@@ -51,10 +51,4 @@ Contains basic classes for fast develop microservices.
 Include abstract implementation for standart pipeline:
 >Source -> Adapter -> Mapping -> Delivery
 
-## ZeroLevel.SqlServer
-
-## ZeroLevel.WebAPI
-
-## ZeroLevel.WPF
-
-## ZeroLevel.WebApiTransport
+## ZeroLevel.Discovery
