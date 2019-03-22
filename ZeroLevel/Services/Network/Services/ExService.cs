@@ -1,0 +1,100 @@
+﻿using System;
+using System.Net;
+using ZeroLevel.Services.Network.Contract;
+using ZeroLevel.Services.Network.Services;
+
+namespace ZeroLevel.Services.Network
+{
+    public class ExService
+        : ZBaseNetwork, IExService
+    {
+        private readonly ExRouter _router;
+        private readonly IZObservableServer _server;
+
+        public event Action<IZBackward> OnConnect = c => { };
+        public event Action<IZBackward> OnDisconnect = c => { };
+
+        public ExService(IZObservableServer server)
+        {
+            _server = server ?? throw new ArgumentNullException(nameof(server));
+            _router = new ExRouter();
+            _server.OnMessage += _server_OnMessage;
+            _server.OnRequest += _server_OnRequest;
+            _server.OnConnect += _server_OnConnect;
+            _server.OnDisconnect += _server_OnDisconnect;
+        }
+
+        private void _server_OnDisconnect(IZBackward client)
+        {
+            this.OnDisconnect(client);
+        }
+
+        private void _server_OnConnect(IZBackward client)
+        {
+            this.OnConnect(client);
+        }
+
+        private Frame _server_OnRequest(Frame frame, IZBackward client)
+        {
+            return _router.HandleRequest(frame, client);
+        }
+
+        private void _server_OnMessage(Frame frame, IZBackward client)
+        {
+            _router.HandleMessage(frame, client);
+        }
+
+        public IPEndPoint Endpoint => _server.Endpoint;
+
+        /// <summary>
+        /// Регистрация обработчика входящих сообщений
+        /// </summary>
+        /// <typeparam name="T">Тип сообщения</typeparam>
+        /// <param name="inbox">Имя точки приема</param>
+        /// <param name="handler">Обработчик</param>
+        public void RegisterInbox<T>(string inbox, Action<T, long, IZBackward> handler)
+        {
+            _router.RegisterInbox(inbox, handler);
+        }
+        public void RegisterInbox<T>(Action<T, long, IZBackward> handler)
+        {
+            _router.RegisterInbox(DEFAULT_MESSAGE_INBOX, handler);
+        }
+        /// <summary>
+        /// Регистрация метода отдающего ответ на входящий запрос
+        /// </summary>
+        /// <typeparam name="Treq">Тип входного сообщения</typeparam>
+        /// <typeparam name="Tresp">Тип ответа</typeparam>
+        /// <param name="protocol">Транспортный протокол</param>
+        /// <param name="inbox">Имя точки приема</param>
+        /// <param name="replier">Обработчик</param>
+        public void RegisterInbox<Treq, Tresp>(string inbox, Func<Treq, long, IZBackward, Tresp> handler)
+        {
+            _router.RegisterInbox<Treq, Tresp>(inbox, handler);
+        }
+        public void RegisterInbox<Treq, Tresp>(Func<Treq, long, IZBackward, Tresp> handler)
+        {
+            _router.RegisterInbox<Treq, Tresp>(DEFAULT_REQUEST_INBOX, handler);
+        }
+        /// <summary>
+        /// Регистрация метода отдающего ответ на входящий запрос, не принимающего входящих данных
+        /// </summary>
+        /// <typeparam name="Tresp">Тип ответа</typeparam>
+        /// <param name="protocol">Транспортный протокол</param>
+        /// <param name="inbox">Имя точки приема</param>
+        /// <param name="replier">Обработчик</param>
+        public void RegisterInbox<Tresp>(string inbox, Func<long, IZBackward, Tresp> handler)
+        {
+            _router.RegisterInbox<Tresp>(inbox, handler);
+        }
+        public void RegisterInbox<Tresp>(Func<long, IZBackward, Tresp> handler)
+        {
+            _router.RegisterInbox<Tresp>(DEFAULT_REQUEST_INBOX, handler);
+        }
+
+        public override void Dispose()
+        {
+            _server.Dispose();
+        }
+    }
+}

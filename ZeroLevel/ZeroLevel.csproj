@@ -1,0 +1,379 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{37020D8D-34E8-4EC3-A447-8396D5080457}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>ZeroLevel</RootNamespace>
+    <AssemblyName>ZeroLevel</AssemblyName>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <LangVersion>7.1</LangVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <LangVersion>7.1</LangVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Configuration.Install" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.IO.Compression" />
+    <Reference Include="System.IO.Compression.FileSystem" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.ServiceProcess" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Models\BaseModel.cs" />
+    <Compile Include="Models\BinaryDocument.cs" />
+    <Compile Include="Models\IEntity.cs" />
+    <Compile Include="Models\InvokeResult.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Services\Application\BaseWindowsService.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Services\Application\BasicServiceInstaller.cs" />
+    <Compile Include="Services\Application\BusinessApplication.cs" />
+    <Compile Include="Services\Application\IZeroService.cs" />
+    <Compile Include="Services\Application\ZeroServiceState.cs" />
+    <Compile Include="Services\Async\AsyncConditionVariable.cs" />
+    <Compile Include="Services\Async\AsyncHelper.cs" />
+    <Compile Include="Services\Async\AsyncLock.cs" />
+    <Compile Include="Services\Async\AsyncManualResetEvent.cs" />
+    <Compile Include="Services\Async\AsyncMonitor.cs" />
+    <Compile Include="Services\Async\AsyncProducerConsumerQueue.cs" />
+    <Compile Include="Services\Async\AsyncReaderWriterLock.cs" />
+    <Compile Include="Services\Async\AsyncSemaphore.cs" />
+    <Compile Include="Services\Async\AsyncWaitQueue.cs" />
+    <Compile Include="Services\Async\CancellationTokenHelpers.cs" />
+    <Compile Include="Services\Async\CancellationTokenTaskSource.cs" />
+    <Compile Include="Services\Async\Deque.cs" />
+    <Compile Include="Services\Async\ExceptionHelpers.cs" />
+    <Compile Include="Services\Async\IdManager.cs" />
+    <Compile Include="Services\Async\NormalizedCancellationToken.cs" />
+    <Compile Include="Services\Async\TaskCompletionSource.cs" />
+    <Compile Include="Services\Async\TaskCompletionSourceExtensions.cs" />
+    <Compile Include="Services\Async\TaskConstants.cs" />
+    <Compile Include="Services\Async\TaskExtensions.cs" />
+    <Compile Include="Services\Async\TaskShim.cs" />
+    <Compile Include="Services\Collections\EverythingStorage.cs" />
+    <Compile Include="Services\Collections\IEverythingStorage.cs" />
+    <Compile Include="Services\Collections\RoundRobinCollection.cs" />
+    <Compile Include="Services\Collections\SparseIterator.cs" />
+    <Compile Include="Services\DependencyInjection\Container.cs" />
+    <Compile Include="Services\DependencyInjection\ContainerFactory.cs" />
+    <Compile Include="Services\DependencyInjection\Contracts\ICompositionProvider.cs" />
+    <Compile Include="Services\DependencyInjection\Contracts\IContainer.cs" />
+    <Compile Include="Services\DependencyInjection\Contracts\IContainerFactory.cs" />
+    <Compile Include="Services\DependencyInjection\Contracts\IContainerInstanceRegister.cs" />
+    <Compile Include="Services\DependencyInjection\Contracts\IContainerRegister.cs" />
+    <Compile Include="Services\DependencyInjection\Contracts\IParameterStorage.cs" />
+    <Compile Include="Services\DependencyInjection\Contracts\IPoolContainer.cs" />
+    <Compile Include="Services\DependencyInjection\Contracts\IResolver.cs" />
+    <Compile Include="Services\DependencyInjection\Injector.cs" />
+    <Compile Include="Services\DependencyInjection\Internal\ConstructorMetadata.cs" />
+    <Compile Include="Services\DependencyInjection\Internal\ConstructorParameter.cs" />
+    <Compile Include="Services\DependencyInjection\Internal\IPoolable.cs" />
+    <Compile Include="Services\DependencyInjection\Internal\ResolveTypeInfo.cs" />
+    <Compile Include="Services\DependencyInjection\ParameterAttribute.cs" />
+    <Compile Include="Services\DependencyInjection\ResolveAttribute.cs" />
+    <Compile Include="Services\Diagnostics\StackTraceReader.cs" />
+    <Compile Include="Services\DOM\Contracts\IContentReader.cs" />
+    <Compile Include="Services\DOM\Contracts\IMetadataReader.cs" />
+    <Compile Include="Services\DOM\DSL\Contexts\TBlockContext.cs" />
+    <Compile Include="Services\DOM\DSL\Contexts\TContext.cs" />
+    <Compile Include="Services\DOM\DSL\Contexts\TElementContext.cs" />
+    <Compile Include="Services\DOM\DSL\Contexts\TFunctionContext.cs" />
+    <Compile Include="Services\DOM\DSL\Contexts\TPropertyContext.cs" />
+    <Compile Include="Services\DOM\DSL\Contexts\TRootContext.cs" />
+    <Compile Include="Services\DOM\DSL\Contracts\ISpecialTableBuilder.cs" />
+    <Compile Include="Services\DOM\DSL\Contracts\TCloneable.cs" />
+    <Compile Include="Services\DOM\DSL\Model\DOMRenderElementCounter.cs" />
+    <Compile Include="Services\DOM\DSL\Model\TChar.cs" />
+    <Compile Include="Services\DOM\DSL\Model\TContentElement.cs" />
+    <Compile Include="Services\DOM\DSL\Model\TEnvironment.cs" />
+    <Compile Include="Services\DOM\DSL\Model\TFlowRules.cs" />
+    <Compile Include="Services\DOM\DSL\Model\TRenderOptions.cs" />
+    <Compile Include="Services\DOM\DSL\Services\PlainTextTableBuilder.cs" />
+    <Compile Include="Services\DOM\DSL\Services\SpecialTableBuilderFactory.cs" />
+    <Compile Include="Services\DOM\DSL\Services\TContainer.cs" />
+    <Compile Include="Services\DOM\DSL\Services\TContainerFactory.cs" />
+    <Compile Include="Services\DOM\DSL\Services\TContentToStringConverter.cs" />
+    <Compile Include="Services\DOM\DSL\Services\TRender.cs" />
+    <Compile Include="Services\DOM\DSL\Services\TStringReader.cs" />
+    <Compile Include="Services\DOM\DSL\TEngine.cs" />
+    <Compile Include="Services\DOM\DSL\Tokens\TBlockToken.cs" />
+    <Compile Include="Services\DOM\DSL\Tokens\TElementToken.cs" />
+    <Compile Include="Services\DOM\DSL\Tokens\TFunctionToken.cs" />
+    <Compile Include="Services\DOM\DSL\Tokens\TPropertyToken.cs" />
+    <Compile Include="Services\DOM\DSL\Tokens\TSystemToken.cs" />
+    <Compile Include="Services\DOM\DSL\Tokens\TTextToken.cs" />
+    <Compile Include="Services\DOM\DSL\Tokens\TToken.cs" />
+    <Compile Include="Services\DOM\Model\Agency.cs" />
+    <Compile Include="Services\DOM\Model\AsideContent.cs" />
+    <Compile Include="Services\DOM\Model\Assotiation.cs" />
+    <Compile Include="Services\DOM\Model\AssotiationRelation.cs" />
+    <Compile Include="Services\DOM\Model\Category.cs" />
+    <Compile Include="Services\DOM\Model\ContentType.cs" />
+    <Compile Include="Services\DOM\Model\DescriptiveMetadata.cs" />
+    <Compile Include="Services\DOM\Model\Document.cs" />
+    <Compile Include="Services\DOM\Model\FlowContent.cs" />
+    <Compile Include="Services\DOM\Model\Flow\Audio.cs" />
+    <Compile Include="Services\DOM\Model\Flow\Audioplayer.cs" />
+    <Compile Include="Services\DOM\Model\Flow\Column.cs" />
+    <Compile Include="Services\DOM\Model\Flow\ContentElement.cs" />
+    <Compile Include="Services\DOM\Model\Flow\ContentElementType.cs" />
+    <Compile Include="Services\DOM\Model\Flow\FlowAlign.cs" />
+    <Compile Include="Services\DOM\Model\Flow\FormContent.cs" />
+    <Compile Include="Services\DOM\Model\Flow\Gallery.cs" />
+    <Compile Include="Services\DOM\Model\Flow\IContentElement.cs" />
+    <Compile Include="Services\DOM\Model\Flow\Image.cs" />
+    <Compile Include="Services\DOM\Model\Flow\Link.cs" />
+    <Compile Include="Services\DOM\Model\Flow\List.cs" />
+    <Compile Include="Services\DOM\Model\Flow\Paragraph.cs" />
+    <Compile Include="Services\DOM\Model\Flow\Quote.cs" />
+    <Compile Include="Services\DOM\Model\Flow\Row.cs" />
+    <Compile Include="Services\DOM\Model\Flow\Section.cs" />
+    <Compile Include="Services\DOM\Model\Flow\SourceType.cs" />
+    <Compile Include="Services\DOM\Model\Flow\Table.cs" />
+    <Compile Include="Services\DOM\Model\Flow\Text.cs" />
+    <Compile Include="Services\DOM\Model\Flow\TextFormatting.cs" />
+    <Compile Include="Services\DOM\Model\Flow\TextSize.cs" />
+    <Compile Include="Services\DOM\Model\Flow\TextStyle.cs" />
+    <Compile Include="Services\DOM\Model\Flow\Video.cs" />
+    <Compile Include="Services\DOM\Model\Flow\Videoplayer.cs" />
+    <Compile Include="Services\DOM\Model\Header.cs" />
+    <Compile Include="Services\DOM\Model\Identifier.cs" />
+    <Compile Include="Services\DOM\Model\Priority.cs" />
+    <Compile Include="Services\DOM\Model\Tag.cs" />
+    <Compile Include="Services\DOM\Model\TagMetadata.cs" />
+    <Compile Include="Services\DOM\Services\ContentBuilder.cs" />
+    <Compile Include="Services\DOM\Services\ContentElementSerializer.cs" />
+    <Compile Include="Services\DOM\Services\DocumentContentReader.cs" />
+    <Compile Include="Services\DOM\Services\LanguageParser.cs" />
+    <Compile Include="Services\Drawing\TextPainter.cs" />
+    <Compile Include="Services\Encryption\FastObfuscator.cs" />
+    <Compile Include="Services\Extensions\ArrayExtensions.cs" />
+    <Compile Include="Services\Extensions\BitConverterExtensions.cs" />
+    <Compile Include="Services\Extensions\CollectionComparsionExtensions.cs" />
+    <Compile Include="Services\Collections\FixSizeQueue.cs" />
+    <Compile Include="Services\Collections\IFixSizeQueue.cs" />
+    <Compile Include="Services\Config\BaseConfiguration.cs" />
+    <Compile Include="Services\Config\BaseConfigurationSet.cs" />
+    <Compile Include="Services\Config\Configuration.cs" />
+    <Compile Include="Services\Config\IConfiguration.cs" />
+    <Compile Include="Services\Config\IConfigurationReader.cs" />
+    <Compile Include="Services\Config\IConfigurationSet.cs" />
+    <Compile Include="Services\Config\IConfigurationWriter.cs" />
+    <Compile Include="Services\Config\Implementation\ApplicationConfigReader.cs" />
+    <Compile Include="Services\Config\Implementation\AppWebConfigReader.cs" />
+    <Compile Include="Services\Config\Implementation\CommandLineReader.cs" />
+    <Compile Include="Services\Config\Implementation\IniFileReader.cs" />
+    <Compile Include="Services\Config\Implementation\IniFileWriter.cs" />
+    <Compile Include="Services\Encryption\RijndaelEncryptor.cs" />
+    <Compile Include="Services\Extensions\DateTimeExtensions.cs" />
+    <Compile Include="Services\Extensions\EndpointExtensions.cs" />
+    <Compile Include="Services\Extensions\EnumerableExtensions.cs" />
+    <Compile Include="Services\Extensions\EnumExtensions.cs" />
+    <Compile Include="Services\Extensions\FPCommon.cs" />
+    <Compile Include="Services\Extensions\LinqExtension.cs" />
+    <Compile Include="Services\Extensions\Monades.cs" />
+    <Compile Include="Services\Extensions\StringExtensions.cs" />
+    <Compile Include="Services\Extensions\TypeExtensions.cs" />
+    <Compile Include="Services\FileSystem\FileArchive.cs" />
+    <Compile Include="Services\FileSystem\FileMeta.cs" />
+    <Compile Include="Services\FileSystem\FSUtils.cs" />
+    <Compile Include="Services\FileSystem\PeriodicFileSystemWatcher.cs" />
+    <Compile Include="Services\IdGenerator.cs" />
+    <Compile Include="Services\Impersonation\IImpersonationExecutor.cs" />
+    <Compile Include="Services\Impersonation\Impersonation.cs" />
+    <Compile Include="Services\Impersonation\ImpersonationNativeMethods.cs" />
+    <Compile Include="Services\Impersonation\MySafeTokenHandle.cs" />
+    <Compile Include="Services\Impersonation\ProcessImpersonationExecutor.cs" />
+    <Compile Include="Services\Impersonation\UserImpersonationExecutor.cs" />
+    <Compile Include="Services\Invokation\IInvokeWrapper.cs" />
+    <Compile Include="Services\Invokation\Invoker.cs" />
+    <Compile Include="Services\Invokation\InvokeWrapper.cs" />
+    <Compile Include="Services\Logging\FixSizeLogMessageBuffer.cs" />
+    <Compile Include="Services\Logging\ILog.cs" />
+    <Compile Include="Services\Logging\ILogComposer.cs" />
+    <Compile Include="Services\Logging\ILogger.cs" />
+    <Compile Include="Services\Logging\ILogMessageBuffer.cs" />
+    <Compile Include="Services\Logging\Implementation\ConsoleLogger.cs" />
+    <Compile Include="Services\Logging\Implementation\DelegateLogger.cs" />
+    <Compile Include="Services\Logging\Implementation\EncryptedFileLog.cs" />
+    <Compile Include="Services\Logging\Implementation\TextFileLogger.cs" />
+    <Compile Include="Services\Logging\Log.cs" />
+    <Compile Include="Services\Logging\LogLevel.cs" />
+    <Compile Include="Services\Logging\LogLevelNameMapping.cs" />
+    <Compile Include="Services\Logging\LogRouterr.cs" />
+    <Compile Include="Services\Logging\NoLimitedLogMessageBuffer.cs" />
+    <Compile Include="Services\Network\Contract\IExClient.cs" />
+    <Compile Include="Services\Network\Contract\IExService.cs" />
+    <Compile Include="Services\Network\Contract\IZBackward.cs" />
+    <Compile Include="Services\Network\Contract\IZObservableServer.cs" />
+    <Compile Include="Services\Network\Contract\IZTransport.cs" />
+    <Compile Include="Services\Network\Exceptions\NoConnectionException.cs" />
+    <Compile Include="Services\Network\Models\ExchangeAttributes.cs" />
+    <Compile Include="Services\Network\Models\MicroserviceInfo.cs" />
+    <Compile Include="Services\Network\Models\RequestInfo.cs" />
+    <Compile Include="Services\Network\Models\ServiceEndpointInfo.cs" />
+    <Compile Include="Services\Network\Models\ServiceEndpointsInfo.cs" />
+    <Compile Include="Services\Network\Models\ZTransportStatus.cs" />
+    <Compile Include="Services\Network\NetworkStats.cs" />
+    <Compile Include="Services\Network\Services\ExClient.cs" />
+    <Compile Include="Services\Network\Services\ExRouter.cs" />
+    <Compile Include="Services\Network\Services\ExService.cs" />
+    <Compile Include="Services\Network\Services\FrameBuilder.cs" />
+    <Compile Include="Services\Network\Services\FrameExchange.cs" />
+    <Compile Include="Services\Network\Services\ZExSocketObservableServer.cs" />
+    <Compile Include="Services\Network\SocketExtensions.cs" />
+    <Compile Include="Services\Network\Models\Frame.cs" />
+    <Compile Include="Services\Network\Services\FrameParser.cs" />
+    <Compile Include="Services\Network\NetworkStreamDataObfuscator.cs" />
+    <Compile Include="Services\Network\Services\IPFinder.cs" />
+    <Compile Include="Services\Network\ZBaseNetwork.cs" />
+    <Compile Include="Services\Network\ZSocketClient.cs" />
+    <Compile Include="Services\Network\ZSocketServer.cs" />
+    <Compile Include="Services\Network\ZSocketServerClient.cs" />
+    <Compile Include="Services\ObjectMapping\IMapper.cs" />
+    <Compile Include="Services\ObjectMapping\IMemberInfo.cs" />
+    <Compile Include="Services\ObjectMapping\MapFieldInfo.cs" />
+    <Compile Include="Services\ObjectMapping\TypeMapper.cs" />
+    <Compile Include="Services\Pools\ObjectPool.cs" />
+    <Compile Include="Services\Queries\AndQuery.cs" />
+    <Compile Include="Services\Queries\BaseQuery.cs" />
+    <Compile Include="Services\Queries\Builder\IQueryBuilder.cs" />
+    <Compile Include="Services\Queries\Builder\MemoryStorageQueryBuilder.cs" />
+    <Compile Include="Services\Queries\IQuery.cs" />
+    <Compile Include="Services\Queries\NotQuery.cs" />
+    <Compile Include="Services\Queries\OrQuery.cs" />
+    <Compile Include="Services\Queries\Query.cs" />
+    <Compile Include="Services\Queries\QueryOp.cs" />
+    <Compile Include="Services\Queries\QueryOperation.cs" />
+    <Compile Include="Services\Queries\Storage\IRealQuery.cs" />
+    <Compile Include="Services\Queries\Storage\IStorage.cs" />
+    <Compile Include="Services\Queries\Storage\MemoryStorage.cs" />
+    <Compile Include="Services\Queries\Storage\QueryResult.cs" />
+    <Compile Include="Services\Reflection\ITypeFastAccessMethodBuilder.cs" />
+    <Compile Include="Services\Reflection\ReferenceHelper.cs" />
+    <Compile Include="Services\Reflection\StringToTypeConverter.cs" />
+    <Compile Include="Services\Reflection\TypeActivator.cs" />
+    <Compile Include="Services\Reflection\TypeFastAccessMethodBuilder.cs" />
+    <Compile Include="Services\Reflection\TypeFastAccessMethodBuilderImpl.cs" />
+    <Compile Include="Services\Reflection\TypeHelpers.cs" />
+    <Compile Include="Services\Semantic\Contracts\ILexer.cs" />
+    <Compile Include="Services\Semantic\Contracts\ILexProvider.cs" />
+    <Compile Include="Services\Semantic\Contracts\Languages.cs" />
+    <Compile Include="Services\Semantic\Contracts\LexToken.cs" />
+    <Compile Include="Services\Semantic\Contracts\WordToken.cs" />
+    <Compile Include="Services\Semantic\Helpers\StopWords.cs" />
+    <Compile Include="Services\Semantic\Helpers\TextAnalizer.cs" />
+    <Compile Include="Services\Semantic\LexProvider.cs" />
+    <Compile Include="Services\Semantic\LexProviderFactory.cs" />
+    <Compile Include="Services\Semantic\Snowball\Among.cs" />
+    <Compile Include="Services\Semantic\Snowball\CzechStemmer.cs" />
+    <Compile Include="Services\Semantic\Snowball\DanishStemmer.cs" />
+    <Compile Include="Services\Semantic\Snowball\DutchStemmer.cs" />
+    <Compile Include="Services\Semantic\Snowball\EnglishStemmer.cs" />
+    <Compile Include="Services\Semantic\Snowball\FinnishStemmer.cs" />
+    <Compile Include="Services\Semantic\Snowball\FrenchStemmer.cs" />
+    <Compile Include="Services\Semantic\Snowball\GermanStemmer.cs" />
+    <Compile Include="Services\Semantic\Snowball\HungarianStemmer.cs" />
+    <Compile Include="Services\Semantic\Snowball\ItalianStemmer.cs" />
+    <Compile Include="Services\Semantic\Snowball\NorwegianStemmer.cs" />
+    <Compile Include="Services\Semantic\Snowball\PortugalStemmer.cs" />
+    <Compile Include="Services\Semantic\Snowball\RomanianStemmer.cs" />
+    <Compile Include="Services\Semantic\Snowball\RussianStemmer.cs" />
+    <Compile Include="Services\Semantic\Snowball\SpanishStemmer.cs" />
+    <Compile Include="Services\Semantic\Snowball\StemmerOperations.cs" />
+    <Compile Include="Services\Semantic\WordLexer.cs" />
+    <Compile Include="Services\Serialization\IBinaryReader.cs" />
+    <Compile Include="Services\Serialization\IBinarySerializable.cs" />
+    <Compile Include="Services\Serialization\IBinaryWriter.cs" />
+    <Compile Include="Services\Serialization\JsonEscaper.cs" />
+    <Compile Include="Services\Serialization\MemoryStreamReader.cs" />
+    <Compile Include="Services\Serialization\MemoryStreamWriter.cs" />
+    <Compile Include="Services\Serialization\MessageSerializer.cs" />
+    <Compile Include="Services\Serialization\SerializedObjectWrapper.cs" />
+    <Compile Include="Services\Serialization\SerializedObjectWrapperExtension.cs" />
+    <Compile Include="Services\Shedulling\AsyncShedullerImpl.cs" />
+    <Compile Include="Services\Shedulling\DateTimeAsyncSheduller.cs" />
+    <Compile Include="Services\Shedulling\DateTimeSheduller.cs" />
+    <Compile Include="Services\Shedulling\ExpiredAsyncObject.cs" />
+    <Compile Include="Services\Shedulling\ExpiredObject.cs" />
+    <Compile Include="Services\Shedulling\IAsyncSheduller.cs" />
+    <Compile Include="Services\Shedulling\IExpirationAsyncSheduller.cs" />
+    <Compile Include="Services\Shedulling\IExpirationSheduller.cs" />
+    <Compile Include="Services\Shedulling\ISheduller.cs" />
+    <Compile Include="Services\Shedulling\Sheduller.cs" />
+    <Compile Include="Services\Shedulling\ShedullerImpl.cs" />
+    <Compile Include="Services\Specification\AndSpecification.cs" />
+    <Compile Include="Services\Specification\BaseNamedSpecification.cs" />
+    <Compile Include="Services\Specification\BaseSpecification.cs" />
+    <Compile Include="Services\Specification\Building\ISpecificationBuilder.cs" />
+    <Compile Include="Services\Specification\Building\ISpecificationConstructor.cs" />
+    <Compile Include="Services\Specification\Building\SpecificationConstructorParameterKind.cs" />
+    <Compile Include="Services\Specification\Building\SpecificationConstructorParametersResolver.cs" />
+    <Compile Include="Services\Specification\Building\SpecificationParameter.cs" />
+    <Compile Include="Services\Specification\CurrySpecification.cs" />
+    <Compile Include="Services\Specification\ExpressionSpecification.cs" />
+    <Compile Include="Services\Specification\ISpecification.cs" />
+    <Compile Include="Services\Specification\ISpecificationFinder.cs" />
+    <Compile Include="Services\Specification\NotSpecification.cs" />
+    <Compile Include="Services\Specification\OrSpecification.cs" />
+    <Compile Include="Services\Specification\PredicateBuilder.cs" />
+    <Compile Include="Services\Specification\Services\AssemblySpecificationFactory.cs" />
+    <Compile Include="Services\Specification\Services\SpecificationBuilder.cs" />
+    <Compile Include="Services\Specification\Services\SpecificationConstructor.cs" />
+    <Compile Include="Services\Specification\Specification.cs" />
+    <Compile Include="Services\Specification\SpecificationReader.cs" />
+    <Compile Include="Services\Specification\TrueSpecification.cs" />
+    <Compile Include="Services\Text\PlainTextTables\TextTableData.cs" />
+    <Compile Include="Services\Text\PlainTextTables\TextTableRender.cs" />
+    <Compile Include="Services\Text\PlainTextTables\TextTableRenderOptions.cs" />
+    <Compile Include="Services\Text\PlainTextTables\TextTableStyle.cs" />
+    <Compile Include="Services\Text\TStringReader.cs" />
+    <Compile Include="Services\Trees\Contracts\ITree.cs" />
+    <Compile Include="Services\Trees\Contracts\ITreeNode.cs" />
+    <Compile Include="Services\Trees\Generic.cs" />
+    <Compile Include="Services\Trees\ItemFieldToTreeConverter.cs" />
+    <Compile Include="Services\Trees\Tree.cs" />
+    <Compile Include="Services\Trees\TreeNode.cs" />
+    <Compile Include="Services\Trees\TreesVisitor.cs" />
+    <Compile Include="Services\Web\HtmlUtility.cs" />
+    <Compile Include="Services\Web\UrlUtility.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Services\Semantic\Contracts\README.txt" />
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
