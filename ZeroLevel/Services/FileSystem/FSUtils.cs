@@ -9,6 +9,38 @@ namespace ZeroLevel.Services.FileSystem
 {
     public static class FSUtils
     {
+        public static string GetAppLocalTemporaryDirectory()
+        {
+            var fn = Path.GetRandomFileName();
+            var folderName = Path.Combine(Configuration.BaseDirectory, "temp", fn);
+            if (false == Directory.Exists(folderName))
+            {
+                Directory.CreateDirectory(folderName);
+            }
+            return folderName;
+        }
+
+        public static string GetAppLocalTemporaryFile()
+        {
+            var fn = Path.GetRandomFileName();
+            var folderName = Path.Combine(Configuration.BaseDirectory, "temp");
+            if (false == Directory.Exists(folderName))
+            {
+                Directory.CreateDirectory(folderName);
+            }
+            return Path.Combine(folderName, fn);
+        }
+
+        public static string GetAppLocalDirectory(string folderName)
+        {
+            folderName = Path.Combine(Configuration.BaseDirectory, "temp", folderName);
+            if (false == Directory.Exists(folderName))
+            {
+                Directory.CreateDirectory(folderName);
+            }
+            return folderName;
+        }
+
         /// <summary>
         /// Задает права доступа к каталогу для учетной записи
         /// </summary>
