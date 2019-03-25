@@ -294,6 +294,7 @@
     <Compile Include="Services\Semantic\Contracts\Languages.cs" />
     <Compile Include="Services\Semantic\Contracts\LexToken.cs" />
     <Compile Include="Services\Semantic\Contracts\WordToken.cs" />
+    <Compile Include="Services\Semantic\Helpers\NGramms.cs" />
     <Compile Include="Services\Semantic\Helpers\StopWords.cs" />
     <Compile Include="Services\Semantic\Helpers\TextAnalizer.cs" />
     <Compile Include="Services\Semantic\LexProvider.cs" />
