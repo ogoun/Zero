@@ -10,17 +10,15 @@ namespace ZeroLevel.DocumentObjectModel
 
         #region Fields        
         /// <summary>
-        /// Версия документа
+        /// Version
         /// </summary>
         public int Version;
         /// <summary>
-        /// Идентификатор по дате выхода, дает возможность идентифицировать 
-        /// последнюю полученную по запросу новость, для последующих запросов
-        /// обновлений
+        /// Timestamp ID
         /// </summary>
-        public string Timestamp;
+        public long Timestamp;
         /// <summary>
-        /// Идентификатор по дате выхода с масштабированием до дня (20161024)
+        /// Label with day accurcy 
         /// </summary>
         public string DateLabel;
         #endregion
@@ -29,14 +27,14 @@ namespace ZeroLevel.DocumentObjectModel
         public void Serialize(IBinaryWriter writer)
         {
             writer.WriteInt32(this.Version);
-            writer.WriteString(this.Timestamp);
+            writer.WriteLong(this.Timestamp);
             writer.WriteString(this.DateLabel);
         }
 
         public void Deserialize(IBinaryReader reader)
         {
             this.Version = reader.ReadInt32();
-            this.Timestamp = reader.ReadString();
+            this.Timestamp = reader.ReadLong();
             this.DateLabel = reader.ReadString();
         }
         #endregion

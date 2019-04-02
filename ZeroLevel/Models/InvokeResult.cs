@@ -5,7 +5,7 @@ using ZeroLevel.Services.Serialization;
 namespace ZeroLevel.Models
 {
     /// <summary>
-    /// Результат выполнения действий
+    /// Action result
     /// </summary>
     [DataContract]
     public class InvokeResult :
@@ -29,12 +29,12 @@ namespace ZeroLevel.Models
 
         #region Properties
         /// <summary>
-        /// Успех выполнения операции
+        /// true when action successfully invoked
         /// </summary>
         [DataMember]
         public bool Success;
         /// <summary>
-        /// Комментарий (сообщение об ошибке при сбое, или доп. информация)
+        /// Comment
         /// </summary>
         [DataMember]
         public string Comment;
@@ -42,15 +42,15 @@ namespace ZeroLevel.Models
 
         #region Fabric methods
         /// <summary>
-        /// Сбой при выполнении плана действий
+        /// Error when action invoking
         /// </summary>
         public static InvokeResult Fault(string comment) { return new InvokeResult(false, comment); }
         /// <summary>
-        /// Успешное выполнение
+        /// Successfully
         /// </summary>        
         public static InvokeResult Succeeding(string comment = "") { return new InvokeResult(true, comment); }
         /// <summary>
-        /// Успешное выполнение
+        /// Successfully
         /// </summary>
         public static InvokeResult Succeeding() { return _successResultWitoutComment; }
         #endregion
@@ -91,7 +91,7 @@ namespace ZeroLevel.Models
 
         #region Fabric methods
         public static InvokeResult<T> Succeeding(T value, string comment = "") { return new InvokeResult<T>(value, true, comment); }
-        public static InvokeResult<T> Fault<T>(string comment) { return new InvokeResult<T>(false, comment); }
+        public static InvokeResult<T> Fault(string comment) { return new InvokeResult<T>(false, comment); }
         #endregion
 
         public override void Serialize(IBinaryWriter writer)

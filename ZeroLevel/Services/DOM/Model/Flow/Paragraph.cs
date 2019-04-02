@@ -5,7 +5,7 @@ using ZeroLevel.Services.Serialization;
 namespace ZeroLevel.DocumentObjectModel.Flow
 {
     /// <summary>
-    /// Параграф
+    /// Paragraph
     /// </summary>
     public class Paragraph : 
         ContentElement

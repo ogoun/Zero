@@ -24,7 +24,7 @@ namespace ZeroLevel
         }
 
         /// <summary>
-        /// Проверяет на одинаковое содержание коллекции строк, в том числе по разному отсортированные
+        /// Checks for the same content of a collection of strings, including sorted in different ways
         /// </summary>
         public static bool StringEnumerableEquals(this IEnumerable<string> A, IEnumerable<string> B)
         {
@@ -34,7 +34,7 @@ namespace ZeroLevel
         }
 
         /// <summary>
-        /// Проверяет на одинаковое содержание коллекций, в том числе по разному отсортированных
+        /// Checks for the same content of collections, including sorted in different ways
         /// </summary>
         public static bool NoOrderingEquals<T>(this IEnumerable<T> A, IEnumerable<T> B)
         {
@@ -51,7 +51,7 @@ namespace ZeroLevel
         }
 
         /// <summary>
-        /// Проверяет на одинаковое содержание коллекций
+        /// Checks for the same content collections
         /// </summary>
         public static bool OrderingEquals<T>(this IEnumerable<T> A, IEnumerable<T> B)
         {
@@ -85,7 +85,7 @@ namespace ZeroLevel
             return true;
         }
         /// <summary>
-        /// Расчет хеша для коллекции
+        /// Calculate hash for collection
         /// </summary>
         public static int GetEnumHashCode<T>(this IEnumerable<T> A)
         {

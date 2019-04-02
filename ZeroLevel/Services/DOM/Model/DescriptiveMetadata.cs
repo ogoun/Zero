@@ -23,39 +23,39 @@ namespace ZeroLevel.DocumentObjectModel
 
         #region Fields
         /// <summary>
-        /// Авторы (подпись)
+        /// Authors
         /// </summary>
         public string Byline;
         /// <summary>
-        /// Копирайт
+        /// Copyright
         /// </summary>
         public string CopyrightNotice;
         /// <summary>
-        /// Дата создания
+        /// Creation date
         /// </summary>
         public DateTime Created;
         /// <summary>
-        /// Основной язык
+        /// Main language
         /// </summary>
         public string Language;
         /// <summary>
-        /// Важность
+        /// Priority
         /// </summary>
         public Priority Priority;
         /// <summary>
-        /// Источник документа (например, информационное агентство)
+        /// Document source
         /// </summary>
         public Agency Source;
         /// <summary>
-        /// Издатель (Агентство)
+        /// Document publisher
         /// </summary>
         public Agency Publisher;
         /// <summary>
-        /// Ссылка на оригинальную новость, если текущая создана на ее основе
+        /// Reference to original document
         /// </summary>
         public Tag Original;
         /// <summary>
-        /// Опциональные заголовки
+        /// Headers (optional)
         /// </summary>
         public List<Header> Headers;
         #endregion

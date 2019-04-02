@@ -8,27 +8,27 @@ using ZeroLevel.Services.Serialization;
 namespace ZeroLevel.Services.Config
 {
     /// <summary>
-    /// Упрощенная конфигурация, без разделения параметров по секциям
+    /// Base configuration
     /// </summary>
     internal sealed class BaseConfiguration :
         IConfiguration
     {
         #region Private members
         /// <summary>
-        /// Указывает на заморозку конфигурации, все изменения запрещены
+        /// When true, any changes disallow
         /// </summary>
         private bool _freezed = false;
         /// <summary>
-        /// Указывает на перманентную заморозку конфигурации, разморозка запрещена
+        /// When true, freeze permanent, can't be canceled
         /// </summary>
         private bool _permanentFreezed = false;
         private readonly object _freezeLock = new object();
         /// <summary>
-        /// Список вида ключ-значение
+        /// Key-values dictionary
         /// </summary>
         private readonly ConcurrentDictionary<string, IList<string>> _keyValues = new ConcurrentDictionary<string, IList<string>>();
         /// <summary>
-        /// Пустой список
+        /// Empty list
         /// </summary>
         private static readonly IEnumerable<string> EmptyValuesList = new List<string>(0);
 
@@ -44,10 +44,10 @@ namespace ZeroLevel.Services.Config
 
         #region Properties
         /// <summary>
-        /// Список значений по ключу
+        /// Get values by key
         /// </summary>
-        /// <param name="key">Ключ</param>
-        /// <returns>Список значений</returns>
+        /// <param name="key">key</param>
+        /// <returns>Values list</returns>
         public IEnumerable<string> this[string key]
         {
             get
@@ -62,7 +62,7 @@ namespace ZeroLevel.Services.Config
             }
         }
         /// <summary>
-        /// Список ключей
+        /// Keys  list
         /// </summary>
         public IEnumerable<string> Keys
         {
@@ -240,10 +240,10 @@ namespace ZeroLevel.Services.Config
         #endregion
 
         /// <summary>
-        /// Добавление ключа и связанного с ним значения
+        /// Add key-value
         /// </summary>
-        /// <param name="key">Ключ</param>
-        /// <param name="value">Значение</param>
+        /// <param name="key">Key</param>
+        /// <param name="value">Value</param>
         public IConfiguration Append(string key, string value)
         {
             if (false == _freezed)
@@ -258,8 +258,7 @@ namespace ZeroLevel.Services.Config
             return this;
         }
         /// <summary>
-        /// Задает значение в единственном числе,
-        /// существующее значение будет перезаписано
+        /// Set unique value for key
         /// </summary>
         public IConfiguration SetUnique(string key, string value)
         {
@@ -270,15 +269,18 @@ namespace ZeroLevel.Services.Config
                 {
                     _keyValues.TryAdd(key, new List<string>());
                 }
-                _keyValues[key].Clear();
+                else
+                {
+                    _keyValues[key].Clear();
+                }
                 _keyValues[key].Add(value?.Trim() ?? null);
             }
             return this;
         }
         /// <summary>
-        /// Очистка связанного с ключом списка значений
+        /// Clean values binded with key
         /// </summary>
-        /// <param name="key">Ключ</param>
+        /// <param name="key">Key</param>
         public IConfiguration Clear(string key)
         {
             if (false == _freezed)
@@ -292,7 +294,7 @@ namespace ZeroLevel.Services.Config
             return this;
         }
         /// <summary>
-        /// Очистка конфигурации
+        /// Configuration drop
         /// </summary>
         public IConfiguration Clear()
         {
@@ -303,9 +305,9 @@ namespace ZeroLevel.Services.Config
             return this;
         }
         /// <summary>
-        /// Удаление ключа и связанных с ним значений
+        /// Remove key and binded values
         /// </summary>
-        /// <param name="key">Ключ</param>
+        /// <param name="key">Key</param>
         public IConfiguration Remove(string key)
         {
             if (false == _freezed)

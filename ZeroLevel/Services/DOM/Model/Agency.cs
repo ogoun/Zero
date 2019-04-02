@@ -5,15 +5,15 @@ namespace ZeroLevel.DocumentObjectModel
     public class Agency : IBinarySerializable
     {
         /// <summary>
-        /// Название источника
+        /// Agency name
         /// </summary>
         public string Title;
         /// <summary>
-        /// Ссылка на источник
+        /// Agency website
         /// </summary>
         public string Url;
         /// <summary>
-        /// Описание источника
+        /// Description
         /// </summary>
         public string Description;
 

@@ -1,10 +1,10 @@
 ﻿namespace ZeroLevel.Services.Invokation
 {
     /// <summary>
-    /// Делегат описывающий вызов метода
+    /// Delegate describing the method call
     /// </summary>
-    /// <param name="target">Цель на которой вызывается метод</param>
-    /// <param name="args">Аргументы метода</param>
-    /// <returns>Результат</returns>
+    /// <param name="target">The target on which the method is called</param>
+    /// <param name="args">Method Arguments</param>
+    /// <returns>Result</returns>
     public delegate object Invoker(object target, params object[] args);
 }

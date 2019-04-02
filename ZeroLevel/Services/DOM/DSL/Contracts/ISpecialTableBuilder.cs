@@ -6,7 +6,7 @@ namespace DOM.DSL.Contracts
     public interface ISpecialTableBuilder
     {
         /// <summary>
-        /// Указывает что ожидается запись тела ячейки таблицы
+        /// Indicates that a table cell body entry is expected.
         /// </summary>
         bool WaitCellBody { get; }
         void WriteToCell(string part);

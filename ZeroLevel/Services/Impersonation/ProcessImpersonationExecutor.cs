@@ -3,7 +3,7 @@
 namespace ZeroLevel.Services.Impersonation
 {
     /// <summary>
-    /// Реализует исполнение произвольного кода от прав указанного процесса
+    /// Implements the execution of an code from the rights of the specified process
     /// </summary>
     public class ProcessImpersonationExecutor 
         : IImpersonationExecutor
@@ -21,11 +21,8 @@ namespace ZeroLevel.Services.Impersonation
             _pid = pid;
         }
         /// <summary>
-        /// Исполнение кода
+        /// Code execution
         /// </summary>
-        /// <typeparam name="T">Тип передаваемого аргумента</typeparam>
-        /// <param name="action">Делегат</param>
-        /// <param name="arg">Аргумент</param>
         public void ExecuteCode<T>(Action<T> action, T arg)
         {
             using (Impersonation imp = new Impersonation())
@@ -40,16 +37,14 @@ namespace ZeroLevel.Services.Impersonation
                 }
                 else
                 {
-                    throw new Exception("Нет данных для идентификации процесса. Для копирования прав процесса требуется указать его имя или идентификатор.");
+                    throw new Exception("No data to identify the process. To copy the rights of a process, you must specify its name or identifier");
                 }
                 action(arg);
             }
         }
         /// <summary>
-        /// Исполнение кода
+        /// Code execution
         /// </summary>
-        /// <typeparam name="T">Тип передаваемого аргумента</typeparam>
-        /// <param name="action">Делегат</param>
         public void ExecuteCode(Action action)
         {
             using (Impersonation imp = new Impersonation())
@@ -64,7 +59,7 @@ namespace ZeroLevel.Services.Impersonation
                 }
                 else
                 {
-                    throw new Exception("Нет данных для идентификации процесса. Для копирования прав процесса требуется указать его имя или идентификатор.");
+                    throw new Exception("No data to identify the process. To copy the rights of a process, you must specify its name or identifier");
                 }
                 action();
             }

@@ -7,14 +7,14 @@ using ZeroLevel.Services.Serialization;
 namespace ZeroLevel.Services.Config
 {
     /// <summary>
-    /// Наборы именованых конфигураций (секций)
+    /// Named configuration sections array
     /// </summary>
     internal sealed class BaseConfigurationSet :
         IConfigurationSet
     {
         #region Private members
         /// <summary>
-        /// Список секций
+        /// Sections
         /// </summary>
         private readonly ConcurrentDictionary<string, IConfiguration> _sections = new ConcurrentDictionary<string, IConfiguration>();
 

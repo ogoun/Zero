@@ -8,31 +8,31 @@ using System.Text;
 namespace ZeroLevel.Services.Invokation
 {
     /// <summary>
-    /// Обертка для вызова методов
+    /// Method call wrapper
     /// </summary>
     public class InvokeWrapper : IInvokeWrapper
     {
         /// <summary>
-        /// Кэш делегатов
+        /// Cahce
         /// </summary>
         protected readonly Dictionary<string, Invoker> _invokeCachee = new Dictionary<string, Invoker>();
 
         #region Static helpers
 
         /// <summary>
-        /// Создает скомпилированное выражение для быстрого вызова метода, возвращает идентификатор выражения и делегат для вызова
+        /// Creates a compiled expression for a quick method call, returns the identifier of the expression and a delegate for the call.
         /// </summary>
-        /// <param name="method">Оборачиваемый метод</param>
-        /// <returns>Кортеж с идентификатором выражения и делегатом</returns>
+        /// <param name="method">Wrapped method</param>
+        /// <returns>Expression ID and Delegate Tuple</returns>
         protected static Tuple<string, Invoker> CreateCompiledExpression(MethodInfo method)
         {
-            var targetArg = Expression.Parameter(typeof(object)); //  Цель на которой происходит вызов
-            var argsArg = Expression.Parameter(typeof(object[])); //  Аргументы метода
+            var targetArg = Expression.Parameter(typeof(object));
+            var argsArg = Expression.Parameter(typeof(object[]));
             var parameters = method.GetParameters();
             Expression body = Expression.Call(
                 method.IsStatic
                     ? null
-                    : Expression.Convert(targetArg, method.DeclaringType), //  тип в котором объявлен метод
+                    : Expression.Convert(targetArg, method.DeclaringType), //  the type in which the method is declared
                 method,
                 parameters.Select((p, i) =>
                     Expression.Convert(Expression.ArrayIndex(argsArg, Expression.Constant(i)), p.ParameterType)));
@@ -46,10 +46,10 @@ namespace ZeroLevel.Services.Invokation
         }
 
         /// <summary>
-        /// Оборачивает вызов делегата
+        /// Wraps Delegate Call
         /// </summary>
-        /// <param name="handler">Оборачиваемый делегат</param>
-        /// <returns>Кортеж с идентификатором выражения и делегатом</returns>
+        /// <param name="handler">Wrapped delegate</param>
+        /// <returns>Expression ID and Delegate Tuple</returns>
         protected static Tuple<string, Invoker> CreateCompiledExpression(Delegate handler)
         {
             return CreateCompiledExpression(handler.GetMethodInfo());
@@ -60,10 +60,10 @@ namespace ZeroLevel.Services.Invokation
         #region Helpers
 
         /// <summary>
-        /// Идентификатр однозначно определяющий метод на уровне типа (но не на глобальном уровне)
+        /// ID uniquely identifying method at the type level (but not at the global level)
         /// </summary>
-        /// <param name="name">Имя метода</param>
-        /// <param name="argsTypes">Типы аргументов метода</param>
+        /// <param name="name">Method name</param>
+        /// <param name="argsTypes">Method Argument Types</param>
         /// <returns></returns>
         internal static string CreateMethodIdentity(string name, params Type[] argsTypes)
         {
@@ -190,10 +190,10 @@ namespace ZeroLevel.Services.Invokation
         #region Configure by MethodInfo
 
         /// <summary>
-        /// Вносит в кэш вызов указанного метода
+        /// Cache the specified method
         /// </summary>
-        /// <param name="method">Метод</param>
-        /// <returns>Идентификатор для вызова</returns>
+        /// <param name="method">Method</param>
+        /// <returns>Call ID</returns>
         public string Configure(MethodInfo method)
         {
             var invoke = CreateCompiledExpression(method);
@@ -202,10 +202,10 @@ namespace ZeroLevel.Services.Invokation
         }
 
         /// <summary>
-        /// Вносит в кэш вызов указанного делегата
+        /// Cache the specified delegate
         /// </summary>
-        /// <param name="handler">Делегат</param>
-        /// <returns>Идентификатор вызова</returns>
+        /// <param name="handler">Delegate</param>
+        /// <returns>Call ID</returns>
         public string Configure(Delegate handler)
         {
             var invoke = CreateCompiledExpression(handler);
@@ -230,7 +230,7 @@ namespace ZeroLevel.Services.Invokation
         #region Configuration
 
         /// <summary>
-        /// Наполнение кэша из списка методов с идентификаторами
+        /// Filling the cache from the list of methods with identifiers
         /// </summary>
         protected void Configure(IEnumerable<Tuple<string, Invoker>> list)
         {
@@ -241,7 +241,7 @@ namespace ZeroLevel.Services.Invokation
         }
 
         /// <summary>
-        /// Добавление вызова в кэш
+        /// Adding a call to the cache
         /// </summary>
         protected void Configure(Tuple<string, Invoker> invoke)
         {
@@ -253,11 +253,11 @@ namespace ZeroLevel.Services.Invokation
         #region Invoking
 
         /// <summary>
-        /// Вызов статического метода по идентификатору, в случае отсутствия метода в кеше будет брошено исключение KeyNotFoundException
+        /// Calling a static method by identifier, if there is no method in the cache, a KeyNotFoundException exception will be thrown
         /// </summary>
-        /// <param name="identity">Идентификатор метода</param>
-        /// <param name="args">Аргументы метода</param>
-        /// <returns>Результат выполнения</returns>
+        /// <param name="identity">Call ID</param>
+        /// <param name="args">Method Arguments</param>
+        /// <returns>Execution result</returns>
         public object InvokeStatic(string identity, object[] args)
         {
             if (_invokeCachee.ContainsKey(identity))
@@ -269,12 +269,12 @@ namespace ZeroLevel.Services.Invokation
         }
 
         /// <summary>
-        /// Вызов метода по идентификатору, в случае отсутствия метода в кеше будет брошено исключение KeyNotFoundException
+        /// Calling a method by identifier; if there is no method in the cache, KeyNotFoundException will be thrown.
         /// </summary>
-        /// <param name="target">Инстанс на котором вызывается метод</param>
-        /// <param name="identity">Идентификатор метода</param>
-        /// <param name="args">Аргументы метода</param>
-        /// <returns>Результат выполнения</returns>
+        /// <param name="target">The instance on which the method is called</param>
+        /// <param name="identity">Call ID</param>
+        /// <param name="args">Method Arguments</param>
+        /// <returns>Execution result</returns>
         public object Invoke(object target, string identity, object[] args)
         {
             if (_invokeCachee.ContainsKey(identity))
@@ -282,7 +282,7 @@ namespace ZeroLevel.Services.Invokation
                 return _invokeCachee[identity](target, args);
             }
 
-            throw new KeyNotFoundException(String.Format("Not found method with identity '{0}'", identity));
+            throw new KeyNotFoundException($"Not found method with identity '{identity}'");
         }
 
         public object Invoke(object target, string identity)
@@ -292,15 +292,15 @@ namespace ZeroLevel.Services.Invokation
                 return _invokeCachee[identity](target, null);
             }
 
-            throw new KeyNotFoundException(String.Format("Not found method with identity '{0}'", identity));
+            throw new KeyNotFoundException($"Not found method with identity '{identity}'");
         }
 
         /// <summary>
-        /// Выполнение статического закэшированного метода
+        /// Execution of a static cached method
         /// </summary>
-        /// <param name="methodName">Имя метода</param>
-        /// <param name="args">Аргументы метода</param>
-        /// /// <returns>Результат выполнения</returns>
+        /// <param name="methodName">Method name</param>
+        /// <param name="args">Method Arguments</param>
+        /// /// <returns>Execution result</returns>
         public object Invoke(string methodName, object[] args)
         {
             return InvokeStatic(CreateMethodIdentity(methodName, args.Select(a => a.GetType()).ToArray()), args);
@@ -311,21 +311,21 @@ namespace ZeroLevel.Services.Invokation
         #region Helpers
 
         /// <summary>
-        /// Запрос идентификатора для метода
+        /// Request call id for method
         /// </summary>
-        /// <param name="methodName">Имя метода</param>
-        /// <param name="argsTypes">Список типов аргументов метода</param>
-        /// <returns>Идентификатор</returns>
+        /// <param name="methodName">Method name</param>
+        /// <param name="argsTypes">Method argument type list</param>
+        /// <returns>Call ID</returns>
         public string GetInvokerIdentity(string methodName, params Type[] argsTypes)
         {
             return CreateMethodIdentity(methodName, argsTypes);
         }
 
         /// <summary>
-        /// Запрос делегата оборачивающего метод
+        /// Request for delegate to wrap method
         /// </summary>
-        /// <param name="identity">Идентификатор метода</param>
-        /// <returns>Делегат</returns>
+        /// <param name="identity">Call ID</param>
+        /// <returns>Delegate</returns>
         public Invoker GetInvoker(string identity)
         {
             if (_invokeCachee.ContainsKey(identity))
@@ -337,11 +337,11 @@ namespace ZeroLevel.Services.Invokation
         }
 
         /// <summary>
-        /// Запрос делегата оборачивающего метод
+        /// Request for delegate to wrap method
         /// </summary>
-        /// <param name="methodName">Имя метода</param>
-        /// <param name="argsTypes">Список типов аргументов метода</param>
-        /// <returns>Делегат</returns>
+        /// <param name="methodName">Method name</param>
+        /// <param name="argsTypes">Method argument type list</param>
+        /// <returns>Delegate</returns>
         public Invoker GetInvoker(string methodName, params Type[] argsTypes)
         {
             return GetInvoker(CreateMethodIdentity(methodName, argsTypes));

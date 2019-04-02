@@ -5,7 +5,7 @@ using ZeroLevel.Services.Serialization;
 namespace ZeroLevel
 {
     /// <summary>
-    /// Интерфейс конфигурационных данных
+    /// Configuration section
     /// </summary>
     public interface IConfiguration :
         IEquatable<IConfiguration>,
@@ -13,103 +13,101 @@ namespace ZeroLevel
     {
         #region Properties
         /// <summary>
-        /// Получение списка значений по ключу
+        /// Get values by key
         /// </summary>
         IEnumerable<string> this[string key] { get; }
         /// <summary>
-        /// Перечисление ключей
+        /// Keys
         /// </summary>
         IEnumerable<string> Keys { get; }
         /// <summary>
-        /// Указывает что конфигурация заблокирована на изменения
+        /// Configuration is locked for change when true
         /// </summary>
         bool Freezed { get; }
         #endregion
 
         #region Methods
         /// <summary>
-        /// Получение списка значений параметра по ключу
+        /// Get values by key
         /// </summary>
-        /// <param name="key">Имя параметра</param>
-        /// <returns>Список значений</returns>
+        /// <param name="key">Key</param>
+        /// <returns>Values list</returns>
         IEnumerable<string> Items(string key);
         /// <summary>
-        /// Получение одного(первого) значения параметра по ключу
+        /// Get first value by key
         /// </summary>
         string First(string key);
         /// <summary>
-        /// Получить первое значение в виде объекта типа T
+        /// Get first value by key with cast to <typeparamref name="T"/>
         /// </summary>
         T First<T>(string key);
         /// <summary>
-        /// Получить первое значение или значение по умолчанию
+        /// Get first or default value by key
         /// </summary>
         string FirstOrDefault(string name, string defaultValue);
         /// <summary>
-        /// Получить первое значение в виде объекта типа T или получить значение по умолчанию
+        /// Get first or default value by key with cast to <typeparamref name="T"/>
         /// </summary>
         T FirstOrDefault<T>(string name);
         /// <summary>
-        /// Получить первое значение в виде объекта типа T или получить переданное значение по умолчанию
+        /// Get first or default value by key with cast to <typeparamref name="T"/>
         /// </summary>
         T FirstOrDefault<T>(string name, T defaultValue);
         /// <summary>
-        /// Проверка наличия ключа
+        /// Check key exists
         /// </summary>
         bool Contains(string key);
         /// <summary>
-        /// Проверка наличия одного из ключей
+        /// Check one of key exists
         /// </summary>
         bool Contains(params string[] keys);
         /// <summary>
-        /// Проверка наличия значения по ключу
+        /// true if exists one or more values by key
         /// </summary>
         bool ContainsValue(string key, string value);
         /// <summary>
-        /// Количество значений параметра
+        /// Count values by key
         /// </summary>
         int Count(string key);
         /// <summary>
-        /// Выполняет указанное действие только в случае если в конфигурации есть ключ
+        /// Do action if key exists, action takes first value
         /// </summary>
         void DoWithFirst(string key, Action<string> action);
         /// <summary>
-        /// Выполняет указанное действие только в случае если в конфигурации есть ключ
+        /// Do action if key exists, action takes first value with cast to <typeparamref name="T"/>
         /// </summary>
         void DoWithFirst<T>(string key, Action<T> action);
         #endregion
 
         #region Create, Clean, Delete
         /// <summary>
-        /// Очистка всей секции
+        /// Clean
         /// </summary>
         IConfiguration Clear();
         /// <summary>
-        /// Очистка значения ключа
+        /// Clean values by key
         /// </summary>
         IConfiguration Clear(string key);
         /// <summary>
-        /// Удаление ключа и значений
+        /// Remove key and binded values
         /// </summary>
         IConfiguration Remove(string key);
         /// <summary>
-        /// Добавление параметра
+        /// Append key and value
         /// </summary>
         IConfiguration Append(string key, string value);
         /// <summary>
-        /// Задает значение в единственном числе,
-        /// существующее значение будет перезаписано
+        /// Set key with one value, if any values by key exists, they will be dropped
         /// </summary>
         IConfiguration SetUnique(string key, string value);
         /// <summary>
-        /// Запрещает вносить какие-либо изменения в конфигурацию
+        /// Sets a prohibition on changing
         /// </summary>
-        /// <returns>false - если уже установлен запрет</returns>
+        /// <returns>false - prohibition was set already</returns>
         bool Freeze(bool permanent = false);
         /// <summary>
-        /// Убирает запрет на внесение изменений в конфигурацию
+        /// Remove a prohibition on changing
         /// </summary>
-        /// <returns>false - если запрет снят</returns>
         bool Unfreeze();
         #endregion
     }

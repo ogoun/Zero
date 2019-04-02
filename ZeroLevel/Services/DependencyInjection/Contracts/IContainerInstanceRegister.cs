@@ -3,37 +3,37 @@
 namespace ZeroLevel.Patterns.DependencyInjection
 {
     /// <summary>
-    /// Интерфейс с методами регистрации зависимостей с явным указанием экземпляров
-    /// (синглтон)
+    /// Methods for register contact implementations
+    /// (singletone)
     /// </summary>
     public interface IContainerInstanceRegister
     {
         #region Register instance
         /// <summary>
-        /// Регистрация готового экземпляра (синглтон)
+        /// Register instance for contract <typeparamref name="TContract"/>. (singletone)
         /// </summary>
-        /// <typeparam name="TContract">Тип контракта</typeparam>
-        /// <param name="implementation">Экземпляр</param>
+        /// <typeparam name="TContract">Contract</typeparam>
+        /// <param name="implementation">Instance</param>
         void Register<TContract>(TContract implementation);
         /// <summary>
-        /// Регистрация готового экземпляра (синглтон)
+        /// Register instance for contract <typeparamref name="TContract"/>. (singletone)
         /// </summary>
-        /// <typeparam name="TContract">Тип контракта</typeparam>
-        /// <param name="implementation">Экземпляр</param>
-        /// <param name="resolveName">Имя разрешения зависимости</param>
+        /// <typeparam name="TContract">Contract</typeparam>
+        /// <param name="implementation">Instance</param>
+        /// <param name="resolveName">Dependency name</param>
         void Register<TContract>(TContract implementation, string resolveName);
         /// <summary>
-        /// Регистрация готового экземпляра (синглтон)
+        /// Register instance for contract (singletone)
         /// </summary>
-        /// <param name="contractType">Тип контракта</param>
-        /// <param name="implementation">Экземпляр</param>
+        /// <param name="contractType">Contract</param>
+        /// <param name="implementation">Instance</param>
         void Register(Type contractType, object implementation);
         /// <summary>
-        /// Регистрация готового экземпляра (синглтон)
+        /// Register instance for contract (singletone)
         /// </summary>
-        /// <param name="contractType">Тип контракта</param>
-        /// <param name="resolveName">Имя разрешения зависимости</param>
-        /// <param name="implementation">Экземпляр</param>
+        /// <param name="contractType">Contract</param>
+        /// <param name="resolveName">Dependency name</param>
+        /// <param name="implementation">Instance</param>
         void Register(Type contractType, string resolveName, object implementation);
         #endregion        
     }

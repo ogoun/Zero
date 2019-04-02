@@ -3,13 +3,13 @@
 namespace DOM.DSL.Tokens
 {
     /// <summary>
-    /// Абстрактная единица шаблона
+    /// Abstract token
     /// </summary>
     public abstract class TToken : TCloneable
     {
         public abstract TToken Clone();
         /// <summary>
-        /// Копия с установкой NextToken в null, для предотвращения циклических расчетов
+        /// Copying token with set NextToken to null, to break cycle
         /// </summary>
         /// <returns></returns>
         public abstract TToken CloneLocal();        

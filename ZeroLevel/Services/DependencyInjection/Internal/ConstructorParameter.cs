@@ -3,47 +3,47 @@
 namespace ZeroLevel.Patterns.DependencyInjection
 {
     /// <summary>
-    /// Тип аргумента конструктора в контексте иньекции зависимостей
+    /// Constructor argument type
     /// </summary>
     internal enum ConstructorParameterKind
     {
         /// <summary>
-        /// Аргумент задается из переданных значений
+        /// Constant
         /// </summary>
         None,
         /// <summary>
-        /// Аргумент задается из параметров контейнера
+        /// DI parameter
         /// </summary>
         Parameter,
         /// <summary>
-        /// Аргумент задается разрешением зависимости
+        /// Dependency
         /// </summary>
-        Resolve
+        Dependency
     }
 
     /// <summary>
-    /// Метаданные для описания аргумента конструктора
+    /// Constructor argument metadata
     /// </summary>
     internal sealed class ConstructorParameter
     {
         /// <summary>
-        /// Тип аргумента в рамках DI
+        /// Argument DI-type
         /// </summary>
         public ConstructorParameterKind ParameterKind;
         /// <summary>
-        /// Тип для определения аргумента через DI
+        /// Argument contract type
         /// </summary>
         public Type ParameterResolveType;
         /// <summary>
-        /// Имя для определения аргумента через DI
+        /// Dependency name
         /// </summary>
         public string ParameterResolveName;
         /// <summary>
-        /// Флаг определяющий допустимость записи null в качестве значения аргумента
+        /// Allow null
         /// </summary>
         public bool IsNullable;
         /// <summary>
-        /// Тип аргумента
+        /// Argument CLR type
         /// </summary>
         public Type Type;
     }

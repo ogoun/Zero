@@ -1,21 +1,21 @@
 ﻿namespace ZeroLevel.Patterns.DependencyInjection
 {
     /// <summary>
-    /// Интерфейс с методами проведения композиций
+    /// Provides object composition
     /// </summary>
     public interface ICompositionProvider
     {
         #region Composition
         /// <summary>
-        /// Композиция, выполняет подстановку зарегистрированных контрактов в полях и свойствах объекта
+        /// Object compositions, insert contract implementation
         /// </summary>
-        /// <param name="instanse">Инстанс объекта</param>
+        /// <param name="instanse">Object instance</param>
         void Compose(object instanse, bool recursive = true);
         /// <summary>
-        /// Безопасная композиция, выполняет подстановку зарегистрированных контрактов в полях и свойствах объекта
+        /// Object compositions, insert contract implementation
         /// </summary>
-        /// <param name="instanse">Инстанс объекта</param>
-        /// /// <returns>false - при сбое в попытке композиции объекта</returns>
+        /// <param name="instanse">Object instance</param>
+        /// /// <returns>false if composition fault</returns>
         bool TryCompose(object instanse, bool recursive = true);
         #endregion
     }

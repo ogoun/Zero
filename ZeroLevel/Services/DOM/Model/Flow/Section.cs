@@ -5,7 +5,7 @@ using ZeroLevel.Services.Serialization;
 namespace ZeroLevel.DocumentObjectModel.Flow
 {
     /// <summary>
-    /// Логически завершенный информационный блок
+    /// Document block
     /// </summary>
     public class Section : 
         ContentElement

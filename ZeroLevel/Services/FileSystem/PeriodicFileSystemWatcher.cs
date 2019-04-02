@@ -72,7 +72,7 @@ namespace ZeroLevel.Services.FileSystem
                         }
                         catch (Exception ex)
                         {
-                            Log.SystemError(ex, "Сбой при попытке перемещения файла '{0}' во временный каталог '{1}'", file, _temporaryFolder);
+                            Log.SystemError(ex, $"[PeriodicFileSystemWatcher] Failed to attempt to move file '{file}' to temporary directory '{_temporaryFolder}'");
                             continue;
                         }
                         Log.Debug($"[PeriodicFileSystemWatcher] Handle file {file}");
@@ -87,12 +87,12 @@ namespace ZeroLevel.Services.FileSystem
             }
             catch (Exception ex)
             {
-                Log.SystemError(ex, "Сбой при обработке входного каталога '{0}'", _sourceFolder);
+                Log.SystemError(ex, $"[PeriodicFileSystemWatcher] Failed to process input directory '{_sourceFolder}'");
             }
         }
 
         /// <summary>
-        /// Перемещение файла во временный каталог
+        /// Moving a file to a temporary directory
         /// </summary>
         public string MoveToTemporary(string from)
         {
@@ -110,8 +110,7 @@ namespace ZeroLevel.Services.FileSystem
             return tempFile;
         }
         /// <summary>
-        /// Разрешение коллизий в именах файлов во временном каталоге 
-        /// (требуется если в источнике могут появляться файлы в разное время с одинаковыми именами)
+        /// Resolving collisions in filenames in the temporary directory
         /// </summary>
         private static string TrySolveCollision(string file)
         {
@@ -141,7 +140,7 @@ namespace ZeroLevel.Services.FileSystem
             throw new ArgumentException("folder");
         }
         /// <summary>
-        /// Получение списка файлов из входного каталога
+        /// Getting a list of files from the input directory
         /// </summary>
         public string[] GetFilesFromSource()
         {
@@ -150,7 +149,7 @@ namespace ZeroLevel.Services.FileSystem
             return files;
         }
         /// <summary>
-        /// Сравнение названий файлов
+        /// File Name Comparison
         /// </summary>
         private static int FileNameSortCompare(string x, string y)
         {

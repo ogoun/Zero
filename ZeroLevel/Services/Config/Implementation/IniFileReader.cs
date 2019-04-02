@@ -15,13 +15,13 @@ namespace ZeroLevel.Services.Config.Implementation
         internal IniFileReader(string configPath)
         {
             if (String.IsNullOrWhiteSpace(configPath))
-                throw new ArgumentNullException("configPath", "Не указан путь к конфигурационному файлу");
+                throw new ArgumentNullException("configPath", "File path not found");
             if (!File.Exists(configPath))
             {
                 configPath = Path.Combine(Configuration.BaseDirectory, configPath);
                 if (!File.Exists(configPath))
                 {
-                    throw new FileNotFoundException("Не существует конфигурационный файл: " + configPath);
+                    throw new FileNotFoundException("File path not exists: " + configPath);
                 }
             }
             _iniPath = configPath;

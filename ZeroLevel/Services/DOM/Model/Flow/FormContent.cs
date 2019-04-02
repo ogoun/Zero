@@ -4,7 +4,7 @@ using ZeroLevel.Services.Serialization;
 namespace ZeroLevel.DocumentObjectModel.Flow
 {
     /// <summary>
-    /// Отображение вложенного документа или содержимого по внешней ссылке
+    /// Attached document or content by external link
     /// </summary>
     public sealed class FormContent : ContentElement
     {

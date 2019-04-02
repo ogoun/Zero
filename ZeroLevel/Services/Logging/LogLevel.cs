@@ -3,63 +3,62 @@
 namespace ZeroLevel.Services.Logging
 {
     /// <summary>
-    /// Перечисление, содержит возможные типы сообщений, для записи в лог
+    /// Enum contains possible types of messages to write to the log
     /// </summary>
     [Flags]
     public enum LogLevel : int
     {
         None = 0,
         /// <summary>
-        /// Сообщение
+        /// Message
         /// </summary>
         Info = 1 << 0,
         /// <summary>
-        /// Предупреждение о возможной неполадке
+        /// Warning
         /// </summary>
         Warning = 1 << 1,
         /// <summary>
-        /// Ошибка в выполнении (некритичная)
+        /// Error
         /// </summary>
         Error = 1 << 2,
         /// <summary>
-        /// Ошибка приводящая к аварийному завершению программы
+        /// Fatal
         /// </summary>
         Fatal = 1 << 3,
         /// <summary>
-        /// Отладочная информация
+        /// Debug
         /// </summary>
         Debug = 1 << 4,
         /// <summary>
-        /// Низкоуровневое логирование
+        /// LowLevel Debug
         /// </summary>
         Verbose = 1 << 5,
         /// <summary>
-        /// Стандартный уровень логирования, сообщения, предупреждения, ошибки и падения
+        /// Info | Warning | Error | Fatal
         /// </summary>
         Standart = Info | Warning | Error | Fatal,
         /// <summary>
-        /// Вывод сообщения как есть, без даты и уровня логирования
+        /// Message output as is, without date and logging level
         /// </summary>
         Raw = 1 << 6,
         /// <summary>
-        /// Запиcь проблем, предупреждения, ошибки, сбои
+        /// Error | Fatal | Warning
         /// </summary>
         Problem = Error | Fatal | Warning,
         /// <summary>
-        /// Запись всех стандартных уровней, не включая отладочные
+        /// Info | Problem | Raw
         /// </summary>
         All = Info | Problem | Raw,
         /// <summary>
-        /// Все сообщения, включая отладочные и низкоуровневые
+        /// All | Verbose | Debug
         /// </summary>
         FullDebug = All | Verbose | Debug,
 
         SystemInfo = 1 << 6,
         SystemWarning = 1 << 7,
         SystemError = 1 << 8,
-        SystemFatal = 1 << 9,
 
-        System = SystemInfo | SystemError | SystemWarning | SystemFatal,
+        System = SystemInfo | SystemError | SystemWarning,
 
         FullStandart = Standart | System
     }

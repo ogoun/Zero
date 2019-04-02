@@ -5,23 +5,23 @@ namespace ZeroLevel.DocumentObjectModel
     public enum AssotiationRelation : Int32
     {
         /// <summary>
-        /// Тип отношения не определен
+        /// Relation type not defined
         /// </summary>
         Uncknown = 0,
         /// <summary>
-        /// Упоминается
+        /// Mentioned
         /// </summary>
         Mentions = 1,
         /// <summary>
-        /// Рассказывается о
+        /// It tells about
         /// </summary>
         About = 2,
         /// <summary>
-        /// Обновление предыдущей версии
+        /// Previous version update
         /// </summary>
         UpdateOf = 3,
         /// <summary>
-        /// Основано на
+        /// Based on
         /// </summary>
         BasedOn = 4
     }

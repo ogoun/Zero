@@ -35,49 +35,49 @@ namespace ZeroLevel.DocumentObjectModel
             Content = new FlowContent();
             TagMetadata = new TagMetadata();
             DescriptiveMetadata = new DescriptiveMetadata();
-            Aside = new List<AsideContent>();
+            Attachments = new List<AttachContent>();
             Assotiations = new List<Assotiation>();
             Categories = new List<Category>();
         }
 
         /// <summary>
-        /// Идентификатор документа
+        /// ID
         /// </summary>
         public Guid Id;
         /// <summary>
-        /// Краткое описание, лид
+        /// Short description
         /// </summary>
         public string Summary;
         /// <summary>
-        /// Заголовок
+        /// Title
         /// </summary>
         public string Header;
         /// <summary>
-        /// Дополнительные идентификаторы
+        /// Identification block
         /// </summary>
         public Identifier Identifier;
         /// <summary>
-        /// Содержимое документа
+        /// Content
         /// </summary>
         public FlowContent Content;
         /// <summary>
-        /// Теги
+        /// Tags
         /// </summary>
         public TagMetadata TagMetadata;
         /// <summary>
-        /// Метаданные документа
+        /// Metadata
         /// </summary>
         public DescriptiveMetadata DescriptiveMetadata;
         /// <summary>
-        /// Вложенные документы
+        /// Attachments
         /// </summary>
-        public List<AsideContent> Aside;
+        public List<AttachContent> Attachments;
         /// <summary>
-        /// Связанные документы
+        /// Binded documents
         /// </summary>
         public List<Assotiation> Assotiations;
         /// <summary>
-        /// Категории
+        /// Categories
         /// </summary>
         public List<Category> Categories;
 
@@ -94,7 +94,7 @@ namespace ZeroLevel.DocumentObjectModel
             writer.Write(this.TagMetadata);
             writer.Write(this.DescriptiveMetadata);
 
-            writer.WriteCollection<AsideContent>(this.Aside);
+            writer.WriteCollection<AttachContent>(this.Attachments);
             writer.WriteCollection<Assotiation>(this.Assotiations);
             writer.WriteCollection<Category>(this.Categories);
         }
@@ -110,7 +110,7 @@ namespace ZeroLevel.DocumentObjectModel
             this.TagMetadata = reader.Read<TagMetadata>();
             this.DescriptiveMetadata = reader.Read<DescriptiveMetadata>();
 
-            this.Aside = reader.ReadCollection<AsideContent>();
+            this.Attachments = reader.ReadCollection<AttachContent>();
             this.Assotiations = reader.ReadCollection<Assotiation>();
             this.Categories = reader.ReadCollection<Category>();
         }

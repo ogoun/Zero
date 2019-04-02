@@ -3,7 +3,7 @@
 namespace ZeroLevel.Services.Impersonation
 {
     /// <summary>
-    /// Интерфейс для классов исполняющих произвольный код от прав пользователя или процесса
+    /// Interface for classes executing code from user or process rights
     /// </summary>
     public interface IImpersonationExecutor
     {

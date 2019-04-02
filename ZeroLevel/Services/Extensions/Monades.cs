@@ -2,9 +2,6 @@
 
 namespace ZeroLevel
 {
-    /// <summary>
-    /// Сборник монад
-    /// </summary>
     public static class Monades
     {
         #region With

@@ -7,7 +7,7 @@ using System.Security.Principal;
 namespace ZeroLevel.Services.Impersonation
 {
     /// <summary>
-    /// Класс реализует перевод исполнения программы на права указанного пользователя
+    /// The class implements the translation of the program execution to the rights of the specified user.
     /// </summary>
     [SecurityPermission(SecurityAction.InheritanceDemand, UnmanagedCode = true)]
     [PermissionSet(SecurityAction.Demand, Name = "FullTrust")]
@@ -17,20 +17,20 @@ namespace ZeroLevel.Services.Impersonation
 
         #region Private methods
         /// <summary>
-        /// Назначение текущему процессу прав от указанного процесса, путем копирования его токена
+        /// Assigning rights to the current process from the specified process, by copying its token
         /// </summary>
-        /// <param name="hProcess">Указатель на процесс</param>
+        /// <param name="hProcess">Process pointer</param>
         private void ImpersonateByProcess(IntPtr hProcess)
         {
             MySafeTokenHandle token;
             if (!ImpersonationNativeMethods.OpenProcessToken(hProcess, ImpersonationNativeMethods.TokenDesiredAccess.TOKEN_DUPLICATE, out token))
-                throw new ApplicationException("Не удалось получить токен процесса.  Win32 код ошибки: " + Marshal.GetLastWin32Error());
+                throw new ApplicationException("Failed to get the process token. Win32 error code: " + Marshal.GetLastWin32Error());
             ImpersonateToken(token);
         }
         /// <summary>
-        /// Метод назначает текущему процессу дубликат переданного токена
+        /// The method assigns a duplicate token to the current process.
         /// </summary>
-        /// <param name="token">Токен</param>
+        /// <param name="token">Token</param>
         private void ImpersonateToken(MySafeTokenHandle token)
         {
             MySafeTokenHandle tokenDuplicate;
@@ -50,19 +50,19 @@ namespace ZeroLevel.Services.Impersonation
                     }
                 }
                 else
-                    throw new Exception("Не удалось создать дубликат указанного токена. Win32 код ошибки: " + Marshal.GetLastWin32Error());
+                    throw new Exception("Failed to create a duplicate of the specified token. Win32 error code: " + Marshal.GetLastWin32Error());
             }
         }
         #endregion
 
         #region Public methods
         /// <summary>
-        /// Вход от имени указанного пользователя
+        /// Login as a specified user
         /// </summary>
-        /// <param name="userName">Имя пользователя</param>
-        /// <param name="domain">Домен</param>
-        /// <param name="password">Пароль</param>
-        /// <returns>false - если не удалось выполнить вход по указанным данным</returns>
+        /// <param name="userName">User name</param>
+        /// <param name="domain">User domain</param>
+        /// <param name="password">User password</param>
+        /// <returns>false - if failed to log in with the specified data</returns>
         public void ImpersonateByUser(String userName, String domain, String password)
         {
             MySafeTokenHandle token;
@@ -111,9 +111,9 @@ namespace ZeroLevel.Services.Impersonation
             }
         }
         /// <summary>
-        /// Копирование прав указанного процесса
+        /// Copying the rights of the specified process
         /// </summary>
-        /// <param name="ProcessID">Идентификатор процесса</param>
+        /// <param name="ProcessID">Process id</param>
         public void ImpersonateByProcess(int ProcessID)
         {
             Process[] myProcesses = Process.GetProcesses();
@@ -129,7 +129,7 @@ namespace ZeroLevel.Services.Impersonation
         #endregion
 
         /// <summary>
-        /// При освобождении рессурсов вернем предыдущего пользователя
+        /// When releasing resources, we will return the previous user right
         /// </summary>
         public void Dispose()
         {

@@ -5,6 +5,11 @@ using System.Threading;
 
 namespace ZeroLevel.Services.Collections
 {
+    /// <summary>
+    /// Collection return new seq every iteration
+    /// Sample. Original: [1,2,3]. Iteration #1: [1, 2, 3]. Iteration #2: [2, 3, 1]. Iteration #3: [3, 1, 2]. Iteration #4: [1, 2, 3]
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public sealed class RoundRobinCollection<T> :
         IDisposable
     {

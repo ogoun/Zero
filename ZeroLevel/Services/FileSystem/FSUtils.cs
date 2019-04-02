@@ -42,12 +42,12 @@ namespace ZeroLevel.Services.FileSystem
         }
 
         /// <summary>
-        /// Задает права доступа к каталогу для учетной записи
+        /// Sets the directory permissions for the account
         /// </summary>
-        /// <param name="folderPath">Путь к каталогу</param>
-        /// <param name="account">Аккаунт</param>
-        /// <param name="right">Права доступа</param>
-        /// <param name="controlType">Тип доступа</param>
+        /// <param name="folderPath">Directory path</param>
+        /// <param name="account">Account</param>
+        /// <param name="right">Access rights</param>
+        /// <param name="controlType">Access type</param>
         public static void SetupFolderPermission(string folderPath, string account,
             FileSystemRights right, AccessControlType controlType)
         {
@@ -63,7 +63,7 @@ namespace ZeroLevel.Services.FileSystem
         private static string _invalid_path_characters = new string(Path.GetInvalidPathChars());
         private static string _invalid_filename_characters = new string(Path.GetInvalidFileNameChars());
         /// <summary>
-        /// Удаляет из переданного пути недопустимые символы
+        /// Removes invalid characters from the passed path
         /// </summary>
         public static string PathCorrection(string path)
         {
@@ -82,7 +82,7 @@ namespace ZeroLevel.Services.FileSystem
             return new string(result, 0, index);
         }
         /// <summary>
-        /// Удаляет из переданного имени файла недопустимые символы
+        /// Removes invalid characters from the passed file name
         /// </summary>
         /// <param name="path"></param>
         /// <returns></returns>
@@ -105,7 +105,7 @@ namespace ZeroLevel.Services.FileSystem
         #endregion
 
         /// <summary>
-        /// Выполняет проверку на доступность файла для обработки
+        /// Performs a file accessibility check for processing
         /// </summary>
         public static bool IsFileLocked(FileInfo file)
         {

@@ -43,64 +43,30 @@ namespace DOM.DSL.Services
     {
         private readonly Document _document;
         private readonly TEnvironment _environment;
-        private readonly DOMRenderElementCounter _counter;
-        private readonly TRenderOptions _options = new TRenderOptions();
-        private readonly TContainerFactory _factory;
-        private readonly IDictionary<string, object> _buffer =
-            new Dictionary<string, object>();
-
         private readonly CustomBlocks _blocks = new CustomBlocks();
-
-        internal TContainerFactory Factory
-        {
-            get
-            {
-                return _factory;
-            }
-        }
-
-        internal IDictionary<string, object> BufferDictionary
-        {
-            get
-            {
-                return _buffer;
-            }
-        }
-
-        internal DOMRenderElementCounter Counter
-        {
-            get
-            {
-                return _counter;
-            }
-        }
-
-        internal TRenderOptions Options
-        {
-            get
-            {
-                return _options;
-            }
-        }
+        internal TContainerFactory Factory { get; }
+        internal IDictionary<string, object> BufferDictionary { get; } = new Dictionary<string, object>();
+        internal DOMRenderElementCounter Counter { get; }
+        internal TRenderOptions Options { get; } = new TRenderOptions();
 
         public TRender(Document document, TEnvironment environment)
         {
             _document = document;
             _environment = environment;
-            _counter = new DOMRenderElementCounter();
-            _factory = new TContainerFactory(this);
+            Counter = new DOMRenderElementCounter();
+            Factory = new TContainerFactory(this);
         }
 
         public void Resolve(TToken token, Action<TContainer> handler, bool release = true, TContainer self = null)
         {
-            var self_copy = self == null ? null : _factory.Get(self.Current, self.Index);
+            var self_copy = self == null ? null : Factory.Get(self.Current, self.Index);
             try
             {
                 if (token is TTextToken)
                 {
-                    var container = _factory.Get(token.AsTextToken().Text);
+                    var container = Factory.Get(token.AsTextToken().Text);
                     handler(container);
-                    if (release) _factory.Release(container);
+                    if (release) Factory.Release(container);
                 }
                 else if (token is TElementToken)
                 {
@@ -108,7 +74,7 @@ namespace DOM.DSL.Services
                     foreach (var c in containers)
                     {
                         handler(c);
-                        if (release) _factory.Release(c);
+                        if (release) Factory.Release(c);
                     }
                 }
                 else if (token is TBlockToken)
@@ -117,13 +83,13 @@ namespace DOM.DSL.Services
                     foreach (var c in containers)
                     {
                         handler(c);
-                        if (release) _factory.Release(c);
+                        if (release) Factory.Release(c);
                     }
                 }
             }
             finally
             {
-                _factory.Release(self_copy);
+                Factory.Release(self_copy);
             }
         }
 
@@ -133,56 +99,56 @@ namespace DOM.DSL.Services
             switch (token.ElementName.Trim().ToLowerInvariant())
             {
                 // External
-                case "now": container = _factory.Get(DateTime.Now); break;
-                case "utc": container = _factory.Get(DateTime.Now.ToUniversalTime()); break;
-                case "guid": container = _factory.Get(Guid.NewGuid()); break;
-                case "nowutc": container = _factory.Get(DateTime.UtcNow); break;
+                case "now": container = Factory.Get(DateTime.Now); break;
+                case "utc": container = Factory.Get(DateTime.Now.ToUniversalTime()); break;
+                case "guid": container = Factory.Get(Guid.NewGuid()); break;
+                case "nowutc": container = Factory.Get(DateTime.UtcNow); break;
 
                 // Document
-                case "id": container = _factory.Get(_document.Id); break;
-                case "summary": container = _factory.Get(_document.Summary); break;
-                case "header": container = _factory.Get(_document.Header); break;
-                case "categories": container = _factory.Get(_document.Categories); break;
+                case "id": container = Factory.Get(_document.Id); break;
+                case "summary": container = Factory.Get(_document.Summary); break;
+                case "header": container = Factory.Get(_document.Header); break;
+                case "categories": container = Factory.Get(_document.Categories); break;
                 case "directions":
-                    container = _factory.Get(_document.Categories.
+                    container = Factory.Get(_document.Categories.
                             Select(c => c.DirectionCode).Distinct().ToList()); break;
 
                 // Descriptive
                 case "desc":
-                case "descriptive": container = _factory.Get(_document.DescriptiveMetadata); break;
-                case "author": container = _factory.Get(_document.DescriptiveMetadata.Byline); break;
-                case "copyright": container = _factory.Get(_document.DescriptiveMetadata.CopyrightNotice); break;
-                case "created": container = _factory.Get(_document.DescriptiveMetadata.Created); break;
-                case "lang": container = _factory.Get(_document.DescriptiveMetadata.Language); break;
-                case "priority": container = _factory.Get(_document.DescriptiveMetadata.Priority); break;
-                case "source": container = _factory.Get(_document.DescriptiveMetadata.Source); break;
-                case "publisher": container = _factory.Get(_document.DescriptiveMetadata.Publisher); break;
+                case "descriptive": container = Factory.Get(_document.DescriptiveMetadata); break;
+                case "author": container = Factory.Get(_document.DescriptiveMetadata.Byline); break;
+                case "copyright": container = Factory.Get(_document.DescriptiveMetadata.CopyrightNotice); break;
+                case "created": container = Factory.Get(_document.DescriptiveMetadata.Created); break;
+                case "lang": container = Factory.Get(_document.DescriptiveMetadata.Language); break;
+                case "priority": container = Factory.Get(_document.DescriptiveMetadata.Priority); break;
+                case "source": container = Factory.Get(_document.DescriptiveMetadata.Source); break;
+                case "publisher": container = Factory.Get(_document.DescriptiveMetadata.Publisher); break;
                 case "meta":
-                case "headers": container = _factory.Get(_document.DescriptiveMetadata.Headers); break;
+                case "headers": container = Factory.Get(_document.DescriptiveMetadata.Headers); break;
 
                 // Identifier
-                case "identifier": container = _factory.Get(_document.Identifier); break;
-                case "timestamp": container = _factory.Get(_document.Identifier.Timestamp); break;
-                case "datelabel": container = _factory.Get(_document.Identifier.DateLabel); break;
-                case "version": container = _factory.Get(_document.Identifier.Version); break;
+                case "identifier": container = Factory.Get(_document.Identifier); break;
+                case "timestamp": container = Factory.Get(_document.Identifier.Timestamp); break;
+                case "datelabel": container = Factory.Get(_document.Identifier.DateLabel); break;
+                case "version": container = Factory.Get(_document.Identifier.Version); break;
 
                 // Tags
-                case "tags": container = _factory.Get(_document.TagMetadata); break;
-                case "keywords": container = _factory.Get(_document.TagMetadata.Keywords); break;
-                case "companies": container = _factory.Get(_document.TagMetadata.Companies); break;
-                case "persons": container = _factory.Get(_document.TagMetadata.Persons); break;
-                case "places": container = _factory.Get(_document.TagMetadata.Places); break;
+                case "tags": container = Factory.Get(_document.TagMetadata); break;
+                case "keywords": container = Factory.Get(_document.TagMetadata.Keywords); break;
+                case "companies": container = Factory.Get(_document.TagMetadata.Companies); break;
+                case "persons": container = Factory.Get(_document.TagMetadata.Persons); break;
+                case "places": container = Factory.Get(_document.TagMetadata.Places); break;
 
-                case "var": container = _factory.Get(_environment.CustomVariables); break;
-                case "buf": container = _factory.Get(_buffer); break;
-                case "env": container = _factory.Get(_environment); break;
-                case "counter": container = _factory.Get(_counter); break;
-                case "self": container = _factory.Get(self.Current, self.Index); break;
-                case "content": container = _factory.Get(new TContentElement(_document)); break;
-                case "aside": container = _factory.Get(_document.Aside); break;
-                case "assotiations": container = _factory.Get(_document.Assotiations); break;
-                case "null": container = _factory.Get(null); break;
-                case "empty": container = _factory.Get(string.Empty); break;
+                case "var": container = Factory.Get(_environment.CustomVariables); break;
+                case "buf": container = Factory.Get(BufferDictionary); break;
+                case "env": container = Factory.Get(_environment); break;
+                case "counter": container = Factory.Get(Counter); break;
+                case "self": container = Factory.Get(self.Current, self.Index); break;
+                case "content": container = Factory.Get(new TContentElement(_document)); break;
+                case "aside": container = Factory.Get(_document.Attachments); break;
+                case "assotiations": container = Factory.Get(_document.Assotiations); break;
+                case "null": container = Factory.Get(null); break;
+                case "empty": container = Factory.Get(string.Empty); break;
 
                 // Blocks
                 case "build":
@@ -191,15 +157,15 @@ namespace DOM.DSL.Services
                         {
                             var block = new TBlockToken(_blocks.Get(token.NextToken.AsPropertyToken().PropertyName));
                             var result = ResolveBlockToken(block, self);
-                            container = _factory.Get(result.Where(c => c.Current != null).Select(c => c.Current).ToList());
+                            container = Factory.Get(result.Where(c => c.Current != null).Select(c => c.Current).ToList());
                             foreach (var c in result)
-                                _factory.Release(c);
+                                Factory.Release(c);
                         }
                         break;
                     }
             }
 
-            if (container == null) container = _factory.Get(null);
+            if (container == null) container = Factory.Get(null);
 
             if (token.NextToken is TPropertyToken)
             {
@@ -286,13 +252,13 @@ namespace DOM.DSL.Services
                         List<TContainer> result;
                         if (success)
                         {
-                            var ls = self_parent == null ? null : _factory.Get(self_parent.Current, self_parent.Index);
+                            var ls = self_parent == null ? null : Factory.Get(self_parent.Current, self_parent.Index);
                             result = ResolveSimpleBlockToken(blockToken, ls);
-                            _factory.Release(ls);
+                            Factory.Release(ls);
                         }
                         else
                         {
-                            result = new List<TContainer> { _factory.Get(null) };
+                            result = new List<TContainer> { Factory.Get(null) };
                         }
                         return result;
                     }
@@ -308,12 +274,12 @@ namespace DOM.DSL.Services
                                 int index = 0;
                                 foreach (var t in (IEnumerable)self_container.Current)
                                 {
-                                    var self = _factory.Get(t, index);
+                                    var self = Factory.Get(t, index);
                                     foreach (var bt in blockToken.Body)
                                     {
                                         Resolve(bt, c => list.Add(c), false, self);
                                     }
-                                    _factory.Release(self);
+                                    Factory.Release(self);
                                     index++;
                                 }
                             }
@@ -325,7 +291,7 @@ namespace DOM.DSL.Services
                                 }
                             }
                         }
-                        _factory.Release(self_container);
+                        Factory.Release(self_container);
                         return list;
                     }
             }
@@ -366,12 +332,12 @@ namespace DOM.DSL.Services
                         }
                         special = string.Join(",", args.Select(a => a.ToString()));
                         foreach (var a in args)
-                            _factory.Release(a);
+                            Factory.Release(a);
                     }
                     rules.UpdateRule(elementName, functionName, rule_token, special);
                 }
             }
-            return _factory.Get(DocumentContentReader.ReadAs<string>(_document, new TContentToStringConverter(this, rules)));
+            return Factory.Get(DocumentContentReader.ReadAs<string>(_document, new TContentToStringConverter(this, rules)));
         }
 
         private void ApplyRenderCommand(TSystemToken token)
@@ -396,13 +362,13 @@ namespace DOM.DSL.Services
                         switch (args[0].ToString().Trim().ToLowerInvariant())
                         {
                             case "xml":
-                                _options.ValidateAsXml = true;
+                                Options.ValidateAsXml = true;
                                 break;
                             case "html":
-                                _options.ValidateAsHtml = true;
+                                Options.ValidateAsHtml = true;
                                 break;
                             case "json":
-                                _options.ValidateAsJson = true;
+                                Options.ValidateAsJson = true;
                                 break;
                         }
                     }
@@ -414,22 +380,24 @@ namespace DOM.DSL.Services
                             int width;
                             if (int.TryParse(args[0].ToString(), out width))
                             {
-                                _options.MaxStringWidth = width;
+                                Options.MaxStringWidth = width;
                             }
                             else
                             {
-                                _options.MaxStringWidth = -1;
+                                Options.MaxStringWidth = -1;
                             }
                         }
                         else
                         {
-                            _options.MaxStringWidth = -1;
+                            Options.MaxStringWidth = -1;
                         }
                     }
                     break;
             }
             foreach (var a in args)
-                _factory.Release(a);
+            {
+                Factory.Release(a);
+            }
         }
     }
 }

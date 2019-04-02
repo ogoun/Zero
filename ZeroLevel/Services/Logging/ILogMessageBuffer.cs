@@ -3,22 +3,19 @@
 namespace ZeroLevel.Services.Logging
 {
     /// <summary>
-    /// Очередь сообщений для вывода в лог
+    /// Message queue for logging
     /// </summary>
     internal interface ILogMessageBuffer : IDisposable
     {
         /// <summary>
-        /// Количество сообщений в очереди
+        /// Number of messages in the queue
         /// </summary>
         long Count { get; }
         /// <summary>
-        /// Запись сообщения в очередь
+        /// Write message to the queue
         /// </summary>
         void Push(LogLevel level, string message);
-        /// <summary>
-        /// Запрос сообщения из очереди для вывода в лог, подразумевается блокирующая работа метода,
-        /// пока очередь пустая, метод ожидает появления сообщения не возвращая результат.
-        /// </summary>
+
         Tuple<LogLevel, string> Take();
     }
 }

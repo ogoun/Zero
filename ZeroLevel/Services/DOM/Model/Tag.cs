@@ -6,13 +6,7 @@ namespace ZeroLevel.DocumentObjectModel
         IBinarySerializable
     {
         #region Fields
-        /// <summary>
-        /// Название
-        /// </summary>
         public string Name;
-        /// <summary>
-        /// Значение
-        /// </summary>
         public string Value;
         #endregion
 

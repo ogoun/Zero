@@ -86,7 +86,6 @@
     <Compile Include="Services\Collections\EverythingStorage.cs" />
     <Compile Include="Services\Collections\IEverythingStorage.cs" />
     <Compile Include="Services\Collections\RoundRobinCollection.cs" />
-    <Compile Include="Services\Collections\SparseIterator.cs" />
     <Compile Include="Services\DependencyInjection\Container.cs" />
     <Compile Include="Services\DependencyInjection\ContainerFactory.cs" />
     <Compile Include="Services\DependencyInjection\Contracts\ICompositionProvider.cs" />
@@ -95,12 +94,10 @@
     <Compile Include="Services\DependencyInjection\Contracts\IContainerInstanceRegister.cs" />
     <Compile Include="Services\DependencyInjection\Contracts\IContainerRegister.cs" />
     <Compile Include="Services\DependencyInjection\Contracts\IParameterStorage.cs" />
-    <Compile Include="Services\DependencyInjection\Contracts\IPoolContainer.cs" />
     <Compile Include="Services\DependencyInjection\Contracts\IResolver.cs" />
     <Compile Include="Services\DependencyInjection\Injector.cs" />
     <Compile Include="Services\DependencyInjection\Internal\ConstructorMetadata.cs" />
     <Compile Include="Services\DependencyInjection\Internal\ConstructorParameter.cs" />
-    <Compile Include="Services\DependencyInjection\Internal\IPoolable.cs" />
     <Compile Include="Services\DependencyInjection\Internal\ResolveTypeInfo.cs" />
     <Compile Include="Services\DependencyInjection\ParameterAttribute.cs" />
     <Compile Include="Services\DependencyInjection\ResolveAttribute.cs" />
@@ -137,7 +134,7 @@
     <Compile Include="Services\DOM\DSL\Tokens\TTextToken.cs" />
     <Compile Include="Services\DOM\DSL\Tokens\TToken.cs" />
     <Compile Include="Services\DOM\Model\Agency.cs" />
-    <Compile Include="Services\DOM\Model\AsideContent.cs" />
+    <Compile Include="Services\DOM\Model\AttachContent.cs" />
     <Compile Include="Services\DOM\Model\Assotiation.cs" />
     <Compile Include="Services\DOM\Model\AssotiationRelation.cs" />
     <Compile Include="Services\DOM\Model\Category.cs" />
@@ -365,7 +362,6 @@
     <Compile Include="Services\Trees\Contracts\ITree.cs" />
     <Compile Include="Services\Trees\Contracts\ITreeNode.cs" />
     <Compile Include="Services\Trees\Generic.cs" />
-    <Compile Include="Services\Trees\ItemFieldToTreeConverter.cs" />
     <Compile Include="Services\Trees\Tree.cs" />
     <Compile Include="Services\Trees\TreeNode.cs" />
     <Compile Include="Services\Trees\TreesVisitor.cs" />

@@ -3,7 +3,7 @@
 namespace ZeroLevel.Services.Impersonation
 {
     /// <summary>
-    /// Класс исполняющий произвольный код с правами указанного пользователя
+    /// Class executing code with the rights of the specified user
     /// </summary>
     public class UserImpersonationExecutor 
         : IImpersonationExecutor
@@ -22,11 +22,8 @@ namespace ZeroLevel.Services.Impersonation
         }
 
         /// <summary>
-        /// Исполнение кода
+        /// Code execution
         /// </summary>
-        /// <typeparam name="T">Тип передаваемого аргумента</typeparam>
-        /// <param name="action">Делегат</param>
-        /// <param name="arg">Аргумент</param>
         public void ExecuteCode<T>(Action<T> action, T arg)
         {
             using (Impersonation imp = new Impersonation())
@@ -36,10 +33,8 @@ namespace ZeroLevel.Services.Impersonation
             }
         }
         /// <summary>
-        /// Исполнение кода
+        /// Code execution
         /// </summary>
-        /// <typeparam name="T">Тип передаваемого аргумента</typeparam>
-        /// <param name="action">Делегат</param>
         public void ExecuteCode(Action action)
         {
             using (Impersonation imp = new Impersonation())

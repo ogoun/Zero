@@ -7,6 +7,7 @@ using System.Linq;
 using System.Security;
 using System.Text;
 using System.Threading;
+using ZeroLevel;
 using ZeroLevel.DocumentObjectModel;
 using ZeroLevel.DocumentObjectModel.Flow;
 using ZeroLevel.Services.FileSystem;
@@ -56,7 +57,7 @@ namespace DOM.DSL.Services
                     }
                     else
                     {
-                        // Добавляются элементы разных типов, в этом случае все элементы приводим к string
+                        // Added elements of different types. All elements casts to string
                         var list = new List<string>();
                         foreach (var i in _list) list.Add(i.ToString());
                         _elementType = typeof(string);
@@ -170,7 +171,7 @@ namespace DOM.DSL.Services
                 else if (_current is Category) SelectProperty((Category)_current, propertyName, propertyIndex);
                 else if (_current is Header) SelectProperty((Header)_current, propertyName, propertyIndex);
                 else if (_current is Tag) SelectProperty((Tag)_current, propertyName, propertyIndex);
-                else if (_current is AsideContent) SelectProperty((AsideContent)_current, propertyName, propertyIndex);
+                else if (_current is AttachContent) SelectProperty((AttachContent)_current, propertyName, propertyIndex);
                 else if (_current is Assotiation) SelectProperty((Assotiation)_current, propertyName, propertyIndex);
                 else if (_current is List<Header>) SelectProperty((List<Header>)_current, propertyName, propertyIndex);
                 else if (_current is Identifier) SelectProperty((Identifier)_current, propertyName, propertyIndex);
@@ -255,8 +256,9 @@ namespace DOM.DSL.Services
             {
                 return (T)Convert.ChangeType(_current, type);
             }
-            catch
+            catch (Exception ex)
             {
+                Log.SystemWarning($"[DOM.TContainer] Fault cast current value from type '{_current?.GetType()?.FullName ?? string.Empty}' to type '{type.FullName}'. {ex.ToString()}");
                 return default(T);
             }
         }
@@ -273,8 +275,9 @@ namespace DOM.DSL.Services
             {
                 return Convert.ChangeType(_current, type);
             }
-            catch
+            catch(Exception ex)
             {
+                Log.SystemWarning($"[DOM.TContainer] Fault cast current value from type '{_current?.GetType()?.FullName ?? string.Empty}' to type '{type.FullName}'. {ex.ToString()}");
                 return TypeHelpers.CreateDefaultState(type);
             }
         }
@@ -1144,7 +1147,7 @@ namespace DOM.DSL.Services
             }
         }
 
-        private void SelectProperty(AsideContent aside, string property, string propertyIndex)
+        private void SelectProperty(AttachContent aside, string property, string propertyIndex)
         {
             switch (property.Trim().ToLowerInvariant())
             {
@@ -2596,7 +2599,7 @@ namespace DOM.DSL.Services
             else if (_current is Category) return ((Category)_current).Title ?? string.Empty;
             else if (_current is Header) return ((Header)_current).Value ?? string.Empty;
             else if (_current is Tag) return ((Tag)_current).Name ?? string.Empty;
-            else if (_current is AsideContent) return ((AsideContent)_current).Caption ?? string.Empty;
+            else if (_current is AttachContent) return ((AttachContent)_current).Caption ?? string.Empty;
             else if (_current is Assotiation) return ((Assotiation)_current).Title ?? string.Empty;
             else if (_current is List<Header>) return string.Join("; ", ((List<Header>)_current).Select(h => h.Name));
             else if (_current is Identifier) return string.Empty;

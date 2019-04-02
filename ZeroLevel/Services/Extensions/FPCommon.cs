@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 namespace ZeroLevel.Services.Extensions
 {
     /// <summary>
-    /// Обобщенные возможности из ФП
+    /// FP
     /// </summary>
     public static class FPCommon
     {

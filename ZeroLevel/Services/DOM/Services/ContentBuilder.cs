@@ -236,14 +236,12 @@ namespace DOM.Services
 
         private void RaiseIncorrectTypeException(ContentElementType received, ContentElementType expected)
         {
-            throw new InvalidCastException(string.Format("Type {0} received instead of {1}",
-                received.ToString(), expected.ToString()));
+            throw new InvalidCastException($"Type {received} received instead of {expected}");
         }
 
         private void RaiseIncorrectContainerType(ContentElementType containerType, ContentElementType elementType)
         {
-            throw new Exception(string.Format("Type {0} can not be written to a container of type {1}",
-                elementType.ToString(), containerType.ToString()));
+            throw new Exception($"Type {elementType} can not be written to a container of type {containerType}");
         }
 
         private void ReduceContainers()
@@ -278,7 +276,7 @@ namespace DOM.Services
                         LeaveRow();
                         break;
                     default:
-                        throw new Exception(string.Format("Uncknown container type {0}", current.Type.ToString()));
+                        throw new Exception($"Uncknown container type {current.Type}");
                 }
             }
         }
@@ -463,7 +461,7 @@ namespace DOM.Services
             WriteElement(column);
         }
 
-        public void WriteText(ZeroLevel.DocumentObjectModel.Flow.Text text)
+        public void WriteText(Text text)
         {
             if (text == null)
             {
@@ -473,15 +471,15 @@ namespace DOM.Services
         }
         public void WriteText(string text)
         {
-            WriteElement(new ZeroLevel.DocumentObjectModel.Flow.Text(text));
+            WriteElement(new Text(text));
         }
         public void WriteText(string text, TextStyle style)
         {
-            WriteElement(new ZeroLevel.DocumentObjectModel.Flow.Text(text) { Style = style });
+            WriteElement(new Text(text) { Style = style });
         }
         public void WriteHeader(string text)
         {
-            WriteElement(new ZeroLevel.DocumentObjectModel.Flow.Text(text) { Style = new TextStyle { Size = TextSize.MediumHeader, Formatting = TextFormatting.None } });
+            WriteElement(new Text(text) { Style = new TextStyle { Size = TextSize.MediumHeader, Formatting = TextFormatting.None } });
         }
         public void WriteQuote(Quote quote)
         {

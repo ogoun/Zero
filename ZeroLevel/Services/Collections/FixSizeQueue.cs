@@ -3,9 +3,6 @@ using System.Collections.Generic;
 
 namespace ZeroLevel.Services.Collections
 {
-    /// <summary>
-    /// Очередь фиксированной длины
-    /// </summary>
     public sealed class FixSizeQueue<T> :
         IFixSizeQueue<T>
     {
@@ -26,8 +23,7 @@ namespace ZeroLevel.Services.Collections
             _count = 0;
         }
         /// <summary>
-        /// Добавление элемента в очередь, при достижении предела по размеру, 
-        /// перезаписывается самый старый элемент
+        /// If count is limited when intem adding, oldest item replace with new item
         /// </summary>
         public void Push(T item)
         {

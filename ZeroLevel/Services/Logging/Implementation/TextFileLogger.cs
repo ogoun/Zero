@@ -26,15 +26,15 @@ namespace ZeroLevel.Services.Logging.Implementation
         internal long LimitFileSize { get; private set; }
         internal Encoding TextEncoding { get; private set; }
         /// <summary>
-        /// Удалять файлы старее чем (период устаревания)
+        /// Delete files older than (aging period)
         /// </summary>
         internal TimeSpan RemoveOlderThen { get; private set; }
         /// <summary>
-        /// Удалять устаревшие файлы
+        /// Delete outdate files
         /// </summary>
         internal bool RemoveOldFiles { get; private set; }
         /// <summary>
-        /// Архивировать файлы
+        /// Archive files
         /// </summary>
         internal bool ZipOldFiles { get; private set; }
 
@@ -48,7 +48,7 @@ namespace ZeroLevel.Services.Logging.Implementation
         }
 
         /// <summary>
-        /// Включить автоматическое архивирование
+        /// Enable automatic archiving
         /// </summary>
         public TextFileLoggerOptions EnableAutoArchiving()
         {
@@ -56,9 +56,9 @@ namespace ZeroLevel.Services.Logging.Implementation
             return this;
         }
         /// <summary>
-        /// Включить автоматическое удаление устаревших файлов
+        ///Enable automatic deletion of outdate files.
         /// </summary>
-        /// <param name="age">Возраст файла лога по достижении которого требуется удаление</param>
+        /// <param name="age">The age of the log file at which removal is required</param>
         public TextFileLoggerOptions EnableAutoCleaning(TimeSpan age)
         {
             this.RemoveOldFiles = true;
@@ -98,21 +98,21 @@ namespace ZeroLevel.Services.Logging.Implementation
                 var options = new TextFileLoggerOptions().
                     SetFolderPath(config.First(logPrefix));
 
-                config.DoWithFirst<long>(string.Format("{0}.backlog", logPrefix), backlog =>
+                config.DoWithFirst<long>($"{logPrefix}.backlog", backlog =>
                 {
                     if (backlog > 0)
                     {
                         Log.Backlog(backlog);
                     }
                 });
-                config.DoWithFirst<bool>(string.Format("{0}.archive", logPrefix), enable =>
+                config.DoWithFirst<bool>($"{logPrefix}.archive", enable =>
                 {
                     if (enable)
                     {
                         options.EnableAutoArchiving();
                     }
                 });
-                config.DoWithFirst<int>(string.Format("{0}.sizeinkb", logPrefix), size =>
+                config.DoWithFirst<int>($"{logPrefix}.sizeinkb", size =>
                 {
                     if (size >= 1)
                     {
@@ -120,7 +120,7 @@ namespace ZeroLevel.Services.Logging.Implementation
                     }
                 });
 
-                config.DoWithFirst<int>(string.Format("{0}.cleanolderdays", logPrefix), days =>
+                config.DoWithFirst<int>($"{logPrefix}.cleanolderdays", days =>
                 {
                     if (days > 0)
                     {
@@ -140,15 +140,15 @@ namespace ZeroLevel.Services.Logging.Implementation
 
         private int _todayCountLogFiles = 0;
         /// <summary>
-        /// Текущий лог-файл
+        /// Current log file
         /// </summary>
         private string _currentLogFile;
         /// <summary>
-        /// Поток для вывода в файл
+        /// Stream to output to file
         /// </summary>
         private TextWriter _writer;
         /// <summary>
-        /// Лок на пересоздание файла
+        /// Lock on re-create file
         /// </summary>
         private readonly object _fileRecreating = new object();
 
@@ -160,9 +160,8 @@ namespace ZeroLevel.Services.Logging.Implementation
         #region Ctors
 
         /// <summary>
-        /// Конструктор с указанием каталога для записи лог-файлов, кодировка задается по умолчанию как Unicode
+        /// Constructor indicating the directory for recording log files, the encoding is set to Unicode by default.
         /// </summary>
-        /// <param name="options"></param>
         public TextFileLogger(TextFileLoggerOptions options)
         {
             _options = options.Commit();
@@ -171,12 +170,11 @@ namespace ZeroLevel.Services.Logging.Implementation
                 var dir = Directory.CreateDirectory(_options.Folder);
                 if (dir.Exists == false)
                 {
-                    throw new ArgumentException(string.Format("Can't create or found directory '{0}'", _options.Folder));
+                    throw new ArgumentException($"Can't create or found directory '{_options.Folder}'");
                 }
             }
             RecreateLogFile();
-            // Задачи обслуживания
-            // Пересоздание лог-файла при достижении размера больше указанного
+            // Maintenance tasks
             if (_options.LimitFileSize > 0)
             {
                 _taskKeys.Add(Sheduller.RemindEvery(TimeSpan.FromSeconds(20), CheckRecreateFileLogByOversize));
@@ -212,7 +210,7 @@ namespace ZeroLevel.Services.Logging.Implementation
         }
 
         /// <summary>
-        /// Закрытие текущего лога
+        /// Closing the current log
         /// </summary>
         private void CloseCurrentWriter()
         {
@@ -264,7 +262,7 @@ namespace ZeroLevel.Services.Logging.Implementation
             fi = null;
         }
         /// <summary>
-        /// Проверка имени лог-файла (изменяется при смене даты на следующий день)
+        /// Checking the name of the log file (changes when the date changes to the next day)
         /// </summary>
         private void RecreateLogFile()
         {
@@ -296,7 +294,7 @@ namespace ZeroLevel.Services.Logging.Implementation
         {
             if (null != filePath && File.Exists(filePath) && _options.ZipOldFiles)
             {
-                using (var stream = new FileStream(string.Format("{0}.{1}", filePath, "zip"), FileMode.Create))
+                using (var stream = new FileStream($"{filePath}.zip", FileMode.Create))
                 {
                     using (var zipStream = new GZipStream(stream, CompressionLevel.Optimal, false))
                     {
@@ -344,9 +342,6 @@ namespace ZeroLevel.Services.Logging.Implementation
 
         #region IDisposable
         private bool _disposed = false;
-        /// <summary>
-        /// Освобождение рессурсов
-        /// </summary>
         public void Dispose()
         {
             foreach (var tk in _taskKeys)
@@ -366,18 +361,13 @@ namespace ZeroLevel.Services.Logging.Implementation
     {
         #region Fields
         /// <summary>
-        /// Поток для вывода в файл
+        /// Stream to output to file
         /// </summary>
         private TextWriter _writer;
         public static readonly Encoding DEFAULT_ENCODING = Encoding.UTF8;
         #endregion
 
         #region Ctors
-
-        /// <summary>
-        /// Конструктор с указанием каталога для записи лог-файлов, кодировка задается по умолчанию как Unicode
-        /// </summary>
-        /// <param name="options"></param>
         public FileLogger(string path)
         {
             CreateLogFile(PreparePath(path));
@@ -391,7 +381,7 @@ namespace ZeroLevel.Services.Logging.Implementation
             {
                 Directory.CreateDirectory(path);
                 FSUtils.SetupFolderPermission(path,
-                    string.Format("{0}\\{1}", Environment.UserDomainName, Environment.UserName),
+                    $"{Environment.UserDomainName}\\{Environment.UserName}",
                     FileSystemRights.Write | FileSystemRights.Read | FileSystemRights.Delete | FileSystemRights.Modify,
                     AccessControlType.Allow);
             }
@@ -409,7 +399,7 @@ namespace ZeroLevel.Services.Logging.Implementation
         }
 
         /// <summary>
-        /// Закрытие текущего лога
+        /// Closing the current log
         /// </summary>
         private void CloseCurrentWriter()
         {
@@ -464,9 +454,6 @@ namespace ZeroLevel.Services.Logging.Implementation
 
         #region IDisposable
         private bool _disposed = false;
-        /// <summary>
-        /// Освобождение рессурсов
-        /// </summary>
         public void Dispose()
         {
             if (false == _disposed)

@@ -11,7 +11,7 @@ namespace ZeroLevel.DocumentObjectModel
 
         void EnterIdentifier(Identifier identifier);
         void ReadVersion(int version);
-        void ReadTimestamp(string timestamp);
+        void ReadTimestamp(long timestamp);
         void ReadDateLabel(string datelabel);
         void LeaveIdentifier(Identifier identifier);
 
@@ -44,9 +44,9 @@ namespace ZeroLevel.DocumentObjectModel
         void LeaveHeaders(IEnumerable<Header> headers);
         void LeaveDescriptioveBlock(DescriptiveMetadata metadata);
 
-        void EnterAsides(IEnumerable<AsideContent> asides);
-        void ReadAside(AsideContent aside, int order);
-        void LeaveAsides(IEnumerable<AsideContent> asides);
+        void EnterAsides(IEnumerable<AttachContent> asides);
+        void ReadAside(AttachContent aside, int order);
+        void LeaveAsides(IEnumerable<AttachContent> asides);
 
         void EnterAssotiations(IEnumerable<Assotiation> assotiations);
         void ReadAssotiation(Assotiation assotiation, int order);

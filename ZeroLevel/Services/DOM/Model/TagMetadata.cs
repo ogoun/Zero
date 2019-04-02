@@ -19,19 +19,18 @@ namespace ZeroLevel.DocumentObjectModel
 
         #region Fields
         /// <summary>
-        /// Упоминаемые места
+        /// Placec (city, country, etc)
         /// </summary>
         public List<Tag> Places;
         /// <summary>
-        /// Упоминаемые компании
+        /// Companies
         /// </summary>
         public List<Tag> Companies;
         /// <summary>
-        /// Упоминаемые персоны
+        /// Persons
         /// </summary>
         public List<Tag> Persons;
-        /// <summary>
-        /// Ключевые слова
+        /// <summary>Keywords
         /// </summary>
         public List<string> Keywords;
         #endregion

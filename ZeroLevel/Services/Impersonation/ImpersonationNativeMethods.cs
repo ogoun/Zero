@@ -10,7 +10,7 @@ namespace ZeroLevel.Services.Impersonation
     {
         #region P/Invoke enums
         /// <summary>
-        /// Провайдер авторизации
+        /// Authorization provider
         /// </summary>
         public enum LogonProvider : int
         {
@@ -23,7 +23,7 @@ namespace ZeroLevel.Services.Impersonation
             LOGON32_PROVIDER_DEFAULT = 0,
         }
         /// <summary>
-        /// Способ авторизации
+        /// Authorization method
         /// </summary>
         public enum LogonType : int
         {
@@ -74,7 +74,7 @@ namespace ZeroLevel.Services.Impersonation
             LOGON32_LOGON_NEW_CREDENTIALS = 9,
         }
         /// <summary>
-        /// Желаемый уровень доступа к токену
+        /// Desired access level to token
         /// </summary>
         public struct TokenDesiredAccess
         {
@@ -82,7 +82,7 @@ namespace ZeroLevel.Services.Impersonation
             public static uint STANDARD_RIGHTS_READ = 0x00020000;
             public static uint TOKEN_ASSIGN_PRIMARY = 0x0001;
             /// <summary>
-            /// Позволяет создать копию
+            /// Allows to create a copy
             /// </summary>
             public static uint TOKEN_DUPLICATE = 0x0002;
             public static uint TOKEN_IMPERSONATE = 0x0004;
@@ -99,7 +99,7 @@ namespace ZeroLevel.Services.Impersonation
                 TOKEN_ADJUST_SESSIONID);
         }
         /// <summary>
-        /// Тип безопасности применяется при операции дублирования токена(в текущей задаче)
+        /// The security type is used during the token duplication operation (in the current task)
         /// </summary>
         public enum SecurityImpersonationLevel : int
         {
@@ -132,14 +132,14 @@ namespace ZeroLevel.Services.Impersonation
 
         #region P/Invoke
         /// <summary>
-        /// Авторизация от имени указанного пользователя
+        /// Authorization on behalf of the specified user
         /// </summary>
-        /// <param name="lpszUserName">Имя пользователя</param>
-        /// <param name="lpszDomain">Домен в котором зарегистрирован пользователь</param>
-        /// <param name="lpszPassword">Пароль</param>
-        /// <param name="dwLogonType">Тип авторизации</param>
-        /// <param name="dwLogonProvider">Провайдер (всегда 0)</param>
-        /// <param name="phToken">Токен - результат входа</param>
+        /// <param name="lpszUserName">Username</param>
+        /// <param name="lpszDomain">Domain</param>
+        /// <param name="lpszPassword">Password</param>
+        /// <param name="dwLogonType">Authorization Type</param>
+        /// <param name="dwLogonProvider">Provider (always 0)</param>
+        /// <param name="phToken">Token - login result</param>
         /// <returns></returns>
         [DllImport("advapi32.dll")]
         internal static extern int LogonUserA(String lpszUserName,
@@ -149,9 +149,9 @@ namespace ZeroLevel.Services.Impersonation
             int dwLogonProvider,
             out MySafeTokenHandle phToken);
         /// <summary>
-        /// Создание дубликата токена
+        /// Creating a duplicate token
         /// </summary>
-        /// <param name="hToken">Исходный токен</param>
+        /// <param name="hToken">Original token</param>
         /// <param name="impersonationLevel"></param>
         /// <param name="hNewToken"></param>
         /// <returns></returns>
@@ -164,11 +164,11 @@ namespace ZeroLevel.Services.Impersonation
         [ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
         internal static extern bool CloseHandle(IntPtr handle);
         /// <summary>
-        /// Попытка получения токена работающего процесса
+        /// Attempt to get a token running process
         /// </summary>
-        /// <param name="ProcessHandle">Указатель на процесс</param>
+        /// <param name="ProcessHandle">Process pointer</param>
         /// <param name="DesiredAccess"></param>
-        /// <param name="TokenHandle">Токен - результат</param>
+        /// <param name="TokenHandle">Token - result</param>
         /// <returns></returns>
         [DllImport("advapi32.dll", SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]

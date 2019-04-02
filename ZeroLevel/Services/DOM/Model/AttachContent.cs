@@ -3,33 +3,33 @@ using ZeroLevel.Services.Serialization;
 
 namespace ZeroLevel.DocumentObjectModel
 {
-    public sealed class AsideContent 
+    public sealed class AttachContent 
         : IBinarySerializable
     {
         /// <summary>
-        /// Идентификатор
+        /// ID
         /// </summary>
         public string Identity;
         /// <summary>
-        /// Название содержимого
+        /// Title
         /// </summary>
         public string Caption;
         /// <summary>
-        /// Описание (опционально)
+        /// Description (optional)
         /// </summary>
         public string Summary;
         /// <summary>
-        /// Тип содержимого
+        /// Content type
         /// </summary>
         public ContentType ContentType;
         /// <summary>
-        /// Содержимое в бинарном представлении
+        /// Binary content
         /// </summary>
         public byte[] Payload;
 
-        public AsideContent() { }
-        public AsideContent(IBinaryReader reader) { Deserialize(reader); }
-        public AsideContent(string identity, string caption, string description)
+        public AttachContent() { }
+        public AttachContent(IBinaryReader reader) { Deserialize(reader); }
+        public AttachContent(string identity, string caption, string description)
         { Identity = identity; Summary = description; Caption = caption; }
 
         #region IBinarySerializable

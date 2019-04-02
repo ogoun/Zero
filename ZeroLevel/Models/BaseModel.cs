@@ -10,7 +10,7 @@ namespace ZeroLevel.Models
         #region Equal
         public bool Equals(BaseModel other)
         {
-            if (this == null) // и так бывает
+            if (this == null)
                 throw new NullReferenceException();
             if (other == null)
                 return false;

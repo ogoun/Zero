@@ -6,7 +6,7 @@ namespace ZeroLevel
     public static class ArrayExtensions
     {
         /// <summary>
-        /// Глубокое копирование массива
+        /// Deep copy array
         /// </summary>
         public static T[] DeepCopy<T>(this T[] array)
             where T : ICloneable
@@ -38,10 +38,8 @@ namespace ZeroLevel
             }
         }
         /// <summary>
-        /// Проверяет вхождение одного массива в другой
+        /// Checks whether one array is in another
         /// </summary>
-        /// <typeparam name="T">Тиа элементов массивов</typeparam>
-        /// <returns>true - массив содержит указанный подмассив</returns>
         public static bool Contains<T>(this T[] array, T[] candidate)
         {
             if (IsEmptyLocate(array, candidate))

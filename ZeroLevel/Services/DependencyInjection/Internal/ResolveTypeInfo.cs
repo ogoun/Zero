@@ -4,40 +4,40 @@ using System.Collections.Generic;
 namespace ZeroLevel.Patterns.DependencyInjection
 {
     /// <summary>
-    /// Метаданные разрешения зависимости
+    /// Dependency resolving metadata
     /// </summary>
     internal sealed class ResolveTypeInfo
     {
         /// <summary>
-        /// Разрешение зависимости по умолчанию
+        /// Default - without dependency name
         /// </summary>
         public bool IsDefault;
         /// <summary>
-        /// Создается только один экземпляр (в случае true)
+        /// Singletone when true
         /// </summary>
         public bool IsShared;
         /// <summary>
-        /// Тип инстанса (в том числе обобщенный)
+        /// Instance type (may be generic)
         /// </summary>
         public Type ImplementationType;
         /// <summary>
-        /// Ключ определения зависимости
+        /// Dependency resolving key
         /// </summary>
         public string ResolveKey;
         /// <summary>
-        /// Кэш экземпляра
+        /// Instance cache
         /// </summary>
         public object SharedInstance;
         /// <summary>
-        /// Кэш обобщенных типов
+        /// Generic types cahce
         /// </summary>
         public Dictionary<Type, Type> GenericCachee;
         /// <summary>
-        /// Кэш обобщенных экземпляров
+        /// Generic instances cahce
         /// </summary>
         public Dictionary<Type, object> GenericInstanceCachee;
         /// <summary>
-        /// Параметры конструктора объекта
+        /// Constructor parameters
         /// </summary>
         public object[] ConstructorParameters;
     }

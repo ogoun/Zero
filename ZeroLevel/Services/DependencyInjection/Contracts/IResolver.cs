@@ -3,107 +3,107 @@
 namespace ZeroLevel.Patterns.DependencyInjection
 {
     /// <summary>
-    /// Интерфейс с методами разрешений зависимостей
+    /// Dependency resolver
     /// </summary>
     public interface IResolver
     {
         #region Activator
         /// <summary>
-        /// Создание экземпляра объекта указанного типа
+        /// Creating an instance of an object of the specified type
         /// </summary>
-        /// <typeparam name="T">Тип объекта</typeparam>
-        /// <param name="resolveName">Имя разрешения зависимости</param>
-        /// <returns>Экземпляр объекта</returns>
+        /// <typeparam name="T">Contract or instance type</typeparam>
+        /// <param name="resolveName">Dependency name</param>
+        /// <returns>Instance</returns>
         T CreateInstance<T>(string resolveName = "");
         /// <summary>
-        /// Создание экземпляра объекта указанного типа
+        /// Creating an instance of an object of the specified type
         /// </summary>
-        /// <typeparam name="T">Тип объекта</typeparam>
-        /// <param name="args">Аргументы конструктора</param>
-        /// <param name="resolveName">Имя разрешения зависимости</param>
-        /// <returns>Экземпляр объекта</returns>
+        /// <typeparam name="T">Contract or instance type</typeparam>
+        /// <param name="args">Ctor agrs</param>
+        /// <param name="resolveName">Dependency name</param>
+        /// <returns>Instance</returns>
         T CreateInstance<T>(object[] args, string resolveName = "");
         /// <summary>
-        /// Создание экземпляра объекта указанного типа
+        /// Creating an instance of an object of the specified type
         /// </summary>
-        /// <param name="type">Тип объекта</param>
-        /// <param name="resolveName">Имя разрешения зависимости</param>
-        /// <returns>Экземпляр объекта</returns>
+        /// <param name="type">Contract or instance type</param>
+        /// <param name="resolveName">Dependency name</param>
+        /// <returns>Instance</returns>
         object CreateInstance(Type type, string resolveName = "");
         /// <summary>
-        /// Создание экземпляра объекта указанного типа
+        /// Creating an instance of an object of the specified type
         /// </summary>
-        /// <param name="type">Тип объекта</param>
-        /// <param name="args">Аргументы конструктора</param>
-        /// <param name="resolveName">Имя разрешения зависимости</param>
-        /// <returns>Экземпляр объекта</returns>
+        /// <param name="type">Contract or instance type</param>
+        /// <param name="args">Ctor agrs</param>
+        /// <param name="resolveName">Dependency name</param>
+        /// <returns>Instance</returns>
         object CreateInstance(Type type, object[] args, string resolveName = "");
         #endregion
 
         #region Resolving
         /// <summary>
-        /// Разрешение зависимости
+        /// Dependency resolve
         /// </summary>
-        /// <typeparam name="T">Тип контракта</typeparam>
-        /// <param name="compose">Указание провести композицию при построении объектов</param>
-        /// <returns>Инстанс</returns>
+        /// <typeparam name="T">Contract</typeparam>
+        /// <param name="compose">Compose the object when true</param>
+        /// <returns>Instance</returns>
         T Resolve<T>(bool compose = true);
         /// <summary>
-        /// Разрешение зависимости
+        /// Dependency resolve
         /// </summary>
-        /// <typeparam name="T">Тип контракта</typeparam>
-        /// <param name="resolveName">Имя разрешения зависимости</param>
-        /// <param name="compose">Указание провести композицию при построении объектов</param>
-        /// <returns>Инстанс</returns>
+        /// <typeparam name="T">Contract</typeparam>
+        /// <param name="resolveName">Dependency name</param>
+        /// <param name="compose">Compose the object when true</param>
+        /// <returns>Instance</returns>
         T Resolve<T>(string resolveName, bool compose = true);
         /// <summary>
-        /// Разрешение зависимости
+        /// Dependency resolve
         /// </summary>
-        /// <typeparam name="T">Тип контракта</typeparam>
-        /// <param name="args">Аргументы конструктора</param>
-        /// <param name="compose">Указание провести композицию при построении объектов</param>
-        /// <returns>Инстанс</returns>
+        /// <typeparam name="T">Contract</typeparam>
+        /// <param name="args">Ctor agrs</param>
+        /// <param name="compose">Compose the object when true</param>
+        /// <returns>Instance</returns>
         T Resolve<T>(object[] args, bool compose = true);
         /// <summary>
-        /// Разрешение зависимости
+        /// Dependency resolve
         /// </summary>
-        /// <typeparam name="T">Тип контракта</typeparam>
-        /// <param name="resolveName">Имя разрешения зависимости</param>
-        /// <param name="args">Аргументы конструктора</param>
-        /// <param name="compose">Указание провести композицию при построении объектов</param>
-        /// <returns>Инстанс</returns>
+        /// <typeparam name="T">Contract</typeparam>
+        /// <param name="resolveName">Dependency name</param>
+        /// <param name="args">Ctor agrs</param>
+        /// <param name="compose">Compose the object when true</param>
+        /// <returns>Instance</returns>
         T Resolve<T>(string resolveName, object[] args, bool compose = true);
         /// <summary>
-        /// Разрешение зависимости
+        /// Dependency resolve
         /// </summary>
-        /// <param name="type">Тип контракта</param>
-        /// <param name="compose">Указание провести композицию при построении объектов</param>
-        /// <returns>Инстанс</returns>
+        /// <param name="type">Contract</param>
+        /// <param name="compose">Compose the object when true</param>
+        /// <returns>Instance</returns>
         object Resolve(Type type, bool compose = true);
         /// <summary>
-        /// Разрешение зависимости
+        /// Dependency resolve
         /// </summary>
-        /// <param name="type">Тип контракта</param>
-        /// <param name="resolveName">Имя разрешения зависимости</param>
-        /// <param name="compose">Указание провести композицию при построении объектов</param>
-        /// <returns>Инстанс</returns>
+        /// <param name="type">Contract</param>
+        /// <param name="resolveName">Dependency name</param>
+        /// <param name="compose">Compose the object when true</param>
+        /// <returns>Instance</returns>
         object Resolve(Type type, string resolveName, bool compose = true);
         /// <summary>
-        /// Разрешение зависимости
+        /// Dependency resolve
         /// </summary>
-        /// <param name="type">Тип контракта</param>
-        /// <param name="args">Аргументы конструктора</param>
-        /// <param name="compose">Указание провести композицию при построении объектов</param>
-        /// <returns>Инстанс</returns>
+        /// <param name="type">Contract</param>
+        /// <param name="args">Ctor agrs</param>
+        /// <param name="compose">Compose the object when true</param>
+        /// <returns>Instance</returns>
         object Resolve(Type type, object[] args, bool compose = true);
         /// <summary>
-        /// Разрешение зависимости
+        /// Dependency resolve
         /// </summary>
-        /// <param name="type">Тип контракта</param>
-        /// <param name="resolveName">Имя разрешения зависимости</param>
-        /// <param name="args">Аргументы конструктора</param>
-        /// <param name="compose">Указание провести композицию при построении объектов</param>
-        /// <returns>Инстанс</returns>
+        /// <param name="type">Contract</param>
+        /// <param name="resolveName">Dependency name</param>
+        /// <param name="args">Ctor agrs</param>
+        /// <param name="compose">Compose the object when true</param>
+        /// <returns>Instance</returns>
         object Resolve(Type type, string resolveName, object[] args, bool compose = true);
         #endregion
 

@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZeroLevel.Microservices", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZeroLevel.Discovery", "ZeroLevel.Discovery\ZeroLevel.Discovery.csproj", "{4F55B23F-938C-4DA2-B6DC-B6BC66D36073}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZeroExample", "ZeroExample\ZeroExample.csproj", "{50CEBEC2-2571-4592-AFD2-970BDB41947B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -55,6 +57,18 @@ Global
 		{4F55B23F-938C-4DA2-B6DC-B6BC66D36073}.Release|x64.Build.0 = Release|Any CPU
 		{4F55B23F-938C-4DA2-B6DC-B6BC66D36073}.Release|x86.ActiveCfg = Release|Any CPU
 		{4F55B23F-938C-4DA2-B6DC-B6BC66D36073}.Release|x86.Build.0 = Release|Any CPU
+		{50CEBEC2-2571-4592-AFD2-970BDB41947B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{50CEBEC2-2571-4592-AFD2-970BDB41947B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{50CEBEC2-2571-4592-AFD2-970BDB41947B}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{50CEBEC2-2571-4592-AFD2-970BDB41947B}.Debug|x64.Build.0 = Debug|Any CPU
+		{50CEBEC2-2571-4592-AFD2-970BDB41947B}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{50CEBEC2-2571-4592-AFD2-970BDB41947B}.Debug|x86.Build.0 = Debug|Any CPU
+		{50CEBEC2-2571-4592-AFD2-970BDB41947B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{50CEBEC2-2571-4592-AFD2-970BDB41947B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{50CEBEC2-2571-4592-AFD2-970BDB41947B}.Release|x64.ActiveCfg = Release|Any CPU
+		{50CEBEC2-2571-4592-AFD2-970BDB41947B}.Release|x64.Build.0 = Release|Any CPU
+		{50CEBEC2-2571-4592-AFD2-970BDB41947B}.Release|x86.ActiveCfg = Release|Any CPU
+		{50CEBEC2-2571-4592-AFD2-970BDB41947B}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

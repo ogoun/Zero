@@ -3,24 +3,24 @@
 namespace ZeroLevel.DocumentObjectModel.Flow
 {
     /// <summary>
-    /// Смещение содержимого в потоке
+    /// Content Offset in flow
     /// </summary>
     public enum FlowAlign : Int32
     {
         /// <summary>
-        /// Без смещения
+        /// None
         /// </summary>
         None = 0,
         /// <summary>
-        /// Смещение к левой части, допускает продолжение потока справа
+        /// Flow: left
         /// </summary>
         Left = 1,
         /// <summary>
-        /// Смещение к правой части, допускает продолжение потока слева
+        /// Flow: right
         /// </summary>
         Right = 2,
         /// <summary>
-        /// Выравнивание по центру
+        /// Block
         /// </summary>
         Center = 3
     }

@@ -40,7 +40,7 @@ namespace ZeroLevel.Services.Config.Implementation
                 }
                 catch (Exception ex)
                 {
-                    throw new InvalidOperationException("Не удалось создать конфигурацию из аргументов командной строки", ex);
+                    throw new InvalidOperationException("Can't read configuration from command line arguments", ex);
                 }
             }
             return result;

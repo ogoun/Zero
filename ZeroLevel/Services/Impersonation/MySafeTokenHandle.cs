@@ -5,7 +5,7 @@ using System.Security.Permissions;
 namespace ZeroLevel.Services.Impersonation
 {
     /// <summary>
-    /// Реализация безопасного указателя
+    /// Implementing a safe pointer
     /// </summary>
     [SecurityPermission(SecurityAction.InheritanceDemand, UnmanagedCode = true)]
     [SecurityPermission(SecurityAction.Demand, UnmanagedCode = true)]

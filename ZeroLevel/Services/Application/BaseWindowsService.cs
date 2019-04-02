@@ -54,7 +54,7 @@ namespace ZeroLevel.Services.Applications
                 }
                 catch (Exception ex)
                 {
-                    Log.SystemFatal(ex, $"[{Name}] Failed to start service");
+                    Log.Fatal(ex, $"[{Name}] Failed to start service");
                     Stop();
                 }
             }
@@ -72,7 +72,7 @@ namespace ZeroLevel.Services.Applications
                 }
                 catch (Exception ex)
                 {
-                    Log.SystemFatal(ex, $"[{Name}] Failed to pause service");
+                    Log.Fatal(ex, $"[{Name}] Failed to pause service");
                     Stop();
                 }
             }
@@ -90,7 +90,7 @@ namespace ZeroLevel.Services.Applications
                 }
                 catch (Exception ex)
                 {
-                    Log.SystemFatal(ex, $"[{Name}] Failed to continue work service after pause");
+                    Log.Fatal(ex, $"[{Name}] Failed to continue work service after pause");
                     Stop();
                 }
             }
@@ -108,7 +108,7 @@ namespace ZeroLevel.Services.Applications
                 }
                 catch (Exception ex)
                 {
-                    Log.SystemFatal(ex, $"[{Name}] Failed to stop service");
+                    Log.Fatal(ex, $"[{Name}] Failed to stop service");
                 }
                 finally
                 {

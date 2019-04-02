@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.ServiceProcess;
 using ZeroLevel.Services.Applications;
@@ -10,7 +11,7 @@ namespace ZeroLevel
     {
         static Bootstrap()
         {
-            // Хак, чтобы не переписывать runtime секцию конфига при каждом обновлении Newtonsoft пакета
+            // Tricks for minimize config changes for dependency resolve
             AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;
         }
 
@@ -27,6 +28,11 @@ namespace ZeroLevel
                 {
                     return Assembly.LoadFile(Path.Combine(Configuration.BaseDirectory, "Microsoft.Owin.dll"));
                 }
+                var candidates = Directory.GetFiles(Path.Combine(Configuration.BaseDirectory), args.Name, SearchOption.TopDirectoryOnly);
+                if (candidates != null && candidates.Any())
+                {
+                    return Assembly.LoadFile(candidates.First());
+                }
             }
             catch (Exception ex)
             {
@@ -36,7 +42,7 @@ namespace ZeroLevel
         }
 
         /// <summary>
-        /// Установка приложения в качестве службы
+        /// Self-install as windows service
         /// </summary>
         private static void InstallApplication()
         {
@@ -48,11 +54,11 @@ namespace ZeroLevel
             }
             catch (Exception ex)
             {
-                Log.SystemFatal(ex, "[Bootstrap] Fault service install");
+                Log.Fatal(ex, "[Bootstrap] Fault service install");
             }
         }
         /// <summary>
-        /// Удаление приложения из служб
+        /// Uninstall from windows services
         /// </summary>
         private static void UninstallApplication()
         {
@@ -64,7 +70,7 @@ namespace ZeroLevel
             }
             catch (Exception ex)
             {
-                Log.SystemFatal(ex, "[Bootstrap] Fault service uninstall");
+                Log.Fatal(ex, "[Bootstrap] Fault service uninstall");
             }
         }
 
@@ -125,7 +131,6 @@ namespace ZeroLevel
                         return;
                     }
                 }
-                // Исключения в процессе работы приложения перехыватываются уровнем ниже
                 if (Environment.UserInteractive)
                 {
                     try
@@ -136,7 +141,7 @@ namespace ZeroLevel
                     }
                     catch (Exception ex)
                     {
-                        Log.SystemFatal(ex, "[Bootstrap] The service start in interactive mode was faulted with error");
+                        Log.Fatal(ex, "[Bootstrap] The service start in interactive mode was faulted with error");
                     }
                 }
                 else
@@ -149,7 +154,7 @@ namespace ZeroLevel
                     }
                     catch (Exception ex)
                     {
-                        Log.SystemFatal(ex, "[Bootstrap] The service start was faulted with error");
+                        Log.Fatal(ex, "[Bootstrap] The service start was faulted with error");
                     }
                 }
             }

@@ -24,21 +24,9 @@ namespace ZeroLevel.DocumentObjectModel
         #endregion
 
         #region Fields
-        /// <summary>
-        /// Название
-        /// </summary>
         public string Name;
-        /// <summary>
-        /// Значение
-        /// </summary>
         public string Value;
-        /// <summary>
-        /// Тип
-        /// </summary>
         public string Type;
-        /// <summary>
-        /// Дополнительная информация
-        /// </summary>
         public string Tag;
         #endregion
 

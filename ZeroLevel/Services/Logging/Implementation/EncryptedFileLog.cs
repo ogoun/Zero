@@ -50,15 +50,15 @@ namespace ZeroLevel.Services.Logging.Implementation
         private readonly EncryptedFileLogOptions _options;
         private int _todayCountLogFiles = 0;
         /// <summary>
-        /// Текущий лог-файл
+        /// Current log file
         /// </summary>
         private string _currentLogFile;
         /// <summary>
-        /// Поток для вывода в файл
+        /// Stream to output to file
         /// </summary>
         private Stream _writer;
         /// <summary>
-        /// Лок на пересоздание файла
+        /// Lock on re-create file
         /// </summary>
         private readonly object _fileRecreating = new object();
 
@@ -85,7 +85,7 @@ namespace ZeroLevel.Services.Logging.Implementation
                 var dir = Directory.CreateDirectory(_options.Folder);
                 if (dir.Exists == false)
                 {
-                    throw new ArgumentException(string.Format("Can't create or found directory '{0}'", _options.Folder));
+                    throw new ArgumentException($"Can't create or found directory '{_options.Folder}'");
                 }
             }
             _obfuscator = new FastObfuscator(options.Key);
@@ -97,7 +97,7 @@ namespace ZeroLevel.Services.Logging.Implementation
 
         #region Utils
         /// <summary>
-        /// Проверка имени лог-файла (изменяется при смене даты на следующий день)
+        /// Checking the name of the log file (changes when the date changes to the next day)
         /// </summary>
         private void RecreateLogFile()
         {
@@ -122,7 +122,7 @@ namespace ZeroLevel.Services.Logging.Implementation
             }
         }
         /// <summary>
-        /// Закрытие текущего лога
+        /// Closing the current log
         /// </summary>
         private void CloseCurrentWriter()
         {
@@ -165,9 +165,6 @@ namespace ZeroLevel.Services.Logging.Implementation
 
         #region IDisposable
         private bool _disposed = false;
-        /// <summary>
-        /// Освобождение рессурсов
-        /// </summary>
         public void Dispose()
         {
             Sheduller.Remove(_taskRename);

@@ -1,13 +1,13 @@
 ﻿namespace DOM.DSL.Tokens
 {
     /// <summary>
-    /// Текстовый токен
+    /// Text token
     /// </summary>
     public class TTextToken :
         TToken
     {
         /// <summary>
-        /// Текст в шаблоне, переносимый в результат без обработки
+        /// Constant text
         /// </summary>
         public string Text;
 

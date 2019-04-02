@@ -7,9 +7,6 @@ namespace ZeroLevel.DocumentObjectModel
     public class FlowContent : 
         ContentElement
     {
-        /// <summary>
-        /// Содержимое
-        /// </summary>
         public List<Section> Sections = new List<Section>();
 
         public FlowContent() : 

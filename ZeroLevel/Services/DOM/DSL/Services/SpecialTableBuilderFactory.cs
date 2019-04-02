@@ -17,12 +17,12 @@ namespace DOM.DSL.Services
                 case "plaintext":
                     // (Borders, 1-0-1-0, 0, 96)
                     var options = new TextTableRenderOptions();
-                    if (args.Length > 1)    // Стиль
+                    if (args.Length > 1)    // Style
                     {
                         if (Enum.TryParse(args[1], out options.Style) == false)
                             options.Style = TextTableStyle.Borders;
                     }
-                    if (args.Length > 2)    // Паддинги
+                    if (args.Length > 2)    // Paddings
                     {
                         var paddings = args[2].Split(' ');
                         int buffer;
@@ -40,7 +40,7 @@ namespace DOM.DSL.Services
                             }
                         }
                     }
-                    if (args.Length > 3)    // Ширина ячейки
+                    if (args.Length > 3)    // Cell width
                     {
                         int buffer;
                         if (true == int.TryParse(args[3].Trim(), out buffer))
@@ -48,7 +48,7 @@ namespace DOM.DSL.Services
                             options.MaxCellWidth = buffer;
                         }
                     }
-                    if (args.Length > 4)    // Ширина таблицы
+                    if (args.Length > 4)    // Table width
                     {
                         int buffer;
                         if (true == int.TryParse(args[4].Trim(), out buffer))

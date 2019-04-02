@@ -84,14 +84,14 @@ namespace ZeroLevel.Patterns.DependencyInjection
         private readonly ReaderWriterLockSlim _rwLock =
             new ReaderWriterLockSlim();
         /// <summary>
-        /// Маппинг контракт - резрешения
+        /// Map - contract - dependency resolving
         /// </summary>
         private readonly Dictionary<Type, List<ResolveTypeInfo>> _resolvingMap =
             new Dictionary<Type, List<ResolveTypeInfo>>();
 
         private readonly object _constructorCacheeLocker = new object();
         /// <summary>
-        /// Кэш данных о контрукторах типа
+        /// Types constructors cache
         /// </summary>
         private readonly Dictionary<Type, IEnumerable<ConstructorMetadata>> _constructorCachee =
             new Dictionary<Type, IEnumerable<ConstructorMetadata>>();
@@ -99,11 +99,11 @@ namespace ZeroLevel.Patterns.DependencyInjection
 
         #region Private
         /// <summary>
-        /// Создание экземпляра объекта по указанному разрешению зависимости
+        /// Creating an instance of an object at the specified dependency resolution
         /// </summary>
-        /// <param name="resolveType">Метаданные разрешения зависимости</param>
-        /// <param name="args">Аргументы конструктора</param>
-        /// <returns>Экземпляр объекта</returns>
+        /// <param name="resolveType">Dependency resolving metadata</param>
+        /// <param name="args">Ctor args</param>
+        /// <returns>Instance</returns>
         private object MakeResolving(ResolveTypeInfo resolveType, object[] args, bool compose = true)
         {
             Type instanceType = resolveType.ImplementationType;
@@ -127,12 +127,12 @@ namespace ZeroLevel.Patterns.DependencyInjection
             return sessionInstance;
         }
         /// <summary>
-        /// Создание экземпляра объекта по указанному разрешению зависимости, для обобщенного типа контракта
+        /// Creating an instance of the object at the specified dependency resolution, for a generic type of contract
         /// </summary>
-        /// <param name="resolveType">Метаданные разрешения зависимости</param>
-        /// <param name="genericType">Обобщенный тип контракта</param>
-        /// <param name="args">Аргументы конструктора</param>
-        /// <returns>Экземпляр объекта</returns>
+        /// <param name="resolveType">Dependency resolving metadata</param>
+        /// <param name="genericType">Generic contract</param>
+        /// <param name="args">Ctor args</param>
+        /// <returns>Instance</returns>
         private object MakeGenericResolving(ResolveTypeInfo resolveType, Type genericType, object[] args, bool compose = true)
         {
             if (null == resolveType.GenericCachee)
@@ -171,31 +171,31 @@ namespace ZeroLevel.Patterns.DependencyInjection
             return sessionInstance;
         }
         /// <summary>
-        /// Сбор свойств типа помеченных аттрибутом разрешения зависимости
+        /// Collecting properties of the type marked with attribute dependency resolution
         /// </summary>
-        /// <param name="type">Тип</param>
-        /// <returns>Список свойств отмеченных аттрибутом Resolve</returns>
+        /// <param name="type">Type</param>
+        /// <returns>List of properties marked with "Resolve" attribute</returns>
         private static IEnumerable<PropertyInfo> CollectResolvingProperties(Type type)
         {
             return type.GetProperties(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.FlattenHierarchy).
                 Where(p => p.GetCustomAttribute<ResolveAttribute>() != null);
         }
         /// <summary>
-        /// Сбор полей типа помеченных аттрибутом разрешения зависимости
+        /// Collecting fields of type marked with an attribute of dependency resolution
         /// </summary>
-        /// <param name="type">Тип</param>
-        /// <returns>Список полей отмеченных аттрибутом Resolve</returns>
+        /// <param name="type">Type</param>
+        /// <returns>List of properties marked with "Resolve" attribute</returns>
         private static IEnumerable<FieldInfo> CollectResolvingFields(Type type)
         {
             return type.GetFields(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.FlattenHierarchy).
                 Where(p => p.GetCustomAttribute<ResolveAttribute>() != null);
         }
         /// <summary>
-        /// Поиск разрешения зависимости
+        /// Search for dependency resolution
         /// </summary>
-        /// <param name="type">Тип контракта</param>
-        /// <param name="resolveName">Имя разрешения зависимости</param>
-        /// <param name="contractType">Переопределенный тип контракта</param>
+        /// <param name="type">Contract</param>
+        /// <param name="resolveName">Dependency name</param>
+        /// <param name="contractType">Redefined contract type</param>
         /// <returns></returns>
         private ResolveTypeInfo FindResolving(Type type, string resolveName, Type contractType)
         {
@@ -227,15 +227,14 @@ namespace ZeroLevel.Patterns.DependencyInjection
                     _rwLock.ExitReadLock();
                 }
             }
-            throw new KeyNotFoundException(string.Format("Не удалось разрешить зависимость для типа {0} по ключу '{1}'",
-                type.FullName, resolveName));
+            throw new KeyNotFoundException($"Can't resolve dependency by type '{type.FullName}' and dependency name '{resolveName}'");
         }
         /// <summary>
-        /// Разрешение зависимости по аттрибуту Resolve
+        /// Resolving dependency on attribute "Resolve
         /// </summary>
-        /// <param name="type">Тип контракта</param>
-        /// <param name="resolveAttribute">Аттрибут</param>
-        /// <returns>Экземпляр объекта</returns>
+        /// <param name="type">Contract</param>
+        /// <param name="resolveAttribute">Resolve attribute</param>
+        /// <returns>Instance</returns>
         private object MakeInstanceBy(Type type, ResolveAttribute resolveAttribute)
         {
             var is_generic = false;
@@ -256,16 +255,14 @@ namespace ZeroLevel.Patterns.DependencyInjection
             }
             catch (Exception ex)
             {
-                throw new Exception(
-                    string.Format("Не удалось создать экземпляр типа {0} для разрешения зависимости типа {1} по ключу {2}",
-                    type.FullName, type.FullName, resolveAttribute?.ResolveName), ex);
+                throw new Exception($"Can't create type '{type.FullName}' instance for contract type {type.FullName}. Dependency key: '{resolveAttribute?.ResolveName}'", ex);
             }
         }
         /// <summary>
-        /// Сбор интерфейсов и абстрактных классов от которых унаследован тип
+        /// Collection of interfaces and abstract classes from which the type is inherited
         /// </summary>
-        /// <param name="sourceType">Тип</param>
-        /// <returns>Список интерфейсов и абстрактных классов</returns>
+        /// <param name="sourceType">Type</param>
+        /// <returns>List of interfaces and abstract classes</returns>
         private static IEnumerable<Type> GetInterfacesAndAbstracts(Type sourceType)
         {
             var interfaces = sourceType.GetInterfaces().ToList();
@@ -279,10 +276,10 @@ namespace ZeroLevel.Patterns.DependencyInjection
             return interfaces;
         }
         /// <summary>
-        /// Получение списка метаданных по конструкторам типа
+        /// Getting a list of metadata by type constructors
         /// </summary>
-        /// <param name="type">Тип</param>
-        /// <returns>Метаданные о конструкторах типа</returns>
+        /// <param name="type">Type</param>
+        /// <returns>Metadata type constructors</returns>
         private IEnumerable<ConstructorMetadata> GetConstructors(Type type)
         {
             lock (_constructorCacheeLocker)
@@ -301,11 +298,11 @@ namespace ZeroLevel.Patterns.DependencyInjection
             return _constructorCachee[type];
         }
         /// <summary>
-        /// Создание экземпляра объекта, в том числе с непубличными конструкторами
+        /// Creating an instance of an object, including with non-public constructors
         /// </summary>
-        /// <param name="type">Тип</param>
-        /// <param name="args">Аргументы конструктора</param>
-        /// <returns>Экземпляр типа</returns>
+        /// <param name="type">Type</param>
+        /// <param name="args">Ctor args</param>
+        /// <returns>Instance</returns>
         private object MakeInstance(Type type, object[] args)
         {
             ConstructorInfo constructor = null;
@@ -331,10 +328,10 @@ namespace ZeroLevel.Patterns.DependencyInjection
             }
         }
         /// <summary>
-        /// Регистрация разрешения зависимости
+        /// Dependency resolution registration
         /// </summary>
-        /// <param name="contractType">Тип контракта</param>
-        /// <param name="resolveType">Метаданные разрешения</param>
+        /// <param name="contractType">Contract</param>
+        /// <param name="resolveType">Dependency resolving metadata</param>
         private void Register(Type contractType, ResolveTypeInfo resolveType)
         {
             try
@@ -357,14 +354,12 @@ namespace ZeroLevel.Patterns.DependencyInjection
                     if (resolveType.IsDefault &&
                         _resolvingMap[contractType].Any(it => it.IsDefault))
                     {
-                        throw new Exception(
-                            string.Format("Default resolve type already has been defined. Contract: {0}", contractType.FullName));
+                        throw new Exception($"Default resolve type already has been defined. Contract: {contractType.FullName}");
                     }
                     if (_resolvingMap[contractType].
                         Any(it => it.ResolveKey.Equals(resolveType.ResolveKey, StringComparison.OrdinalIgnoreCase)))
                     {
-                        throw new Exception(
-                            string.Format("Resolve type with the same name '{0}' already has been defined. Contract: {1}", resolveType.ResolveKey, contractType.FullName));
+                        throw new Exception($"Resolve type with the same name '{resolveType.ResolveKey}' already has been defined. Contract: { contractType.FullName}");
                     }
                 }
                 try
@@ -590,10 +585,10 @@ namespace ZeroLevel.Patterns.DependencyInjection
 
         #region Register instance
         /// <summary>
-        /// Регистрация готового экземпляра (синглтон)
+        /// Register singletone
         /// </summary>
-        /// <typeparam name="TContract">Тип контракта</typeparam>
-        /// <param name="implementation">Экземпляр</param>
+        /// <typeparam name="TContract">Contract</typeparam>
+        /// <param name="implementation">Instance</param>
         public void Register<TContract>(TContract implementation)
         {
             var resolveType = new ResolveTypeInfo
@@ -961,8 +956,7 @@ namespace ZeroLevel.Patterns.DependencyInjection
         {
             var resolve = GetResolvedType(type, resolveName);
             if (null == resolve.Item1)
-                throw new KeyNotFoundException(string.Format("Can'r resolve type {0} on key '{1}'",
-                    type.FullName, resolveName));
+                throw new KeyNotFoundException($"Can'r resolve type {type.FullName} on key '{resolveName}'");
             // Detect instance type
             try
             {
@@ -974,9 +968,7 @@ namespace ZeroLevel.Patterns.DependencyInjection
             }
             catch (Exception ex)
             {
-                throw new Exception(
-                    string.Format("Can't create instance for type {0} for resolved dependency {1} by key {2}",
-                        type.FullName, type.FullName, resolveName), ex);
+                throw new Exception($"Can't create instance for type {type.FullName} for resolved dependency {type.FullName} by key {resolveName}", ex);
             }
         }
         #endregion
@@ -1069,8 +1061,7 @@ namespace ZeroLevel.Patterns.DependencyInjection
             catch (Exception ex)
             {
                 Log.SystemWarning(
-                    string.Format("Не удалось создать экземпляр типа {0} для разрешения зависимости типа {1} по ключу {2}",
-                    type.FullName, type.FullName, resolveName), ex);
+                    $"Can't create type '{type.FullName}' instance for resolve dependency with contract type '{type.FullName}' and dependency name '{resolveName}'", ex);
             }
             result = null;
             return false;
@@ -1079,7 +1070,7 @@ namespace ZeroLevel.Patterns.DependencyInjection
 
         #region Composition
         /// <summary>
-        /// Заполнение полей и свойств объекта отмеченных флагом автоподставновки значений из параметров контейнера
+        /// Filling in the fields and properties of an object with auto-set values flagged from the container parameters
         /// </summary>
         private void FillParametrizedFieldsAndProperties(object instance)
         {
@@ -1165,7 +1156,10 @@ namespace ZeroLevel.Patterns.DependencyInjection
                 Compose(instanse, recursive);
                 return true;
             }
-            catch { }
+            catch (Exception ex)
+            {
+                Log.SystemError(ex, $"[Container] TryCompose error. Instance: '{instanse?.GetType()?.FullName ?? string.Empty}'. Recursive: {recursive}");
+            }
             return false;
         }
         #endregion
@@ -1184,7 +1178,10 @@ namespace ZeroLevel.Patterns.DependencyInjection
                         {
                             (item.SharedInstance as IDisposable)?.Dispose();
                         }
-                        catch { }
+                        catch (Exception ex)
+                        {
+                            Log.SystemError(ex, $"[Container] Singletone dispose error. Instance: '{item?.GetType()?.FullName ?? string.Empty}'");
+                        }
                         if (item.GenericInstanceCachee != null)
                         {
                             foreach (var gitem in item.GenericInstanceCachee.Values)
@@ -1193,11 +1190,18 @@ namespace ZeroLevel.Patterns.DependencyInjection
                                 {
                                     (gitem as IDisposable)?.Dispose();
                                 }
-                                catch { }
+                                catch(Exception ex)
+                                {
+                                    Log.SystemError(ex, $"[Container] Generic singletone dispose error. Instance: '{gitem?.GetType()?.FullName ?? string.Empty}'");
+                                }
                             }
                         }
                     }
                 }
+            }
+            catch (Exception ex)
+            {
+                Log.SystemError(ex, $"[Container] Dispose error");
             }
             finally
             {

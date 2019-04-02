@@ -227,20 +227,20 @@ namespace ZeroLevel.Services.FileSystem
             } while (_disposed == false);
         }
         /// <summary>
-        /// Сохранение текста в архив
+        /// Save text to archive
         /// </summary>
-        /// <param name="text">Текст</param>
-        /// <param name="subfolder_name">Имя файла в архиве (по умолчанию HH_mm_ss_fff_counter.{ext})</param>
+        /// <param name="text">Text</param>
+        /// <param name="subfolder_name">Archive file name (HH_mm_ss_fff_counter.{ext} by default)</param>
         /// <returns></returns>
         public void StoreText(string text, string subfolder_name = null, string file_name = null)
         {
             Apply(new StoreText(text, CreateArchiveFilePath(subfolder_name, file_name)));
         }
         /// <summary>
-        /// Сохранение указанного файла в архив
+        /// Saving the specified file to the archive
         /// </summary>
-        /// <param name="file_path">Путь к файлу</param>
-        /// <param name="subfolder_name">Имя файла в архиве (по умолчанию оригинальное имя файла)</param>
+        /// <param name="file_path">File path</param>
+        /// <param name="subfolder_name">Archive file name (original file name by default)</param>
         /// <returns></returns>
         public void Store(string file_path, string subfolder_name = null, string file_name = null)
         {
@@ -259,20 +259,20 @@ namespace ZeroLevel.Services.FileSystem
             }
         }
         /// <summary>
-        /// Сохранение данных из потока в архив
+        /// Saving data from stream to archive
         /// </summary>
-        /// <param name="stream">Поток с данными для чтения</param>
-        /// <param name="subfolder_name">Имя файла в архиве (по умолчанию HH_mm_ss_fff_counter.{ext})</param>
+        /// <param name="stream">Data stream for reading</param>
+        /// <param name="subfolder_name">Archive file name (HH_mm_ss_fff_counter.{ext} by default)</param>
         /// <returns></returns>
         public void Store(Stream stream, string subfolder_name = null, string file_name = null)
         {
             Apply(new StoreStream(stream, CreateArchiveFilePath(subfolder_name, file_name)));
         }
         /// <summary>
-        /// Сохранение данных в бинарном виде в архив
+        /// Saving data in binary form in the archive
         /// </summary>
-        /// <param name="data">Данные</param>
-        /// <param name="subfolder_name">Имя файла в архиве (по умолчанию HH_mm_ss_fff_counter.{ext})</param>
+        /// <param name="data">Data</param>
+        /// <param name="subfolder_name">Archive file name (HH_mm_ss_fff_counter.{ext} by default)</param>
         /// <returns></returns>
         public void StoreData(byte[] data, string subfolder_name = null, string file_name = null)
         {
@@ -333,8 +333,7 @@ namespace ZeroLevel.Services.FileSystem
             if (Directory.Exists(path) == false)
             {
                 Directory.CreateDirectory(path);
-                FSUtils.SetupFolderPermission(path,
-                    string.Format("{0}\\{1}", Environment.UserDomainName, Environment.UserName),
+                FSUtils.SetupFolderPermission(path,$"{Environment.UserDomainName}\\{Environment.UserName}",
                     FileSystemRights.Write | FileSystemRights.Read | FileSystemRights.Delete | FileSystemRights.Modify,
                     AccessControlType.Allow);
             }
@@ -398,31 +397,31 @@ namespace ZeroLevel.Services.FileSystem
             }
         }
         /// <summary>
-        /// Сохранение текста в архив
+        /// Save text to archive
         /// </summary>
-        /// <param name="text">Текст</param>
-        /// <param name="name">Имя файла в архиве (по умолчанию HH_mm_ss_fff_counter.{ext})</param>
+        /// <param name="text">Text</param>
+        /// <param name="name">Archive file name (HH_mm_ss_fff_counter.{ext} by default)</param>
         /// <returns></returns>
         public void StoreText(string text, string name = null)
         {
             Apply(new StoreText(text, CreateArchiveFilePath(name)));
         }
         /// <summary>
-        /// Сохранение указанного файла в архив
+        /// Saving the specified file to the archive
         /// </summary>
-        /// <param name="file_path">Путь к файлу</param>
-        /// <param name="name">Имя файла в архиве (по умолчанию оригинальное имя файла)</param>
+        /// <param name="file_path">File path</param>
+        /// <param name="subfolder_name">Archive file name (original file name by default)</param>
         /// <returns></returns>
         public void Store(string file_path, string name = null)
         {
             Apply(new StoreFile(file_path, CreateArchiveFilePath(name)));
         }
         /// <summary>
-        /// охранение указанного файла в архив, синхронно
+        /// Sync saving the specified file to the archive
         /// </summary>
-        /// <param name="file_path"></param>
-        /// <param name="immediate"></param>
-        /// <param name="name"></param>
+        /// <param name="file_path">File path</param>
+        /// <param name="subfolder_name">Archive file name (original file name by default)</param>
+        /// <returns></returns>
         public void Store(string file_path, bool immediate, string name = null)
         {
             if (immediate)
@@ -435,10 +434,10 @@ namespace ZeroLevel.Services.FileSystem
             }
         }
         /// <summary>
-        /// Сохранение данных из потока в архив
+        /// Saving data from stream to archive
         /// </summary>
-        /// <param name="stream">Поток с данными для чтения</param>
-        /// <param name="name">Имя файла в архиве (по умолчанию HH_mm_ss_fff_counter.{ext})</param>
+        /// <param name="stream">Data stream for reading</param>
+        /// <param name="name">Archive file name (HH_mm_ss_fff_counter.{ext} by default)</param>
         /// <returns></returns>
         public void Store(Stream stream, string name = null)
         {
@@ -447,8 +446,8 @@ namespace ZeroLevel.Services.FileSystem
         /// <summary>
         /// Сохранение данных в бинарном виде в архив
         /// </summary>
-        /// <param name="data">Данные</param>
-        /// <param name="name">Имя файла в архиве (по умолчанию HH_mm_ss_fff_counter.{ext})</param>
+        /// <param name="data">Data</param>
+        /// <param name="name">Archive file name (HH_mm_ss_fff_counter.{ext} by default)</param>
         /// <returns></returns>
         public void StoreData(byte[] data, string name = null)
         {
@@ -475,7 +474,7 @@ namespace ZeroLevel.Services.FileSystem
             {
                 Directory.CreateDirectory(path);
                 FSUtils.SetupFolderPermission(path,
-                    string.Format("{0}\\{1}", Environment.UserDomainName, Environment.UserName),
+                    $"{Environment.UserDomainName}\\{Environment.UserName}",
                     FileSystemRights.Write | FileSystemRights.Read | FileSystemRights.Delete | FileSystemRights.Modify,
                     AccessControlType.Allow);
             }

@@ -8,11 +8,11 @@ namespace ZeroLevel.DocumentObjectModel.Flow
     {
         public SourceType Source { get; set; }
         /// <summary>
-        /// Название
+        /// Title
         /// </summary>
         public string Title;
         /// <summary>
-        /// Ссылка или идентификатор вложения
+        /// Link or Attachment ID
         /// </summary>
         public string Identifier;
 

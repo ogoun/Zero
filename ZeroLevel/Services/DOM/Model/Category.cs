@@ -43,28 +43,27 @@ namespace ZeroLevel.DocumentObjectModel
         #region Fields
 
         /// <summary>
-        /// Название
+        /// Title
         /// </summary>
         public string Title { get; set; }
 
         /// <summary>
-        /// Описание
+        /// Description
         /// </summary>
         public string Description { get; set; }
 
         /// <summary>
-        /// Код категории
+        /// Category code
         /// </summary>
         public string Code { get; set; }
 
         /// <summary>
-        /// Код направления
+        /// Direction code
         /// </summary>
         public string DirectionCode { get; set; }
 
         /// <summary>
-        /// Указывает на принадлежность категории внутренней части системы
-        /// Категория не предназначенна для публичного доступа
+        /// Is instrnal category
         /// </summary>
         public bool IsSystem { get; set; }
 

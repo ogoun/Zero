@@ -305,13 +305,13 @@ namespace DOM.DSL.Model
                         case "ignore":
                             TablePrefix = TablePostfix = null;
                             break;
-                        case "special": // Использование захардкоженного преобразования таблицы
+                        case "special": // Using a hardcoded table conversion
                                         //TablePrefix = TablePostfix = null;
                             ColumnsPrefix = ColumnsPostfix = null;
                             ColumnPrefix = ColumnTemplate = ColumnPostfix = null;
                             RowPrefix = RowPostfix = null;
                             CellPrefix = CellPostfix = null;
-                            // Аргументы: (style, paddings l-t-r-b, maxcellwidth, maxtablewidth)                            
+                            // Args: (style, paddings l-t-r-b, maxcellwidth, maxtablewidth)                            
                             UseSpecialTableBuilder = true;
                             SpecialTableBuilder = SpecialTableBuilderFactory.CreateSpecialTableBuilder(special);
                             if (SpecialTableBuilder == null) UseSpecialTableBuilder = false;

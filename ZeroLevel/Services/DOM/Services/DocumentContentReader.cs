@@ -192,12 +192,12 @@ namespace DOM.Services
             reader.LeaveHeaders(doc.DescriptiveMetadata.Headers);
             reader.LeaveDescriptioveBlock(doc.DescriptiveMetadata);
 
-            reader.EnterAsides(doc.Aside);
-            for (int i = 0; i < doc.Aside.Count; i++)
+            reader.EnterAsides(doc.Attachments);
+            for (int i = 0; i < doc.Attachments.Count; i++)
             {
-                reader.ReadAside(doc.Aside[i], i);
+                reader.ReadAside(doc.Attachments[i], i);
             }
-            reader.LeaveAsides(doc.Aside);
+            reader.LeaveAsides(doc.Attachments);
 
             reader.EnterAssotiations(doc.Assotiations);
             for (int i = 0; i < doc.Assotiations.Count; i++)

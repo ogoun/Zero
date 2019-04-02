@@ -28,7 +28,7 @@ namespace DOM.DSL
                 }
                 catch (Exception ex)
                 {
-                    Log.SystemError(ex, "Fault parse template '{0}' to token list", template);
+                    Log.SystemError(ex, $"Fault parse template '{template}' to token list");
                 }
             }
             return Enumerable.Empty<TToken>();
@@ -69,7 +69,7 @@ namespace DOM.DSL
             }
             catch (Exception ex)
             {
-                Log.Debug("Fault transform document '{0} by token list'. {1}", document.Id, ex);
+                Log.Debug($"Fault transform document '{document.Id} by token list'. {ex.ToString()}");
                 if (ignore_fault == false)
                 {
                     throw ex;

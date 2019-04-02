@@ -3,69 +3,65 @@
 namespace ZeroLevel.Patterns.DependencyInjection
 {
     /// <summary>
-    /// Интерфейс с методами для реализации хранения параметров
-    /// (хранилище ключ-значение, где в качестве ключа используется сущность типа string, а в качестве значения объект любого типа)
+    /// DI parameters stogare (string key and anytype value)
     /// </summary>
     public interface IParameterStorage
     {
         #region IEverythingStorage
         /// <summary>
-        /// Сохранение параметра
+        /// Save parameter
         /// </summary>
-        /// <typeparam name="T">Тип параметра</typeparam>
-        /// <param name="key">Ключ</param>
-        /// <param name="value">Значение параметра</param>
+        /// <typeparam name="T">Parameter type</typeparam>
+        /// <param name="key">Key</param>
+        /// <param name="value">Parameter value</param>
         void Save<T>(string key, T value);
         /// <summary>
-        /// Сохранение или обновление параметра
+        /// Save or update parameter
         /// </summary>
-        /// <typeparam name="T">Тип параметра</typeparam>
-        /// <param name="key">Ключ</param>
-        /// <param name="value">Значение параметра</param>
+        /// <typeparam name="T">Parameter type</typeparam>
+        /// <param name="key">Key</param>
+        /// <param name="value">Parameter value</param>
         void SaveOrUpdate<T>(string key, T value);
         /// <summary>
-        /// Безопасное сохранение параметра
+        /// Safe save parameter
         /// </summary>
-        /// <typeparam name="T">Тип параметра</typeparam>
-        /// <param name="key">Ключ</param>
-        /// <param name="value">Значение параметра</param>
-        /// <returns>true - в случае успеха</returns>
+        /// <typeparam name="T">Parameter type</typeparam>
+        /// <param name="key">Key</param>
+        /// <param name="value">Parameter value</param>
         bool TrySave<T>(string key, T value);
         /// <summary>
-        /// Удаление параметра
+        /// Remove parameter by key
         /// </summary>
-        /// <typeparam name="T">Тип параметра</typeparam>
-        /// <param name="key">Ключ</param>
+        /// <typeparam name="T">Parameter type</typeparam>
+        /// <param name="key">Key</param>
         void Remove<T>(string key);
         /// <summary>
-        /// Безопасное удаление параметра
+        /// Safe remove parameter by key
         /// </summary>
-        /// <typeparam name="T">Тип параметра</typeparam>
-        /// <param name="key">Ключ</param>
-        /// <returns>true - в случае успеха</returns>
+        /// <typeparam name="T">Parameter type</typeparam>
+        /// <param name="key">Key</param>
         bool TryRemove<T>(string key);
         /// <summary>
-        /// Запрос сохраненного параметра
+        /// Get parameter value by key
         /// </summary>
-        /// <typeparam name="T">Тип параметра</typeparam>
-        /// <param name="key">Ключ</param>
-        /// <returns>Значение параметра</returns>
+        /// <typeparam name="T">Parameter type</typeparam>
+        /// <param name="key">Key</param>
+        /// <returns>Parameter value</returns>
         T Get<T>(string key);
         T GetOrDefault<T>(string key);
         T GetOrDefault<T>(string key, T defaultValue);
         /// <summary>
-        /// Запрос сохраненного параметра
+        /// Get parameter value by key
         /// </summary>
-        /// <param name="type">Тип параметра</param>
-        /// <param name="key">Ключ</param>
-        /// <returns>Значение параметра</returns>
+        /// <param name="type">Parameter type</param>
+        /// <param name="key">Key</param>
+        /// <returns>Parameter value</returns>
         object Get(Type type, string key);
         /// <summary>
-        /// Проверка наличия параметра с указанным именем
+        /// Check for parameter existence by key
         /// </summary>
-        /// <typeparam name="T">Тип параметра</typeparam>
-        /// <param name="key">Ключ</param>
-        /// <returns>Указывает наличие параметра с заданным именем</returns>
+        /// <typeparam name="T">Parameter type</typeparam>
+        /// <param name="key">Key</param>
         bool Contains<T>(string key);
         #endregion
     }

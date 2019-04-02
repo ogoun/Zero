@@ -12,7 +12,7 @@ namespace ZeroLevel
     public static class Configuration
     {
         /// <summary>
-        /// Путь к каталогу приложения
+        /// Application folder path
         /// </summary>
         public static string BaseDirectory =
             Path.GetDirectoryName(Assembly.GetExecutingAssembly()?.CodeBase)?.

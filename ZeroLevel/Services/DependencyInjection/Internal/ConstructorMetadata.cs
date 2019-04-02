@@ -6,7 +6,7 @@ using System.Reflection;
 namespace ZeroLevel.Patterns.DependencyInjection
 {
     /// <summary>
-    /// Метаданные конструктора
+    /// Constructor metadata
     /// </summary>
     internal class ConstructorMetadata
     {
@@ -26,16 +26,16 @@ namespace ZeroLevel.Patterns.DependencyInjection
                     var resolveAttribute = p.GetCustomAttribute<ResolveAttribute>();
 
                     var kind = (parameterAttribute != null) ? ConstructorParameterKind.Parameter :
-                    (resolveAttribute != null) ? ConstructorParameterKind.Resolve : ConstructorParameterKind.None;
+                    (resolveAttribute != null) ? ConstructorParameterKind.Dependency : ConstructorParameterKind.None;
 
                     return new ConstructorParameter
                     {
                         Type = p.ParameterType,
                         ParameterKind = kind,
                         ParameterResolveName = (kind == ConstructorParameterKind.Parameter) ? parameterAttribute?.Name ?? p.Name :
-                            (kind == ConstructorParameterKind.Resolve) ? resolveAttribute?.ResolveName : null,
+                            (kind == ConstructorParameterKind.Dependency) ? resolveAttribute?.ResolveName : null,
                         ParameterResolveType = (kind == ConstructorParameterKind.Parameter) ? parameterAttribute?.Type ?? p.ParameterType :
-                            (kind == ConstructorParameterKind.Resolve) ? resolveAttribute?.ContractType ?? p.ParameterType : null,
+                            (kind == ConstructorParameterKind.Dependency) ? resolveAttribute?.ContractType ?? p.ParameterType : null,
                         IsNullable = IsNullable(p.ParameterType)
                     };
                 }).ToList();
@@ -48,11 +48,11 @@ namespace ZeroLevel.Patterns.DependencyInjection
             return false; // value-type
         }
         /// <summary>
-        /// Определение, подходит ли конструктор под указанные аргументы
+        /// Determining whether the constructor is suitable for the specified arguments
         /// </summary>
-        /// <param name="args">Аргументы</param>
-        /// <param name="parameters">Подготовленные массив аргументов для вызова конструктора</param>
-        /// <returns>true - если конструктор можно вызвать с переданными аргументами</returns>
+        /// <param name="args">Arguments</param>
+        /// <param name="parameters">Prepared arguments for constructor call</param>
+        /// <returns>true - if the constructor can be called with the arguments passed</returns>
         public bool IsMatch(object[] args, out object[] parameters)
         {
             parameters = null;
@@ -67,7 +67,7 @@ namespace ZeroLevel.Patterns.DependencyInjection
                         case ConstructorParameterKind.Parameter:
                             parameters[i] = _parent.Get(Parameters[i].ParameterResolveType, Parameters[i].ParameterResolveName);
                             break;
-                        case ConstructorParameterKind.Resolve:
+                        case ConstructorParameterKind.Dependency:
                             parameters[i] = _parent.Resolve(Parameters[i].ParameterResolveType, Parameters[i].ParameterResolveName);
                             break;
                         default:

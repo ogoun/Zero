@@ -5,39 +5,39 @@ namespace ZeroLevel.Services.Logging
     public interface ILog
     {
         /// <summary>
-        /// Вывод сообщения как есть, без добавления уровня логирования и даты
+        /// Message output as is, without adding a logging level and date
         /// </summary>
         void Raw(string line, params object[] args);
         /// <summary>
-        /// Сообщение
+        /// Message
         /// </summary>
         void Info(string line, params object[] args);
         /// <summary>
-        /// Предупреждение
+        /// Warning
         /// </summary>
         void Warning(string line, params object[] args);
         /// <summary>
-        /// Ошибка
+        /// Error
         /// </summary>
         void Error(string line, params object[] args);
         /// <summary>
-        /// Ошибка
+        /// Error
         /// </summary>
         void Error(Exception ex, string line, params object[] args);
         /// <summary>
-        /// Фатальный сбой
+        /// Fatal crash
         /// </summary>
         void Fatal(string line, params object[] args);
         /// <summary>
-        /// Фатальный сбой
+        /// Fatal crash
         /// </summary>
         void Fatal(Exception ex, string line, params object[] args);
         /// <summary>
-        /// Отладочная информация
+        /// Debug info
         /// </summary>
         void Debug(string line, params object[] args);
         /// <summary>
-        /// Низкоуровневая отладочная информация
+        /// Low Level Debug info
         /// </summary>
         void Verbose(string line, params object[] args);
     }

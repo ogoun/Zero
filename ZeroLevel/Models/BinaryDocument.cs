@@ -6,7 +6,7 @@ using ZeroLevel.Services.Serialization;
 namespace ZeroLevel.Models
 {
     /// <summary>
-    /// Документ в бинарном представлении
+    /// Binary data represantation
     /// </summary>
     public class BinaryDocument :
         IBinarySerializable,
@@ -14,31 +14,31 @@ namespace ZeroLevel.Models
         ICloneable
     {
         /// <summary>
-        /// Идентификатор
+        /// Id
         /// </summary>
         public Guid Id { get; set; }
         /// <summary>
-        /// Имя файла
+        /// File name
         /// </summary>
         public string FileName { get; set; }
         /// <summary>
-        /// Тип содержимого (pdf, doc и т.п.)
+        /// Content type (pdf, doc, etc.)
         /// </summary>
         public string ContentType { get; set; }
         /// <summary>
-        /// Содержимое
+        /// Content
         /// </summary>
         public byte[] Document { get; set; }
         /// <summary>
-        /// Дата создания
+        /// Creation date
         /// </summary>
         public DateTime Created { get; set; }
         /// <summary>
-        /// Опциональные заголовки
+        /// Optional headers
         /// </summary>
         public List<Header> Headers { get; set; }
         /// <summary>
-        /// Категории
+        /// Categories
         /// </summary>
         public List<Category> Categories { get; set; }
 

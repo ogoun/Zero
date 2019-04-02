@@ -1,7 +1,7 @@
 ﻿namespace DOM.DSL.Tokens
 {
     /// <summary>
-    /// Токен ссылающийся на элемент документа
+    /// Token referring to the document element
     /// </summary>
     public class TElementToken :
         TToken
@@ -11,7 +11,7 @@
         /// </summary>
         public string ElementName;
         /// <summary>
-        /// Опционально, при наличии свойств и/или функций для текущего элемента
+        /// Optionally, next token
         /// </summary>
         public TToken NextToken;
 

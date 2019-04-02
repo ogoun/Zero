@@ -36,56 +36,56 @@ namespace ZeroLevel
             _router.Write(LogLevel.Raw, FormatMessage(line, args));
         }
         /// <summary>
-        /// Сообщение
+        /// Info message
         /// </summary>
         public static void Info(string line, params object[] args)
         {
             _router.Write(LogLevel.Info, FormatMessage(line, args));
         }
         /// <summary>
-        /// Предупреждение
+        /// Warning message
         /// </summary>
         public static void Warning(string line, params object[] args)
         {
             _router.Write(LogLevel.Warning, FormatMessage(line, args));
         }
         /// <summary>
-        /// Ошибка
+        /// Error message
         /// </summary>
         public static void Error(string line, params object[] args)
         {
             _router.Write(LogLevel.Error, FormatMessage(line, args));
         }
         /// <summary>
-        /// Ошибка
+        /// Error message
         /// </summary>
         public static void Error(Exception ex, string line, params object[] args)
         {
             _router.Write(LogLevel.Error, FormatMessage(line, args) + "\r\n" + ex.ToString());
         }
         /// <summary>
-        /// Фатальный сбой
+        /// Fatal crash
         /// </summary>
         public static void Fatal(string line, params object[] args)
         {
             _router.Write(LogLevel.Fatal, FormatMessage(line, args));
         }
         /// <summary>
-        /// Фатальный сбой
+        /// Fatal message (mean stop app after crash)
         /// </summary>
         public static void Fatal(Exception ex, string line, params object[] args)
         {
             _router.Write(LogLevel.Fatal, FormatMessage(line, args) + "\r\n" + ex.ToString());
         }
         /// <summary>
-        /// Отладочная информация
+        /// Debug message
         /// </summary>
         public static void Debug(string line, params object[] args)
         {
             _router.Write(LogLevel.Debug, FormatMessage(line, args));
         }
         /// <summary>
-        /// Низкоуровневая отладолчная информация
+        /// Low-level debug message
         /// </summary>
         public static void Verbose(string line, params object[] args)
         {
@@ -94,46 +94,32 @@ namespace ZeroLevel
 
 
         /// <summary>
-        /// Сообщение
+        /// System message
         /// </summary>
         public static void SystemInfo(string line, params object[] args)
         {
             _router.Write(LogLevel.SystemInfo, FormatMessage(line, args));
         }
         /// <summary>
-        /// Предупреждение
+        /// System warning
         /// </summary>
         public static void SystemWarning(string line, params object[] args)
         {
             _router.Write(LogLevel.SystemWarning, FormatMessage(line, args));
         }
         /// <summary>
-        /// Ошибка
+        /// System error
         /// </summary>
         public static void SystemError(string line, params object[] args)
         {
             _router.Write(LogLevel.SystemError, FormatMessage(line, args));
         }
         /// <summary>
-        /// Ошибка
+        /// System error
         /// </summary>
         public static void SystemError(Exception ex, string line, params object[] args)
         {
             _router.Write(LogLevel.SystemError, FormatMessage(line, args) + "\r\n" + ex.ToString());
-        }
-        /// <summary>
-        /// Фатальный сбой
-        /// </summary>
-        public static void SystemFatal(string line, params object[] args)
-        {
-            _router.Write(LogLevel.SystemFatal, FormatMessage(line, args));
-        }
-        /// <summary>
-        /// Фатальный сбой
-        /// </summary>
-        public static void SystemFatal(Exception ex, string line, params object[] args)
-        {
-            _router.Write(LogLevel.SystemFatal, FormatMessage(line, args) + "\r\n" + ex.ToString());
         }
         #endregion
 
@@ -217,7 +203,7 @@ namespace ZeroLevel
             }
         }
         /// <summary>
-        /// Установка максимального количества сообщений в очереди
+        /// Set mam count log-messages in queue
         /// </summary>
         public static void Backlog(long backlog)
         {

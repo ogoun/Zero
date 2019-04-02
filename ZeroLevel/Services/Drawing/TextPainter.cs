@@ -6,7 +6,7 @@ namespace ZeroLevel.Services.Drawing
 {
     public static class TextPainter
     {
-        #region Отрисовка текста вдоль линий
+        #region Drawing text along lines
         public static void DrawOnSegment(Graphics gr, Font font,
             PointF start_point,
             PointF end_point,

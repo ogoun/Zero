@@ -8,19 +8,19 @@ namespace ZeroLevel.DocumentObjectModel
     {
         #region Fields
         /// <summary>
-        /// Заголовок
+        /// Title
         /// </summary>
         public string Title;
         /// <summary>
-        /// Описание (например, что было изменено по сравнению с прошлой версией)
+        /// Description
         /// </summary>
         public string Description;
         /// <summary>
-        /// Ссылка на связанный документ
+        /// Binded document reference
         /// </summary>
         public Guid DocumentId;
         /// <summary>
-        /// Тип связи
+        /// Relation type
         /// </summary>
         public AssotiationRelation Relation;
         #endregion

@@ -3,27 +3,23 @@
 namespace ZeroLevel.Services.Config.Implementation
 {
     /// <summary>
-    /// Запись конфигурации в ini-файл
+    /// Write config to ini-file
     /// </summary>
     public class IniFileWriter 
         : IConfigurationWriter
     {
         /// <summary>
-        /// Путь к ini-файлу
+        /// Config file path
         /// </summary>
         private readonly string _iniPath;
-        /// <summary>
-        /// Инициализирует новый экземпляр класса <see cref="IniFileWriter"/>
-        /// </summary>
-        /// <param name="iniPath">Путь к ini-файлу</param>
+
         public IniFileWriter(string iniPath)
         {
             _iniPath = iniPath;
         }
         /// <summary>
-        /// Запись простой конфигурации
+        /// Write config to file
         /// </summary>
-        /// <param name="configuration">Конфигурация</param>
         public void WriteConfiguration(IConfiguration configuration)
         {
             using (TextWriter writer = new StreamWriter(_iniPath, false))
@@ -46,9 +42,8 @@ namespace ZeroLevel.Services.Config.Implementation
             }
         }
         /// <summary>
-        /// Запись конфигурации разбитой по секциям
+        /// Write configuration set to file
         /// </summary>
-        /// <param name="configuration">Конфигурация</param>
         public void WriteConfigurationSet(IConfigurationSet configuration)
         {
             using (TextWriter writer = new StreamWriter(_iniPath, false))
