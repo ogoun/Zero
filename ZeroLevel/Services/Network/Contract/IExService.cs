@@ -10,7 +10,7 @@ namespace ZeroLevel.Services.Network
         void RegisterInbox<T>(string inbox, Action<T, long, IZBackward> handler);
         void RegisterInbox<Treq, Tresp>(string inbox, Func<Treq, long, IZBackward, Tresp> handдer);
         /// <summary>
-        /// Replier не принимающий данных
+        /// Replier without request
         /// </summary>
         void RegisterInbox<Tresp>(string inbox, Func<long, IZBackward, Tresp> handдer);
     }
