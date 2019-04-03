@@ -230,7 +230,7 @@ namespace ZeroLevel
         }
 
         /// <summary>
-        /// Set mam count log-messages in queue
+        /// Set max count log-messages in queue
         /// </summary>
         public static void Backlog(long backlog)
         {
