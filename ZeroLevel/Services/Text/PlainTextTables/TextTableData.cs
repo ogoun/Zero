@@ -79,7 +79,7 @@ namespace ZeroLevel.Services.PlainTextTables
 
         #region API
         /// <summary>
-        /// Установка заголовков столбцов
+        /// Setting column headers
         /// </summary>
         public void SetColumnsHeaders(string[] headers)
         {
@@ -99,7 +99,7 @@ namespace ZeroLevel.Services.PlainTextTables
         }
 
         /// <summary>
-        /// Добавление строки значений
+        /// Adding a value row
         /// </summary>
         public void AppendRow(string[] cells)
         {

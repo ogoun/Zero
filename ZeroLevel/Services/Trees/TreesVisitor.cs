@@ -27,14 +27,14 @@ namespace ZeroLevel.Services.Trees
             return result;
         }
         /// <summary>
-        /// Выделяет все ветви дерева, возвращая массив ветвей состоящий из специфицированных значений узлов
+        /// Selects all branches of the tree, returning an array of branches consisting of the specified node values.
         /// </summary>
-        /// <typeparam name="T">Тип узлов дерева</typeparam>
-        /// <typeparam name="TCode">Тип значений для возвращаемых элементов ветвей</typeparam>
-        /// <param name="root">Корень</param>
-        /// <param name="childrenExtractor">Выделяет дочерние узлы для текущего узла</param>
-        /// <param name="codeExtractor">Выделяет значение узла</param>
-        /// <returns>Список ветвей дерева</returns>
+        /// <typeparam name="T">Type of tree nodes</typeparam>
+        /// <typeparam name="TCode">Value type for returned branch elements</typeparam>
+        /// <param name="root">Root</param>
+        /// <param name="childrenExtractor">Selects child nodes for the current node.</param>
+        /// <param name="codeExtractor">Select the value of the node</param>
+        /// <returns>List of tree branches</returns>
         public static List<TCode[]> SpecifyExtractBranches<T, TCode>(T root,
             Func<T, IEnumerable<T>> childrenExtractor,
             Func<T, TCode> codeExtractor)
@@ -53,12 +53,8 @@ namespace ZeroLevel.Services.Trees
             return result;
         }
         /// <summary>
-        /// Выполняет обход ветвей дерева
+        /// Performs tree branch traversal.
         /// </summary>
-        /// <typeparam name="T">Тип узлов дерева</typeparam>
-        /// <param name="root">Корень</param>
-        /// <param name="childrenExtractor">Выделяет дочерние узлы для текущего узла</param>
-        /// <param name="handler">Обработчик ветви</param>
         public static void TraversTreeBrunches<T>(T root,
             Func<T, IEnumerable<T>> childrenExtractor,
             Action<IEnumerable<T>> handler)

@@ -5,7 +5,6 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using ZeroLevel.Services.Network.Contract;
-using ZeroLevel.Services.Network.Exceptions;
 using ZeroLevel.Services.Network.Models;
 using ZeroLevel.Services.Pools;
 using ZeroLevel.Services.Serialization;

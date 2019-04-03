@@ -14,10 +14,8 @@ namespace ZeroLevel.Services.Network.Services
         private sealed class MRInvoker
         {
             /// <summary>
-            /// Создает скомпилированное выражение для быстрого вызова метода, возвращает идентификатор выражения и делегат для вызова
+            /// Creates a compiled expression for a quick method call, returns the identifier of the expression and a delegate for the call.
             /// </summary>
-            /// <param name="method">Оборачиваемый метод</param>
-            /// <returns>Кортеж с идентификатором выражения и делегатом</returns>
             private static Invoker CreateCompiledExpression(MethodInfo method)
             {
                 var targetArg = Expression.Parameter(typeof(object)); //  Цель на которой происходит вызов
@@ -36,11 +34,6 @@ namespace ZeroLevel.Services.Network.Services
                     body = Expression.Convert(body, typeof(object));
                 return Expression.Lambda<Invoker>(body, targetArg, argsArg).Compile();
             }
-            /// <summary>
-            /// Оборачивает вызов делегата
-            /// </summary>
-            /// <param name="handler">Оборачиваемый делегат</param>
-            /// <returns>Кортеж с идентификатором выражения и делегатом</returns>
             private static Invoker CreateCompiledExpression(Delegate handler)
             {
                 return CreateCompiledExpression(handler.GetMethodInfo());
@@ -127,7 +120,7 @@ namespace ZeroLevel.Services.Network.Services
             }
             else
             {
-                throw new Exception(string.Format("[SocketExchangeServer] Inbox {0} already exists", inbox));
+                throw new Exception($"[SocketExchangeServer] Inbox {inbox} already exists");
             }
         }
 
@@ -139,7 +132,7 @@ namespace ZeroLevel.Services.Network.Services
             }
             else
             {
-                throw new Exception(string.Format("[SocketExchangeServer] Inbox {0} already exists", inbox));
+                throw new Exception($"[SocketExchangeServer] Inbox {inbox} already exists");
             }
         }
         #endregion

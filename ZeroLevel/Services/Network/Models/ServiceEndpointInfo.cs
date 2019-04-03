@@ -3,7 +3,7 @@
 namespace ZeroLevel.Network.Microservices
 {
     /// <summary>
-    /// Точка подключения
+    /// Endpoint
     /// </summary>
     public class ServiceEndpointInfo :
         IEquatable<ServiceEndpointInfo>

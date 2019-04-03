@@ -91,8 +91,7 @@ namespace ZeroLevel.Services.ObjectMapping
                 var setter = this._fields[name].Setter;
                 if (setter == null)
                 {
-                    throw new Exception(string.Format("{0} '{1}' has not setter",
-                        this._fields[name].IsField ? "Field" : "Property", name));
+                    throw new Exception($"{(this._fields[name].IsField ? "Field" : "Property")} '{name}' has not setter");
                 }
                 if (value == null)
                 {
@@ -116,12 +115,11 @@ namespace ZeroLevel.Services.ObjectMapping
                 var getter = this._fields[name]?.Getter;
                 if (getter == null)
                 {
-                    throw new Exception(string.Format("{0} '{1}' has not getter",
-                        this._fields[name].IsField ? "Field" : "Property", name));
+                    throw new Exception($"{(this._fields[name].IsField ? "Field" : "Property")} '{name}' has not getter");
                 }
                 return getter(instance);
             }
-            throw new KeyNotFoundException(string.Format("Not found field {0}", name));
+            throw new KeyNotFoundException($"Not found field {name}");
         }
 
         public T Get<T>(object instance, string name)
@@ -131,12 +129,11 @@ namespace ZeroLevel.Services.ObjectMapping
                 var getter = this._fields[name]?.Getter;
                 if (getter == null)
                 {
-                    throw new Exception(string.Format("{0} '{1}' has not getter",
-                        this._fields[name].IsField ? "Field" : "Property", name));
+                    throw new Exception($"{(this._fields[name].IsField ? "Field" : "Property")} '{name}' has not getter");
                 }
                 return (T)getter(instance);
             }
-            throw new KeyNotFoundException(string.Format("Not found field {0}", name));
+            throw new KeyNotFoundException($"Not found field {name}");
         }
 
         public object GetOrDefault(object instance, string name, object defaultValue)
@@ -150,7 +147,7 @@ namespace ZeroLevel.Services.ObjectMapping
                 }
                 return getter(instance);
             }
-            throw new KeyNotFoundException(string.Format("Not found field {0}", name));
+            throw new KeyNotFoundException($"Not found field {name}");
         }
 
         public T GetOrDefault<T>(object instance, string name, T defaultValue)
@@ -164,7 +161,7 @@ namespace ZeroLevel.Services.ObjectMapping
                 }
                 return (T)getter(instance);
             }
-            throw new KeyNotFoundException(string.Format("Not found field {0}", name));
+            throw new KeyNotFoundException($"Not found field {name}");
         }
         #endregion
 

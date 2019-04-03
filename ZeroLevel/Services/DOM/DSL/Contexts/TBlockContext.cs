@@ -32,7 +32,7 @@ namespace DOM.DSL.Contexts
                 {
                     reader.Move();
                     var name = reader.ReadIdentity();
-                    if (name.Equals(string.Format("end{0}", _name)))
+                    if (name.Equals($"end{_name}"))
                     {
                         reader.Move(name.Length);
                         return;
@@ -64,7 +64,7 @@ namespace DOM.DSL.Contexts
                 {
                     reader.Move();
                     var name = reader.ReadIdentity();
-                    if (name.Equals(string.Format("end{0}", _name)))
+                    if (name.Equals($"end{_name}"))
                     {
                         reader.Move(name.Length);
                         return;
@@ -106,7 +106,7 @@ namespace DOM.DSL.Contexts
                     if (offset == -1) return;
                     reader.Move(offset + 1);
                     var name = reader.ReadIdentity();
-                    if (name.Equals(string.Format("end{0}", _name)))
+                    if (name.Equals($"end{_name}"))
                     {
                         reader.Move(name.Length);
                         return;

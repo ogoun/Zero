@@ -1,6 +1,4 @@
-﻿using ZeroLevel.Services.Semantic;
-
-namespace ZeroLevel.Services.Semantic
+﻿namespace ZeroLevel.Services.Semantic
 {
     public class WordLexer : ILexer
     {

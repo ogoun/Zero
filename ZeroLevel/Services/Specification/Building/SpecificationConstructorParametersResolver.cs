@@ -24,12 +24,12 @@ namespace ZeroLevel.Contracts.Specification.Building
             }
         }
         /// <summary>
-        /// Для выбора одного значения из списка
+        /// To select a single value from the list
         /// </summary>
         private static readonly Dictionary<Type, Dictionary<string, ParamEnum>> _enums =
             new Dictionary<Type, Dictionary<string, ParamEnum>>();
         /// <summary>
-        /// Для выбора нескольких значений из списка
+        /// To select multiple values from the list
         /// </summary>
         private static readonly Dictionary<Type, Dictionary<string, ITree>> _trees =
             new Dictionary<Type, Dictionary<string, ITree>>();
@@ -37,7 +37,7 @@ namespace ZeroLevel.Contracts.Specification.Building
         private static readonly object _locker = new object();
 
         /// <summary>
-        /// Регистрация перечисления
+        /// Registration of enumerable
         /// </summary>
         public static void Register<TFilter>(string paramName, Dictionary<string, object> map)
         {
@@ -57,7 +57,7 @@ namespace ZeroLevel.Contracts.Specification.Building
             }
         }
         /// <summary>
-        /// Регистрация дерева
+        /// Tree Registration
         /// </summary>
         public static void RegisterTree<TFilter>(string paramName, ITree tree)
         {

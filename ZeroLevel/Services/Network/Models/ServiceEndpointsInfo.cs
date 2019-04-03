@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace ZeroLevel.Network.Microservices
 {
     /// <summary>
-    /// Информация о точках подключения для сервиса
+    /// Information about service connection points
     /// </summary>
     public class ServiceEndpointsInfo :
         IEquatable<ServiceEndpointsInfo>

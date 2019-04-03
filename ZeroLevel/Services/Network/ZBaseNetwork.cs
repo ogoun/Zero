@@ -11,32 +11,32 @@ namespace ZeroLevel.Services.Network
         protected const string DEFAULT_PING_INBOX = "__ping__";
         protected const string DEFAULT_REQUEST_ERROR_INBOX = "__request_error__";
         /// <summary>
-        /// Размер буфера для приема данных
+        /// Buffer size for receiving data
         /// </summary>
         protected const int DEFAULT_RECEIVE_BUFFER_SIZE = 4096;
         /// <summary>
-        /// Если в течение указанного периода не было сетевой активности, выслать пинг-реквест
+        /// If during the specified period there was no network activity, send a ping-request
         /// </summary>
         protected const long HEARTBEAT_PING_PERIOD_TICKS = 1500 * TimeSpan.TicksPerMillisecond;
         /// <summary>
-        /// Период проверки наличия соединения
+        /// Connection check period
         /// </summary>
         protected const int HEARTBEAT_UPDATE_PERIOD_MS = 7500;
         /// <summary>
-        /// Период выполнения запроса, после которого считать его неудачным
+        /// The period of the request, after which it is considered unsuccessful
         /// </summary>
         protected const long MAX_REQUEST_TIME_TICKS = 30000 * TimeSpan.TicksPerMillisecond;
         public const int MAX_REQUEST_TIME_MS = 30000;
         /// <summary>
-        /// Максимальный размер пакета данных для передачи (сериализованный размер фрейма)
+        /// Maximum size of data packet to transmit (serialized frame size)
         /// </summary>
         public const int MAX_FRAME_PAYLOAD_SIZE = 1024 * 1024 * 32;
         /// <summary>
-        /// Начальный байт заголовка пакета данных
+        /// Starting byte of the data packet header
         /// </summary>
         public const byte PACKET_HEADER_START_BYTE = 181;
         /// <summary>
-        /// Размер очереди сообщения для отправки
+        /// The size of the message queue to send
         /// </summary>
         public const int MAX_SEND_QUEUE_SIZE = 1024;
 

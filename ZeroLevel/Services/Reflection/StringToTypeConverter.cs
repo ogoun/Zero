@@ -8,12 +8,8 @@ namespace ZeroLevel.Services.Reflection
         #region TypeHelpers
 
         /// <summary>
-        /// Преобразование строки в тип, если для типа есть соответствующий конвертер, при отсутствии конвертера возвращается
-        /// состояние по умолчанию для указанного типа
+        /// Сonverting a string to a type, if there is a corresponding converter for the type, in the absence of a converter, the default state for the specified type is returned
         /// </summary>
-        /// <param name="input">Строка</param>
-        /// <param name="to">Тип к которому требуется привести значение в строке</param>
-        /// <returns>Результат преобразования</returns>
         public static object TryConvert(string input, Type to)
         {
             try
@@ -28,17 +24,14 @@ namespace ZeroLevel.Services.Reflection
         }
 
         /// <summary>
-        /// Создание значения по умолчанию для указанного типа
+        /// Creating default values for specified type
         /// </summary>
-        /// <param name="type">Тип</param>
-        /// <returns>Значение по умолчанию</returns>
         private static object CreateDefaultState(Type type)
         {
             if (type.IsValueType)
             {
                 return Activator.CreateInstance(type);
             }
-
             return null;
         }
 

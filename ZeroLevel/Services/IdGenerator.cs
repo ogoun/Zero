@@ -5,12 +5,12 @@ using System.Threading;
 namespace ZeroLevel.Services
 {
     /// <summary>
-    /// Предоставляет различные варианты генерации идентификаторов
+    /// Provides various options for generating identifiers
     /// </summary>
     public static class IdGenerator
     {
         /// <summary>
-        /// Возвращает функцию для получения последовательных значений int64
+        /// Returns a function to get consecutive int64 values.
         /// </summary>
         public static Func<long> IncreasingSequenceIdGenerator()
         {
@@ -18,7 +18,7 @@ namespace ZeroLevel.Services
             return new Func<long>(() => Interlocked.Increment(ref id));
         }
         /// <summary>
-        /// Создает Base64 хэш от указанного даты/времени
+        /// Creates a base64 hash from the specified datetime
         /// </summary>
         public static string HashFromDateTime(DateTime date)
         {
@@ -29,35 +29,35 @@ namespace ZeroLevel.Services
                                     .TrimEnd('=');
         }
         /// <summary>
-        /// Создает Base64 хэш от текущего даты/времени
+        /// Creates a base64 hash from the current datetime
         /// </summary>
         public static string HashFromCurrentDateTime()
         {
             return HashFromDateTime(DateTime.Now);
         }
         /// <summary>
-        /// Возвращает хэш в виде строки от 32-хбитного значения хэша указанного даты/времени
+        /// Returns a hash as a string from the 32-bit hash value of the specified datetime
         /// </summary>
         public static string ShortHashFromDateTime(DateTime date)
         {
             return date.ToString(CultureInfo.InvariantCulture).GetHashCode().ToString("x");
         }
         /// <summary>
-        /// Возвращает хэш в виде строки от 32-хбитного значения хэша текущего даты/времени
+        /// Returns a hash as a string from the 32-bit hash value of the current datetime
         /// </summary>
         public static string ShortHashFromCurrentDateTime()
         {
             return DateTime.Now.ToString(CultureInfo.InvariantCulture).GetHashCode().ToString("x");
         }
         /// <summary>
-        /// Создает временную отметку из текущей даты/времени
+        /// Creates a timestamp from current datetime
         /// </summary>
         public static string CreateTimestamp()
         {
             return DateTime.Now.ToString("yyyyMMddHHmmssFFF");
         }
         /// <summary>
-        /// Создает временную отметку из указанной даты/времени
+        /// Creates a timestamp from a specified datetime
         /// </summary>
         public static string CreateTimestamp(DateTime date)
         {

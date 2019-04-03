@@ -63,7 +63,7 @@ namespace ZeroLevel.Services.Config.Implementation
                 {
                     if (!string.IsNullOrEmpty(sectionName))
                     {
-                        result.Append(string.Format("{0}.{1}", sectionName, key), value);
+                        result.Append($"{sectionName}.{key}", value);
                     }
                     else
                     {

@@ -32,7 +32,7 @@ namespace ZeroLevel.Services.Semantic
         {
             if ((object)this == (object)other)
                 return true;
-            if (this == null) // и так бывает
+            if (this == null)
                 throw new NullReferenceException();
             if (other == null)
                 return false;

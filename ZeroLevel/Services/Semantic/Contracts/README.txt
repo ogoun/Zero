@@ -1,22 +1,22 @@
-﻿Реализация основы для семантической работы с текстом.
+﻿The implementation of the basis for semantic work with the text.
 
-LexProvider - реализует выделение токенов из текста, где под токеном понимается какое-либо приведение слова.
-Например, токеном может являться непосредственно само слово, стем, лемма.
+LexProvider - implements the selection of tokens from the text, where a token is any coercion of a word.
+For example, a token can be directly the word itself, a system, a lemma.
 
-В качестве реализации созданы две фабрики:
+Two factories were created as an implementation:
 
-SnowbolLexProviderFactory - возвращает провайдеры на основе стемминга 'Snowball'
-JustWordLexProviderFactory - возвращает провайдер который принимает за токен непосредственно слово, без изменений (lower case)
+SnowbolLexProviderFactory - returns providers based on stemming 'Snowball'
+JustWordLexProviderFactory - returns a provider that takes the word itself for the token, no change (lower case)
 
-Для реализации собственного провайдера потребуется создать класс на основе интерфейса ILexer и реализовать метод Lex, 
-в котором будет проведена необходимая нормализация слова в нужном семантическом контексте.
+To implement your own provider, you need to create a class based on the ILexer interface and implement the Lex method,
+in which the necessary normalization of the word in the necessary semantic context will be carried out.
 
-Например:
+For example:
 public class LemmaLexer: ILexer
 {
-	public string Lex(string word) { return Lemmatizer.Lemma(word); }
+public string Lex (string word) {return Lemmatizer.Lemma (word); }
 }
 
-После чего можно создать на его основе провайдер:
+Then you can create a provider based on it:
 
-var provider = new LexProvider(new LemmaLexer());
+var provider = new LexProvider (new LemmaLexer ());

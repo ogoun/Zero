@@ -1,7 +1,7 @@
 ﻿namespace ZeroLevel.Services.Semantic
 {
     /// <summary>
-    /// Выполняет преобразование слова к абстрактной основе слова(корень, стем, лемма и т.п.)
+    /// Performs word conversion to abstract word basis (root, stem, lemma, etc.)
     /// </summary>
     public interface ILexer
     {

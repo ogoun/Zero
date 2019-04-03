@@ -83,7 +83,7 @@ namespace ZeroLevel
             IConfiguration result;
             if (false == _cachee.TryGetValue(name, out result))
             {
-                throw new KeyNotFoundException(string.Format("Not found configuration '{0}'", name));
+                throw new KeyNotFoundException("Not found configuration '{name}'");
             }
             return result;
         }
@@ -93,7 +93,7 @@ namespace ZeroLevel
             IConfigurationSet result;
             if (false == _setCachee.TryGetValue(name, out result))
             {
-                throw new KeyNotFoundException(string.Format("Not found configuration set '{0}'", name));
+                throw new KeyNotFoundException("Not found configuration set '{name}'");
             }
             return result;
         }

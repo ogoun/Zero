@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
-using ZeroLevel.Services.Logging;
 
 namespace ZeroLevel.Services.Shedulling
 {
@@ -31,7 +30,7 @@ namespace ZeroLevel.Services.Shedulling
         private readonly ConcurrentDictionary<long, ExpiredAsyncObject> _repitableAsyncActions = new ConcurrentDictionary<long, ExpiredAsyncObject>();
 
         /// <summary>
-        /// Исполняет действие раз в период, при этом период перерасчитывается по переданной функции при каждом пересоздании задачи
+        /// Performs an action once a period, while the period is recalculated according to the transferred function at each re-creation of the task.
         /// </summary>
         /// <param name="nextEventPeriodCalcFunction">Функция для расчета следующего периода</param>
         /// <param name="callback">Действие</param>

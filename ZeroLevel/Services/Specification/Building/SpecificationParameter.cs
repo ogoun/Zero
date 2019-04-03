@@ -3,24 +3,24 @@
 namespace ZeroLevel.Contracts.Specification.Building
 {
     /// <summary>
-    /// Параметр конструктора спецификации
+    /// Specification constructor parameter
     /// </summary>
     public class SpecificationParameter
     {
         /// <summary>
-        /// Отображаемое имя
+        /// Display Name
         /// </summary>
         public string DisplayName;
         /// <summary>
-        /// Имя параметра
+        /// Parameter name
         /// </summary>
         public string ParameterName;
         /// <summary>
-        /// Тип параметра
+        /// Parameter type
         /// </summary>
         public Type ParameterType;
         /// <summary>
-        /// Значение параметра
+        /// Parameter value
         /// </summary>
         public object Value;
     }

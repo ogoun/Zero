@@ -12,35 +12,33 @@ namespace ZeroLevel.Network.Microservices
         public const string DEFAULT_TYPE_NAME = "__service_default_type__";
 
         /// <summary>
-        /// Ключ сервиса, должен быть уникален в рамках бизнес функционала
-        /// т.е. с одинаковым ключом могут работать только копии сервиса, для горизонтальной балансировки
+        /// Service key, must be unique within the business functionality.
+        /// two services with same key will be horizontally balanced
         /// </summary>
         [DataMember]
         public string ServiceKey { get; set; }
         /// <summary>
-        /// Группа, для фильтрации, в качетсве группы можно определять сервисы работающие в одном домене,
-        /// например сервисы обрабатывющие новости в одной группе, сервисы по котировкам в другой
+        /// The group can determine the services working in the same domain
         /// </summary>
         [DataMember]
         public string ServiceGroup { get; set; } = DEFAULT_GROUP_NAME;
         /// <summary>
-        /// Тип сервиса, для фильтрации, определяет принадлежность к подгруппе, например сервисы для доставки информации,
-        /// или сервисы-адаптеры и т.д.
+        /// The type of service, for filtering, determines membership in a subgroup.
         /// </summary>
         [DataMember]
         public string ServiceType { get; set; } = DEFAULT_TYPE_NAME;
         /// <summary>
-        /// Протокол по которому разрешен доступ к API сервиса
+        /// Protocol on which access to the service API is allowed
         /// </summary>
         [DataMember]
         public string Protocol { get; set; }
         /// <summary>
-        /// Точка подключения, адрес
+        /// Connection point, address
         /// </summary>
         [DataMember]
         public string Endpoint { get; set; }
         /// <summary>
-        /// Версия сервиса
+        /// Service version
         /// </summary>
         [DataMember]
         public string Version { get; set; }

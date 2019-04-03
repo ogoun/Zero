@@ -47,11 +47,11 @@ namespace ZeroLevel.Services.Network
         public IPEndPoint Endpoint => _server.Endpoint;
 
         /// <summary>
-        /// Регистрация обработчика входящих сообщений
+        /// Registering an Inbox Handler
         /// </summary>
-        /// <typeparam name="T">Тип сообщения</typeparam>
-        /// <param name="inbox">Имя точки приема</param>
-        /// <param name="handler">Обработчик</param>
+        /// <typeparam name="T">Message type</typeparam>
+        /// <param name="inbox">Inbox name</param>
+        /// <param name="handler">Handler</param>
         public void RegisterInbox<T>(string inbox, Action<T, long, IZBackward> handler)
         {
             _router.RegisterInbox(inbox, handler);
@@ -61,13 +61,13 @@ namespace ZeroLevel.Services.Network
             _router.RegisterInbox(DEFAULT_MESSAGE_INBOX, handler);
         }
         /// <summary>
-        /// Регистрация метода отдающего ответ на входящий запрос
+        /// Registration method responding to an incoming request
         /// </summary>
-        /// <typeparam name="Treq">Тип входного сообщения</typeparam>
-        /// <typeparam name="Tresp">Тип ответа</typeparam>
-        /// <param name="protocol">Транспортный протокол</param>
-        /// <param name="inbox">Имя точки приема</param>
-        /// <param name="replier">Обработчик</param>
+        /// <typeparam name="Treq">Type of input message</typeparam>
+        /// <typeparam name="Tresp">Type of response</typeparam>
+        /// <param name="protocol">Protocol</param>
+        /// <param name="inbox">Inbox name</param>
+        /// <param name="replier">Handler</param>
         public void RegisterInbox<Treq, Tresp>(string inbox, Func<Treq, long, IZBackward, Tresp> handler)
         {
             _router.RegisterInbox<Treq, Tresp>(inbox, handler);
@@ -77,12 +77,12 @@ namespace ZeroLevel.Services.Network
             _router.RegisterInbox<Treq, Tresp>(DEFAULT_REQUEST_INBOX, handler);
         }
         /// <summary>
-        /// Регистрация метода отдающего ответ на входящий запрос, не принимающего входящих данных
+        /// Registration of the method of responding to the incoming request, not receiving incoming data
         /// </summary>
-        /// <typeparam name="Tresp">Тип ответа</typeparam>
-        /// <param name="protocol">Транспортный протокол</param>
-        /// <param name="inbox">Имя точки приема</param>
-        /// <param name="replier">Обработчик</param>
+        /// <typeparam name="Tresp">Type of response</typeparam>
+        /// <param name="protocol">Protocol</param>
+        /// <param name="inbox">Inbox name</param>
+        /// <param name="replier">Handler</param>
         public void RegisterInbox<Tresp>(string inbox, Func<long, IZBackward, Tresp> handler)
         {
             _router.RegisterInbox<Tresp>(inbox, handler);

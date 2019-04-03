@@ -237,7 +237,6 @@
     <Compile Include="Services\Network\Contract\IZBackward.cs" />
     <Compile Include="Services\Network\Contract\IZObservableServer.cs" />
     <Compile Include="Services\Network\Contract\IZTransport.cs" />
-    <Compile Include="Services\Network\Exceptions\NoConnectionException.cs" />
     <Compile Include="Services\Network\Models\ExchangeAttributes.cs" />
     <Compile Include="Services\Network\Models\MicroserviceInfo.cs" />
     <Compile Include="Services\Network\Models\RequestInfo.cs" />

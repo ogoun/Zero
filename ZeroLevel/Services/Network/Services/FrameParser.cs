@@ -48,7 +48,7 @@ namespace ZeroLevel.Services.Network
                     offset = 0;
                     if (Size == 0)
                     {
-                        // Как минимум 1 байт с контрольной суммой должен быть
+                        // At least 1 byte with checksum must be
                         Corrupted = true;
                     }
                 }
@@ -135,7 +135,7 @@ namespace ZeroLevel.Services.Network
                         {
                             for (; start < length; start++)
                             {
-                                // Поиск начала заголовка пакета
+                                // Search for the beginning of the package header
                                 if ((part[start] & ZBaseNetwork.PACKET_HEADER_START_BYTE) == ZBaseNetwork.PACKET_HEADER_START_BYTE)
                                 {
                                     _accum.Reset();

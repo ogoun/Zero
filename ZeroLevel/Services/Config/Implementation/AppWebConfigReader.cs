@@ -14,7 +14,7 @@ namespace ZeroLevel.Services.Config.Implementation
         {
             if (configFilePath == null)
             {
-                var appConfig = Path.Combine(Configuration.BaseDirectory, string.Format("{0}.config", System.AppDomain.CurrentDomain.FriendlyName));
+                var appConfig = Path.Combine(Configuration.BaseDirectory, $"{System.AppDomain.CurrentDomain.FriendlyName}.config");
                 if (File.Exists(appConfig))
                 {
                     _configFilePath = appConfig;

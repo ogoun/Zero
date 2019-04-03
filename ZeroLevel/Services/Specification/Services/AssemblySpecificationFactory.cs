@@ -37,7 +37,7 @@ namespace ZeroLevel.Specification
         {
             if (false == _filterTypes.ContainsKey(filterName))
             {
-                throw new KeyNotFoundException(string.Format("Not found specification '{0}'", filterName));
+                throw new KeyNotFoundException($"Not found specification '{filterName}'");
             }
 
             return (ISpecification<T>)Activator.CreateInstance(_filterTypes[filterName], args);
@@ -47,7 +47,7 @@ namespace ZeroLevel.Specification
         {
             if (false == _filterTypes.ContainsKey(filterName))
             {
-                throw new KeyNotFoundException(string.Format("Not found specification '{0}'", filterName));
+                throw new KeyNotFoundException($"Not found specification '{filterName}'");
             }
             return _filterTypes[filterName];
         }

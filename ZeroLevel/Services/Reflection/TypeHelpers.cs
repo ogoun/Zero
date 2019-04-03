@@ -9,56 +9,61 @@ using System.Runtime.Serialization;
 namespace ZeroLevel.Services.Reflection
 {
     /// <summary>
-    /// Набор методов для работы с типами объектов
+    /// A set of methods for working with object types
     /// </summary>
     public static class TypeHelpers
     {
-        /// <summary>
-        /// True если массив
-        /// </summary>
         public static bool IsArray(Type type)
         {
             return type.Return(t => t.IsArray, false);
         }
-        /// <summary>
-        /// True если структура
-        /// </summary>
         public static bool IsStruct(Type type)
         {
             return type.Return(t => t.IsValueType && !IsSimpleType(t), false);
         }
-        /// <summary>
-        /// True если класс
-        /// </summary>
         public static bool IsClass(Type type)
         {
             return type.Return(t => t.IsClass, false);
         }
-        /// <summary>
-        /// True если URI
-        /// </summary>
         public static bool IsUri(Type type)
         {
             return type.Return(t => (typeof(Uri).IsAssignableFrom(t)), false);
         }
-        /// <summary>
-        /// True если хэшсет
-        /// </summary>
         public static bool IsHashSet(Type type)
         {
             return type.Return(t => t.IsGenericType
                 && t.GetGenericTypeDefinition() == typeof(HashSet<>), false);
         }
-
-        /// <summary>
-        /// True если строка
-        /// </summary>
         public static bool IsString(Type type)
         {
             return type.Return(t => t == typeof(string));
         }
+        public static bool IsRuntimeType(Type type)
+        {
+            return type.Return(t => (typeof(Type).IsAssignableFrom(t)), false);
+        }
+        public static bool IsIpEndPoint(Type type)
+        {
+            return type.Return(t => t == typeof(IPEndPoint), false);
+        }
+        public static bool IsDataset(Type type)
+        {
+            return type.Return(t => t == typeof(DataSet), false);
+        }
+        public static bool IsDataTable(Type type)
+        {
+            return type.Return(t => t == typeof(DataTable), false);
+        }
+        public static bool IsDataRow(Type type)
+        {
+            return type.Return(t => t == typeof(DataRow), false);
+        }
+        public static bool IsList(Type type)
+        {
+            return type.Return(t => t.GetInterfaces().Contains(typeof(IList)), false);
+        }
         /// <summary>
-        /// True если базовый тип - date, decimal, string, или GUID
+        /// True if the base type is datetime, decimal, string, or GUID
         /// </summary>
         public static bool IsSimpleType(Type type)
         {
@@ -75,46 +80,6 @@ namespace ZeroLevel.Services.Reflection
                        || t == typeof(Guid)
                        || t == typeof(TimeSpan);
             }, false);
-        }
-        /// <summary>
-        /// True если тип данных
-        /// </summary>
-        public static bool IsRuntimeType(Type type)
-        {
-            return type.Return(t => (typeof(Type).IsAssignableFrom(t)), false);
-        }
-        /// <summary>
-        /// True если IPEndPoint
-        /// </summary>
-        public static bool IsIpEndPoint(Type type)
-        {
-            return type.Return(t => t == typeof(IPEndPoint), false);
-        }
-        /// <summary>
-        /// True если DataSet
-        /// </summary>
-        public static bool IsDataset(Type type)
-        {
-            return type.Return(t => t == typeof(DataSet), false);
-        }
-        /// <summary>
-        /// True если DataTable
-        /// </summary>
-        public static bool IsDataTable(Type type)
-        {
-            return type.Return(t => t == typeof(DataTable), false);
-        }
-        /// <summary>
-        /// True если DataRow
-        /// </summary>
-        public static bool IsDataRow(Type type)
-        {
-            return type.Return(t => t == typeof(DataRow), false);
-        }
-
-        public static bool IsList(Type type)
-        {
-            return type.Return(t => t.GetInterfaces().Contains(typeof(IList)), false);
         }
 
         public static bool IsDictionary(Type type)

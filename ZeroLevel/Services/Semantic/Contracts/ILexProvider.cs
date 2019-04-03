@@ -5,33 +5,33 @@ namespace ZeroLevel.Services.Semantic
     public interface ILexProvider
     {
         /// <summary>
-        /// Выделение токенов из текста как есть
+        /// Extract tokens from text as is
         /// </summary>
-        /// <returns>Список токенов</returns>
+        /// <returns>Spisok tokenov</returns>
         IEnumerable<LexToken> ExtractLexTokens(string text);
         /// <summary>
-        /// Выделение уникальных токенов из текста
+        /// Selecting unique tokens from text
         /// </summary>
-        /// <returns>Список токенов</returns>
+        /// <returns>Tokens</returns>
         IEnumerable<LexToken> ExtractUniqueLexTokens(string text);
         /// <summary>
-        /// Выделение уникальных токенов из текста с отбрасыванием стоп-слов
+        /// Allocation of unique tokens from text with drop of stop words
         /// </summary>
-        /// <returns>Список токенов</returns>
+        /// <returns>Tokens</returns>
         IEnumerable<LexToken> ExtractUniqueLexTokensWithoutStopWords(string text);
         /// <summary>
-        /// Поиск токенов в тексте соответствующих указанным словам (полнотекстовый поиск)
+        /// Search for tokens in the text corresponding to the specified words (full-text search)
         /// </summary>
-        /// <param name="text">Текст по которому выполняется поиск</param>
-        /// <param name="words">Слова для поиска</param>
-        /// <returns>Словарь, где ключ - слово, значение - список соответствующих ему найденных токенов</returns>
+        /// <param name="text">Search text</param>
+        /// <param name="words">Search words</param>
+        /// <returns>Dictionary, where key is a word, value is a list of matching tokens found for it</returns>
         IDictionary<string, IEnumerable<LexToken>> SearchLexTokensByWords(string text, string[] words);
         /// <summary>
-        /// Поиск токенов в тексте соответствующих указанным фразам (полнотекстовый поиск)
+        /// Search for tokens in the text corresponding to the specified phrases (full-text search)
         /// </summary>
-        /// <param name="text">Текст по которому выполняется поиск</param>
-        /// <param name="phrases">Фразы для поиска</param>
-        /// <returns>Словарь, где ключ - фраза, значение - список соответствующих ему найденных массивов токенов</returns>
+        /// <param name="text">Search text</param>
+        /// <param name="phrases">Search phrases</param>
+        /// <returns>The dictionary, where the key is a phrase, a value is a list of token arrays corresponding to it</returns>
         IDictionary<string, IEnumerable<LexToken[]>> SearchLexTokensByPhrases(string text, string[] phrases);
     }
 }

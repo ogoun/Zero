@@ -7,23 +7,23 @@ using ZeroLevel.Services.Trees;
 namespace ZeroLevel.Specification
 {
     /// <summary>
-    /// Создает спецификацию используя конкретный конструктор
+    /// Creates a specification using a specific constructor.
     /// </summary>
     public class SpecificationBuilder : 
         ISpecificationBuilder, 
         IEquatable<SpecificationBuilder>
     {
         /// <summary>
-        /// Тип спецификации
+        /// Type of specification
         /// </summary>
         private readonly Type _instanceType;
         /// <summary>
-        /// Список параметров конструктора
+        /// List of Constructor Parameters
         /// </summary>
         private readonly List<SpecificationParameter> _values =
             new List<SpecificationParameter>();
         /// <summary>
-        /// Обозначение конструктора
+        /// Constructor name
         /// </summary>
         public string Name { get; }
         public Type FilterType { get { return _instanceType; } }
@@ -38,7 +38,7 @@ namespace ZeroLevel.Specification
             _values = parameters;
         }
         /// <summary>
-        /// Обход параметров
+        /// Parameter traversal
         /// </summary>
         public void ParametersTraversal(Action<SpecificationParameter> parameterHandler)
         {
@@ -48,7 +48,7 @@ namespace ZeroLevel.Specification
             }
         }
         /// <summary>
-        /// Построение спецификации
+        /// Build specification
         /// </summary>
         public ISpecification<T> Build<T>()
         {

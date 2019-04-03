@@ -3,31 +3,31 @@
     public enum TextTableStyle
     {
         /// <summary>
-        /// Без рамок
+        /// No borders
         /// </summary>
         NoBorders,
         /// <summary>
-        /// Рамки из символов !+-
+        /// Borders of characters! + -
         /// </summary>
         Simple,
         /// <summary>
-        /// Рамки из символов +|, только для первой и последней строки и колонок
+        /// Borders of characters +|, only for the first and last row and columns
         /// </summary>
         Columns,
         /// <summary>
-        /// Полные рамки
+        /// Full borders
         /// </summary>
         Borders,
         /// <summary>
-        /// Линия для отделения названий колонок
+        /// Line to separate column names
         /// </summary>
         HeaderLine,
         /// <summary>
-        /// Линии для отделения названий колонок и первого стоблца (названий строк)
+        /// Lines for separating column names and first column (row names)
         /// </summary>
         HeaderAndFirstColumn,
         /// <summary>
-        /// Полные двойные рамки
+        /// Full double borders
         /// </summary>
         DoubleBorders,
         DoubleHeaderLine,        

@@ -9,7 +9,7 @@ using ZeroLevel.Services.Extensions;
 namespace ZeroLevel.Services.Serialization
 {
     /// <summary>
-    /// Обертка над MemoryStream для записи
+    /// Wrapper over memorystream for writing
     /// </summary>
     public sealed class MemoryStreamWriter :
         IBinaryWriter
@@ -29,21 +29,21 @@ namespace ZeroLevel.Services.Serialization
             _stream = new MemoryStream();
         }
         /// <summary>
-        /// Запись булевого значения    (1 байт)
+        /// Record a boolean value (1 byte)
         /// </summary>
         public void WriteBoolean(bool val)
         {
             _stream.WriteByte(BitConverter.GetBytes(val)[0]);
         }
         /// <summary>
-        /// Запись байта                (1 байт)
+        /// Write byte (1 byte)
         /// </summary>
         public void WriteByte(byte val)
         {
             _stream.WriteByte(val);
         }
         /// <summary>
-        /// Запись байт массива
+        /// Write array bytes
         /// </summary>
         /// <param name="val"></param>
         public void WriteBytes(byte[] val)
@@ -60,14 +60,14 @@ namespace ZeroLevel.Services.Serialization
         }
 
         /// <summary>
-        /// Запись целого 32-хбитного числа (4 байта)
+        /// Record a 32-bit integer (4 bytes)
         /// </summary>
         public void WriteInt32(Int32 number)
         {
             _stream.Write(BitConverter.GetBytes(number), 0, 4);
         }
         /// <summary>
-        /// Запись целого 64-хбитного числа (8 байт)
+        /// Record an integer 64-bit number (8 bytes)
         /// </summary>
         public void WriteLong(Int64 number)
         {
@@ -90,7 +90,7 @@ namespace ZeroLevel.Services.Serialization
         }
 
         /// <summary>
-        /// Запись строки   (4 байта на длину + Length байт)
+        /// Write string (4 bytes long + Length bytes)
         /// </summary>
         public void WriteString(string line)
         {
@@ -106,14 +106,14 @@ namespace ZeroLevel.Services.Serialization
             }
         }
         /// <summary>
-        /// Запись GUID (16 байт)
+        /// GUID record (16 bytes)
         /// </summary>
         public void WriteGuid(Guid guid)
         {
             _stream.Write(guid.ToByteArray(), 0, 16);
         }
         /// <summary>
-        /// Запись даты времени
+        /// Record the datetime
         /// </summary>
         /// <param name="datetime"></param>
         public void WriteDateTime(DateTime? datetime)

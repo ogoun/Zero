@@ -21,7 +21,7 @@ namespace ZeroLevel.Services.PlainTextTables
                 {
                     columns_width[i] += ow;
                 }
-                // Обновление ширины столбцов при необходимости
+                // Update column widths as needed
                 if (options.MaxCellWidth > 0)
                 {
                     for (int i = 0; i < columns_width.Length; i++)
@@ -47,7 +47,7 @@ namespace ZeroLevel.Services.PlainTextTables
                 var table_width = GetTableWidth(options, columns_width);
 
                 var table = new StringBuilder();
-                // Отрисовка таблицы
+                // Table drawing
                 var rows = data.Rows.ToArray();
                 for (int i = 0; i < rows.Length; i++)
                 {
@@ -70,20 +70,20 @@ namespace ZeroLevel.Services.PlainTextTables
             }
             catch (Exception ex)
             {
-                Log.SystemError(ex, "Сбой при преобразовании таблицы");
+                Log.SystemError(ex, "Failed to convert table");
                 return string.Empty;
             }
         }
 
         /// <summary>
-        /// Рендеринг отображения строки
+        /// Render row view
         /// </summary>
         private static List<string[]> RenderRow(TextTableData.TextTableRow row,
             TextTableRenderOptions options,
             int[] columns_width)
         {
             var result = new List<string[]>();
-            // Добавление пустых строк если есть padding сверху
+            // Adding blank lines if there is padding on top
             if (options.PaddingTop > 0)
             {
                 for (int i = 0; i < options.PaddingTop; i++)
@@ -96,13 +96,13 @@ namespace ZeroLevel.Services.PlainTextTables
                     result.Add(empty);
                 }
             }
-            // Разделение значений ячеек на части в зависимости от ширины столбца
+            // Separation of cell values into parts depending on the width of the column
             var cells = new List<string[]>();
             for (int i = 0; i < columns_width.Length; i++)
             {
                 cells.Add(Split(row.Cells[i].Text, columns_width[i], options.PaddingLeft, options.PaddingRight).ToArray());
             }
-            // Определение максимального количества строк по ячейкам (высота строки таблицы)
+            // Determining the maximum number of rows per cell (row height of the table)
             var max = cells.Max(c => c.Length);
             for (int i = 0; i < max; i++)
             {
@@ -118,7 +118,7 @@ namespace ZeroLevel.Services.PlainTextTables
                 }
                 result.Add(line);
             }
-            // Добавление пустых строк если есть padding снизу
+            // Adding blank lines if there is padding below
             if (options.PaddingBottom > 0)
             {
                 for (int i = 0; i < options.PaddingBottom; i++)
@@ -134,7 +134,7 @@ namespace ZeroLevel.Services.PlainTextTables
             return result;
         }
         /// <summary>
-        /// Разделение текстовой строки на подстроки указанной длины
+        /// Splitting a text string into substrings of the specified length
         /// </summary>
         private static IEnumerable<string> Split(string str, int chunkSize, int leftPad, int rightPad)
         {
@@ -169,26 +169,26 @@ namespace ZeroLevel.Services.PlainTextTables
             return result;
         }
         /// <summary>
-        /// Подсчет реальной ширины таблицы, для указанного стиля
+        /// Calculate the actual width of the table for the specified style
         /// </summary>
         private static int GetTableWidth(TextTableRenderOptions options, int[] columns_width)
         {
             int width =
-                columns_width.Sum() +   // ширина областей текста
-                columns_width.Length - 1;   // границы между ячейками
+                columns_width.Sum() +   // width of text areas
+                columns_width.Length - 1;   // cell boundaries
             switch (options.Style)
             {
                 case TextTableStyle.Columns:
                 case TextTableStyle.Simple:
                 case TextTableStyle.Borders:
                 case TextTableStyle.DoubleBorders:
-                    width += 2; //  внешние границы
+                    width += 2; //  outer borders
                     break;
             }
             return width;
         }
         /// <summary>
-        /// Отрисовка разделителя столбцов
+        /// Rendering column separator
         /// </summary>
         private static void DrawColumnSeparator(StringBuilder sb, TextTableRenderOptions options, int column_index)
         {
@@ -219,10 +219,10 @@ namespace ZeroLevel.Services.PlainTextTables
             }
         }
         /// <summary>
-        /// Отрисовка разделителя строк
+        /// Row separator rendering
         /// </summary>
         /// <param name="sb"></param>
-        /// <param name="row_index">Индекс строки, имеется в виду индекс следующей строки, т.е. 0 - до отрисовки первой строки</param>
+        /// <param name="row_index">Line index, meaning the index of the next line, those 0 - before the first line is drawn</param>
         private static void DrawRowSeparator(StringBuilder sb, TextTableRenderOptions options, int width, int row_index,
             bool isFirst, bool isLast, int[] columns_width)
         {

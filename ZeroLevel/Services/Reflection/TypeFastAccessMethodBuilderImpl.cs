@@ -34,7 +34,7 @@ namespace ZeroLevel.Services.Reflection
             return (Func<object, object>)lambda.Compile();
         }
         /// <summary>
-        /// Создает быстрый сеттер для свойства
+        /// Creates a quick setter for a property
         /// </summary>
         public Action<object, object> BuildSetter(PropertyInfo property)
         {
@@ -53,7 +53,7 @@ namespace ZeroLevel.Services.Reflection
             return expr.Compile();
         }
         /// <summary>
-        /// Создает быстрый сеттер для поля
+        /// Creates a quick setter for a field.
         /// </summary>
         public Action<object, object> BuildSetter(FieldInfo field)
         {

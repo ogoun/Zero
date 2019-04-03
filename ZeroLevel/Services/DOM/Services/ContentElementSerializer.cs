@@ -50,7 +50,7 @@ namespace DOM.Services
                 case ContentElementType.Form:
                     return new FormContent(reader);
             }
-            throw new InvalidCastException(string.Format("Uncknown element type: {0}", type));
+            throw new InvalidCastException($"Uncknown element type: {type}");
         }
 
         public static List<IContentElement> ReadCollection(IBinaryReader reader)

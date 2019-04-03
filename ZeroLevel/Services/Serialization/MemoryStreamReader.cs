@@ -7,16 +7,13 @@ using System.Text;
 namespace ZeroLevel.Services.Serialization
 {
     /// <summary>
-    /// Обертка над MemoryStream для чтения, с проверкой выхода за пределы потока
+    /// A wrapper over a MemoryStream for reading, with a check for overflow
     /// </summary>
     public sealed class MemoryStreamReader
         : IBinaryReader
     {
         private readonly MemoryStream _stream;
-        /// <summary>
-        /// Конструктор
-        /// </summary>
-        /// <param name="data">Данные для чтения</param>
+
         public MemoryStreamReader(byte[] data)
         {
             if (data == null)
@@ -25,7 +22,7 @@ namespace ZeroLevel.Services.Serialization
         }
 
         /// <summary>
-        /// Чтение флага
+        /// Flag reading
         /// </summary>
         public bool ReadBoolean()
         {
@@ -34,7 +31,7 @@ namespace ZeroLevel.Services.Serialization
             return BitConverter.ToBoolean(new byte[1] { ReadByte() }, 0);
         }
         /// <summary>
-        /// Чтение байта
+        /// Reading byte
         /// </summary>
         public byte ReadByte()
         {
@@ -43,7 +40,7 @@ namespace ZeroLevel.Services.Serialization
             return (byte)_stream.ReadByte();
         }
         /// <summary>
-        /// Чтение байт-массива
+        /// Reading bytes
         /// </summary>
         /// <returns></returns>
         public byte[] ReadBytes()
@@ -53,7 +50,7 @@ namespace ZeroLevel.Services.Serialization
             return ReadBuffer(length);
         }
         /// <summary>
-        /// Чтение целого 32-хбитного числа (4 байта)
+        /// Read 32-bit integer (4 bytes)
         /// </summary>
         public Int32 ReadInt32()
         {
@@ -67,7 +64,7 @@ namespace ZeroLevel.Services.Serialization
             return BitConverter.ToInt32(buffer, 0);
         }
         /// <summary>
-        /// Чтение целого 64-хбитного числа (8 байт)
+        /// Read integer 64-bit number (8 bytes)
         /// </summary>
         public Int64 ReadLong()
         {
@@ -87,7 +84,7 @@ namespace ZeroLevel.Services.Serialization
         }
 
         /// <summary>
-        /// Чтение строки   (4 байта на длину + Length байт)
+        /// Read string (4 bytes per length + Length bytes)
         /// </summary>
         public string ReadString()
         {
@@ -97,7 +94,7 @@ namespace ZeroLevel.Services.Serialization
             return Encoding.UTF8.GetString(buffer);
         }
         /// <summary>
-        /// Чтение GUID (16 байт)
+        /// Read GUID (16 bytes)
         /// </summary>
         public Guid ReadGuid()
         {
@@ -105,7 +102,7 @@ namespace ZeroLevel.Services.Serialization
             return new Guid(buffer);
         }
         /// <summary>
-        ///  Чтение байт-пакета (читается размер из указанного количества байт и затем сам пакет прочитанного размера)
+        ///  Reading byte-package (read the size of the specified number of bytes, and then the packet itself read size)
         /// </summary>
         public byte[] ReadBuffer(int count)
         {
@@ -115,11 +112,11 @@ namespace ZeroLevel.Services.Serialization
             var buffer = new byte[count];
             var readedCount = _stream.Read(buffer, 0, count);
             if (count != readedCount)
-                throw new InvalidOperationException(string.Format("The stream returned less data ({0} bytes) than expected ({1} bytes)", count, readedCount));
+                throw new InvalidOperationException($"The stream returned less data ({count} bytes) than expected ({readedCount} bytes)");
             return buffer;
         }
         /// <summary>
-        /// Чтение даты времени
+        /// Reading the datetime
         /// </summary>
         /// <returns></returns>
         public DateTime? ReadDateTime()
@@ -145,7 +142,7 @@ namespace ZeroLevel.Services.Serialization
         }
 
         /// <summary>
-        /// Проверка не выходит ли чтение данных за пределы потока
+        /// Check if data reading is outside the stream
         /// </summary>
         bool CheckOutOfRange(Stream stream, int offset)
         {
@@ -333,9 +330,6 @@ namespace ZeroLevel.Services.Serialization
         }
         #endregion
 
-        /// <summary>
-        /// Очистка
-        /// </summary>
         public void Dispose()
         {
             _stream.Dispose();

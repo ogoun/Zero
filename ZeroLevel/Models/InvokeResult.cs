@@ -91,7 +91,7 @@ namespace ZeroLevel.Models
 
         #region Fabric methods
         public static InvokeResult<T> Succeeding(T value, string comment = "") { return new InvokeResult<T>(value, true, comment); }
-        public static InvokeResult<T> Fault(string comment) { return new InvokeResult<T>(false, comment); }
+        public static InvokeResult<T> Fault<T>(string comment) { return new InvokeResult<T>(false, comment); }
         #endregion
 
         public override void Serialize(IBinaryWriter writer)

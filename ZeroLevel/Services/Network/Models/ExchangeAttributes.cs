@@ -4,15 +4,15 @@ namespace ZeroLevel.Network.Microservices
 {
     public abstract class ExchangeAttribute : Attribute { }
     /// <summary>
-    /// Отмечает метод который является обработчиком сообщений по умолчанию
+    /// Marks the method that is the default message handler
     /// </summary>
     public sealed class ExchangeMainHandlerAttribute : ExchangeAttribute { }
     /// <summary>
-    /// Отмечает метод который является обработчиком запросов по умолчанию
+    /// Marks the method that is the default message handler
     /// </summary>
     public sealed class ExchangeMainReplierAttribute : ExchangeAttribute { }
     /// <summary>
-    /// Отмечает метод-обработчик сообщений для inbox'а с указанным именем
+    /// Marks a message handler method for an inbox with the specified name.
     /// </summary>
     public sealed class ExchangeHandlerAttribute : ExchangeAttribute
     {
@@ -24,7 +24,7 @@ namespace ZeroLevel.Network.Microservices
         }
     }
     /// <summary>
-    /// Отмечает метод-обработчик запросов для inbox'а с указанным именем
+    /// Marks a message handler method for an inbox with the specified name.
     /// </summary>
     public sealed class ExchangeReplierAttribute : ExchangeAttribute
     {
@@ -36,11 +36,11 @@ namespace ZeroLevel.Network.Microservices
         }
     }
     /// <summary>
-    /// Отмечает метод-обработчик сообщений для inbox'а с указанным именем
+    /// Marks a message handler method for an inbox with the specified name.
     /// </summary>
     public sealed class ExchangeMainReplierWithoutArgAttribute : ExchangeAttribute { }
     /// <summary>
-    /// Отмечает метод-обработчик запросов для inbox'а с указанным именем
+    /// Marks a message handler method for an inbox with the specified name.
     /// </summary>
     public sealed class ExchangeReplierWithoutArgAttribute : ExchangeAttribute
     {

@@ -39,7 +39,7 @@ namespace ZeroLevel.Specification
         public ISpecificationBuilder GetVariant(string variantName)
         {
             if (false == _specificationActivateVariants.ContainsKey(variantName))
-                throw new InvalidOperationException(string.Format("Not found variant name {0}", variantName));
+                throw new InvalidOperationException($"Not found variant name {variantName}");
             return new SpecificationBuilder(variantName, _specificationActivateVariants[variantName], _specificationType);
         }
 
@@ -48,7 +48,7 @@ namespace ZeroLevel.Specification
             int index = 0;
             foreach (var ctor in _specificationType.GetConstructors())
             {
-                var vName = string.Format("{0} #{1:D2}", _specificationType.Name, index);
+                var vName = $"{_specificationType.Name} #{index:D2}";
                 var ca = ctor.GetCustomAttribute<DescriptionAttribute>();
                 if (null != ca)
                 {
