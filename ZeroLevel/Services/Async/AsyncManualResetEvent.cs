@@ -154,6 +154,7 @@ namespace ZeroLevel.Services.Async
 
             public Task CurrentTask { get { return _mre._tcs.Task; } }
         }
+
         // ReSharper restore UnusedMember.Local
     }
 }

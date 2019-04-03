@@ -5,7 +5,7 @@ namespace DOM.DSL.Services
 {
     public class TContainerFactory
     {
-        private readonly ObjectPool<TContainer> _pool;           
+        private readonly ObjectPool<TContainer> _pool;
 
         private static int _get_count = 0;
         private static int _release_count = 0;
@@ -22,6 +22,7 @@ namespace DOM.DSL.Services
             c.Reset(value);
             return c;
         }
+
         internal TContainer Get(object value, int index)
         {
             Interlocked.Increment(ref _get_count);
@@ -30,6 +31,7 @@ namespace DOM.DSL.Services
             c.Index = index;
             return c;
         }
+
         internal void Release(TContainer container)
         {
             if (container != null)
@@ -40,6 +42,7 @@ namespace DOM.DSL.Services
         }
 
         public static int GetsCount() => _get_count;
+
         public static int ReleasesCount() => _release_count;
     }
 }

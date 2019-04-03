@@ -12,6 +12,7 @@ namespace ZeroLevel.Services.Network
         private readonly IZObservableServer _server;
 
         public event Action<IZBackward> OnConnect = c => { };
+
         public event Action<IZBackward> OnDisconnect = c => { };
 
         public ExService(IZObservableServer server)
@@ -56,10 +57,12 @@ namespace ZeroLevel.Services.Network
         {
             _router.RegisterInbox(inbox, handler);
         }
+
         public void RegisterInbox<T>(Action<T, long, IZBackward> handler)
         {
             _router.RegisterInbox(DEFAULT_MESSAGE_INBOX, handler);
         }
+
         /// <summary>
         /// Registration method responding to an incoming request
         /// </summary>
@@ -72,10 +75,12 @@ namespace ZeroLevel.Services.Network
         {
             _router.RegisterInbox<Treq, Tresp>(inbox, handler);
         }
+
         public void RegisterInbox<Treq, Tresp>(Func<Treq, long, IZBackward, Tresp> handler)
         {
             _router.RegisterInbox<Treq, Tresp>(DEFAULT_REQUEST_INBOX, handler);
         }
+
         /// <summary>
         /// Registration of the method of responding to the incoming request, not receiving incoming data
         /// </summary>
@@ -87,6 +92,7 @@ namespace ZeroLevel.Services.Network
         {
             _router.RegisterInbox<Tresp>(inbox, handler);
         }
+
         public void RegisterInbox<Tresp>(Func<long, IZBackward, Tresp> handler)
         {
             _router.RegisterInbox<Tresp>(DEFAULT_REQUEST_INBOX, handler);

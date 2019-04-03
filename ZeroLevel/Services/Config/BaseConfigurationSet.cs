@@ -13,6 +13,7 @@ namespace ZeroLevel.Services.Config
         IConfigurationSet
     {
         #region Private members
+
         /// <summary>
         /// Sections
         /// </summary>
@@ -26,9 +27,11 @@ namespace ZeroLevel.Services.Config
             }
             return key.Trim().ToLower(CultureInfo.InvariantCulture);
         }
-        #endregion
+
+        #endregion Private members
 
         #region Properties
+
         public IConfiguration Default
         {
             get { return _sections[Configuration.DEFAULT_SECTION_NAME]; }
@@ -60,9 +63,10 @@ namespace ZeroLevel.Services.Config
             }
         }
 
-        #endregion
+        #endregion Properties
 
         #region Methods
+
         public BaseConfigurationSet()
         {
             CreateSection(Configuration.DEFAULT_SECTION_NAME);
@@ -119,18 +123,22 @@ namespace ZeroLevel.Services.Config
             }
             return false;
         }
-        #endregion
+
+        #endregion Methods
 
         #region IEquatable
+
         public bool Equals(IConfigurationSet other)
         {
             if (other == null) return false;
             return this.SectionNames.NoOrderingEquals(other.SectionNames) &&
                 this.Sections.NoOrderingEquals(other.Sections);
         }
-        #endregion
+
+        #endregion IEquatable
 
         #region Freezing
+
         private readonly object _freezeLock = new object();
 
         public bool FreezeConfiguration(bool permanent = false)
@@ -193,9 +201,11 @@ namespace ZeroLevel.Services.Config
                 return false;
             }
         }
-        #endregion
+
+        #endregion Freezing
 
         #region Binary Serializable
+
         public void Serialize(IBinaryWriter writer)
         {
             writer.WriteBoolean(this._sectionsFreezed);
@@ -220,6 +230,7 @@ namespace ZeroLevel.Services.Config
                 _sections.TryAdd(key, reader.Read<BaseConfiguration>());
             }
         }
-        #endregion
+
+        #endregion Binary Serializable
     }
 }

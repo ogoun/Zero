@@ -6,19 +6,32 @@ namespace ZeroExample
     public sealed class MyFirstApp
         : BaseWindowsService, IZeroService
     {
-        public MyFirstApp() : base("MyApp") { Log.AddConsoleLogger(); }
-        public override void PauseAction() { }
-        public override void ResumeAction() { }
+        public MyFirstApp() : base("MyApp")
+        {
+            Log.AddConsoleLogger();
+        }
+
+        public override void PauseAction()
+        {
+        }
+
+        public override void ResumeAction()
+        {
+        }
+
         public override void StartAction()
         {
             Log.Info("Started");
         }
-        public override void StopAction() { }
+
+        public override void StopAction()
+        {
+        }
     }
 
-    class Program
+    internal class Program
     {
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
             Bootstrap.Startup<MyFirstApp>(args);
         }

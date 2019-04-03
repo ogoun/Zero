@@ -11,7 +11,9 @@ namespace ZeroLevel.Services.Logging.Implementation
             _handler = handler ?? throw new ArgumentNullException(nameof(handler));
         }
 
-        public void Dispose() { }
+        public void Dispose()
+        {
+        }
 
         public void Write(LogLevel level, string message)
         {

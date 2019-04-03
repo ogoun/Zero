@@ -13,6 +13,7 @@ namespace ZeroLevel
         {
             return array.Select(a => (T)a.Clone()).ToArray();
         }
+
         // Copyright (c) 2008-2013 Hafthor Stefansson
         // Distributed under the MIT/X11 software license
         // Ref: http://www.opensource.org/licenses/mit-license.php.
@@ -37,6 +38,7 @@ namespace ZeroLevel
                 return true;
             }
         }
+
         /// <summary>
         /// Checks whether one array is in another
         /// </summary>
@@ -62,7 +64,7 @@ namespace ZeroLevel
             return false;
         }
 
-        static bool IsEmptyLocate<T>(T[] array, T[] candidate)
+        private static bool IsEmptyLocate<T>(T[] array, T[] candidate)
         {
             return array == null
                 || candidate == null

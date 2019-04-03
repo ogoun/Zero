@@ -4,40 +4,48 @@ using ZeroLevel.Services.Reflection;
 
 namespace ZeroLevel.Services.ObjectMapping
 {
-    public class MapMemberInfo: 
+    public class MapMemberInfo :
         IMemberInfo
     {
         #region Properties
+
         public bool IsField { get; set; }
         public string Name { get; set; }
         public Type ClrType { get; set; }
         public Action<object, object> Setter { get; set; }
         public Func<object, object> Getter { get; set; }
-        #endregion
+
+        #endregion Properties
 
         #region Ctor
+
         public MapMemberInfo(Action<object, object> setter, Func<object, object> getter)
         {
             Getter = getter;
             Setter = setter;
         }
-        #endregion
+
+        #endregion Ctor
 
         #region Factory
+
         public static IMemberInfo FromMember(MemberInfo memberInfo)
         {
             switch (memberInfo.MemberType)
             {
                 case MemberTypes.Field:
                     return FromField(memberInfo as FieldInfo);
+
                 case MemberTypes.Property:
                     return FromProperty(memberInfo as PropertyInfo);
             }
             return null;
         }
-        #endregion
+
+        #endregion Factory
 
         #region Helpers
+
         private static bool IsNullable(Type type)
         {
             if (!type.IsValueType) return true; // ref-type
@@ -77,6 +85,7 @@ namespace ZeroLevel.Services.ObjectMapping
             }
             return null;
         }
-        #endregion
+
+        #endregion Helpers
     }
 }

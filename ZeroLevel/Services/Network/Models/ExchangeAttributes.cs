@@ -2,15 +2,19 @@
 
 namespace ZeroLevel.Network.Microservices
 {
+    [AttributeUsage(AttributeTargets.All, AllowMultiple = false)]
     public abstract class ExchangeAttribute : Attribute { }
+
     /// <summary>
     /// Marks the method that is the default message handler
     /// </summary>
     public sealed class ExchangeMainHandlerAttribute : ExchangeAttribute { }
+
     /// <summary>
     /// Marks the method that is the default message handler
     /// </summary>
     public sealed class ExchangeMainReplierAttribute : ExchangeAttribute { }
+
     /// <summary>
     /// Marks a message handler method for an inbox with the specified name.
     /// </summary>
@@ -23,6 +27,7 @@ namespace ZeroLevel.Network.Microservices
             this.Inbox = inbox;
         }
     }
+
     /// <summary>
     /// Marks a message handler method for an inbox with the specified name.
     /// </summary>
@@ -35,10 +40,12 @@ namespace ZeroLevel.Network.Microservices
             this.Inbox = inbox;
         }
     }
+
     /// <summary>
     /// Marks a message handler method for an inbox with the specified name.
     /// </summary>
     public sealed class ExchangeMainReplierWithoutArgAttribute : ExchangeAttribute { }
+
     /// <summary>
     /// Marks a message handler method for an inbox with the specified name.
     /// </summary>
@@ -52,6 +59,7 @@ namespace ZeroLevel.Network.Microservices
         }
     }
 
+    [AttributeUsage(AttributeTargets.All, AllowMultiple = false)]
     public class ExchangeServerAttribute : Attribute
     {
         public string Protocol { get; }
@@ -62,6 +70,8 @@ namespace ZeroLevel.Network.Microservices
             this.Protocol = protocol;
         }
     }
+
+    [AttributeUsage(AttributeTargets.All, AllowMultiple = false)]
     public class ExchangeClientAttribute : Attribute
     {
         public string Protocol { get; }

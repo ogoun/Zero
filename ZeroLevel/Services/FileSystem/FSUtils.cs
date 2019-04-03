@@ -60,8 +60,10 @@ namespace ZeroLevel.Services.FileSystem
         }
 
         #region FileName & Path correction
+
         private static string _invalid_path_characters = new string(Path.GetInvalidPathChars());
         private static string _invalid_filename_characters = new string(Path.GetInvalidFileNameChars());
+
         /// <summary>
         /// Removes invalid characters from the passed path
         /// </summary>
@@ -81,6 +83,7 @@ namespace ZeroLevel.Services.FileSystem
             }
             return new string(result, 0, index);
         }
+
         /// <summary>
         /// Removes invalid characters from the passed file name
         /// </summary>
@@ -102,7 +105,8 @@ namespace ZeroLevel.Services.FileSystem
             }
             return new string(result, 0, index);
         }
-        #endregion
+
+        #endregion FileName & Path correction
 
         /// <summary>
         /// Performs a file accessibility check for processing

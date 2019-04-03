@@ -9,12 +9,19 @@ namespace DOM.DSL.Contracts
         /// Indicates that a table cell body entry is expected.
         /// </summary>
         bool WaitCellBody { get; }
+
         void WriteToCell(string part);
+
         void EnterTable(Column[] colunmns);
+
         void EnterRow(int count_columns);
+
         void EnterCell(int order);
+
         void LeaveCell();
+
         void LeaveRow();
+
         void FlushTable(StringBuilder builder);
     }
 }

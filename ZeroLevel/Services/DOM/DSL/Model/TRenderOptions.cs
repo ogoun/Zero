@@ -38,7 +38,7 @@ namespace DOM.DSL.Model
                             .Select(i => word.Substring(i * max, max)).
                             ToArray();
                         int k = 0;
-                        if(current_max > 0) text.Append("\r\n");
+                        if (current_max > 0) text.Append("\r\n");
                         for (; k < lines.Length - 1; k++)
                         {
                             text.Append(lines[k]);
@@ -70,7 +70,7 @@ namespace DOM.DSL.Model
                     {
                         if (reader.Next == '\r' &&
                             reader.FindOffsetTo('\n') == 2)
-                        {                            
+                        {
                             text.Append("\r\n");
                             reader.Move(2);
                         }

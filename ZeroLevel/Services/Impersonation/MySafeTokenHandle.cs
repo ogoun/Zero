@@ -9,7 +9,7 @@ namespace ZeroLevel.Services.Impersonation
     /// </summary>
     [SecurityPermission(SecurityAction.InheritanceDemand, UnmanagedCode = true)]
     [SecurityPermission(SecurityAction.Demand, UnmanagedCode = true)]
-    internal class MySafeTokenHandle 
+    internal class MySafeTokenHandle
         : SafeHandleZeroOrMinusOneIsInvalid
     {
         private MySafeTokenHandle()

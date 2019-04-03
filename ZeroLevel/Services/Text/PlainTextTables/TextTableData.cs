@@ -7,6 +7,7 @@ namespace ZeroLevel.Services.PlainTextTables
     public class TextTableData
     {
         #region Classes
+
         internal class TextTableCell
         {
             private readonly string _text;
@@ -36,6 +37,7 @@ namespace ZeroLevel.Services.PlainTextTables
         internal class TextTableColumn
         {
             private int _width;
+
             public int Width
             {
                 get
@@ -51,33 +53,41 @@ namespace ZeroLevel.Services.PlainTextTables
 
             public void UpdateWidth(TextTableCell cell)
             {
-                if (cell.Text!=null && cell.Text.Length > _width)
+                if (cell.Text != null && cell.Text.Length > _width)
                 {
                     _width = cell.Text.Length;
                 }
             }
         }
-        #endregion
+
+        #endregion Classes
 
         #region Fields
+
         private readonly TextTableColumn[] _columns;
         private readonly List<TextTableRow> _rows;
-        #endregion
+
+        #endregion Fields
 
         #region Ctor
+
         public TextTableData(int column_count)
         {
             _columns = new TextTableColumn[column_count];
             _rows = new List<TextTableRow>();
         }
-        #endregion
+
+        #endregion Ctor
 
         #region Properties
+
         internal TextTableColumn[] Columns { get { return _columns; } }
         internal IEnumerable<TextTableRow> Rows { get { return _rows; } }
-        #endregion
+
+        #endregion Properties
 
         #region API
+
         /// <summary>
         /// Setting column headers
         /// </summary>
@@ -113,6 +123,7 @@ namespace ZeroLevel.Services.PlainTextTables
             }
             _rows.Add(new TextTableRow(cells.Select((c, i) => new TextTableCell(_columns[i], c)).ToArray()));
         }
-        #endregion
+
+        #endregion API
     }
 }

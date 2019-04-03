@@ -54,6 +54,7 @@ namespace ZeroLevel.Services.Async
             using (var cancelTaskSource = new CancellationTokenTaskSource<TResult>(cancellationToken))
                 return await await Task.WhenAny(task, cancelTaskSource.Task).ConfigureAwait(false);
         }
+
         /// <summary>
         /// Waits for the task to complete, unwrapping any exceptions.
         /// </summary>

@@ -7,7 +7,7 @@ namespace ZeroLevel.Services.Config.Implementation
     /// <summary>
     /// Чтение конфигурации из ini файла
     /// </summary>
-    internal sealed class IniFileReader 
+    internal sealed class IniFileReader
         : IConfigurationReader
     {
         private readonly string _iniPath;

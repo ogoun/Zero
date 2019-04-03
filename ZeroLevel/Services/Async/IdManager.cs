@@ -15,6 +15,7 @@ namespace ZeroLevel.Services.Async
         /// </summary>
 // ReSharper disable StaticFieldInGenericType
         private static int _lastId;
+
         // ReSharper restore StaticFieldInGenericType
 
         /// <summary>

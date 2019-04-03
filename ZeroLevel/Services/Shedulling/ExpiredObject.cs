@@ -4,8 +4,7 @@ using System.Threading;
 namespace ZeroLevel.Services.Shedulling
 {
     /// <summary>
-    /// Обертка над Action, хранящее время в которое должно быть выполнено действие,
-    /// а также ссылку на следующее действие
+    /// A wrapper around an Action that stores the time at which an action should be performed, as well as a link to the next action.
     /// </summary>
     internal class ExpiredObject
     {
@@ -14,7 +13,7 @@ namespace ZeroLevel.Services.Shedulling
         public ExpiredObject()
         {
             Key = Interlocked.Increment(ref _counter);
-            if(Key == -1)
+            if (Key == -1)
                 Key = Interlocked.Increment(ref _counter);
         }
 
@@ -34,19 +33,22 @@ namespace ZeroLevel.Services.Shedulling
         }
 
         /// <summary>
-        /// Событие при завершении ожидания
+        /// Action at the end of the wait
         /// </summary>
         public Action<long> Callback;
+
         /// <summary>
-        /// Срок истечения ожидания
+        ///Expiration Timeout
         /// </summary>
         public DateTime ExpirationDate;
+
         /// <summary>
-        /// Следующий объект с ближайшей датой окончания ожидания
+        /// Next object with the nearest waiting date
         /// </summary>
         public ExpiredObject Next;
+
         /// <summary>
-        /// Ключ для идентификации ожидающего события
+        /// Key to identify the pending event
         /// </summary>
         public long Key { get; }
     }

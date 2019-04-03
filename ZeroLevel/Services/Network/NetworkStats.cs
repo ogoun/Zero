@@ -1,11 +1,9 @@
-﻿using System;
-using System.Threading;
-
-namespace ZeroLevel.Services.Network
+﻿namespace ZeroLevel.Services.Network
 {/*
     public static class NetworkStats
     {
         #region Send info
+
         private static long _sended_bytes = 0;
         private static long _sended_kbytes = 0;
         private static long _sended_mbytes = 0;
@@ -56,9 +54,11 @@ namespace ZeroLevel.Services.Network
             }
             return $"{_sended_bytes} bytes";
         }
-        #endregion
+
+        #endregion Send info
 
         #region Receive info
+
         private static long _received_bytes = 0;
         private static long _received_kbytes = 0;
         private static long _received_mbytes = 0;
@@ -109,9 +109,11 @@ namespace ZeroLevel.Services.Network
             }
             return $"{_received_bytes} bytes";
         }
-        #endregion
+
+        #endregion Receive info
 
         #region RPS
+
         public static long RPS => _rps;
 
         private static long _rps_task = -1;
@@ -140,7 +142,8 @@ namespace ZeroLevel.Services.Network
                 _rps_task = -1;
             }
         }
-        #endregion
+
+        #endregion RPS
 
         public static long _sendFrameCount = 0;
         public static long _receiveFrameCount = 0;

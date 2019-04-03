@@ -16,9 +16,9 @@ namespace ZeroLevel
         public static bool IsAsyncMethod(this MethodInfo method)
         {
             Type attType = typeof(AsyncStateMachineAttribute);
-            // Obtain the custom attribute for the method. 
-            // The value returned contains the StateMachineType property. 
-            // Null is returned if the attribute isn't present for the method. 
+            // Obtain the custom attribute for the method.
+            // The value returned contains the StateMachineType property.
+            // Null is returned if the attribute isn't present for the method.
             var attrib = (AsyncStateMachineAttribute)method.GetCustomAttribute(attType);
             return (attrib != null);
         }

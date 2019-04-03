@@ -17,51 +17,63 @@ namespace ZeroLevel.Services.Reflection
         {
             return type.Return(t => t.IsArray, false);
         }
+
         public static bool IsStruct(Type type)
         {
             return type.Return(t => t.IsValueType && !IsSimpleType(t), false);
         }
+
         public static bool IsClass(Type type)
         {
             return type.Return(t => t.IsClass, false);
         }
+
         public static bool IsUri(Type type)
         {
             return type.Return(t => (typeof(Uri).IsAssignableFrom(t)), false);
         }
+
         public static bool IsHashSet(Type type)
         {
             return type.Return(t => t.IsGenericType
                 && t.GetGenericTypeDefinition() == typeof(HashSet<>), false);
         }
+
         public static bool IsString(Type type)
         {
             return type.Return(t => t == typeof(string));
         }
+
         public static bool IsRuntimeType(Type type)
         {
             return type.Return(t => (typeof(Type).IsAssignableFrom(t)), false);
         }
+
         public static bool IsIpEndPoint(Type type)
         {
             return type.Return(t => t == typeof(IPEndPoint), false);
         }
+
         public static bool IsDataset(Type type)
         {
             return type.Return(t => t == typeof(DataSet), false);
         }
+
         public static bool IsDataTable(Type type)
         {
             return type.Return(t => t == typeof(DataTable), false);
         }
+
         public static bool IsDataRow(Type type)
         {
             return type.Return(t => t == typeof(DataRow), false);
         }
+
         public static bool IsList(Type type)
         {
             return type.Return(t => t.GetInterfaces().Contains(typeof(IList)), false);
         }
+
         /// <summary>
         /// True if the base type is datetime, decimal, string, or GUID
         /// </summary>

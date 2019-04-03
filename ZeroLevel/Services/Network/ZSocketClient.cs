@@ -106,6 +106,7 @@ namespace ZeroLevel.Services.Network
         }
 
         #region Private
+
         private Socket _clientSocket;
         private NetworkStream _stream;
         private readonly IPEndPoint _endpoint;
@@ -118,10 +119,13 @@ namespace ZeroLevel.Services.Network
         private readonly BlockingCollection<Frame> _send_queue = new BlockingCollection<Frame>();
 
         private readonly RequestBuffer _requests = new RequestBuffer();
-        #endregion
+
+        #endregion Private
 
         public event EventHandler<Frame> OnServerMessage = (_, __) => { };
+
         public event Action OnConnect = () => { };
+
         public event Action OnDisconnect = () => { };
 
         public IPEndPoint Endpoint { get { return _endpoint; } }
@@ -141,6 +145,7 @@ namespace ZeroLevel.Services.Network
         }
 
         #region Private methods
+
         private void Heartbeat()
         {
             try
@@ -283,9 +288,11 @@ namespace ZeroLevel.Services.Network
                 }
             }
         }
-        #endregion
+
+        #endregion Private methods
 
         #region API
+
         private bool TryConnect()
         {
             if (_status == ZTransportStatus.Working) return true;
@@ -379,9 +386,11 @@ namespace ZeroLevel.Services.Network
                 Log.SystemError(ex, $"[ZSocketClient] Request error. Frame '{frame.FrameId}'. Inbox '{frame.Inbox}'");
             }
         }
-        #endregion
+
+        #endregion API
 
         #region Helper
+
         private static Socket MakeClientSocket()
         {
             var s = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
@@ -389,7 +398,8 @@ namespace ZeroLevel.Services.Network
             s.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.DontLinger, true);
             return s;
         }
-        #endregion
+
+        #endregion Helper
 
         public override void Dispose()
         {

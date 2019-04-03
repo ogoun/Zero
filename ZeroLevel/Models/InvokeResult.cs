@@ -12,10 +12,13 @@ namespace ZeroLevel.Models
         IBinarySerializable
     {
         #region Static
+
         private static readonly InvokeResult _successResultWitoutComment = new InvokeResult(true, String.Empty);
-        #endregion
+
+        #endregion Static
 
         #region Ctor
+
         public InvokeResult()
         {
         }
@@ -25,35 +28,43 @@ namespace ZeroLevel.Models
             Success = success;
             Comment = comment;
         }
-        #endregion
+
+        #endregion Ctor
 
         #region Properties
+
         /// <summary>
         /// true when action successfully invoked
         /// </summary>
         [DataMember]
         public bool Success;
+
         /// <summary>
         /// Comment
         /// </summary>
         [DataMember]
         public string Comment;
-        #endregion
+
+        #endregion Properties
 
         #region Fabric methods
+
         /// <summary>
         /// Error when action invoking
         /// </summary>
         public static InvokeResult Fault(string comment) { return new InvokeResult(false, comment); }
+
         /// <summary>
         /// Successfully
-        /// </summary>        
+        /// </summary>
         public static InvokeResult Succeeding(string comment = "") { return new InvokeResult(true, comment); }
+
         /// <summary>
         /// Successfully
         /// </summary>
         public static InvokeResult Succeeding() { return _successResultWitoutComment; }
-        #endregion
+
+        #endregion Fabric methods
 
         public virtual void Serialize(IBinaryWriter writer)
         {
@@ -75,6 +86,7 @@ namespace ZeroLevel.Models
         public T Value { get { return _value; } }
 
         #region Ctor
+
         public InvokeResult(bool success, string comment)
         {
             Success = success;
@@ -87,12 +99,22 @@ namespace ZeroLevel.Models
             Success = success;
             Comment = comment;
         }
-        #endregion
+
+        #endregion Ctor
 
         #region Fabric methods
-        public static InvokeResult<T> Succeeding(T value, string comment = "") { return new InvokeResult<T>(value, true, comment); }
-        public static InvokeResult<T> Fault<T>(string comment) { return new InvokeResult<T>(false, comment); }
-        #endregion
+
+        public static InvokeResult<T> Succeeding(T value, string comment = "")
+        {
+            return new InvokeResult<T>(value, true, comment);
+        }
+
+        public static InvokeResult<T> Fault<T>(string comment)
+        {
+            return new InvokeResult<T>(false, comment);
+        }
+
+        #endregion Fabric methods
 
         public override void Serialize(IBinaryWriter writer)
         {

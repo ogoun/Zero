@@ -21,11 +21,13 @@ namespace ZeroLevel.Specification
         public static Expression<Func<T, bool>> False<T>() { return param => false; }
 
         #region Creates a predicate expression from the specified lambda expression.
+
         /// <summary>
         /// Creates a predicate expression from the specified lambda expression.
         /// </summary>
         public static Expression<Func<T, bool>> Create<T>(Expression<Func<T, bool>> predicate)
         { return predicate; }
+
         /// <summary>
         /// Creates a predicate expression from the specified lambda expression.
         /// </summary>
@@ -39,9 +41,11 @@ namespace ZeroLevel.Specification
                 parameters);
             return Expression.Lambda<Func<T, bool>>(call, parameters);
         }
-        #endregion
+
+        #endregion Creates a predicate expression from the specified lambda expression.
 
         #region Combines the first predicate with the second using the logical "and".
+
         /// <summary>
         /// Combines the first predicate with the second using the logical "or".
         /// </summary>
@@ -49,6 +53,7 @@ namespace ZeroLevel.Specification
         {
             return first.Compose(second, Expression.AndAlso);
         }
+
         /// <summary>
         /// Combines the first predicate with the second using the logical "or".
         /// </summary>
@@ -56,6 +61,7 @@ namespace ZeroLevel.Specification
         {
             return first.Compose(CreateFromFunc(second), Expression.AndAlso);
         }
+
         /// <summary>
         /// Combines the first predicate with the second using the logical "or".
         /// </summary>
@@ -63,6 +69,7 @@ namespace ZeroLevel.Specification
         {
             return CreateFromFunc(first).Compose(second, Expression.AndAlso);
         }
+
         /// <summary>
         /// Combines the first predicate with the second using the logical "or".
         /// </summary>
@@ -70,9 +77,11 @@ namespace ZeroLevel.Specification
         {
             return CreateFromFunc(first).Compose(CreateFromFunc(second), Expression.AndAlso);
         }
-        #endregion
+
+        #endregion Combines the first predicate with the second using the logical "and".
 
         #region Combines the first predicate with the second using the logical "or".
+
         /// <summary>
         /// Combines the first predicate with the second using the logical "or".
         /// </summary>
@@ -80,6 +89,7 @@ namespace ZeroLevel.Specification
         {
             return first.Compose(second, Expression.OrElse);
         }
+
         /// <summary>
         /// Combines the first predicate with the second using the logical "or".
         /// </summary>
@@ -87,6 +97,7 @@ namespace ZeroLevel.Specification
         {
             return first.Compose(CreateFromFunc(second), Expression.OrElse);
         }
+
         /// <summary>
         /// Combines the first predicate with the second using the logical "or".
         /// </summary>
@@ -94,6 +105,7 @@ namespace ZeroLevel.Specification
         {
             return CreateFromFunc(first).Compose(second, Expression.OrElse);
         }
+
         /// <summary>
         /// Combines the first predicate with the second using the logical "or".
         /// </summary>
@@ -101,9 +113,11 @@ namespace ZeroLevel.Specification
         {
             return CreateFromFunc(first).Compose(CreateFromFunc(second), Expression.OrElse);
         }
-        #endregion
+
+        #endregion Combines the first predicate with the second using the logical "or".
 
         #region Negates the predicate.
+
         /// <summary>
         /// Negates the predicate.
         /// </summary>
@@ -112,6 +126,7 @@ namespace ZeroLevel.Specification
             var negated = Expression.Not(expression.Body);
             return Expression.Lambda<Func<T, bool>>(negated, expression.Parameters);
         }
+
         /// <summary>
         /// Negates the predicate.
         /// </summary>
@@ -121,13 +136,15 @@ namespace ZeroLevel.Specification
             var negated = Expression.Not(expression.Body);
             return Expression.Lambda<Func<T, bool>>(negated, expression.Parameters);
         }
-        #endregion
+
+        #endregion Negates the predicate.
 
         #region Helpers
+
         /// <summary>
         /// Combines the first expression with the second using the specified merge function.
         /// </summary>
-        static Expression<T> Compose<T>(this Expression<T> first, Expression<T> second, Func<Expression, Expression, Expression> merge)
+        private static Expression<T> Compose<T>(this Expression<T> first, Expression<T> second, Func<Expression, Expression, Expression> merge)
         {
             // zip parameters (map from parameters of second to parameters of first)
             var map = first.Parameters
@@ -141,11 +158,11 @@ namespace ZeroLevel.Specification
             return Expression.Lambda<T>(merge(first.Body, secondBody), first.Parameters);
         }
 
-        class ParameterRebinder : ExpressionVisitor
+        private class ParameterRebinder : ExpressionVisitor
         {
-            readonly Dictionary<ParameterExpression, ParameterExpression> map;
+            private readonly Dictionary<ParameterExpression, ParameterExpression> map;
 
-            ParameterRebinder(Dictionary<ParameterExpression, ParameterExpression> map)
+            private ParameterRebinder(Dictionary<ParameterExpression, ParameterExpression> map)
             {
                 this.map = map ?? new Dictionary<ParameterExpression, ParameterExpression>();
             }
@@ -165,6 +182,7 @@ namespace ZeroLevel.Specification
                 return base.VisitParameter(p);
             }
         }
-        #endregion
+
+        #endregion Helpers
     }
 }

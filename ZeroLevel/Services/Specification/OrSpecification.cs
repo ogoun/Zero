@@ -6,9 +6,10 @@ namespace ZeroLevel.Specification
     public class OrSpecification<T> : BaseSpecification<T>
     {
         [DataMember]
-        ISpecification<T> leftSpecification;
+        private ISpecification<T> leftSpecification;
+
         [DataMember]
-        ISpecification<T> rightSpecification;
+        private ISpecification<T> rightSpecification;
 
         public OrSpecification(ISpecification<T> left, ISpecification<T> right)
         {

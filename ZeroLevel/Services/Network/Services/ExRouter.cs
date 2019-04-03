@@ -11,6 +11,7 @@ namespace ZeroLevel.Services.Network.Services
     internal sealed class ExRouter
     {
         #region Routing
+
         private sealed class MRInvoker
         {
             /// <summary>
@@ -34,6 +35,7 @@ namespace ZeroLevel.Services.Network.Services
                     body = Expression.Convert(body, typeof(object));
                 return Expression.Lambda<Invoker>(body, targetArg, argsArg).Compile();
             }
+
             private static Invoker CreateCompiledExpression(Delegate handler)
             {
                 return CreateCompiledExpression(handler.GetMethodInfo());
@@ -99,11 +101,14 @@ namespace ZeroLevel.Services.Network.Services
 
         private readonly Dictionary<string, List<MRInvoker>> _handlers =
             new Dictionary<string, List<MRInvoker>>();
+
         private readonly Dictionary<string, MRInvoker> _requestors =
             new Dictionary<string, MRInvoker>();
-        #endregion
+
+        #endregion Routing
 
         #region Registration
+
         public void RegisterInbox<T>(string inbox, Action<T, long, IZBackward> handler)
         {
             if (false == _handlers.ContainsKey(inbox))
@@ -112,6 +117,7 @@ namespace ZeroLevel.Services.Network.Services
             }
             _handlers[inbox].Add(MRInvoker.Create<T>(inbox, handler));
         }
+
         public void RegisterInbox<Treq, Tresp>(string inbox, Func<Treq, long, IZBackward, Tresp> hanlder)
         {
             if (false == _requestors.ContainsKey(inbox))
@@ -135,9 +141,11 @@ namespace ZeroLevel.Services.Network.Services
                 throw new Exception($"[SocketExchangeServer] Inbox {inbox} already exists");
             }
         }
-        #endregion
+
+        #endregion Registration
 
         #region Invokation
+
         public void HandleMessage(Frame frame, IZBackward client)
         {
             try
@@ -182,6 +190,7 @@ namespace ZeroLevel.Services.Network.Services
             }
             return null;
         }
-        #endregion
+
+        #endregion Invokation
     }
 }

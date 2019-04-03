@@ -28,6 +28,7 @@ namespace ZeroLevel.Services.Serialization
         {
             _stream = new MemoryStream();
         }
+
         /// <summary>
         /// Record a boolean value (1 byte)
         /// </summary>
@@ -35,6 +36,7 @@ namespace ZeroLevel.Services.Serialization
         {
             _stream.WriteByte(BitConverter.GetBytes(val)[0]);
         }
+
         /// <summary>
         /// Write byte (1 byte)
         /// </summary>
@@ -42,6 +44,7 @@ namespace ZeroLevel.Services.Serialization
         {
             _stream.WriteByte(val);
         }
+
         /// <summary>
         /// Write array bytes
         /// </summary>
@@ -66,6 +69,7 @@ namespace ZeroLevel.Services.Serialization
         {
             _stream.Write(BitConverter.GetBytes(number), 0, 4);
         }
+
         /// <summary>
         /// Record an integer 64-bit number (8 bytes)
         /// </summary>
@@ -105,6 +109,7 @@ namespace ZeroLevel.Services.Serialization
                 _stream.Write(buffer, 0, buffer.Length);
             }
         }
+
         /// <summary>
         /// GUID record (16 bytes)
         /// </summary>
@@ -112,6 +117,7 @@ namespace ZeroLevel.Services.Serialization
         {
             _stream.Write(guid.ToByteArray(), 0, 16);
         }
+
         /// <summary>
         /// Record the datetime
         /// </summary>
@@ -153,6 +159,7 @@ namespace ZeroLevel.Services.Serialization
         }
 
         #region Extension
+
         public void Write<T>(T item)
             where T : IBinarySerializable
         {
@@ -166,6 +173,7 @@ namespace ZeroLevel.Services.Serialization
                 WriteByte(0);
             }
         }
+
         public void WriteCollection<T>(IEnumerable<T> collection)
             where T : IBinarySerializable
         {
@@ -178,6 +186,7 @@ namespace ZeroLevel.Services.Serialization
                 }
             }
         }
+
         public void WriteCollection(IEnumerable<string> collection)
         {
             WriteInt32(collection?.Count() ?? 0);
@@ -225,6 +234,7 @@ namespace ZeroLevel.Services.Serialization
                 }
             }
         }
+
         public void WriteCollection(IEnumerable<DateTime> collection)
         {
             WriteInt32(collection?.Count() ?? 0);
@@ -236,6 +246,7 @@ namespace ZeroLevel.Services.Serialization
                 }
             }
         }
+
         public void WriteCollection(IEnumerable<Int64> collection)
         {
             WriteInt32(collection?.Count() ?? 0);
@@ -247,6 +258,7 @@ namespace ZeroLevel.Services.Serialization
                 }
             }
         }
+
         public void WriteCollection(IEnumerable<Int32> collection)
         {
             WriteInt32(collection?.Count() ?? 0);
@@ -258,6 +270,7 @@ namespace ZeroLevel.Services.Serialization
                 }
             }
         }
+
         public void WriteCollection(IEnumerable<Double> collection)
         {
             WriteInt32(collection?.Count() ?? 0);
@@ -269,6 +282,7 @@ namespace ZeroLevel.Services.Serialization
                 }
             }
         }
+
         public void WriteCollection(IEnumerable<bool> collection)
         {
             WriteInt32(collection?.Count() ?? 0);
@@ -280,6 +294,7 @@ namespace ZeroLevel.Services.Serialization
                 }
             }
         }
+
         public void WriteCollection(IEnumerable<byte> collection)
         {
             WriteInt32(collection?.Count() ?? 0);
@@ -291,6 +306,7 @@ namespace ZeroLevel.Services.Serialization
                 }
             }
         }
+
         public void WriteCollection(IEnumerable<byte[]> collection)
         {
             WriteInt32(collection?.Count() ?? 0);
@@ -307,6 +323,7 @@ namespace ZeroLevel.Services.Serialization
         {
             WriteBytes(MessageSerializer.SerializeCompatible(item));
         }
-        #endregion
+
+        #endregion Extension
     }
 }

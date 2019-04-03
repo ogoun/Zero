@@ -8,6 +8,7 @@ namespace ZeroLevel.Patterns.DependencyInjection
     public interface IResolver
     {
         #region Activator
+
         /// <summary>
         /// Creating an instance of an object of the specified type
         /// </summary>
@@ -15,6 +16,7 @@ namespace ZeroLevel.Patterns.DependencyInjection
         /// <param name="resolveName">Dependency name</param>
         /// <returns>Instance</returns>
         T CreateInstance<T>(string resolveName = "");
+
         /// <summary>
         /// Creating an instance of an object of the specified type
         /// </summary>
@@ -23,6 +25,7 @@ namespace ZeroLevel.Patterns.DependencyInjection
         /// <param name="resolveName">Dependency name</param>
         /// <returns>Instance</returns>
         T CreateInstance<T>(object[] args, string resolveName = "");
+
         /// <summary>
         /// Creating an instance of an object of the specified type
         /// </summary>
@@ -30,6 +33,7 @@ namespace ZeroLevel.Patterns.DependencyInjection
         /// <param name="resolveName">Dependency name</param>
         /// <returns>Instance</returns>
         object CreateInstance(Type type, string resolveName = "");
+
         /// <summary>
         /// Creating an instance of an object of the specified type
         /// </summary>
@@ -38,9 +42,11 @@ namespace ZeroLevel.Patterns.DependencyInjection
         /// <param name="resolveName">Dependency name</param>
         /// <returns>Instance</returns>
         object CreateInstance(Type type, object[] args, string resolveName = "");
-        #endregion
+
+        #endregion Activator
 
         #region Resolving
+
         /// <summary>
         /// Dependency resolve
         /// </summary>
@@ -48,6 +54,7 @@ namespace ZeroLevel.Patterns.DependencyInjection
         /// <param name="compose">Compose the object when true</param>
         /// <returns>Instance</returns>
         T Resolve<T>(bool compose = true);
+
         /// <summary>
         /// Dependency resolve
         /// </summary>
@@ -56,6 +63,7 @@ namespace ZeroLevel.Patterns.DependencyInjection
         /// <param name="compose">Compose the object when true</param>
         /// <returns>Instance</returns>
         T Resolve<T>(string resolveName, bool compose = true);
+
         /// <summary>
         /// Dependency resolve
         /// </summary>
@@ -64,6 +72,7 @@ namespace ZeroLevel.Patterns.DependencyInjection
         /// <param name="compose">Compose the object when true</param>
         /// <returns>Instance</returns>
         T Resolve<T>(object[] args, bool compose = true);
+
         /// <summary>
         /// Dependency resolve
         /// </summary>
@@ -73,6 +82,7 @@ namespace ZeroLevel.Patterns.DependencyInjection
         /// <param name="compose">Compose the object when true</param>
         /// <returns>Instance</returns>
         T Resolve<T>(string resolveName, object[] args, bool compose = true);
+
         /// <summary>
         /// Dependency resolve
         /// </summary>
@@ -80,6 +90,7 @@ namespace ZeroLevel.Patterns.DependencyInjection
         /// <param name="compose">Compose the object when true</param>
         /// <returns>Instance</returns>
         object Resolve(Type type, bool compose = true);
+
         /// <summary>
         /// Dependency resolve
         /// </summary>
@@ -88,6 +99,7 @@ namespace ZeroLevel.Patterns.DependencyInjection
         /// <param name="compose">Compose the object when true</param>
         /// <returns>Instance</returns>
         object Resolve(Type type, string resolveName, bool compose = true);
+
         /// <summary>
         /// Dependency resolve
         /// </summary>
@@ -96,6 +108,7 @@ namespace ZeroLevel.Patterns.DependencyInjection
         /// <param name="compose">Compose the object when true</param>
         /// <returns>Instance</returns>
         object Resolve(Type type, object[] args, bool compose = true);
+
         /// <summary>
         /// Dependency resolve
         /// </summary>
@@ -105,17 +118,27 @@ namespace ZeroLevel.Patterns.DependencyInjection
         /// <param name="compose">Compose the object when true</param>
         /// <returns>Instance</returns>
         object Resolve(Type type, string resolveName, object[] args, bool compose = true);
-        #endregion
+
+        #endregion Resolving
 
         #region Safe resolving
+
         object TryResolve(Type type, out object result, bool compose = true);
+
         object TryResolve(Type type, object[] args, out object result, bool compose = true);
+
         object TryResolve(Type type, string resolveName, out object result, bool compose = true);
+
         bool TryResolve<T>(out T result, bool compose = true);
+
         bool TryResolve<T>(object[] args, out T result, bool compose = true);
+
         bool TryResolve<T>(string resolveName, out T result, bool compose = true);
+
         bool TryResolve<T>(string resolveName, object[] args, out T result, bool compose = true);
+
         bool TryResolve(Type type, string resolveName, object[] args, out object result, bool compose = true);
-        #endregion
+
+        #endregion Safe resolving
     }
 }

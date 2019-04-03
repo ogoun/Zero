@@ -2,7 +2,7 @@
  *  Port of Snowball stemmers on C#
  *  Original stemmers can be found on http://snowball.tartarus.org
  *  Licence still BSD: http://snowball.tartarus.org/license.php
- *  
+ *
  *  Most of stemmers are ported from Java by Iveonik Systems ltd. (www.iveonik.com)
  */
 
@@ -52,7 +52,6 @@ namespace Iveonik.Stemmers
           new Among ( "dt", -1, -1, null ),
           new Among ( "vt", -1, -1, null )
         };
-
 
         private readonly static Among[] a_2 =
         {
@@ -199,11 +198,13 @@ namespace Iveonik.Stemmers
             {
                 case 0:
                     return false;
+
                 case 1:
                     // (, line 44
                     // delete, line 44
                     slice_del();
                     break;
+
                 case 2:
                     // (, line 46
                     // or, line 46
@@ -235,6 +236,7 @@ namespace Iveonik.Stemmers
                     // delete, line 46
                     slice_del();
                     break;
+
                 case 3:
                     // (, line 48
                     // <-, line 48
@@ -324,6 +326,7 @@ namespace Iveonik.Stemmers
             {
                 case 0:
                     return false;
+
                 case 1:
                     // (, line 67
                     // delete, line 67

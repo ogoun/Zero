@@ -20,6 +20,7 @@ namespace DOM.DSL.Services
     internal class TContainer
     {
         #region Private classes
+
         private class TDList
         {
             private IList _list;
@@ -79,7 +80,8 @@ namespace DOM.DSL.Services
                 return _list;
             }
         }
-        #endregion
+
+        #endregion Private classes
 
         private readonly TContainerFactory _factory;
         private readonly TRender _render;
@@ -216,16 +218,19 @@ namespace DOM.DSL.Services
                         args = args_getter(this);
                         ApplyStringFunction(functionName, args);
                         break;
+
                     case FunctionType.Condition:
                         args = args_getter(this);
                         ApplyConditionFunction(functionName, args);
                         break;
+
                     case FunctionType.Extract:
                         unchecked
                         {
                             ApplyExtractionFunction(functionName, args_getter, out args);
                         }
                         break;
+
                     case FunctionType.Unknown:
                         break;
                 }
@@ -243,6 +248,7 @@ namespace DOM.DSL.Services
         }
 
         #region As
+
         public T As<T>()
         {
             if (_current == null) return default(T);
@@ -275,15 +281,17 @@ namespace DOM.DSL.Services
             {
                 return Convert.ChangeType(_current, type);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Log.SystemWarning($"[DOM.TContainer] Fault cast current value from type '{_current?.GetType()?.FullName ?? string.Empty}' to type '{type.FullName}'. {ex.ToString()}");
                 return TypeHelpers.CreateDefaultState(type);
             }
         }
-        #endregion
+
+        #endregion As
 
         #region Detect function type
+
         private enum FunctionType
         {
             Extract,
@@ -291,6 +299,7 @@ namespace DOM.DSL.Services
             Condition,
             Unknown
         }
+
         private static FunctionType GetFunctionType(string function)
         {
             switch (function)
@@ -319,6 +328,7 @@ namespace DOM.DSL.Services
                 case "tofilename":
                 case "topath":
                     return FunctionType.String;
+
                 case "contains":
                 case "nocontains":
                 case "any":
@@ -347,11 +357,13 @@ namespace DOM.DSL.Services
             }
             return FunctionType.Extract;
         }
-        #endregion
+
+        #endregion Detect function type
 
         #region Properties
 
         #region Flow
+
         private void SelectProperty(TextStyle style, string property, string propertyIndex)
         {
             switch (property.Trim().ToLowerInvariant())
@@ -360,13 +372,16 @@ namespace DOM.DSL.Services
                 case "formatting":
                     Reset(style.Formatting);
                     break;
+
                 case "size":
                     Reset(style.Size);
                     break;
+
                 case "color":
                 case "foreground":
                     Reset(style.HexColor);
                     break;
+
                 case "background":
                     Reset(style.HexMarkerColor);
                     break;
@@ -382,9 +397,11 @@ namespace DOM.DSL.Services
                 case "caption":
                     Reset(column.Caption);
                     break;
+
                 case "type":
                     Reset(column.Type);
                     break;
+
                 default:
                     Reset(column.Caption);
                     break;
@@ -400,13 +417,16 @@ namespace DOM.DSL.Services
                 case "identifier":
                     Reset(audio.Identifier);
                     break;
+
                 case "title":
                 case "name":
                     Reset(audio.Title);
                     break;
+
                 case "type":
                     Reset(audio.Type);
                     break;
+
                 case "source":
                     Reset(audio.Source);
                     break;
@@ -422,16 +442,20 @@ namespace DOM.DSL.Services
                 case "lead":
                     Reset(table.Abstract);
                     break;
+
                 case "columns":
                     Reset(table.Columns);
                     break;
+
                 case "name":
                 case "title":
                     Reset(table.Name);
                     break;
+
                 case "rows":
                     Reset(table.Rows);
                     break;
+
                 case "type":
                     Reset(table.Type);
                     break;
@@ -447,13 +471,16 @@ namespace DOM.DSL.Services
                 case "identifier":
                     Reset(form.Identifier);
                     break;
+
                 case "title":
                 case "name":
                     Reset(form.Title);
                     break;
+
                 case "type":
                     Reset(form.Type);
                     break;
+
                 case "source":
                     Reset(form.Source);
                     break;
@@ -469,13 +496,16 @@ namespace DOM.DSL.Services
                 case "identifier":
                     Reset(video.Identifier);
                     break;
+
                 case "title":
                 case "name":
                     Reset(video.Title);
                     break;
+
                 case "type":
                     Reset(video.Type);
                     break;
+
                 case "source":
                     Reset(video.Source);
                     break;
@@ -491,13 +521,16 @@ namespace DOM.DSL.Services
                 case "identifier":
                     Reset(image.Identifier);
                     break;
+
                 case "title":
                 case "name":
                     Reset(image.Title);
                     break;
+
                 case "type":
                     Reset(image.Type);
                     break;
+
                 case "source":
                     Reset(image.Source);
                     break;
@@ -511,10 +544,12 @@ namespace DOM.DSL.Services
                 case "style":
                     Reset(quote.Style);
                     break;
+
                 case "value":
                 case "text":
                     Reset(quote.Value);
                     break;
+
                 case "type":
                     Reset(quote.Type);
                     break;
@@ -528,10 +563,12 @@ namespace DOM.DSL.Services
                 case "style":
                     Reset(text.Style);
                     break;
+
                 case "value":
                 case "text":
                     Reset(text.Value);
                     break;
+
                 case "type":
                     Reset(text.Type);
                     break;
@@ -547,10 +584,12 @@ namespace DOM.DSL.Services
                 case "url":
                     Reset(link.Href);
                     break;
+
                 case "value":
                 case "text":
                     Reset(link.Value);
                     break;
+
                 case "type":
                     Reset(link.Type);
                     break;
@@ -565,6 +604,7 @@ namespace DOM.DSL.Services
                 case "items":
                     Reset(paragraph.Parts);
                     break;
+
                 case "type":
                     Reset(paragraph.Type);
                     break;
@@ -579,6 +619,7 @@ namespace DOM.DSL.Services
                 case "items":
                     Reset(section.Parts);
                     break;
+
                 case "type":
                     Reset(section.Type);
                     break;
@@ -593,6 +634,7 @@ namespace DOM.DSL.Services
                 case "items":
                     Reset(row.Cells);
                     break;
+
                 case "type":
                     Reset(row.Type);
                     break;
@@ -606,6 +648,7 @@ namespace DOM.DSL.Services
                 case "items":
                     Reset(list.Items);
                     break;
+
                 case "type":
                     Reset(list.Type);
                     break;
@@ -620,10 +663,12 @@ namespace DOM.DSL.Services
                 case "title":
                     Reset(audioplayer.Title);
                     break;
+
                 case "items":
                 case "tracks":
                     Reset(audioplayer.Tracks);
                     break;
+
                 case "type":
                     Reset(audioplayer.Type);
                     break;
@@ -638,10 +683,12 @@ namespace DOM.DSL.Services
                 case "title":
                     Reset(gallery.Title);
                     break;
+
                 case "items":
                 case "images":
                     Reset(gallery.Images);
                     break;
+
                 case "type":
                     Reset(gallery.Type);
                     break;
@@ -656,16 +703,19 @@ namespace DOM.DSL.Services
                 case "title":
                     Reset(videoplayer.Title);
                     break;
+
                 case "items":
                 case "playlist":
                     Reset(videoplayer.Playlist);
                     break;
+
                 case "type":
                     Reset(videoplayer.Type);
                     break;
             }
         }
-        #endregion
+
+        #endregion Flow
 
         private void SelectProperty(TimeSpan time, string property, string propertyIndex)
         {
@@ -681,6 +731,7 @@ namespace DOM.DSL.Services
                         Reset(time.TotalDays.ToString(propertyIndex));
                     }
                     break;
+
                 case "hours":
                     if (string.IsNullOrWhiteSpace(propertyIndex))
                     {
@@ -691,6 +742,7 @@ namespace DOM.DSL.Services
                         Reset(time.TotalHours.ToString(propertyIndex));
                     }
                     break;
+
                 case "minutes":
                     if (string.IsNullOrWhiteSpace(propertyIndex))
                     {
@@ -701,6 +753,7 @@ namespace DOM.DSL.Services
                         Reset(time.TotalMinutes.ToString(propertyIndex));
                     }
                     break;
+
                 case "seconds":
                     if (string.IsNullOrWhiteSpace(propertyIndex))
                     {
@@ -711,6 +764,7 @@ namespace DOM.DSL.Services
                         Reset(time.TotalSeconds.ToString(propertyIndex));
                     }
                     break;
+
                 case "milliseconds":
                     if (string.IsNullOrWhiteSpace(propertyIndex))
                     {
@@ -721,6 +775,7 @@ namespace DOM.DSL.Services
                         Reset(time.TotalMilliseconds.ToString(propertyIndex));
                     }
                     break;
+
                 case "ticks":
                     if (string.IsNullOrWhiteSpace(propertyIndex))
                     {
@@ -772,16 +827,19 @@ namespace DOM.DSL.Services
                 case "username":
                     Reset(Environment.UserName);
                     break;
+
                 case "domain":
                 case "domainname":
                     Reset(Environment.UserDomainName);
                     break;
+
                 case "host":
                 case "hostname":
                 case "machine":
                 case "machinename":
                     Reset(Environment.MachineName);
                     break;
+
                 case "tick":
                 case "tickcount":
                     Reset(Environment.TickCount);
@@ -790,17 +848,21 @@ namespace DOM.DSL.Services
                 case "subs":
                     Reset(env.SubscriptionName);
                     break;
+
                 case "subsid":
                 case "subscriptionid":
                     Reset(env.SubscriptionId);
                     break;
+
                 case "file":
                 case "filename":
                     Reset(env.FileName);
                     break;
+
                 case "delay":
                     Reset(env.Delay);
                     break;
+
                 case "contract":
                     Reset(env.ContractName);
                     break;
@@ -808,9 +870,11 @@ namespace DOM.DSL.Services
                 case "encoding":
                     Reset(env.Encoding.HeaderName);
                     break;
+
                 case "encodingfullname":
                     Reset(env.Encoding.EncodingName);
                     break;
+
                 case "encodingpage":
                 case "encodingcode":
                 case "encodingcodepage":
@@ -826,10 +890,12 @@ namespace DOM.DSL.Services
                 case "version":
                     Reset(identifier.Version);
                     break;
+
                 case "time":
                 case "timestamp":
                     Reset(identifier.Timestamp);
                     break;
+
                 case "date":
                 case "datelabel":
                     Reset(identifier.DateLabel);
@@ -845,12 +911,15 @@ namespace DOM.DSL.Services
                 case "places":
                     enumerable = tags.Places;
                     break;
+
                 case "companies":
                     enumerable = tags.Companies;
                     break;
+
                 case "persons":
                     enumerable = tags.Persons;
                     break;
+
                 case "keywords":
                     enumerable = tags.Keywords;
                     break;
@@ -880,31 +949,39 @@ namespace DOM.DSL.Services
                 case "author":
                     Reset(descriptive.Byline);
                     break;
+
                 case "copyright":
                     Reset(descriptive.CopyrightNotice);
                     break;
+
                 case "created":
                 case "date":
                 case "time":
                 case "datetime":
                     Reset(descriptive.Created);
                     break;
+
                 case "lang":
                 case "language":
                     Reset(descriptive.Language);
                     break;
+
                 case "original":
                     Reset(descriptive.Original);
                     break;
+
                 case "priority":
                     Reset(descriptive.Priority);
                     break;
+
                 case "publisher":
                     Reset(descriptive.Publisher);
                     break;
+
                 case "source":
                     Reset(descriptive.Source);
                     break;
+
                 case "headers":
                     {
                         int index;
@@ -948,6 +1025,7 @@ namespace DOM.DSL.Services
                         Reset(dt.Day.ToString(propertyIndex));
                     }
                     break;
+
                 case "year":
                     if (string.IsNullOrWhiteSpace(propertyIndex))
                     {
@@ -958,6 +1036,7 @@ namespace DOM.DSL.Services
                         Reset(dt.Year.ToString(propertyIndex));
                     }
                     break;
+
                 case "month":
                     if (string.IsNullOrWhiteSpace(propertyIndex))
                     {
@@ -968,6 +1047,7 @@ namespace DOM.DSL.Services
                         Reset(dt.Month.ToString(propertyIndex));
                     }
                     break;
+
                 case "date":
                     if (string.IsNullOrWhiteSpace(propertyIndex))
                     {
@@ -978,6 +1058,7 @@ namespace DOM.DSL.Services
                         Reset(dt.Date.ToString(propertyIndex));
                     }
                     break;
+
                 case "hour":
                     if (string.IsNullOrWhiteSpace(propertyIndex))
                     {
@@ -988,6 +1069,7 @@ namespace DOM.DSL.Services
                         Reset(dt.Hour.ToString(propertyIndex));
                     }
                     break;
+
                 case "minute":
                     if (string.IsNullOrWhiteSpace(propertyIndex))
                     {
@@ -998,6 +1080,7 @@ namespace DOM.DSL.Services
                         Reset(dt.Minute.ToString(propertyIndex));
                     }
                     break;
+
                 case "second":
                     if (string.IsNullOrWhiteSpace(propertyIndex))
                     {
@@ -1008,6 +1091,7 @@ namespace DOM.DSL.Services
                         Reset(dt.Second.ToString(propertyIndex));
                     }
                     break;
+
                 case "millisecond":
                     if (string.IsNullOrWhiteSpace(propertyIndex))
                     {
@@ -1018,6 +1102,7 @@ namespace DOM.DSL.Services
                         Reset(dt.Millisecond.ToString(propertyIndex));
                     }
                     break;
+
                 case "ticks":
                     if (string.IsNullOrWhiteSpace(propertyIndex))
                     {
@@ -1028,6 +1113,7 @@ namespace DOM.DSL.Services
                         Reset(dt.Ticks.ToString(propertyIndex));
                     }
                     break;
+
                 case "time":
                     if (string.IsNullOrWhiteSpace(propertyIndex))
                     {
@@ -1038,6 +1124,7 @@ namespace DOM.DSL.Services
                         Reset(dt.TimeOfDay.ToString(propertyIndex));
                     }
                     break;
+
                 case "dayofweek":
                     if (string.IsNullOrWhiteSpace(propertyIndex) == false)
                     {
@@ -1052,6 +1139,7 @@ namespace DOM.DSL.Services
                         Reset(dt.DayOfWeek.ToString());
                     }
                     break;
+
                 case "dayofyear":
                     if (string.IsNullOrWhiteSpace(propertyIndex))
                     {
@@ -1072,12 +1160,15 @@ namespace DOM.DSL.Services
                 case "title":
                     Reset(agency.Title);
                     break;
+
                 case "url":
                     Reset(agency.Url);
                     break;
+
                 case "description":
                     Reset(agency.Description);
                     break;
+
                 default:
                     Reset(agency.Title);
                     break;
@@ -1091,18 +1182,23 @@ namespace DOM.DSL.Services
                 case "title":
                     Reset(category.Title);
                     break;
+
                 case "code":
                     Reset(category.Code);
                     break;
+
                 case "description":
                     Reset(category.Description);
                     break;
+
                 case "direction":
                     Reset(category.DirectionCode);
                     break;
+
                 case "system":
                     Reset(category.IsSystem);
                     break;
+
                 default:
                     Reset(category.Title);
                     break;
@@ -1116,15 +1212,19 @@ namespace DOM.DSL.Services
                 case "name":
                     Reset(header.Name);
                     break;
+
                 case "value":
                     Reset(header.Value);
                     break;
+
                 case "type":
                     Reset(header.Type);
                     break;
+
                 case "tag":
                     Reset(header.Tag);
                     break;
+
                 default:
                     Reset(header.Value);
                     break;
@@ -1138,9 +1238,11 @@ namespace DOM.DSL.Services
                 case "name":
                     Reset(tag.Name);
                     break;
+
                 case "value":
                     Reset(tag.Value);
                     break;
+
                 default:
                     Reset(tag.Value);
                     break;
@@ -1154,15 +1256,19 @@ namespace DOM.DSL.Services
                 case "caption":
                     Reset(aside.Caption);
                     break;
+
                 case "contenttype":
                     Reset(aside.ContentType);
                     break;
+
                 case "identity":
                     Reset(aside.Identity);
                     break;
+
                 case "summary":
                     Reset(aside.Summary);
                     break;
+
                 default:
                     Reset(aside.Caption);
                     break;
@@ -1176,15 +1282,19 @@ namespace DOM.DSL.Services
                 case "title":
                     Reset(assotiation.Title);
                     break;
+
                 case "documentid":
                     Reset(assotiation.DocumentId);
                     break;
+
                 case "relation":
                     Reset(assotiation.Relation);
                     break;
+
                 case "description":
                     Reset(assotiation.Description);
                     break;
+
                 default:
                     Reset(assotiation.Title);
                     break;
@@ -1234,9 +1344,11 @@ namespace DOM.DSL.Services
             Type keyType = typing[0];
             Reset(dictionary[ConvertTo(property, keyType)]);
         }
-        #endregion
+
+        #endregion Properties
 
         #region Functions
+
         private static string HtmlEncode(string text)
         {
             return HtmlUtility.EncodeHtmlEntities(text);
@@ -1319,6 +1431,7 @@ namespace DOM.DSL.Services
                         Reset(text);
                     }
                     break;
+
                 case "format":
                     if (_current is DateTime)
                     {
@@ -1327,6 +1440,7 @@ namespace DOM.DSL.Services
                         Reset(FormattedDateTime((DateTime)_current, format, culture));
                     }
                     break;
+
                 case "tolower": Reset(this.ToString().ToLowerInvariant()); break;
                 case "toupper": Reset(this.ToString().ToUpperInvariant()); break;
                 case "xmlescape": Reset(XmlEscape(this.ToString())); break;
@@ -1346,12 +1460,14 @@ namespace DOM.DSL.Services
                         Reset(string.Concat(this.ToString(), string.Join(string.Empty, args.Select(a => a.ToString()))));
                     }
                     break;
+
                 case "joinleft":
                     if (args.Length > 0)
                     {
                         Reset(string.Concat(string.Join(string.Empty, args.Select(a => a.ToString())), this.ToString()));
                     }
                     break;
+
                 case "insert":
                     {
                         int position;
@@ -1385,6 +1501,7 @@ namespace DOM.DSL.Services
                         }
                     }
                     break;
+
                 case "replace":
                     {
                         if (args.Length == 2)
@@ -1393,6 +1510,7 @@ namespace DOM.DSL.Services
                         }
                     }
                     break;
+
                 case "remove":
                     {
                         int start;
@@ -1420,6 +1538,7 @@ namespace DOM.DSL.Services
                         }
                     }
                     break;
+
                 case "index":
                     if (args.Length == 1)
                     {
@@ -1434,6 +1553,7 @@ namespace DOM.DSL.Services
                         Reset(-1);
                     }
                     break;
+
                 case "lastindex":
                     if (args.Length == 1)
                     {
@@ -1448,6 +1568,7 @@ namespace DOM.DSL.Services
                         Reset(-1);
                     }
                     break;
+
                 case "map_mc":
                     if (args != null && args.Any())
                     {
@@ -1455,6 +1576,7 @@ namespace DOM.DSL.Services
                         Reset(MakeMapFunc(_args, false)(this.ToString()));
                     }
                     break;
+
                 case "map":
                     if (args != null && args.Any())
                     {
@@ -1462,6 +1584,7 @@ namespace DOM.DSL.Services
                         Reset(MakeMapFunc(_args, true)(this.ToString()));
                     }
                     break;
+
                 case "padleft":
                     {
                         if (args.Length > 0)
@@ -1487,6 +1610,7 @@ namespace DOM.DSL.Services
                         }
                     }
                     break;
+
                 case "padright":
                     {
                         if (args.Length > 0)
@@ -1512,6 +1636,7 @@ namespace DOM.DSL.Services
                         }
                     }
                     break;
+
                 case "substr":
                     {
                         if (args.Length == 1)
@@ -1565,18 +1690,21 @@ namespace DOM.DSL.Services
                         Reset(Is(args[0], true));
                     }
                     break;
+
                 case "is_mc":
                     if (args?.Length > 0)
                     {
                         Reset(Is(args[0], false));
                     }
                     break;
+
                 case "isnt":
                     if (args?.Length > 0)
                     {
                         Reset(IsNot(args[0], true));
                     }
                     break;
+
                 case "isnt_mc":
                     if (args?.Length > 0)
                     {
@@ -1590,42 +1718,49 @@ namespace DOM.DSL.Services
                         Reset(LessThan(args[0], true));
                     }
                     break;
+
                 case "gt":
                     if (args?.Length > 0)
                     {
                         Reset(MoreThan(args[0], true));
                     }
                     break;
+
                 case "lte":
                     if (args?.Length > 0)
                     {
                         Reset(LessOrEq(args[0], true));
                     }
                     break;
+
                 case "gte":
                     if (args?.Length > 0)
                     {
                         Reset(MoreOrEq(args[0], true));
                     }
                     break;
+
                 case "lt_mc":
                     if (args?.Length > 0)
                     {
                         Reset(LessThan(args[0], false));
                     }
                     break;
+
                 case "gt_mc":
                     if (args?.Length > 0)
                     {
                         Reset(MoreThan(args[0], false));
                     }
                     break;
+
                 case "lte_mc":
                     if (args?.Length > 0)
                     {
                         Reset(LessOrEq(args[0], false));
                     }
                     break;
+
                 case "gte_mc":
                     if (args?.Length > 0)
                     {
@@ -1771,6 +1906,7 @@ namespace DOM.DSL.Services
                             }
                         }
                         break;
+
                     case "get":
                         {
                             if (args != null && args.Any())
@@ -1817,6 +1953,7 @@ namespace DOM.DSL.Services
                             }
                         }
                         break;
+
                     case "select":
                         {
                             if (args?.Length > 0)
@@ -1846,6 +1983,7 @@ namespace DOM.DSL.Services
                             }
                         }
                         break;
+
                     case "apply":
                         {
                             if (args?.Length > 0)
@@ -1865,6 +2003,7 @@ namespace DOM.DSL.Services
                                             case FunctionType.String:
                                                 container.ApplyStringFunction(functionName, functionArgs.ToArray());
                                                 break;
+
                                             case FunctionType.Condition:
                                                 container.ApplyConditionFunction(functionName, functionArgs.ToArray());
                                                 break;
@@ -1882,6 +2021,7 @@ namespace DOM.DSL.Services
                                         case FunctionType.String:
                                             container.ApplyStringFunction(functionName, functionArgs.ToArray());
                                             break;
+
                                         case FunctionType.Condition:
                                             container.ApplyConditionFunction(functionName, functionArgs.ToArray());
                                             break;
@@ -1892,6 +2032,7 @@ namespace DOM.DSL.Services
                             }
                         }
                         break;
+
                     case "distinct":
                         {
                             if (_current is IEnumerable)
@@ -1909,6 +2050,7 @@ namespace DOM.DSL.Services
                             }
                         }
                         break;
+
                     case "utc":
                         if (_current != null && (_current is DateTime))
                         {
@@ -1932,6 +2074,7 @@ namespace DOM.DSL.Services
                             }
                         }
                         break;
+
                     case "append":
                         if (_current is List<TContainer>)
                         {
@@ -1945,9 +2088,11 @@ namespace DOM.DSL.Services
                 }
             }
         }
-        #endregion
+
+        #endregion Functions
 
         #region Math
+
         private void Multiply(TContainer value)
         {
             if (_current is byte) Reset(((byte)_current) * value.As<byte>());
@@ -1961,6 +2106,7 @@ namespace DOM.DSL.Services
             else if (_current is double) Reset(((double)_current) * value.As<double>());
             else if (_current is decimal) Reset(((decimal)_current) * value.As<decimal>());
         }
+
         private void Divide(TContainer value)
         {
             if (_current is byte) Reset(((byte)_current) / value.As<byte>());
@@ -1974,6 +2120,7 @@ namespace DOM.DSL.Services
             else if (_current is double) Reset(((double)_current) / value.As<double>());
             else if (_current is decimal) Reset(((decimal)_current) / value.As<decimal>());
         }
+
         private void Increment(TContainer value)
         {
             if (_current is byte) Reset(((byte)_current) + value.As<byte>());
@@ -1989,6 +2136,7 @@ namespace DOM.DSL.Services
             else if (_current is decimal) Reset(((decimal)_current) + value.As<decimal>());
             else if (_current is DateTime) Reset(new DateTime(((DateTime)_current).Ticks + value.As<long>()));
         }
+
         private void Decrement(TContainer value)
         {
             if (_current is byte) Reset(((byte)_current) - value.As<byte>());
@@ -2003,6 +2151,7 @@ namespace DOM.DSL.Services
             else if (_current is decimal) Reset(((decimal)_current) - value.As<decimal>());
             else if (_current is DateTime) Reset(new DateTime(((DateTime)_current).Ticks - value.As<long>()));
         }
+
         private void Mod(TContainer value)
         {
             if (_current is byte) Reset(((byte)_current) % value.As<byte>());
@@ -2016,6 +2165,7 @@ namespace DOM.DSL.Services
             else if (_current is double) Reset(((double)_current) % value.As<double>());
             else if (_current is decimal) Reset(((decimal)_current) % value.As<decimal>());
         }
+
         private void Max()
         {
             if (IsEnumerable)
@@ -2071,6 +2221,7 @@ namespace DOM.DSL.Services
                 }
             }
         }
+
         private void Min()
         {
             if (IsEnumerable)
@@ -2294,6 +2445,7 @@ namespace DOM.DSL.Services
             Months,
             Years
         }
+
         private void ChangeDateTime(TContainer value, ChangeDateTimeType type)
         {
             if (_current == null) return;
@@ -2305,12 +2457,15 @@ namespace DOM.DSL.Services
                     case ChangeDateTimeType.Days:
                         Reset(dt.AddDays(value.As<double>()));
                         break;
+
                     case ChangeDateTimeType.Hours:
                         Reset(dt.AddHours(value.As<double>()));
                         break;
+
                     case ChangeDateTimeType.Minutes:
                         Reset(dt.AddMinutes(value.As<double>()));
                         break;
+
                     case ChangeDateTimeType.Seconds:
                         Reset(dt.AddSeconds(value.As<double>()));
                         break;
@@ -2318,18 +2473,22 @@ namespace DOM.DSL.Services
                     case ChangeDateTimeType.Milliseconds:
                         Reset(dt.AddMilliseconds(value.As<double>()));
                         break;
+
                     case ChangeDateTimeType.Months:
                         Reset(dt.AddMonths(value.As<int>()));
                         break;
+
                     case ChangeDateTimeType.Years:
                         Reset(dt.AddYears(value.As<int>()));
                         break;
                 }
             }
         }
-        #endregion
+
+        #endregion Math
 
         #region Conditions
+
         public bool Any(TContainer[] set = null, bool ignoreCase = true)
         {
             if (_current == null) return false;
@@ -2485,6 +2644,7 @@ namespace DOM.DSL.Services
                     case true:
                         if (t) return 0;
                         return 1;
+
                     case false:
                         if (!t) return 0;
                         return -1;
@@ -2541,13 +2701,16 @@ namespace DOM.DSL.Services
         {
             return (T)StringToTypeConverter.TryConvert(line, typeof(T));
         }
+
         private static object ConvertTo(string line, Type type)
         {
             return StringToTypeConverter.TryConvert(line, type);
         }
-        #endregion
+
+        #endregion Conditions
 
         #region Helpers
+
         private static string XmlEscape(string unescaped)
         {
             return SecurityElement.Escape(unescaped);
@@ -2557,7 +2720,9 @@ namespace DOM.DSL.Services
         {
             return JsonEscaper.EscapeString(s);
         }
+
         private const string DEFAULT_DATETIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
+
         private static string FormattedDateTime(DateTime dt, string format = null, string culture = null)
         {
             CultureInfo ci;
@@ -2586,7 +2751,8 @@ namespace DOM.DSL.Services
             }
             return dt.ToString(DEFAULT_DATETIME_FORMAT, ci);
         }
-        #endregion
+
+        #endregion Helpers
 
         public override string ToString()
         {

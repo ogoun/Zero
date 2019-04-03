@@ -2,9 +2,10 @@
  *  Port of Snowball stemmers on C#
  *  Original stemmers can be found on http://snowball.tartarus.org
  *  Licence still BSD: http://snowball.tartarus.org/license.php
- *  
+ *
  *  Most of stemmers are ported from Java by Iveonik Systems ltd. (www.iveonik.com)
  */
+
 using System.Text;
 using ZeroLevel.Services.Semantic;
 
@@ -13,7 +14,8 @@ namespace Iveonik.Stemmers
     public class DanishStemmer : StemmerOperations, ILexer
     {
         private readonly static DanishStemmer methodObject = new DanishStemmer();
-        private readonly static Among[] a_0 = 
+
+        private readonly static Among[] a_0 =
         {
             new Among ( "hed", -1, 1, null ),
             new Among ( "ethed", 0, 1, null ),
@@ -49,7 +51,7 @@ namespace Iveonik.Stemmers
             new Among ( "eret", 30, 1, null )
         };
 
-        private readonly static Among[] a_1 = 
+        private readonly static Among[] a_1 =
         {
             new Among ( "gd", -1, -1, null ),
             new Among ( "dt", -1, -1, null ),
@@ -57,7 +59,7 @@ namespace Iveonik.Stemmers
             new Among ( "kt", -1, -1, null )
         };
 
-        private readonly static Among[] a_2 = 
+        private readonly static Among[] a_2 =
         {
             new Among ( "ig", -1, 1, null ),
             new Among ( "lig", 0, 1, null ),
@@ -71,7 +73,7 @@ namespace Iveonik.Stemmers
                                                  (char)0, (char)0, (char)48,(char)0, (char)128 };
 
         private static readonly char[] g_s_ending = { (char)239, (char)254, (char)42, (char)3, (char)0, (char)0,
-                                                        (char)0, (char)0, (char)0, (char)0, (char)0, (char)0, 
+                                                        (char)0, (char)0, (char)0, (char)0, (char)0, (char)0,
                                                         (char)0, (char)0, (char)0, (char)0, (char)16 };
 
         private int I_x;
@@ -198,11 +200,13 @@ namespace Iveonik.Stemmers
             {
                 case 0:
                     return false;
+
                 case 1:
                     // (, line 48
                     // delete, line 48
                     slice_del();
                     break;
+
                 case 2:
                     // (, line 50
                     if (!(in_grouping_b(g_s_ending, 97, 229)))
@@ -321,6 +325,7 @@ namespace Iveonik.Stemmers
             {
                 case 0:
                     return false;
+
                 case 1:
                     // (, line 70
                     // delete, line 70
@@ -337,6 +342,7 @@ namespace Iveonik.Stemmers
                     } while (false);
                     cursor = limit - v_4;
                     break;
+
                 case 2:
                     // (, line 72
                     // <-, line 72

@@ -2,9 +2,10 @@
  *  Port of Snowball stemmers on C#
  *  Original stemmers can be found on http://snowball.tartarus.org
  *  Licence still BSD: http://snowball.tartarus.org/license.php
- *  
+ *
  *  Most of stemmers are ported from Java by Iveonik Systems ltd. (www.iveonik.com)
  */
+
 using ZeroLevel.Services.Semantic;
 
 namespace Iveonik.Stemmers
@@ -13,7 +14,7 @@ namespace Iveonik.Stemmers
     {
         private readonly static RussianStemmer methodObject = new RussianStemmer();
 
-        private readonly static Among[] a_0 = 
+        private readonly static Among[] a_0 =
         {
             new Among ( "\u0432", -1, 1, null ),
             new Among ( "\u0438\u0432", 0, 2, null ),
@@ -26,7 +27,7 @@ namespace Iveonik.Stemmers
             new Among ( "\u044B\u0432\u0448\u0438\u0441\u044C", 6, 2, null )
         };
 
-        private readonly static Among[] a_1 = 
+        private readonly static Among[] a_1 =
         {
             new Among ( "\u0435\u0435", -1, 1, null ),
             new Among ( "\u0438\u0435", -1, 1, null ),
@@ -56,7 +57,7 @@ namespace Iveonik.Stemmers
             new Among ( "\u044F\u044F", -1, 1, null )
         };
 
-        private readonly static Among[] a_2 = 
+        private readonly static Among[] a_2 =
         {
             new Among ( "\u0435\u043C", -1, 1, null ),
             new Among ( "\u043D\u043D", -1, 1, null ),
@@ -68,13 +69,13 @@ namespace Iveonik.Stemmers
             new Among ( "\u0443\u044E\u0449", 6, 2, null )
         };
 
-        private readonly static Among[] a_3 = 
+        private readonly static Among[] a_3 =
         {
             new Among ( "\u0441\u044C", -1, 1, null ),
             new Among ( "\u0441\u044F", -1, 1, null )
         };
 
-        private readonly static Among[] a_4 = 
+        private readonly static Among[] a_4 =
         {
             new Among ( "\u043B\u0430", -1, 1, null ),
             new Among ( "\u0438\u043B\u0430", 0, 2, null ),
@@ -124,7 +125,7 @@ namespace Iveonik.Stemmers
             new Among ( "\u0443\u044E", 44, 2, null )
         };
 
-        private readonly static Among[] a_5 = 
+        private readonly static Among[] a_5 =
         {
             new Among ( "\u0430", -1, 1, null ),
             new Among ( "\u0435\u0432", -1, 1, null ),
@@ -164,13 +165,13 @@ namespace Iveonik.Stemmers
             new Among ( "\u044C\u044F", 33, 1, null )
         };
 
-        private readonly static Among[] a_6 = 
+        private readonly static Among[] a_6 =
         {
             new Among ( "\u043E\u0441\u0442", -1, 1, null ),
             new Among ( "\u043E\u0441\u0442\u044C", -1, 1, null )
         };
 
-        private readonly static Among[] a_7 = 
+        private readonly static Among[] a_7 =
         {
             new Among ( "\u0435\u0439\u0448\u0435", -1, 1, null ),
             new Among ( "\u043D", -1, 2, null ),
@@ -230,7 +231,6 @@ namespace Iveonik.Stemmers
                     }
                     cursor++;
                 }
-
 
                 if (root) break;
                 root = false;
@@ -347,6 +347,7 @@ namespace Iveonik.Stemmers
             {
                 case 0:
                     return false;
+
                 case 1:
                     // (, line 76
                     // or, line 76
@@ -375,6 +376,7 @@ namespace Iveonik.Stemmers
                     // delete, line 76
                     slice_del();
                     break;
+
                 case 2:
                     // (, line 83
                     // delete, line 83
@@ -402,6 +404,7 @@ namespace Iveonik.Stemmers
             {
                 case 0:
                     return false;
+
                 case 1:
                     // (, line 97
                     // delete, line 97
@@ -473,6 +476,7 @@ namespace Iveonik.Stemmers
                         // delete, line 115
                         slice_del();
                         break;
+
                     case 2:
                         // (, line 122
                         // delete, line 122
@@ -504,6 +508,7 @@ namespace Iveonik.Stemmers
             {
                 case 0:
                     return false;
+
                 case 1:
                     // (, line 132
                     // delete, line 132
@@ -533,6 +538,7 @@ namespace Iveonik.Stemmers
             {
                 case 0:
                     return false;
+
                 case 1:
                     // (, line 143
                     // or, line 143
@@ -562,6 +568,7 @@ namespace Iveonik.Stemmers
                     // delete, line 143
                     slice_del();
                     break;
+
                 case 2:
                     // (, line 151
                     // delete, line 151
@@ -589,6 +596,7 @@ namespace Iveonik.Stemmers
             {
                 case 0:
                     return false;
+
                 case 1:
                     // (, line 167
                     // delete, line 167
@@ -621,6 +629,7 @@ namespace Iveonik.Stemmers
             {
                 case 0:
                     return false;
+
                 case 1:
                     // (, line 179
                     // delete, line 179
@@ -648,6 +657,7 @@ namespace Iveonik.Stemmers
             {
                 case 0:
                     return false;
+
                 case 1:
                     // (, line 188
                     // delete, line 188
@@ -669,6 +679,7 @@ namespace Iveonik.Stemmers
                     // delete, line 189
                     slice_del();
                     break;
+
                 case 2:
                     // (, line 192
                     // literal, line 192
@@ -679,6 +690,7 @@ namespace Iveonik.Stemmers
                     // delete, line 192
                     slice_del();
                     break;
+
                 case 3:
                     // (, line 194
                     // delete, line 194

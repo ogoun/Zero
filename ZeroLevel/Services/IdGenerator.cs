@@ -17,6 +17,7 @@ namespace ZeroLevel.Services
             long id = 0;
             return new Func<long>(() => Interlocked.Increment(ref id));
         }
+
         /// <summary>
         /// Creates a base64 hash from the specified datetime
         /// </summary>
@@ -28,6 +29,7 @@ namespace ZeroLevel.Services
                                     .Replace('/', '-')
                                     .TrimEnd('=');
         }
+
         /// <summary>
         /// Creates a base64 hash from the current datetime
         /// </summary>
@@ -35,6 +37,7 @@ namespace ZeroLevel.Services
         {
             return HashFromDateTime(DateTime.Now);
         }
+
         /// <summary>
         /// Returns a hash as a string from the 32-bit hash value of the specified datetime
         /// </summary>
@@ -42,6 +45,7 @@ namespace ZeroLevel.Services
         {
             return date.ToString(CultureInfo.InvariantCulture).GetHashCode().ToString("x");
         }
+
         /// <summary>
         /// Returns a hash as a string from the 32-bit hash value of the current datetime
         /// </summary>
@@ -49,6 +53,7 @@ namespace ZeroLevel.Services
         {
             return DateTime.Now.ToString(CultureInfo.InvariantCulture).GetHashCode().ToString("x");
         }
+
         /// <summary>
         /// Creates a timestamp from current datetime
         /// </summary>
@@ -56,6 +61,7 @@ namespace ZeroLevel.Services
         {
             return DateTime.Now.ToString("yyyyMMddHHmmssFFF");
         }
+
         /// <summary>
         /// Creates a timestamp from a specified datetime
         /// </summary>

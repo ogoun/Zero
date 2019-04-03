@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
-using ZeroLevel.Services.Reflection;
 
 namespace ZeroLevel.Specification
 {

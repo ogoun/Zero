@@ -4,7 +4,7 @@ using ZeroLevel.Services.Serialization;
 
 namespace ZeroLevel.DocumentObjectModel.Flow
 {
-    public class Row : 
+    public class Row :
         ContentElement
     {
         public List<IContentElement> Cells = new List<IContentElement>();
@@ -13,7 +13,7 @@ namespace ZeroLevel.DocumentObjectModel.Flow
         {
         }
 
-        public Row(IBinaryReader reader) : 
+        public Row(IBinaryReader reader) :
             base(ContentElementType.Row)
         {
             Deserialize(reader);

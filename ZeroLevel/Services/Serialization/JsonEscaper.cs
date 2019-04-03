@@ -24,6 +24,7 @@
                 // Escape "</" for <script> tags
                 || (c == '/' && i > 0 && src[i - 1] == '<');
         }
+
         /// <summary>
         /// Escape string for use as json value
         /// </summary>

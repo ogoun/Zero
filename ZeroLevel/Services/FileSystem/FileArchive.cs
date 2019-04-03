@@ -165,8 +165,10 @@ namespace ZeroLevel.Services.FileSystem
         IDisposable
     {
         private static int _counter;
+
         private static string NextCounter
         { get { return Interlocked.Increment(ref _counter).ToString("X8"); } }
+
         private readonly string _base_path;
         private const string DIRECTORY_NAME_TEMPLATE = "yyyyMMdd";
         private const string FILE_NAME_TEMPLATE = "HH_mm_ss_{0}{1}";
@@ -226,6 +228,7 @@ namespace ZeroLevel.Services.FileSystem
                 Thread.Sleep(100);
             } while (_disposed == false);
         }
+
         /// <summary>
         /// Save text to archive
         /// </summary>
@@ -236,6 +239,7 @@ namespace ZeroLevel.Services.FileSystem
         {
             Apply(new StoreText(text, CreateArchiveFilePath(subfolder_name, file_name)));
         }
+
         /// <summary>
         /// Saving the specified file to the archive
         /// </summary>
@@ -258,6 +262,7 @@ namespace ZeroLevel.Services.FileSystem
                 Apply(new StoreFile(file_path, CreateArchiveFilePath(subfolder_name, file_name)));
             }
         }
+
         /// <summary>
         /// Saving data from stream to archive
         /// </summary>
@@ -268,6 +273,7 @@ namespace ZeroLevel.Services.FileSystem
         {
             Apply(new StoreStream(stream, CreateArchiveFilePath(subfolder_name, file_name)));
         }
+
         /// <summary>
         /// Saving data in binary form in the archive
         /// </summary>
@@ -288,6 +294,7 @@ namespace ZeroLevel.Services.FileSystem
         }
 
         #region Helpers
+
         private string CreateArchiveFilePath(string subfolder_name, string filename)
         {
             string archive_file_path;
@@ -333,7 +340,7 @@ namespace ZeroLevel.Services.FileSystem
             if (Directory.Exists(path) == false)
             {
                 Directory.CreateDirectory(path);
-                FSUtils.SetupFolderPermission(path,$"{Environment.UserDomainName}\\{Environment.UserName}",
+                FSUtils.SetupFolderPermission(path, $"{Environment.UserDomainName}\\{Environment.UserName}",
                     FileSystemRights.Write | FileSystemRights.Read | FileSystemRights.Delete | FileSystemRights.Modify,
                     AccessControlType.Allow);
             }
@@ -347,7 +354,8 @@ namespace ZeroLevel.Services.FileSystem
             }
             return FSUtils.PathCorrection(path);
         }
-        #endregion
+
+        #endregion Helpers
 
         public void Dispose()
         {
@@ -396,6 +404,7 @@ namespace ZeroLevel.Services.FileSystem
                 });
             }
         }
+
         /// <summary>
         /// Save text to archive
         /// </summary>
@@ -406,6 +415,7 @@ namespace ZeroLevel.Services.FileSystem
         {
             Apply(new StoreText(text, CreateArchiveFilePath(name)));
         }
+
         /// <summary>
         /// Saving the specified file to the archive
         /// </summary>
@@ -416,6 +426,7 @@ namespace ZeroLevel.Services.FileSystem
         {
             Apply(new StoreFile(file_path, CreateArchiveFilePath(name)));
         }
+
         /// <summary>
         /// Sync saving the specified file to the archive
         /// </summary>
@@ -433,6 +444,7 @@ namespace ZeroLevel.Services.FileSystem
                 Apply(new StoreFile(file_path, CreateArchiveFilePath(name)));
             }
         }
+
         /// <summary>
         /// Saving data from stream to archive
         /// </summary>
@@ -443,6 +455,7 @@ namespace ZeroLevel.Services.FileSystem
         {
             Apply(new StoreStream(stream, CreateArchiveFilePath(name)));
         }
+
         /// <summary>
         /// Сохранение данных в бинарном виде в архив
         /// </summary>
@@ -463,6 +476,7 @@ namespace ZeroLevel.Services.FileSystem
         }
 
         #region Helpers
+
         private string CreateArchiveFilePath(string original_name)
         {
             return Path.Combine(_currentArchivePath, FSUtils.FileNameCorrection(original_name));
@@ -488,7 +502,8 @@ namespace ZeroLevel.Services.FileSystem
             }
             return FSUtils.PathCorrection(path);
         }
-        #endregion
+
+        #endregion Helpers
 
         public void Dispose()
         {

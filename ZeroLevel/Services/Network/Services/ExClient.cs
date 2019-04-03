@@ -12,7 +12,9 @@ namespace ZeroLevel.Services.Network
         private readonly IZTransport _transport;
         private readonly ExRouter _router;
         private readonly FrameExchange _fe;
+
         public event Action Connected = () => { };
+
         public new ZTransportStatus Status => _transport.Status;
 
         public ExClient(IZTransport transport)

@@ -11,6 +11,7 @@ namespace ZeroLevel.Services.Serialization
         : IBinarySerializable
     {
         #region Cachee
+
         private class Wrapper
         {
             public string ReadId;
@@ -29,8 +30,10 @@ namespace ZeroLevel.Services.Serialization
         }
 
         private readonly static object _creation_lock = new object();
+
         private readonly static Dictionary<Type, Wrapper> _cachee =
             new Dictionary<Type, Wrapper>();
+
         private static Wrapper Create<Tw>()
         {
             var type = typeof(Tw);
@@ -96,7 +99,6 @@ namespace ZeroLevel.Services.Serialization
                             wrapper.ReadId = wrapper.Invoker.Configure(typeof(MemoryStreamReader), "ReadLong").First();
                             wrapper.WriteId = wrapper.Invoker.Configure(typeof(MemoryStreamWriter), "WriteLong").First();
                         }
-
                         else if (typeof(T) == typeof(String))
                         {
                             wrapper.ReadId = wrapper.Invoker.Configure(typeof(MemoryStreamReader), "ReadString").First();
@@ -160,7 +162,6 @@ namespace ZeroLevel.Services.Serialization
                             wrapper.ReadId = wrapper.Invoker.Configure(typeof(MemoryStreamReader), "ReadInt64Collection").First();
                             wrapper.WriteId = wrapper.Invoker.Configure(typeof(MemoryStreamWriter), CreatePredicate()).First();
                         }
-
                         else if (typeof(T) == typeof(IEnumerable<String>))
                         {
                             wrapper.ReadId = wrapper.Invoker.Configure(typeof(MemoryStreamReader), "ReadStringCollection").First();
@@ -190,8 +191,10 @@ namespace ZeroLevel.Services.Serialization
             }
             return _cachee[type];
         }
+
         private Wrapper _wrapper;
-        #endregion
+
+        #endregion Cachee
 
         public SerializedObjectWrapper()
         {

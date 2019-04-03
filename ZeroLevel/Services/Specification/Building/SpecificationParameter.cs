@@ -11,14 +11,17 @@ namespace ZeroLevel.Contracts.Specification.Building
         /// Display Name
         /// </summary>
         public string DisplayName;
+
         /// <summary>
         /// Parameter name
         /// </summary>
         public string ParameterName;
+
         /// <summary>
         /// Parameter type
         /// </summary>
         public Type ParameterType;
+
         /// <summary>
         /// Parameter value
         /// </summary>

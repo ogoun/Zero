@@ -2,30 +2,31 @@
  *  Port of Snowball stemmers on C#
  *  Original stemmers can be found on http://snowball.tartarus.org
  *  Licence still BSD: http://snowball.tartarus.org/license.php
- *  
+ *
  *  Most of stemmers are ported from Java by Iveonik Systems ltd. (www.iveonik.com)
  */
+
 using ZeroLevel.Services.Semantic;
 
 namespace Iveonik.Stemmers
 {
     public class EnglishStemmer : StemmerOperations, ILexer
     {
-        private readonly static Among[] a_0 = 
+        private readonly static Among[] a_0 =
         {
             new Among ( "arsen", -1, -1,null ),
             new Among ( "commun", -1, -1, null ),
             new Among ( "gener", -1, -1, null )
         };
 
-        private readonly static Among[] a_1 = 
+        private readonly static Among[] a_1 =
         {
             new Among ( "'", -1, 1, null),
             new Among ( "'s'", 0, 1, null),
             new Among ( "'s", -1, 1, null)
         };
 
-        private readonly static Among[] a_2 = 
+        private readonly static Among[] a_2 =
         {
             new Among ( "ied", -1, 2, null),
             new Among ( "s", -1, 3, null),
@@ -35,7 +36,7 @@ namespace Iveonik.Stemmers
             new Among ( "us", 1, -1, null)
         };
 
-        private readonly static Among[] a_3 = 
+        private readonly static Among[] a_3 =
         {
             new Among ( "", -1, 3, null),
             new Among ( "bb", 0, 2, null),
@@ -52,7 +53,7 @@ namespace Iveonik.Stemmers
             new Among ( "iz", 0, 1, null)
         };
 
-        private readonly static Among[] a_4 = 
+        private readonly static Among[] a_4 =
         {
             new Among ( "ed", -1, 2, null),
             new Among ( "eed", 0, 1, null),
@@ -62,7 +63,7 @@ namespace Iveonik.Stemmers
             new Among ( "ingly", -1, 2, null)
         };
 
-        private readonly static Among[] a_5 = 
+        private readonly static Among[] a_5 =
         {
             new Among ( "anci", -1, 3, null),
             new Among ( "enci", -1, 2, null),
@@ -90,7 +91,7 @@ namespace Iveonik.Stemmers
             new Among ( "ousness", -1, 10, null)
         };
 
-        private readonly static Among[] a_6 = 
+        private readonly static Among[] a_6 =
         {
             new Among ( "icate", -1, 4, null),
             new Among ( "ative", -1, 6, null),
@@ -103,7 +104,7 @@ namespace Iveonik.Stemmers
             new Among ( "ness", -1, 5, null)
         };
 
-        private readonly static Among[] a_7 = 
+        private readonly static Among[] a_7 =
         {
             new Among ( "ic", -1, 1, null),
             new Among ( "ance", -1, 1, null),
@@ -125,13 +126,13 @@ namespace Iveonik.Stemmers
             new Among ( "ement", 16, 1, null)
         };
 
-        private readonly static Among[] a_8 = 
+        private readonly static Among[] a_8 =
         {
             new Among ( "e", -1, 1, null),
             new Among ( "l", -1, 2, null)
         };
 
-        private readonly static Among[] a_9 = 
+        private readonly static Among[] a_9 =
         {
             new Among ( "succeed", -1, -1, null),
             new Among ( "proceed", -1, -1, null),
@@ -143,7 +144,7 @@ namespace Iveonik.Stemmers
             new Among ( "outing", -1, -1, null)
         };
 
-        private readonly static Among[] a_10 = 
+        private readonly static Among[] a_10 =
         {
             new Among ( "andes", -1, -1, null),
             new Among ( "atlas", -1, -1, null),
@@ -422,7 +423,7 @@ namespace Iveonik.Stemmers
             int v_1;
             // (, line 49
             // or, line 51
-            //        lab0: 
+            //        lab0:
             do
             {
                 v_1 = limit - cursor;
@@ -511,6 +512,7 @@ namespace Iveonik.Stemmers
                         cursor = limit - v_1;
                         subroot = true;
                         break;
+
                     case 1:
                         // (, line 62
                         // delete, line 62
@@ -533,15 +535,17 @@ namespace Iveonik.Stemmers
             {
                 case 0:
                     return false;
+
                 case 1:
                     // (, line 66
                     // <-, line 66
                     slice_from("ss");
                     break;
+
                 case 2:
                     // (, line 68
                     // or, line 68
-                    //    lab1: 
+                    //    lab1:
                     do
                     {
                         v_2 = limit - cursor;
@@ -568,6 +572,7 @@ namespace Iveonik.Stemmers
                         slice_from("ie");
                     } while (false);
                     break;
+
                 case 3:
                     // (, line 69
                     // next, line 69
@@ -624,6 +629,7 @@ namespace Iveonik.Stemmers
             {
                 case 0:
                     return false;
+
                 case 1:
                     // (, line 77
                     // call R1, line 77
@@ -634,6 +640,7 @@ namespace Iveonik.Stemmers
                     // <-, line 77
                     slice_from("ee");
                     break;
+
                 case 2:
                     // (, line 79
                     // test, line 80
@@ -673,6 +680,7 @@ namespace Iveonik.Stemmers
                     {
                         case 0:
                             return false;
+
                         case 1:
                             // (, line 83
                             // <+, line 83
@@ -682,6 +690,7 @@ namespace Iveonik.Stemmers
                                 cursor = c;
                             }
                             break;
+
                         case 2:
                             // (, line 86
                             // [, line 86
@@ -697,6 +706,7 @@ namespace Iveonik.Stemmers
                             // delete, line 86
                             slice_del();
                             break;
+
                         case 3:
                             // (, line 87
                             // atmark, line 87
@@ -735,7 +745,7 @@ namespace Iveonik.Stemmers
             // [, line 94
             ket = cursor;
             // or, line 94
-            //        lab0: 
+            //        lab0:
             do
             {
                 v_1 = limit - cursor;
@@ -809,66 +819,79 @@ namespace Iveonik.Stemmers
             {
                 case 0:
                     return false;
+
                 case 1:
                     // (, line 101
                     // <-, line 101
                     slice_from("tion");
                     break;
+
                 case 2:
                     // (, line 102
                     // <-, line 102
                     slice_from("ence");
                     break;
+
                 case 3:
                     // (, line 103
                     // <-, line 103
                     slice_from("ance");
                     break;
+
                 case 4:
                     // (, line 104
                     // <-, line 104
                     slice_from("able");
                     break;
+
                 case 5:
                     // (, line 105
                     // <-, line 105
                     slice_from("ent");
                     break;
+
                 case 6:
                     // (, line 107
                     // <-, line 107
                     slice_from("ize");
                     break;
+
                 case 7:
                     // (, line 109
                     // <-, line 109
                     slice_from("ate");
                     break;
+
                 case 8:
                     // (, line 111
                     // <-, line 111
                     slice_from("al");
                     break;
+
                 case 9:
                     // (, line 112
                     // <-, line 112
                     slice_from("ful");
                     break;
+
                 case 10:
                     // (, line 114
                     // <-, line 114
                     slice_from("ous");
                     break;
+
                 case 11:
                     // (, line 116
                     // <-, line 116
                     slice_from("ive");
                     break;
+
                 case 12:
                     // (, line 118
                     // <-, line 118
                     slice_from("ble");
                     break;
+
                 case 13:
                     // (, line 119
                     // literal, line 119
@@ -879,16 +902,19 @@ namespace Iveonik.Stemmers
                     // <-, line 119
                     slice_from("og");
                     break;
+
                 case 14:
                     // (, line 120
                     // <-, line 120
                     slice_from("ful");
                     break;
+
                 case 15:
                     // (, line 121
                     // <-, line 121
                     slice_from("less");
                     break;
+
                 case 16:
                     // (, line 122
                     if (!(in_grouping_b(g_valid_LI, 99, 116)))
@@ -925,31 +951,37 @@ namespace Iveonik.Stemmers
             {
                 case 0:
                     return false;
+
                 case 1:
                     // (, line 128
                     // <-, line 128
                     slice_from("tion");
                     break;
+
                 case 2:
                     // (, line 129
                     // <-, line 129
                     slice_from("ate");
                     break;
+
                 case 3:
                     // (, line 130
                     // <-, line 130
                     slice_from("al");
                     break;
+
                 case 4:
                     // (, line 132
                     // <-, line 132
                     slice_from("ic");
                     break;
+
                 case 5:
                     // (, line 134
                     // delete, line 134
                     slice_del();
                     break;
+
                 case 6:
                     // (, line 136
                     // call R2, line 136
@@ -989,11 +1021,13 @@ namespace Iveonik.Stemmers
             {
                 case 0:
                     return false;
+
                 case 1:
                     // (, line 144
                     // delete, line 144
                     slice_del();
                     break;
+
                 case 2:
                     // (, line 145
                     // or, line 145
@@ -1047,6 +1081,7 @@ namespace Iveonik.Stemmers
             {
                 case 0:
                     return false;
+
                 case 1:
                     // (, line 151
                     // or, line 151
@@ -1093,6 +1128,7 @@ namespace Iveonik.Stemmers
                     // delete, line 151
                     slice_del();
                     break;
+
                 case 2:
                     // (, line 152
                     // call R2, line 152
@@ -1155,56 +1191,67 @@ namespace Iveonik.Stemmers
             {
                 case 0:
                     return false;
+
                 case 1:
                     // (, line 174
                     // <-, line 174
                     slice_from("ski");
                     break;
+
                 case 2:
                     // (, line 175
                     // <-, line 175
                     slice_from("sky");
                     break;
+
                 case 3:
                     // (, line 176
                     // <-, line 176
                     slice_from("die");
                     break;
+
                 case 4:
                     // (, line 177
                     // <-, line 177
                     slice_from("lie");
                     break;
+
                 case 5:
                     // (, line 178
                     // <-, line 178
                     slice_from("tie");
                     break;
+
                 case 6:
                     // (, line 182
                     // <-, line 182
                     slice_from("idl");
                     break;
+
                 case 7:
                     // (, line 183
                     // <-, line 183
                     slice_from("gentl");
                     break;
+
                 case 8:
                     // (, line 184
                     // <-, line 184
                     slice_from("ugli");
                     break;
+
                 case 9:
                     // (, line 185
                     // <-, line 185
                     slice_from("earli");
                     break;
+
                 case 10:
                     // (, line 186
                     // <-, line 186
                     slice_from("onli");
                     break;
+
                 case 11:
                     // (, line 187
                     // <-, line 187

@@ -28,7 +28,6 @@ namespace ZeroLevel.Services.Reflection
                     identity.Append(argsTypes[i].Name);
                     if ((i + 1) < argsTypes.Length)
                         identity.Append(".");
-
                 }
             }
             identity.Append(")");

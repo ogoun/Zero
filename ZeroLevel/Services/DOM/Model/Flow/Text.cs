@@ -2,7 +2,7 @@
 
 namespace ZeroLevel.DocumentObjectModel.Flow
 {
-    public class Text : 
+    public class Text :
         ContentElement
     {
         public string Value { get; set; }
@@ -11,12 +11,14 @@ namespace ZeroLevel.DocumentObjectModel.Flow
         public Text() : base(ContentElementType.Text)
         {
         }
-        public Text(string value) : 
+
+        public Text(string value) :
             base(ContentElementType.Text)
         {
             this.Value = value;
         }
-        public Text(IBinaryReader reader) : 
+
+        public Text(IBinaryReader reader) :
             base(ContentElementType.Text)
         {
             Deserialize(reader);

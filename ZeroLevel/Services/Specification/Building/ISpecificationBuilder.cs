@@ -8,9 +8,12 @@ namespace ZeroLevel.Contracts.Specification.Building
     {
         string Name { get; }
         Type FilterType { get; }
-        IEnumerable<SpecificationParameter> Parameters{get;}
+        IEnumerable<SpecificationParameter> Parameters { get; }
+
         void ParametersTraversal(Action<SpecificationParameter> parameterHandler);
+
         ISpecification<T> Build<T>();
+
         bool Equals(ISpecificationBuilder other);
     }
 }

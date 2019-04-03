@@ -6,6 +6,7 @@ namespace ZeroLevel.Services.Reflection
     public static class TypeFastAccessMethodBuilder
     {
         private readonly static ITypeFastAccessMethodBuilder _builder;
+
         static TypeFastAccessMethodBuilder()
         {
             _builder = new TypeFastAccessMethodBuilderImpl();

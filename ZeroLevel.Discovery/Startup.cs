@@ -48,7 +48,7 @@ namespace ZeroLevel.Discovery
         // parameter in the WebApp.Start method.
         public void Configuration(IAppBuilder appBuilder)
         {
-            // Configure Web API for self-host. 
+            // Configure Web API for self-host.
             HttpConfiguration config = new HttpConfiguration();
             config.MapHttpAttributeRoutes(new EnableInheritRoutingDirectRouteProvider());
             config.Routes.MapHttpRoute(
@@ -67,6 +67,7 @@ namespace ZeroLevel.Discovery
         }
 
         private static bool _log_request_response;
+
         public static void StartWebPanel(int port,
             bool log_request_response)
         {

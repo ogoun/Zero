@@ -172,6 +172,7 @@ namespace ZeroLevel.Services.Async
 
             public IAsyncWaitQueue<object> WaitQueue { get { return _semaphore._queue; } }
         }
+
         // ReSharper restore UnusedMember.Local
     }
 }

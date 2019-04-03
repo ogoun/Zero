@@ -248,7 +248,8 @@ namespace ZeroLevel.Services.Async
             return this.GetEnumerator();
         }
 
-        #endregion
+        #endregion GenericListImplementations
+
         #region ObjectListImplementations
 
         int System.Collections.IList.Add(object value)
@@ -329,7 +330,8 @@ namespace ZeroLevel.Services.Async
             get { return this; }
         }
 
-        #endregion
+        #endregion ObjectListImplementations
+
         #region GenericListHelpers
 
         /// <summary>
@@ -386,7 +388,7 @@ namespace ZeroLevel.Services.Async
             }
         }
 
-        #endregion
+        #endregion GenericListHelpers
 
         /// <summary>
         /// Gets a value indicating whether this instance is empty.

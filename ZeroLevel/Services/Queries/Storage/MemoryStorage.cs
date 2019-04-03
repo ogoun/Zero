@@ -45,7 +45,6 @@ namespace ZeroLevel.Patterns.Queries
             }
         }
 
-
         public IEnumerable<T> Get()
         {
             _lock.EnterReadLock();

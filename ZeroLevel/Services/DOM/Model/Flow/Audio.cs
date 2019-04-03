@@ -3,14 +3,16 @@ using ZeroLevel.Services.Serialization;
 
 namespace ZeroLevel.DocumentObjectModel.Flow
 {
-    public sealed class Audio : 
+    public sealed class Audio :
         ContentElement
     {
         public SourceType Source { get; set; }
+
         /// <summary>
         /// Title
         /// </summary>
         public string Title;
+
         /// <summary>
         /// Link or Attachment ID
         /// </summary>
@@ -20,7 +22,7 @@ namespace ZeroLevel.DocumentObjectModel.Flow
         {
         }
 
-        public Audio(IBinaryReader reader) : 
+        public Audio(IBinaryReader reader) :
             base(ContentElementType.Audio)
         {
             Deserialize(reader);

@@ -7,6 +7,7 @@ namespace ZeroLevel.Services.Network
     public sealed class FrameParser
     {
         #region private models
+
         private enum ParserState
         {
             WaitNew,
@@ -82,7 +83,8 @@ namespace ZeroLevel.Services.Network
                 return i;
             }
         }
-        #endregion
+
+        #endregion private models
 
         private void FireOnFrame(byte[] payload)
         {
@@ -109,10 +111,12 @@ namespace ZeroLevel.Services.Network
         }
 
         public event Action<Frame> OnIncomingFrame;
+
         private readonly _Accum _accum = new _Accum();
 
         private ParserState _state = ParserState.WaitNew;
         private readonly object _push_lock = new object();
+
         /// <summary>
         /// Parse with state machine
         /// </summary>
@@ -146,6 +150,7 @@ namespace ZeroLevel.Services.Network
                             }
                         }
                         break;
+
                     case ParserState.WaitSize:
                         {
                             start = _accum.WriteSize(part, start, length);
@@ -163,12 +168,13 @@ namespace ZeroLevel.Services.Network
                             }
                         }
                         break;
+
                     case ParserState.Proceeding:
                         {
                             start = _accum.WritePayload(part, start, length);
                             if (_accum.Corrupted)
                             {
-                               // NetworkStats.Corrupted();
+                                // NetworkStats.Corrupted();
                                 _state = ParserState.WaitNew;
                             }
                             else if (_accum.PayloadFilled)

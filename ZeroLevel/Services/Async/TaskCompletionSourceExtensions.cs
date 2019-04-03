@@ -75,6 +75,7 @@ namespace ZeroLevel.Services.Async
             }
             return @this.TrySetResult(resultFunc());
         }
+
         /// <summary>
         /// Attempts to complete a <see cref="TaskCompletionSource{TResult}"/>, propagating the completion of <paramref name="eventArgs"/>.
         /// </summary>
@@ -91,6 +92,7 @@ namespace ZeroLevel.Services.Async
                 return @this.TrySetException(eventArgs.Error);
             return @this.TrySetResult(getResult());
         }
+
         /// <summary>
         /// Attempts to complete a <see cref="TaskCompletionSource"/>, propagating the completion of <paramref name="task"/>.
         /// </summary>
@@ -105,6 +107,7 @@ namespace ZeroLevel.Services.Async
                 return @this.TrySetCanceled();
             return @this.TrySetResult();
         }
+
         /// <summary>
         /// Attempts to complete a <see cref="TaskCompletionSource"/>, propagating the completion of <paramref name="eventArgs"/>.
         /// </summary>
@@ -119,6 +122,7 @@ namespace ZeroLevel.Services.Async
                 return @this.TrySetException(eventArgs.Error);
             return @this.TrySetResult();
         }
+
         /// <summary>
         /// Attempts to complete a <see cref="TaskCompletionSource{TResult}"/> with the specified value, forcing all continuations onto a threadpool thread even if they specified <c>ExecuteSynchronously</c>.
         /// </summary>
@@ -166,6 +170,7 @@ namespace ZeroLevel.Services.Async
             {
             }
         }
+
         /// <summary>
         /// Creates a new TCS for use with async code, and which forces its continuations to execute asynchronously.
         /// </summary>
@@ -174,6 +179,7 @@ namespace ZeroLevel.Services.Async
         {
             return new TaskCompletionSource<TResult>(TaskCreationOptions.RunContinuationsAsynchronously);
         }
+
         /// <summary>
         /// Attempts to complete a <see cref="TaskCompletionSource"/> as canceled, forcing all continuations onto a threadpool thread even if they specified <c>ExecuteSynchronously</c>.
         /// </summary>

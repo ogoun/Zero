@@ -18,9 +18,11 @@ namespace ZeroLevel.Microservices
             public MicroserviceInfo ServiceInfo { get; set; }
             public ExService Server { get; set; }
         }
+
         private bool _disposed = false;
         private readonly long _registerTaskKey = -1;
         private readonly IDiscoveryClient _discoveryClient;
+
         private readonly ConcurrentDictionary<string, MetaService> _services
             = new ConcurrentDictionary<string, MetaService>();
 
@@ -116,6 +118,7 @@ namespace ZeroLevel.Microservices
         }
 
         #region Private methods
+
         private void ValidateService(IExchangeService service)
         {
             if (string.IsNullOrWhiteSpace(service.Protocol))
@@ -127,6 +130,7 @@ namespace ZeroLevel.Microservices
                 throw new ArgumentNullException("Service.Key");
             }
         }
+
         private void ValidateService(MicroserviceInfo service)
         {
             if (string.IsNullOrWhiteSpace(service.Protocol))
@@ -218,9 +222,11 @@ namespace ZeroLevel.Microservices
                 _discoveryClient.Register(service);
             }
         }
-        #endregion
+
+        #endregion Private methods
 
         #region Utils
+
         private static Delegate CreateDelegate(MethodInfo methodInfo, object target)
         {
             Func<Type[], Type> getType;
@@ -241,9 +247,11 @@ namespace ZeroLevel.Microservices
             }
             return Delegate.CreateDelegate(getType(types.ToArray()), target, methodInfo.Name);
         }
-        #endregion
+
+        #endregion Utils
 
         #region Inboxes
+
         /// <summary>
         /// Регистрация обработчика входящих сообщений
         /// </summary>
@@ -263,6 +271,7 @@ namespace ZeroLevel.Microservices
                 Log.SystemError(ex, $"[Exchange] Register inbox handler error. Protocol '{meta.ServiceInfo.Protocol}'. Inbox '{inbox}'. Service '{meta.ServiceInfo.ServiceKey}'");
             }
         }
+
         /// <summary>
         /// Регистрация метода отдающего ответ на входящий запрос
         /// </summary>
@@ -283,6 +292,7 @@ namespace ZeroLevel.Microservices
                 Log.SystemError(ex, $"[Exchange] Register inbox replier error. Protocol '{meta.ServiceInfo.Protocol}'. Inbox '{inbox}'. Service '{meta.ServiceInfo.ServiceKey}'");
             }
         }
+
         /// <summary>
         /// Регистрация метода отдающего ответ на входящий запрос, не принимающего входящих данных
         /// </summary>
@@ -302,9 +312,11 @@ namespace ZeroLevel.Microservices
                 Log.SystemError(ex, $"[Exchange] Register inbox replier error. Protocol '{meta.ServiceInfo.Protocol}'. Inbox '{inbox}'. Service '{meta.ServiceInfo.ServiceKey}'");
             }
         }
-        #endregion
+
+        #endregion Inboxes
 
         #region Transport helpers
+
         /// <summary>
         /// Call service with round-robin balancing
         /// </summary>
@@ -503,7 +515,8 @@ namespace ZeroLevel.Microservices
                 }
             }
         }
-        #endregion
+
+        #endregion Transport helpers
 
         public void Dispose()
         {

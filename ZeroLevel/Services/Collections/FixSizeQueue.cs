@@ -22,6 +22,7 @@ namespace ZeroLevel.Services.Collections
             _nextIndex = 0;
             _count = 0;
         }
+
         /// <summary>
         /// If count is limited when intem adding, oldest item replace with new item
         /// </summary>

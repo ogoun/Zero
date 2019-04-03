@@ -11,6 +11,7 @@ namespace ZeroLevel.Services.Logging
         /// Number of messages in the queue
         /// </summary>
         long Count { get; }
+
         /// <summary>
         /// Write message to the queue
         /// </summary>

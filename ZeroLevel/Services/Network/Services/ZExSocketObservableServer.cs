@@ -7,7 +7,7 @@ namespace ZeroLevel.Services.Network
     public class ZExSocketObservableServer :
         ZSocketServer, IZObservableServer
     {
-        public ZExSocketObservableServer(IPEndPoint endpoint) 
+        public ZExSocketObservableServer(IPEndPoint endpoint)
             : base(endpoint)
         {
         }
@@ -15,6 +15,7 @@ namespace ZeroLevel.Services.Network
         public IPEndPoint Endpoint => base.LocalEndpoint;
 
         public event Action<Frame, IZBackward> OnMessage = (f, c) => { };
+
         public event Func<Frame, IZBackward, Frame> OnRequest = (f, c) => null;
 
         protected override void Handle(Frame frame, IZBackward client)

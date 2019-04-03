@@ -13,6 +13,7 @@ namespace ZeroLevel.Services.Logging.Implementation
             Folder = null;
             LimitFileSize = 0;
         }
+
         internal string Key { get; private set; }
         internal string Folder { get; private set; }
         internal long LimitFileSize { get; private set; }
@@ -47,16 +48,20 @@ namespace ZeroLevel.Services.Logging.Implementation
         : ILogger
     {
         #region Fields
+
         private readonly EncryptedFileLogOptions _options;
         private int _todayCountLogFiles = 0;
+
         /// <summary>
         /// Current log file
         /// </summary>
         private string _currentLogFile;
+
         /// <summary>
         /// Stream to output to file
         /// </summary>
         private Stream _writer;
+
         /// <summary>
         /// Lock on re-create file
         /// </summary>
@@ -67,7 +72,8 @@ namespace ZeroLevel.Services.Logging.Implementation
         private readonly long _taskRename = -1;
 
         private readonly FastObfuscator _obfuscator;
-        #endregion
+
+        #endregion Fields
 
         public EncryptedFileLog(EncryptedFileLogOptions options)
         {
@@ -96,6 +102,7 @@ namespace ZeroLevel.Services.Logging.Implementation
         }
 
         #region Utils
+
         /// <summary>
         /// Checking the name of the log file (changes when the date changes to the next day)
         /// </summary>
@@ -121,6 +128,7 @@ namespace ZeroLevel.Services.Logging.Implementation
                 }
             }
         }
+
         /// <summary>
         /// Closing the current log
         /// </summary>
@@ -161,10 +169,13 @@ namespace ZeroLevel.Services.Logging.Implementation
             }
             return fileName;
         }
-        #endregion
+
+        #endregion Utils
 
         #region IDisposable
+
         private bool _disposed = false;
+
         public void Dispose()
         {
             Sheduller.Remove(_taskRename);
@@ -174,9 +185,11 @@ namespace ZeroLevel.Services.Logging.Implementation
                 CloseCurrentWriter();
             }
         }
-        #endregion
+
+        #endregion IDisposable
 
         #region ILog
+
         public void Write(LogLevel level, string message)
         {
             if (false == _disposed)
@@ -203,6 +216,7 @@ namespace ZeroLevel.Services.Logging.Implementation
                 }
             }
         }
-        #endregion
+
+        #endregion ILog
     }
 }

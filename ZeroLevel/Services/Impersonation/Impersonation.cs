@@ -13,9 +13,10 @@ namespace ZeroLevel.Services.Impersonation
     [PermissionSet(SecurityAction.Demand, Name = "FullTrust")]
     public class Impersonation : IDisposable
     {
-        WindowsImpersonationContext impersonationContext;
+        private WindowsImpersonationContext impersonationContext;
 
         #region Private methods
+
         /// <summary>
         /// Assigning rights to the current process from the specified process, by copying its token
         /// </summary>
@@ -27,6 +28,7 @@ namespace ZeroLevel.Services.Impersonation
                 throw new ApplicationException("Failed to get the process token. Win32 error code: " + Marshal.GetLastWin32Error());
             ImpersonateToken(token);
         }
+
         /// <summary>
         /// The method assigns a duplicate token to the current process.
         /// </summary>
@@ -53,9 +55,11 @@ namespace ZeroLevel.Services.Impersonation
                     throw new Exception("Failed to create a duplicate of the specified token. Win32 error code: " + Marshal.GetLastWin32Error());
             }
         }
-        #endregion
+
+        #endregion Private methods
 
         #region Public methods
+
         /// <summary>
         /// Login as a specified user
         /// </summary>
@@ -75,6 +79,7 @@ namespace ZeroLevel.Services.Impersonation
                 throw new Exception("LogonUser failed: " + Marshal.GetLastWin32Error().ToString());
             }
         }
+
         /// <summary>
         /// Вход от имени указанного пользователя с указанием способа авторизации
         /// </summary>
@@ -94,6 +99,7 @@ namespace ZeroLevel.Services.Impersonation
                 throw new Exception("LogonUser failed: " + Marshal.GetLastWin32Error().ToString());
             }
         }
+
         /// <summary>
         /// Копирование прав указанного процесса
         /// </summary>
@@ -110,6 +116,7 @@ namespace ZeroLevel.Services.Impersonation
                 }
             }
         }
+
         /// <summary>
         /// Copying the rights of the specified process
         /// </summary>
@@ -126,7 +133,8 @@ namespace ZeroLevel.Services.Impersonation
                 }
             }
         }
-        #endregion
+
+        #endregion Public methods
 
         /// <summary>
         /// When releasing resources, we will return the previous user right

@@ -22,7 +22,6 @@ namespace ZeroLevel.Services.Applications
         public ZeroServiceState State => _state;
         private ZeroServiceState _state;
 
-
         private ManualResetEvent InteraciveModeWorkingFlag = new ManualResetEvent(false);
 
         public void InteractiveStart(string[] args)
@@ -35,13 +34,19 @@ namespace ZeroLevel.Services.Applications
         }
 
         #region IZeroService
+
         public abstract void StartAction();
+
         public abstract void StopAction();
+
         public abstract void PauseAction();
+
         public abstract void ResumeAction();
-        #endregion
+
+        #endregion IZeroService
 
         #region Windows service
+
         protected override void OnStart(string[] args)
         {
             if (_state == ZeroServiceState.Initialized)
@@ -116,6 +121,7 @@ namespace ZeroLevel.Services.Applications
                 }
             }
         }
-        #endregion
+
+        #endregion Windows service
     }
 }

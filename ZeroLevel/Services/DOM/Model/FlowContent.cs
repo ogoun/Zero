@@ -4,15 +4,16 @@ using ZeroLevel.Services.Serialization;
 
 namespace ZeroLevel.DocumentObjectModel
 {
-    public class FlowContent : 
+    public class FlowContent :
         ContentElement
     {
         public List<Section> Sections = new List<Section>();
 
-        public FlowContent() : 
-            base(ContentElementType.Content) { }
+        public FlowContent() :
+            base(ContentElementType.Content)
+        { }
 
-        public FlowContent(IBinaryReader reader) : 
+        public FlowContent(IBinaryReader reader) :
             base(ContentElementType.Content)
         {
             Deserialize(reader);

@@ -47,6 +47,7 @@ namespace ZeroLevel.Patterns.DependencyInjection
             if (Nullable.GetUnderlyingType(type) != null) return true; // Nullable<T>
             return false; // value-type
         }
+
         /// <summary>
         /// Determining whether the constructor is suitable for the specified arguments
         /// </summary>
@@ -67,9 +68,11 @@ namespace ZeroLevel.Patterns.DependencyInjection
                         case ConstructorParameterKind.Parameter:
                             parameters[i] = _parent.Get(Parameters[i].ParameterResolveType, Parameters[i].ParameterResolveName);
                             break;
+
                         case ConstructorParameterKind.Dependency:
                             parameters[i] = _parent.Resolve(Parameters[i].ParameterResolveType, Parameters[i].ParameterResolveName);
                             break;
+
                         default:
                             if (args == null || arg_index >= args.Length) return false;
                             if (null == args[arg_index])

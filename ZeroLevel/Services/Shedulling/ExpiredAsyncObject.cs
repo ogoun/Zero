@@ -29,19 +29,22 @@ namespace ZeroLevel.Services.Shedulling
         }
 
         /// <summary>
-        /// Событие при завершении ожидания
+        /// Action at the end of the wait
         /// </summary>
         public Func<long, Task> Callback;
+
         /// <summary>
-        /// Срок истечения ожидания
+        /// Expiration Timeout
         /// </summary>
         public DateTime ExpirationDate;
+
         /// <summary>
-        /// Следующий объект с ближайшей датой окончания ожидания
+        /// Next object with the nearest waiting date
         /// </summary>
         public ExpiredAsyncObject Next;
+
         /// <summary>
-        /// Ключ для идентификации ожидающего события
+        /// Key to identify the pending event
         /// </summary>
         public long Key { get; }
     }

@@ -1,14 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ZeroLevel.Services.Trees
 {
     public class Tree<T>
     {
         private readonly Dictionary<string, TreeNode<T>> _rootNodes = new Dictionary<string, TreeNode<T>>();
+
         public IEnumerable<TreeNode<T>> RootNodes
         {
             get
@@ -37,7 +36,6 @@ namespace ZeroLevel.Services.Trees
         {
             /* if (_rootNodes.ContainsKey(path[index]))
              {
-
              }*/
             return false;
         }

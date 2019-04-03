@@ -99,7 +99,7 @@ namespace ZeroLevel.Services.Web
         }
 
         //  Helper to encode the non-ASCII url characters only
-        static string UrlEncodeNonAscii(string str, Encoding e)
+        private static string UrlEncodeNonAscii(string str, Encoding e)
         {
             if (string.IsNullOrEmpty(str))
             {
@@ -115,7 +115,7 @@ namespace ZeroLevel.Services.Web
         }
 
         //  Helper to encode spaces only
-        static string UrlEncodeSpaces(string str)
+        private static string UrlEncodeSpaces(string str)
         {
             if (str != null && str.IndexOf(' ') >= 0)
             {
@@ -140,7 +140,7 @@ namespace ZeroLevel.Services.Web
         }
 
         //  Implementation for encoding
-        static byte[] UrlEncodeBytesToBytesInternal(byte[] bytes, int offset, int count, bool alwaysCreateReturnValue)
+        private static byte[] UrlEncodeBytesToBytesInternal(byte[] bytes, int offset, int count, bool alwaysCreateReturnValue)
         {
             var cSpaces = 0;
             var cUnsafe = 0;
@@ -192,12 +192,12 @@ namespace ZeroLevel.Services.Web
             return expandedBytes;
         }
 
-        static bool IsNonAsciiByte(byte b)
+        private static bool IsNonAsciiByte(byte b)
         {
             return (b >= 0x7F || b < 0x20);
         }
 
-        static byte[] UrlEncodeBytesToBytesInternalNonAscii(byte[] bytes, int offset, int count, bool alwaysCreateReturnValue)
+        private static byte[] UrlEncodeBytesToBytesInternalNonAscii(byte[] bytes, int offset, int count, bool alwaysCreateReturnValue)
         {
             var cNonAscii = 0;
 
@@ -237,7 +237,7 @@ namespace ZeroLevel.Services.Web
             return expandedBytes;
         }
 
-        static string UrlDecodeStringFromStringInternal(string s, Encoding e)
+        private static string UrlDecodeStringFromStringInternal(string s, Encoding e)
         {
             var count = s.Length;
             var helper = new UrlDecoder(count, e);
@@ -295,7 +295,7 @@ namespace ZeroLevel.Services.Web
         }
 
         // Private helpers for URL encoding/decoding
-        static int HexToInt(char h)
+        private static int HexToInt(char h)
         {
             return (h >= '0' && h <= '9') ? h - '0' :
             (h >= 'a' && h <= 'f') ? h - 'a' + 10 :
@@ -303,7 +303,7 @@ namespace ZeroLevel.Services.Web
             -1;
         }
 
-        static char IntToHex(int n)
+        private static char IntToHex(int n)
         {
             if (n <= 9)
             {
@@ -335,18 +335,24 @@ namespace ZeroLevel.Services.Web
         }
 
         // Internal class to facilitate URL decoding -- keeps char buffer and byte buffer, allows appending of either chars or bytes
-        class UrlDecoder
+        private class UrlDecoder
         {
-            readonly int _bufferSize;
+            private readonly int _bufferSize;
+
             // Accumulate characters in a special array
-            int _numChars;
-            readonly char[] _charBuffer;
+            private int _numChars;
+
+            private readonly char[] _charBuffer;
+
             // Accumulate bytes for decoding into characters in a special array
-            int _numBytes;
-            byte[] _byteBuffer;
+            private int _numBytes;
+
+            private byte[] _byteBuffer;
+
             // Encoding to convert chars to bytes
-            readonly Encoding _encoding;
-            void FlushBytes()
+            private readonly Encoding _encoding;
+
+            private void FlushBytes()
             {
                 if (_numBytes <= 0) return;
                 _numChars += _encoding.GetChars(_byteBuffer, 0, _numBytes, _charBuffer, _numChars);
@@ -390,7 +396,7 @@ namespace ZeroLevel.Services.Web
             }
         }
 
-        static IDictionary<string, string> CreateCollection(string s, bool urlencoded, Encoding encoding)
+        private static IDictionary<string, string> CreateCollection(string s, bool urlencoded, Encoding encoding)
         {
             var result = new Dictionary<string, string>();
             if (string.IsNullOrWhiteSpace(s))

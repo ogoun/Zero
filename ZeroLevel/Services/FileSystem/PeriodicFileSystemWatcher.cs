@@ -3,7 +3,6 @@ using System.Globalization;
 using System.IO;
 using System.Security.Permissions;
 using System.Threading.Tasks;
-using ZeroLevel.Services.Logging;
 
 namespace ZeroLevel.Services.FileSystem
 {
@@ -109,6 +108,7 @@ namespace ZeroLevel.Services.FileSystem
             File.Delete(from);
             return tempFile;
         }
+
         /// <summary>
         /// Resolving collisions in filenames in the temporary directory
         /// </summary>
@@ -139,6 +139,7 @@ namespace ZeroLevel.Services.FileSystem
             }
             throw new ArgumentException("folder");
         }
+
         /// <summary>
         /// Getting a list of files from the input directory
         /// </summary>
@@ -148,6 +149,7 @@ namespace ZeroLevel.Services.FileSystem
             Array.Sort<string>(files, FileNameSortCompare);
             return files;
         }
+
         /// <summary>
         /// File Name Comparison
         /// </summary>

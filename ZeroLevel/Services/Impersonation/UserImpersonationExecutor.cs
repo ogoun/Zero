@@ -5,7 +5,7 @@ namespace ZeroLevel.Services.Impersonation
     /// <summary>
     /// Class executing code with the rights of the specified user
     /// </summary>
-    public class UserImpersonationExecutor 
+    public class UserImpersonationExecutor
         : IImpersonationExecutor
     {
         private string USR { get; set; }
@@ -32,6 +32,7 @@ namespace ZeroLevel.Services.Impersonation
                 action(arg);
             }
         }
+
         /// <summary>
         /// Code execution
         /// </summary>

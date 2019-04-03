@@ -4,10 +4,11 @@ using ZeroLevel.Services.Serialization;
 
 namespace ZeroLevel.DocumentObjectModel
 {
-    public class Document 
+    public class Document
         : IBinarySerializable
     {
         private static readonly Document _empty = new Document();
+
         public static Document Empty
         {
             get
@@ -17,9 +18,21 @@ namespace ZeroLevel.DocumentObjectModel
             }
         }
 
-        public Document() { Id = Guid.NewGuid(); Initialize(); }
-        public Document(Guid id) { Id = id; Initialize(); }
-        public Document(IBinaryReader reader) { Deserialize(reader); }
+        public Document()
+        {
+            Id = Guid.NewGuid(); Initialize();
+        }
+
+        public Document(Guid id)
+        {
+            Id = id; Initialize();
+        }
+
+        public Document(IBinaryReader reader)
+        {
+            Deserialize(reader);
+        }
+
         public Document(Document other)
         {
             var data = MessageSerializer.Serialize(other);
@@ -44,45 +57,54 @@ namespace ZeroLevel.DocumentObjectModel
         /// ID
         /// </summary>
         public Guid Id;
+
         /// <summary>
         /// Short description
         /// </summary>
         public string Summary;
+
         /// <summary>
         /// Title
         /// </summary>
         public string Header;
+
         /// <summary>
         /// Identification block
         /// </summary>
         public Identifier Identifier;
+
         /// <summary>
         /// Content
         /// </summary>
         public FlowContent Content;
+
         /// <summary>
         /// Tags
         /// </summary>
         public TagMetadata TagMetadata;
+
         /// <summary>
         /// Metadata
         /// </summary>
         public DescriptiveMetadata DescriptiveMetadata;
+
         /// <summary>
         /// Attachments
         /// </summary>
         public List<AttachContent> Attachments;
+
         /// <summary>
         /// Binded documents
         /// </summary>
         public List<Assotiation> Assotiations;
+
         /// <summary>
         /// Categories
         /// </summary>
         public List<Category> Categories;
 
-
         #region IBinarySerializable
+
         public void Serialize(IBinaryWriter writer)
         {
             writer.WriteGuid(this.Id);
@@ -114,6 +136,7 @@ namespace ZeroLevel.DocumentObjectModel
             this.Assotiations = reader.ReadCollection<Assotiation>();
             this.Categories = reader.ReadCollection<Category>();
         }
-        #endregion
+
+        #endregion IBinarySerializable
     }
 }

@@ -7,6 +7,7 @@ namespace ZeroLevel.Services.Drawing
     public static class TextPainter
     {
         #region Drawing text along lines
+
         public static void DrawOnSegment(Graphics gr, Font font,
             PointF start_point,
             PointF end_point,
@@ -18,6 +19,7 @@ namespace ZeroLevel.Services.Drawing
             DrawTextOnSegment(gr, Brushes.Black, font, txt,
                 ref start_ch, ref start_point, end_point, text_above_segment);
         }
+
         // Draw some text along a line segment.
         // Leave char_num pointing to the next character to be drawn.
         // Leave start_point holding the last point used.
@@ -68,6 +70,7 @@ namespace ZeroLevel.Services.Drawing
                 start_point.X + dx * text_width,
                 start_point.Y + dy * text_width);
         }
-        #endregion
+
+        #endregion Drawing text along lines
     }
 }

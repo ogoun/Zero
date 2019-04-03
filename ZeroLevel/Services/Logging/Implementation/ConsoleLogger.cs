@@ -2,7 +2,7 @@
 
 namespace ZeroLevel.Services.Logging.Implementation
 {
-    public sealed class ConsoleLogger 
+    public sealed class ConsoleLogger
         : ILogger
     {
         public void Dispose()

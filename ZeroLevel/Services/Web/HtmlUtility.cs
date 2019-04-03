@@ -7,6 +7,7 @@ namespace ZeroLevel.Services.Web
     public static class HtmlUtility
     {
         #region Helpers
+
         private class SymToken
         {
             public readonly char Value;
@@ -145,9 +146,11 @@ namespace ZeroLevel.Services.Web
                 }
             }
         }
-        #endregion
+
+        #endregion Helpers
 
         #region Mapping
+
         private readonly static Dictionary<string, string> _entityMap = new Dictionary<string, string>
         {
             {"quot;", "\""},    {"apos;", "'"},     {"amp;", "&"},      {"lt;", "<"},
@@ -249,7 +252,8 @@ namespace ZeroLevel.Services.Web
             {"183;","·"},   {"187;","»"},   {"188;","¼"},   {"189;","½"},
             {"190;","¾"},   {"191;","¿"},   {"247;","÷"},   {"248;","ø"}
         };
-        #endregion
+
+        #endregion Mapping
 
         public static string DecodeHtmlEntities(string line)
         {
@@ -286,6 +290,7 @@ namespace ZeroLevel.Services.Web
                                             }
                                         }
                                         break;
+
                                     default:    //  DEC
                                         foreach (var decPair in _numMap)
                                         {
@@ -302,6 +307,7 @@ namespace ZeroLevel.Services.Web
                                         break;
                                 }
                                 break;
+
                             default:    //  Entity
                                 foreach (var pair in _entityMap)
                                 {
@@ -321,6 +327,7 @@ namespace ZeroLevel.Services.Web
                             result.Append(cursor.Current);
                         }
                         break;
+
                     default:
                         result.Append(cursor.Current);
                         break;

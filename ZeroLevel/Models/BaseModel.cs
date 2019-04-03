@@ -8,6 +8,7 @@ namespace ZeroLevel.Models
     public abstract class BaseModel
     {
         #region Equal
+
         public bool Equals(BaseModel other)
         {
             if (this == null)
@@ -30,10 +31,13 @@ namespace ZeroLevel.Models
         }
 
         public static bool operator ==(BaseModel first, BaseModel second) => Equals(first, second);
+
         public static bool operator !=(BaseModel first, BaseModel second) => !Equals(first, second);
-        #endregion
+
+        #endregion Equal
 
         public abstract override int GetHashCode();
+
         public abstract object Clone();
     }
 }

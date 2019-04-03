@@ -238,6 +238,7 @@ namespace DOM.DSL.Services
                         }
                     }
                     break;
+
                 case "flow":
                     {
                         return new List<TContainer>
@@ -356,6 +357,7 @@ namespace DOM.DSL.Services
                         Log.Debug(args[0].ToString(), args.Skip(1).ToArray());
                     }
                     break;
+
                 case "validate":
                     if (args?.Length == 1)
                     {
@@ -364,15 +366,18 @@ namespace DOM.DSL.Services
                             case "xml":
                                 Options.ValidateAsXml = true;
                                 break;
+
                             case "html":
                                 Options.ValidateAsHtml = true;
                                 break;
+
                             case "json":
                                 Options.ValidateAsJson = true;
                                 break;
                         }
                     }
                     break;
+
                 case "fixwidth":
                     {
                         if (args?.Length == 1)

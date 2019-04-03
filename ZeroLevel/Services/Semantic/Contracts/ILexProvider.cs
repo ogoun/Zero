@@ -9,16 +9,19 @@ namespace ZeroLevel.Services.Semantic
         /// </summary>
         /// <returns>Spisok tokenov</returns>
         IEnumerable<LexToken> ExtractLexTokens(string text);
+
         /// <summary>
         /// Selecting unique tokens from text
         /// </summary>
         /// <returns>Tokens</returns>
         IEnumerable<LexToken> ExtractUniqueLexTokens(string text);
+
         /// <summary>
         /// Allocation of unique tokens from text with drop of stop words
         /// </summary>
         /// <returns>Tokens</returns>
         IEnumerable<LexToken> ExtractUniqueLexTokensWithoutStopWords(string text);
+
         /// <summary>
         /// Search for tokens in the text corresponding to the specified words (full-text search)
         /// </summary>
@@ -26,6 +29,7 @@ namespace ZeroLevel.Services.Semantic
         /// <param name="words">Search words</param>
         /// <returns>Dictionary, where key is a word, value is a list of matching tokens found for it</returns>
         IDictionary<string, IEnumerable<LexToken>> SearchLexTokensByWords(string text, string[] words);
+
         /// <summary>
         /// Search for tokens in the text corresponding to the specified phrases (full-text search)
         /// </summary>

@@ -2,9 +2,10 @@
  *  Port of Snowball stemmers on C#
  *  Original stemmers can be found on http://snowball.tartarus.org
  *  Licence still BSD: http://snowball.tartarus.org/license.php
- *  
+ *
  *  Most of stemmers are ported from Java by Iveonik Systems ltd. (www.iveonik.com)
  */
+
 using ZeroLevel.Services.Semantic;
 
 namespace Iveonik.Stemmers
@@ -266,7 +267,6 @@ namespace Iveonik.Stemmers
         private int I_p2;
         private int I_p1;
         private int I_pV;
-
 
         private void copy_from(RomanianStemmer other)
         {
@@ -659,16 +659,19 @@ namespace Iveonik.Stemmers
                         case 0:
                             subroot = true;
                             break;
+
                         case 1:
                             // (, line 59
                             // <-, line 59
                             slice_from("i");
                             break;
+
                         case 2:
                             // (, line 60
                             // <-, line 60
                             slice_from("u");
                             break;
+
                         case 3:
                             // (, line 61
                             // next, line 61
@@ -744,26 +747,31 @@ namespace Iveonik.Stemmers
             {
                 case 0:
                     return false;
+
                 case 1:
                     // (, line 75
                     // delete, line 75
                     slice_del();
                     break;
+
                 case 2:
                     // (, line 77
                     // <-, line 77
                     slice_from("a");
                     break;
+
                 case 3:
                     // (, line 79
                     // <-, line 79
                     slice_from("e");
                     break;
+
                 case 4:
                     // (, line 81
                     // <-, line 81
                     slice_from("i");
                     break;
+
                 case 5:
                     // (, line 83
                     // not, line 83
@@ -788,11 +796,13 @@ namespace Iveonik.Stemmers
                     // <-, line 83
                     slice_from("i");
                     break;
+
                 case 6:
                     // (, line 85
                     // <-, line 85
                     slice_from("at");
                     break;
+
                 case 7:
                     // (, line 87
                     // <-, line 87
@@ -829,31 +839,37 @@ namespace Iveonik.Stemmers
             {
                 case 0:
                     return false;
+
                 case 1:
                     // (, line 100
                     // <-, line 101
                     slice_from("abil");
                     break;
+
                 case 2:
                     // (, line 103
                     // <-, line 104
                     slice_from("ibil");
                     break;
+
                 case 3:
                     // (, line 106
                     // <-, line 107
                     slice_from("iv");
                     break;
+
                 case 4:
                     // (, line 112
                     // <-, line 113
                     slice_from("ic");
                     break;
+
                 case 5:
                     // (, line 117
                     // <-, line 118
                     slice_from("at");
                     break;
+
                 case 6:
                     // (, line 121
                     // <-, line 122
@@ -912,11 +928,13 @@ namespace Iveonik.Stemmers
             {
                 case 0:
                     return false;
+
                 case 1:
                     // (, line 148
                     // delete, line 149
                     slice_del();
                     break;
+
                 case 2:
                     // (, line 151
                     // literal, line 152
@@ -929,6 +947,7 @@ namespace Iveonik.Stemmers
                     // <-, line 152
                     slice_from("t");
                     break;
+
                 case 3:
                     // (, line 155
                     // <-, line 156
@@ -975,6 +994,7 @@ namespace Iveonik.Stemmers
                 case 0:
                     limit_backward = v_2;
                     return false;
+
                 case 1:
                     // (, line 200
                     // or, line 200
@@ -1002,6 +1022,7 @@ namespace Iveonik.Stemmers
                     // delete, line 200
                     slice_del();
                     break;
+
                 case 2:
                     // (, line 214
                     // delete, line 214
@@ -1035,6 +1056,7 @@ namespace Iveonik.Stemmers
             {
                 case 0:
                     return false;
+
                 case 1:
                     // (, line 220
                     // delete, line 220

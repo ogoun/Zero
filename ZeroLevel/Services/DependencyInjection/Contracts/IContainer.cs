@@ -11,8 +11,11 @@ namespace ZeroLevel.Patterns.DependencyInjection
         IDisposable
     {
         bool IsResolvingExists<T>();
+
         bool IsResolvingExists<T>(string resolveName);
+
         bool IsResolvingExists(Type type);
+
         bool IsResolvingExists(Type type, string resolveName);
     }
 }

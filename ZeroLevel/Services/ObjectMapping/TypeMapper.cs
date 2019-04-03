@@ -12,12 +12,15 @@ namespace ZeroLevel.Services.ObjectMapping
         IMapper
     {
         #region Fields
+
         protected readonly Type _entityType;
         protected Func<IMemberInfo, object, object> typeConverter;
         protected readonly Dictionary<string, IMemberInfo> _fields = new Dictionary<string, IMemberInfo>();
-        #endregion
+
+        #endregion Fields
 
         #region Properties
+
         public IEnumerable<string> MemberNames
         {
             get
@@ -49,9 +52,11 @@ namespace ZeroLevel.Services.ObjectMapping
                 return _fields[name];
             }
         }
-        #endregion
+
+        #endregion Properties
 
         #region Ctor
+
         public TypeMapper(Type entityType)
         {
             if (entityType == null)
@@ -61,9 +66,11 @@ namespace ZeroLevel.Services.ObjectMapping
             _entityType = entityType;
             BuildMapping();
         }
-        #endregion
+
+        #endregion Ctor
 
         #region Public methods
+
         public void SetTypeConverter(Func<IMemberInfo, object, object> converter)
         {
             typeConverter = converter;
@@ -163,9 +170,11 @@ namespace ZeroLevel.Services.ObjectMapping
             }
             throw new KeyNotFoundException($"Not found field {name}");
         }
-        #endregion
+
+        #endregion Public methods
 
         #region Helpers
+
         private void BuildMapping()
         {
             _entityType.GetMembers(
@@ -185,7 +194,8 @@ namespace ZeroLevel.Services.ObjectMapping
                     }
                 });
         }
-        #endregion
+
+        #endregion Helpers
 
         private static readonly ConcurrentDictionary<Type, IMapper>
             _mappersCachee = new ConcurrentDictionary<Type, IMapper>();
@@ -207,6 +217,7 @@ namespace ZeroLevel.Services.ObjectMapping
         {
             return Create(typeof(T), from_cachee);
         }
+
         /// <summary>
         /// Create copy of object without call constructor
         /// </summary>

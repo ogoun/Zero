@@ -2,7 +2,7 @@
 
 namespace ZeroLevel.DocumentObjectModel.Flow
 {
-    public sealed class Quote : 
+    public sealed class Quote :
         Text
     {
         public Quote()

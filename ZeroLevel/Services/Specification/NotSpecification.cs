@@ -6,7 +6,7 @@ namespace ZeroLevel.Specification
     public class NotSpecification<T> : BaseSpecification<T>
     {
         [DataMember]
-        ISpecification<T> _specification;
+        private ISpecification<T> _specification;
 
         public NotSpecification(ISpecification<T> specification)
         {

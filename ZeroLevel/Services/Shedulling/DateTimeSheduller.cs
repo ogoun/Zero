@@ -13,11 +13,13 @@ namespace ZeroLevel.Services.Shedulling
         private volatile bool _stopped = false;
 
         #region Ctor
+
         public DateTimeSheduller()
         {
             _timer = new Timer(TimerCallbackHandler, null, Timeout.Infinite, Timeout.Infinite);
         }
-        #endregion
+
+        #endregion Ctor
 
         private void TimerCallbackHandler(object state)
         {
@@ -29,11 +31,6 @@ namespace ZeroLevel.Services.Shedulling
                 {
                     if ((_head.ExpirationDate - DateTime.Now).Ticks > 0)
                     {
-                        // Защита на случай если callback был вызван, но до захвата блокировки в нем, она была
-                        // захвачена другим методом, в этом случае есть риск получить на head дату истечения позже текущего времени.
-
-                        // При изменении времени системы может быть ситуация, при которой в head лежит элемент для которого сработал таймер,
-                        // но время истечения сместилось, поэтому вызов пересоздания таймера необходим
                         ResetTimer();
                         return;
                     }
@@ -141,6 +138,7 @@ namespace ZeroLevel.Services.Shedulling
         }
 
         #region API
+
         public long Push(TimeSpan timespan, Action<long> callback)
         {
             return Push(new ExpiredObject { Callback = callback, ExpirationDate = DateTime.Now.AddMilliseconds(timespan.TotalMilliseconds) });
@@ -182,9 +180,11 @@ namespace ZeroLevel.Services.Shedulling
                 _head = null;
             }
         }
-        #endregion
+
+        #endregion API
 
         #region Control
+
         private void FindTaskByKeyWithPreviousTask(long key, out ExpiredObject previous, out ExpiredObject current)
         {
             if (_head.Key == key)
@@ -210,7 +210,6 @@ namespace ZeroLevel.Services.Shedulling
             current = null;
             return;
         }
-
 
         private const uint _max_interval = 4294967294;
         private static readonly TimeSpan _infinite = TimeSpan.FromMilliseconds(Timeout.Infinite);
@@ -255,9 +254,11 @@ namespace ZeroLevel.Services.Shedulling
                 }
             }
         }
-        #endregion
+
+        #endregion Control
 
         #region IDisposable
+
         public void Dispose()
         {
             Dispose(true);
@@ -279,6 +280,7 @@ namespace ZeroLevel.Services.Shedulling
                 }
             }
         }
-        #endregion
+
+        #endregion IDisposable
     }
 }

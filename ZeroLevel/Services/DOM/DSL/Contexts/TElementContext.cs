@@ -19,7 +19,7 @@ namespace DOM.DSL.Contexts
         public override void Read(TStringReader reader)
         {
             if (reader.EOF == false && reader.Current == TChar.PropertyOrFuncStart)
-            {                
+            {
                 if (reader.Move())
                 {
                     reader.SkipBreaks();

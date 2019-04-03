@@ -2,10 +2,11 @@
 
 namespace ZeroLevel.DocumentObjectModel.Flow
 {
-    public abstract class ContentElement : 
+    public abstract class ContentElement :
         IContentElement
     {
         protected ContentElementType _type;
+
         public ContentElementType Type
         {
             get
@@ -20,6 +21,7 @@ namespace ZeroLevel.DocumentObjectModel.Flow
         }
 
         public abstract void Serialize(IBinaryWriter writer);
+
         public abstract void Deserialize(IBinaryReader reader);
     }
 }

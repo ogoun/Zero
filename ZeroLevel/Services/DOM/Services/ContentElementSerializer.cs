@@ -19,31 +19,43 @@ namespace DOM.Services
                 // Primitives
                 case ContentElementType.Text:
                     return new ZeroLevel.DocumentObjectModel.Flow.Text(reader);
+
                 case ContentElementType.Quote:
                     return new Quote(reader);
+
                 case ContentElementType.Link:
                     return new Link(reader);
+
                 case ContentElementType.Image:
                     return new Image(reader);
+
                 case ContentElementType.Audio:
                     return new Audio(reader);
+
                 case ContentElementType.Video:
                     return new Video(reader);
                 // Containers
                 case ContentElementType.Row:
                     return new Row(reader);
+
                 case ContentElementType.Paragraph:
                     return new Paragraph(reader);
+
                 case ContentElementType.Section:
                     return new Section(reader);
+
                 case ContentElementType.List:
                     return new List(reader);
+
                 case ContentElementType.Table:
                     return new Table(reader);
+
                 case ContentElementType.Gallery:
                     return new Gallery(reader);
+
                 case ContentElementType.Audioplayer:
                     return new Audioplayer(reader);
+
                 case ContentElementType.Videoplayer:
                     return new Videoplayer(reader);
                 // Feature

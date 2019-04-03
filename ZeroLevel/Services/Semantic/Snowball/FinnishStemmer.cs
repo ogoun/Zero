@@ -2,9 +2,10 @@
  *  Port of Snowball stemmers on C#
  *  Original stemmers can be found on http://snowball.tartarus.org
  *  Licence still BSD: http://snowball.tartarus.org/license.php
- *  
+ *
  *  Most of stemmers are ported from Java by Iveonik Systems ltd. (www.iveonik.com)
  */
+
 using System.Text;
 using ZeroLevel.Services.Semantic;
 
@@ -15,6 +16,7 @@ namespace Iveonik.Stemmers
         ///private static final long serialVersionUID = 1L;
 
         private readonly static FinnishStemmer methodObject = new FinnishStemmer();
+
         public delegate bool DelegateType();
 
         private readonly static Among[] a_0 = {
@@ -135,7 +137,7 @@ namespace Iveonik.Stemmers
                     new Among ( "imma", 0, -1, null )
                 };
 
-        private static readonly char[] g_AEI = {(char)17, (char)1, (char)0, (char)0, (char)0, (char)0, 
+        private static readonly char[] g_AEI = {(char)17, (char)1, (char)0, (char)0, (char)0, (char)0,
                                                            (char)0, (char)0, (char)0, (char)0, (char)0, (char)0,
                                                            (char)0, (char)0, (char)0, (char)0, (char)8 };
 
@@ -308,6 +310,7 @@ namespace Iveonik.Stemmers
             {
                 case 0:
                     return false;
+
                 case 1:
                     // (, line 62
                     if (!(in_grouping_b(g_particle_end, 97, 246)))
@@ -315,6 +318,7 @@ namespace Iveonik.Stemmers
                         return false;
                     }
                     break;
+
                 case 2:
                     // (, line 64
                     // call R2, line 64
@@ -365,6 +369,7 @@ namespace Iveonik.Stemmers
             {
                 case 0:
                     return false;
+
                 case 1:
                     // (, line 72
                     // not, line 72
@@ -389,6 +394,7 @@ namespace Iveonik.Stemmers
                     // delete, line 72
                     slice_del();
                     break;
+
                 case 2:
                     // (, line 74
                     // delete, line 74
@@ -405,11 +411,13 @@ namespace Iveonik.Stemmers
                     // <-, line 74
                     slice_from("ksi");
                     break;
+
                 case 3:
                     // (, line 78
                     // delete, line 78
                     slice_del();
                     break;
+
                 case 4:
                     // (, line 81
                     // among, line 81
@@ -420,6 +428,7 @@ namespace Iveonik.Stemmers
                     // delete, line 81
                     slice_del();
                     break;
+
                 case 5:
                     // (, line 83
                     // among, line 83
@@ -430,6 +439,7 @@ namespace Iveonik.Stemmers
                     // delete, line 84
                     slice_del();
                     break;
+
                 case 6:
                     // (, line 86
                     // among, line 86
@@ -507,6 +517,7 @@ namespace Iveonik.Stemmers
             {
                 case 0:
                     return false;
+
                 case 1:
                     // (, line 98
                     // literal, line 98
@@ -515,6 +526,7 @@ namespace Iveonik.Stemmers
                         return false;
                     }
                     break;
+
                 case 2:
                     // (, line 99
                     // literal, line 99
@@ -523,6 +535,7 @@ namespace Iveonik.Stemmers
                         return false;
                     }
                     break;
+
                 case 3:
                     // (, line 100
                     // literal, line 100
@@ -531,6 +544,7 @@ namespace Iveonik.Stemmers
                         return false;
                     }
                     break;
+
                 case 4:
                     // (, line 101
                     // literal, line 101
@@ -539,6 +553,7 @@ namespace Iveonik.Stemmers
                         return false;
                     }
                     break;
+
                 case 5:
                     // (, line 102
                     // literal, line 102
@@ -547,6 +562,7 @@ namespace Iveonik.Stemmers
                         return false;
                     }
                     break;
+
                 case 6:
                     // (, line 103
                     // literal, line 103
@@ -555,6 +571,7 @@ namespace Iveonik.Stemmers
                         return false;
                     }
                     break;
+
                 case 7:
                     // (, line 111
                     // try, line 111
@@ -601,6 +618,7 @@ namespace Iveonik.Stemmers
                         bra = cursor;
                     } while (false);
                     break;
+
                 case 8:
                     // (, line 119
                     if (!(in_grouping_b(g_V1, 97, 246)))
@@ -612,6 +630,7 @@ namespace Iveonik.Stemmers
                         return false;
                     }
                     break;
+
                 case 9:
                     // (, line 121
                     // literal, line 121
@@ -664,6 +683,7 @@ namespace Iveonik.Stemmers
             {
                 case 0:
                     return false;
+
                 case 1:
                     // (, line 146
                     // not, line 146
@@ -797,6 +817,7 @@ namespace Iveonik.Stemmers
             {
                 case 0:
                     return false;
+
                 case 1:
                     // (, line 167
                     // not, line 167

@@ -17,32 +17,39 @@ namespace ZeroLevel.Models
         /// Id
         /// </summary>
         public Guid Id { get; set; }
+
         /// <summary>
         /// File name
         /// </summary>
         public string FileName { get; set; }
+
         /// <summary>
         /// Content type (pdf, doc, etc.)
         /// </summary>
         public string ContentType { get; set; }
+
         /// <summary>
         /// Content
         /// </summary>
         public byte[] Document { get; set; }
+
         /// <summary>
         /// Creation date
         /// </summary>
         public DateTime Created { get; set; }
+
         /// <summary>
         /// Optional headers
         /// </summary>
         public List<Header> Headers { get; set; }
+
         /// <summary>
         /// Categories
         /// </summary>
         public List<Category> Categories { get; set; }
 
         #region Ctors
+
         public BinaryDocument()
         {
             Created = DateTime.Now;
@@ -58,9 +65,11 @@ namespace ZeroLevel.Models
                 Deserialize(reader);
             }
         }
-        #endregion
+
+        #endregion Ctors
 
         #region IBinarySerializable
+
         public void Serialize(IBinaryWriter writer)
         {
             writer.WriteGuid(this.Id);
@@ -82,9 +91,11 @@ namespace ZeroLevel.Models
             this.Headers = reader.ReadCollection<Header>();
             this.Categories = reader.ReadCollection<Category>();
         }
-        #endregion
+
+        #endregion IBinarySerializable
 
         #region Equals & Hash
+
         public override bool Equals(object obj)
         {
             return this.Equals(obj as BinaryDocument);
@@ -111,7 +122,8 @@ namespace ZeroLevel.Models
         {
             return Id.GetHashCode();
         }
-        #endregion
+
+        #endregion Equals & Hash
 
         public object Clone()
         {

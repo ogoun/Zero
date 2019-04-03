@@ -19,25 +19,31 @@ namespace DOM.Services
                 case ContentElementType.Text:
                     reader.ReadText(element as ZeroLevel.DocumentObjectModel.Flow.Text);
                     break;
+
                 case ContentElementType.Quote:
                     reader.ReadQuote(element as Quote);
                     break;
+
                 case ContentElementType.Link:
                     counter.IncLinkId();
                     reader.ReadLink(element as Link, counter.LinkId);
                     break;
+
                 case ContentElementType.Image:
                     counter.IncImageId();
                     reader.ReadImage(element as Image, counter.ImageId);
                     break;
+
                 case ContentElementType.Audio:
                     counter.IncAudioId();
                     reader.ReadAudio(element as Audio, counter.AudioId);
                     break;
+
                 case ContentElementType.Video:
                     counter.IncVideoId();
                     reader.ReadVideo(element as Video, counter.VideoId);
                     break;
+
                 case ContentElementType.Form:
                     reader.ReadForm(element as FormContent);
                     break;
@@ -52,6 +58,7 @@ namespace DOM.Services
                         }
                     }
                     break;
+
                 case ContentElementType.Section:
                     var section = (element as Section);
                     reader.EnterSection(section);
@@ -61,6 +68,7 @@ namespace DOM.Services
                     }
                     reader.LeaveSection(section);
                     break;
+
                 case ContentElementType.Paragraph:
                     var paragraph = (element as Paragraph);
                     reader.EnterParagraph(paragraph);
@@ -70,6 +78,7 @@ namespace DOM.Services
                     }
                     reader.LeaveParagraph(paragraph);
                     break;
+
                 case ContentElementType.List:
                     var list = (element as List);
                     reader.EnterList(list);
@@ -81,6 +90,7 @@ namespace DOM.Services
                     }
                     reader.LeaveList(list);
                     break;
+
                 case ContentElementType.Gallery:
                     var gallery = (element as Gallery);
                     reader.EnterGallery(gallery);
@@ -90,6 +100,7 @@ namespace DOM.Services
                     }
                     reader.LeaveGallery(gallery);
                     break;
+
                 case ContentElementType.Audioplayer:
                     var audioplayer = (element as Audioplayer);
                     reader.EnterAudioplayer(audioplayer);
@@ -99,6 +110,7 @@ namespace DOM.Services
                     }
                     reader.LeaveAudioplayer(audioplayer);
                     break;
+
                 case ContentElementType.Videoplayer:
                     var videoplayer = (element as Videoplayer);
                     reader.EnterVideoplayer(videoplayer);
@@ -108,6 +120,7 @@ namespace DOM.Services
                     }
                     reader.LeaveVideoplayer(videoplayer);
                     break;
+
                 case ContentElementType.Table:
                     var table = (element as Table);
                     reader.EnterTable(table);
@@ -133,6 +146,7 @@ namespace DOM.Services
                     break;
             }
         }
+
         /// <summary>
         /// Reading metadata items
         /// </summary>
@@ -214,6 +228,7 @@ namespace DOM.Services
             reader.LeaveCategories(doc.Categories);
             return reader.Complete();
         }
+
         /// <summary>
         /// Reading content elements
         /// </summary>

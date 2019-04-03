@@ -13,7 +13,7 @@ namespace ZeroLevel.Services.Network.Models
 
         public void Reset(Action<Frame> handler, Action<string> failHandler)
         {
-            _sended = false;            
+            _sended = false;
             _handler = handler;
             _failHandler = failHandler;
         }

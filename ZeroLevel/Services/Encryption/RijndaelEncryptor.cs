@@ -11,9 +11,11 @@ namespace ZeroLevel.Services.Encryption
         private static readonly byte[] SALT = new byte[] { 0x26, 0xdc, 0xff, 0x00, 0xad, 0xed, 0x7a, 0xee, 0xc5, 0xfe, 0x07, 0xaf, 0x4d, 0x08, 0x22, 0x3c };
 
         #region Crypt fields
+
         private Rijndael _rijndael;
         private CryptoStream _stream;
-        #endregion
+
+        #endregion Crypt fields
 
         public RijndaelEncryptor(Stream stream, string password, byte[] salt = null)
         {
@@ -32,6 +34,7 @@ namespace ZeroLevel.Services.Encryption
         }
 
         #region OneTime Read/Write
+
         protected static void Transfer(Stream input, Stream output)
         {
             if (input.CanRead == false)
@@ -168,7 +171,8 @@ namespace ZeroLevel.Services.Encryption
                 }
             }
         }
-        #endregion
+
+        #endregion OneTime Read/Write
 
         public void Dispose()
         {

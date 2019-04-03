@@ -4,10 +4,8 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using ZeroLevel.Microservices.Contracts;
-using ZeroLevel.Microservices.Model;
 using ZeroLevel.Network.Microservices;
 using ZeroLevel.Services.Network;
-using ZeroLevel.Services.Serialization;
 
 namespace ZeroLevel.Microservices
 {
@@ -21,12 +19,14 @@ namespace ZeroLevel.Microservices
         private readonly ExServiceHost _host;
 
         #region Ctor
+
         public Exchange(IDiscoveryClient discoveryClient)
         {
             this._discoveryClient = discoveryClient ?? throw new ArgumentNullException(nameof(discoveryClient));
             this._host = new ExServiceHost(this._discoveryClient);
         }
-        #endregion
+
+        #endregion Ctor
 
         /// <summary>
         ///  Регистрация сервиса
@@ -42,6 +42,7 @@ namespace ZeroLevel.Microservices
         }
 
         #region Balanced send
+
         /// <summary>
         /// Отправка сообщения сервису
         /// </summary>
@@ -63,9 +64,11 @@ namespace ZeroLevel.Microservices
         }
 
         public bool Send<T>(string serviceKey, T data) => Send(serviceKey, ZBaseNetwork.DEFAULT_MESSAGE_INBOX, data);
-        #endregion
+
+        #endregion Balanced send
 
         #region Balanced request
+
         public Tresp Request<Treq, Tresp>(string serviceKey, string inbox, Treq data)
         {
             Tresp response = default(Tresp);
@@ -157,9 +160,11 @@ namespace ZeroLevel.Microservices
 
         public Tresp Request<Tresp>(string serviceKey) =>
             Request<Tresp>(serviceKey, ZBaseNetwork.DEFAULT_REQUEST_INBOX);
-        #endregion
+
+        #endregion Balanced request
 
         #region Direct request
+
         public Tresp RequestDirect<Treq, Tresp>(string endpoint, string serviceKey, string inbox, Treq data)
         {
             Tresp response = default(Tresp);
@@ -251,9 +256,11 @@ namespace ZeroLevel.Microservices
 
         public Tresp RequestDirect<Tresp>(string endpoint, string serviceKey) =>
             RequestDirect<Tresp>(endpoint, serviceKey, ZBaseNetwork.DEFAULT_REQUEST_INBOX);
-        #endregion
+
+        #endregion Direct request
 
         #region Broadcast
+
         /// <summary>
         /// Отправка сообщения всем сервисам с указанным ключом в указанный обработчик
         /// </summary>
@@ -287,6 +294,7 @@ namespace ZeroLevel.Microservices
             }
             return false;
         }
+
         /// <summary>
         /// Отправка сообщения всем сервисам с указанным ключом, в обработчик по умолчанию
         /// </summary>
@@ -295,6 +303,7 @@ namespace ZeroLevel.Microservices
         /// <param name="data">Сообщение</param>
         /// <returns>true - при успешной отправке</returns>
         public bool SendBroadcast<T>(string serviceKey, T data) => SendBroadcast(serviceKey, ZBaseNetwork.DEFAULT_MESSAGE_INBOX, data);
+
         /// <summary>
         /// Отправка сообщения всем сервисам конкретного типа в указанный обработчик
         /// </summary>
@@ -328,6 +337,7 @@ namespace ZeroLevel.Microservices
             }
             return false;
         }
+
         /// <summary>
         /// Отправка сообщения всем сервисам конкретного типа, в обработчик по умолчанию
         /// </summary>
@@ -337,6 +347,7 @@ namespace ZeroLevel.Microservices
         /// <returns>true - при успешной отправке</returns>
         public bool SendBroadcastByType<T>(string serviceType, T data) =>
             SendBroadcastByType(serviceType, ZBaseNetwork.DEFAULT_MESSAGE_INBOX, data);
+
         /// <summary>
         /// Отправка сообщения всем сервисам конкретной группы в указанный обработчик
         /// </summary>
@@ -370,6 +381,7 @@ namespace ZeroLevel.Microservices
             }
             return false;
         }
+
         /// <summary>
         /// Отправка сообщения всем сервисам конкретной группы, в обработчик по умолчанию
         /// </summary>
@@ -379,6 +391,7 @@ namespace ZeroLevel.Microservices
         /// <returns>true - при успешной отправке</returns>
         public bool SendBroadcastByGroup<T>(string serviceGroup, T data) =>
             SendBroadcastByGroup(serviceGroup, ZBaseNetwork.DEFAULT_MESSAGE_INBOX, data);
+
         /// <summary>
         /// Широковещательный опрос сервисов по ключу
         /// </summary>
@@ -402,6 +415,7 @@ namespace ZeroLevel.Microservices
             }
             return Enumerable.Empty<Tresp>();
         }
+
         /// <summary>
         /// Широковещательный опрос сервисов по ключу, без сообщеня запроса
         /// </summary>
@@ -423,6 +437,7 @@ namespace ZeroLevel.Microservices
             }
             return Enumerable.Empty<Tresp>();
         }
+
         /// <summary>
         /// Широковещательный опрос сервисов по ключу, в обработчик по умолчанию
         /// </summary>
@@ -434,6 +449,7 @@ namespace ZeroLevel.Microservices
         /// <returns>true - в случае успешной рассылки</returns>
         public IEnumerable<Tresp> RequestBroadcast<Treq, Tresp>(string serviceKey, Treq data) =>
             RequestBroadcast<Treq, Tresp>(serviceKey, ZBaseNetwork.DEFAULT_REQUEST_INBOX, data);
+
         /// <summary>
         /// Широковещательный опрос сервисов по ключу, без сообщеня запроса, в обработчик по умолчанию
         /// </summary>
@@ -443,6 +459,7 @@ namespace ZeroLevel.Microservices
         /// <returns>true - в случае успешной рассылки</returns>
         public IEnumerable<Tresp> RequestBroadcast<Tresp>(string serviceKey) =>
             RequestBroadcast<Tresp>(serviceKey, ZBaseNetwork.DEFAULT_REQUEST_INBOX);
+
         /// <summary>
         /// Широковещательный опрос сервисов по типу сервису
         /// </summary>
@@ -466,6 +483,7 @@ namespace ZeroLevel.Microservices
             }
             return Enumerable.Empty<Tresp>();
         }
+
         /// <summary>
         /// Широковещательный опрос сервисов по типу сервису, без сообщеня запроса
         /// </summary>
@@ -487,6 +505,7 @@ namespace ZeroLevel.Microservices
             }
             return Enumerable.Empty<Tresp>();
         }
+
         /// <summary>
         /// Широковещательный опрос сервисов по типу сервису, в обработчик по умолчанию
         /// </summary>
@@ -498,6 +517,7 @@ namespace ZeroLevel.Microservices
         /// <returns>true - в случае успешной рассылки</returns>
         public IEnumerable<Tresp> RequestBroadcastByType<Treq, Tresp>(string serviceType, Treq data) =>
             RequestBroadcastByType<Treq, Tresp>(serviceType, ZBaseNetwork.DEFAULT_REQUEST_INBOX, data);
+
         /// <summary>
         /// Широковещательный опрос сервисов по типу, без сообщеня запроса, в обработчик по умолчанию
         /// </summary>
@@ -507,6 +527,7 @@ namespace ZeroLevel.Microservices
         /// <returns>true - в случае успешной рассылки</returns>
         public IEnumerable<Tresp> RequestBroadcastByType<Tresp>(string serviceType) =>
             RequestBroadcastByType<Tresp>(serviceType, ZBaseNetwork.DEFAULT_REQUEST_INBOX);
+
         /// <summary>
         /// Широковещательный опрос сервисов по группе сервисов
         /// </summary>
@@ -530,6 +551,7 @@ namespace ZeroLevel.Microservices
             }
             return Enumerable.Empty<Tresp>();
         }
+
         /// <summary>
         /// Широковещательный опрос сервисов по группе сервисов, без сообщения запроса
         /// </summary>
@@ -551,6 +573,7 @@ namespace ZeroLevel.Microservices
             }
             return Enumerable.Empty<Tresp>();
         }
+
         /// <summary>
         /// Широковещательный опрос сервисов по группе сервисов в обработчик по умолчанию
         /// </summary>
@@ -562,6 +585,7 @@ namespace ZeroLevel.Microservices
         /// <returns>true - в случае успешной рассылки</returns>
         public IEnumerable<Tresp> RequestBroadcastByGroup<Treq, Tresp>(string serviceGroup, Treq data) =>
             RequestBroadcastByGroup<Treq, Tresp>(serviceGroup, ZBaseNetwork.DEFAULT_REQUEST_INBOX, data);
+
         /// <summary>
         /// Широковещательный опрос сервисов по группе сервисов, без сообщения запроса, в обработчик по умолчанию
         /// </summary>
@@ -573,6 +597,7 @@ namespace ZeroLevel.Microservices
             RequestBroadcastByGroup<Tresp>(serviceGroup, ZBaseNetwork.DEFAULT_REQUEST_INBOX);
 
         #region Private
+
         private IEnumerable<Tresp> _RequestBroadcast<Treq, Tresp>(List<IExClient> clients, string inbox, Treq data)
         {
             var response = new List<Tresp>();
@@ -628,9 +653,10 @@ namespace ZeroLevel.Microservices
             }
             return response;
         }
-        #endregion
 
-        #endregion
+        #endregion Private
+
+        #endregion Broadcast
 
         public void Dispose()
         {

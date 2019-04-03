@@ -30,6 +30,7 @@ namespace ZeroLevel.Services.Serialization
                 throw new OutOfMemoryException("Array index out of bounds");
             return BitConverter.ToBoolean(new byte[1] { ReadByte() }, 0);
         }
+
         /// <summary>
         /// Reading byte
         /// </summary>
@@ -39,6 +40,7 @@ namespace ZeroLevel.Services.Serialization
                 throw new OutOfMemoryException("Array index out of bounds");
             return (byte)_stream.ReadByte();
         }
+
         /// <summary>
         /// Reading bytes
         /// </summary>
@@ -49,6 +51,7 @@ namespace ZeroLevel.Services.Serialization
             if (length == 0) return new byte[0];
             return ReadBuffer(length);
         }
+
         /// <summary>
         /// Read 32-bit integer (4 bytes)
         /// </summary>
@@ -63,6 +66,7 @@ namespace ZeroLevel.Services.Serialization
             var buffer = ReadBuffer(4);
             return BitConverter.ToInt32(buffer, 0);
         }
+
         /// <summary>
         /// Read integer 64-bit number (8 bytes)
         /// </summary>
@@ -93,6 +97,7 @@ namespace ZeroLevel.Services.Serialization
             var buffer = ReadBuffer(length);
             return Encoding.UTF8.GetString(buffer);
         }
+
         /// <summary>
         /// Read GUID (16 bytes)
         /// </summary>
@@ -101,6 +106,7 @@ namespace ZeroLevel.Services.Serialization
             var buffer = ReadBuffer(16);
             return new Guid(buffer);
         }
+
         /// <summary>
         ///  Reading byte-package (read the size of the specified number of bytes, and then the packet itself read size)
         /// </summary>
@@ -115,6 +121,7 @@ namespace ZeroLevel.Services.Serialization
                 throw new InvalidOperationException($"The stream returned less data ({count} bytes) than expected ({readedCount} bytes)");
             return buffer;
         }
+
         /// <summary>
         /// Reading the datetime
         /// </summary>
@@ -144,12 +151,13 @@ namespace ZeroLevel.Services.Serialization
         /// <summary>
         /// Check if data reading is outside the stream
         /// </summary>
-        bool CheckOutOfRange(Stream stream, int offset)
+        private bool CheckOutOfRange(Stream stream, int offset)
         {
             return (stream.Position + offset) > stream.Length;
         }
 
         #region Extensions
+
         public List<T> ReadCollection<T>()
             where T : IBinarySerializable, new()
         {
@@ -250,6 +258,7 @@ namespace ZeroLevel.Services.Serialization
             }
             return collection;
         }
+
         public List<Int64> ReadInt64Collection()
         {
             int count = ReadInt32();
@@ -263,6 +272,7 @@ namespace ZeroLevel.Services.Serialization
             }
             return collection;
         }
+
         public List<Int32> ReadInt32Collection()
         {
             int count = ReadInt32();
@@ -276,6 +286,7 @@ namespace ZeroLevel.Services.Serialization
             }
             return collection;
         }
+
         public List<Double> ReadDoubleCollection()
         {
             int count = ReadInt32();
@@ -289,6 +300,7 @@ namespace ZeroLevel.Services.Serialization
             }
             return collection;
         }
+
         public List<bool> ReadBooleanCollection()
         {
             int count = ReadInt32();
@@ -302,6 +314,7 @@ namespace ZeroLevel.Services.Serialization
             }
             return collection;
         }
+
         public List<byte> ReadByteCollection()
         {
             int count = ReadInt32();
@@ -315,6 +328,7 @@ namespace ZeroLevel.Services.Serialization
             }
             return collection;
         }
+
         public List<byte[]> ReadByteArrayCollection()
         {
             int count = ReadInt32();
@@ -328,7 +342,8 @@ namespace ZeroLevel.Services.Serialization
             }
             return collection;
         }
-        #endregion
+
+        #endregion Extensions
 
         public void Dispose()
         {

@@ -9,23 +9,26 @@ namespace ZeroLevel.Specification
     /// <summary>
     /// Creates a specification using a specific constructor.
     /// </summary>
-    public class SpecificationBuilder : 
-        ISpecificationBuilder, 
+    public class SpecificationBuilder :
+        ISpecificationBuilder,
         IEquatable<SpecificationBuilder>
     {
         /// <summary>
         /// Type of specification
         /// </summary>
         private readonly Type _instanceType;
+
         /// <summary>
         /// List of Constructor Parameters
         /// </summary>
         private readonly List<SpecificationParameter> _values =
             new List<SpecificationParameter>();
+
         /// <summary>
         /// Constructor name
         /// </summary>
         public string Name { get; }
+
         public Type FilterType { get { return _instanceType; } }
         public IEnumerable<SpecificationParameter> Parameters { get { return _values; } }
 
@@ -37,6 +40,7 @@ namespace ZeroLevel.Specification
             _instanceType = specificationType;
             _values = parameters;
         }
+
         /// <summary>
         /// Parameter traversal
         /// </summary>
@@ -47,6 +51,7 @@ namespace ZeroLevel.Specification
                 parameterHandler(p);
             }
         }
+
         /// <summary>
         /// Build specification
         /// </summary>
@@ -72,6 +77,7 @@ namespace ZeroLevel.Specification
                             parameters[i] = SpecificationConstructorParametersResolver.GetEnumInstance(_instanceType, _values[i].ParameterName, _values[i].Value as string);
                         }
                         break;
+
                     case SpecificationConstructorParameterKind.Tree:
                         var tree = (ITree)_values[i].Value;
                         var list = new List<object>();
@@ -99,6 +105,7 @@ namespace ZeroLevel.Specification
                             a.SetValue(list[index], index);
                         parameters[i] = a;
                         break;
+
                     default:
                         parameters[i] = _values[i].Value;
                         break;

@@ -10,6 +10,7 @@
         /// Имя элемента
         /// </summary>
         public string ElementName;
+
         /// <summary>
         /// Optionally, next token
         /// </summary>

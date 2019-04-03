@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Threading;
 using ZeroLevel.Microservices;
 using ZeroLevel.Models;
@@ -24,6 +23,7 @@ namespace ZeroLevel.Discovery
         }
 
         #region Snapshot
+
         private static readonly object _snapshot_lock = new object();
 
         private void Save()
@@ -89,7 +89,8 @@ namespace ZeroLevel.Discovery
                 Log.Error(ex, "Fault load snapshot");
             }
         }
-        #endregion
+
+        #endregion Snapshot
 
         private bool Ping(string protocol, string endpoint, string msg)
         {

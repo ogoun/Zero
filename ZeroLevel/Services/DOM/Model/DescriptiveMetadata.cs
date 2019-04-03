@@ -4,11 +4,18 @@ using ZeroLevel.Services.Serialization;
 
 namespace ZeroLevel.DocumentObjectModel
 {
-    public sealed class DescriptiveMetadata : 
+    public sealed class DescriptiveMetadata :
         IBinarySerializable
     {
-        public DescriptiveMetadata() { Initialize(); }
-        public DescriptiveMetadata(IBinaryReader reader) { Deserialize(reader); }
+        public DescriptiveMetadata()
+        {
+            Initialize();
+        }
+
+        public DescriptiveMetadata(IBinaryReader reader)
+        {
+            Deserialize(reader);
+        }
 
         private void Initialize()
         {
@@ -22,45 +29,56 @@ namespace ZeroLevel.DocumentObjectModel
         }
 
         #region Fields
+
         /// <summary>
         /// Authors
         /// </summary>
         public string Byline;
+
         /// <summary>
         /// Copyright
         /// </summary>
         public string CopyrightNotice;
+
         /// <summary>
         /// Creation date
         /// </summary>
         public DateTime Created;
+
         /// <summary>
         /// Main language
         /// </summary>
         public string Language;
+
         /// <summary>
         /// Priority
         /// </summary>
         public Priority Priority;
+
         /// <summary>
         /// Document source
         /// </summary>
         public Agency Source;
+
         /// <summary>
         /// Document publisher
         /// </summary>
         public Agency Publisher;
+
         /// <summary>
         /// Reference to original document
         /// </summary>
         public Tag Original;
+
         /// <summary>
         /// Headers (optional)
         /// </summary>
         public List<Header> Headers;
-        #endregion
+
+        #endregion Fields
 
         #region IBinarySerializable
+
         public void Serialize(IBinaryWriter writer)
         {
             writer.WriteString(this.Byline);
@@ -89,6 +107,7 @@ namespace ZeroLevel.DocumentObjectModel
             this.Source = new Agency();
             this.Source.Deserialize(reader);
         }
-        #endregion
+
+        #endregion IBinarySerializable
     }
 }

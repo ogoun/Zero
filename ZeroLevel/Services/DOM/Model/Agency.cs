@@ -8,22 +8,43 @@ namespace ZeroLevel.DocumentObjectModel
         /// Agency name
         /// </summary>
         public string Title;
+
         /// <summary>
         /// Agency website
         /// </summary>
         public string Url;
+
         /// <summary>
         /// Description
         /// </summary>
         public string Description;
 
-        public Agency() { }
-        public Agency(IBinaryReader reader) { Deserialize(reader); }
-        public Agency(string title) { this.Title = title; }
-        public Agency(string title, string url) { this.Title = title; this.Url = url; }
-        public Agency(string title, string url, string description) { this.Title = title; this.Url = url; this.Description = description; }
+        public Agency()
+        {
+        }
+
+        public Agency(IBinaryReader reader)
+        {
+            Deserialize(reader);
+        }
+
+        public Agency(string title)
+        {
+            this.Title = title;
+        }
+
+        public Agency(string title, string url)
+        {
+            this.Title = title; this.Url = url;
+        }
+
+        public Agency(string title, string url, string description)
+        {
+            this.Title = title; this.Url = url; this.Description = description;
+        }
 
         #region IBinarySerializable
+
         public void Serialize(IBinaryWriter writer)
         {
             writer.WriteString(this.Title);
@@ -37,6 +58,7 @@ namespace ZeroLevel.DocumentObjectModel
             this.Url = reader.ReadString();
             this.Description = reader.ReadString();
         }
-        #endregion
+
+        #endregion IBinarySerializable
     }
 }

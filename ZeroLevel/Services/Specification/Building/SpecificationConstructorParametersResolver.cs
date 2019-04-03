@@ -12,6 +12,7 @@ namespace ZeroLevel.Contracts.Specification.Building
             {
                 _enum = map;
             }
+
             private readonly Dictionary<string, object> _enum;
 
             public IEnumerable<string> Names { get { return _enum.Keys; } }
@@ -23,11 +24,13 @@ namespace ZeroLevel.Contracts.Specification.Building
                 return null;
             }
         }
+
         /// <summary>
         /// To select a single value from the list
         /// </summary>
         private static readonly Dictionary<Type, Dictionary<string, ParamEnum>> _enums =
             new Dictionary<Type, Dictionary<string, ParamEnum>>();
+
         /// <summary>
         /// To select multiple values from the list
         /// </summary>
@@ -56,6 +59,7 @@ namespace ZeroLevel.Contracts.Specification.Building
                 }
             }
         }
+
         /// <summary>
         /// Tree Registration
         /// </summary>

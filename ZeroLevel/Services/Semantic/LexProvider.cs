@@ -118,6 +118,6 @@ namespace ZeroLevel.Services.Semantic
             return result;
         }
 
-        #endregion
+        #endregion Helpers
     }
 }

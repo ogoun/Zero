@@ -1,5 +1,4 @@
-﻿using System;
-using ZeroLevel.Services.Serialization;
+﻿using ZeroLevel.Services.Serialization;
 
 namespace ZeroLevel.Services.Network
 {
@@ -14,6 +13,7 @@ namespace ZeroLevel.Services.Network
             frame.Payload = MessageSerializer.SerializeCompatible(obj);
             return frame;
         }
+
         public static Frame BuildFrame(string inbox)
         {
             var frame = Frame.FromPool();
@@ -23,6 +23,7 @@ namespace ZeroLevel.Services.Network
             frame.Payload = null;
             return frame;
         }
+
         public static Frame BuildRequestFrame<T>(T obj, string inbox)
         {
             var frame = Frame.FromPool();
@@ -32,15 +33,17 @@ namespace ZeroLevel.Services.Network
             frame.Payload = MessageSerializer.SerializeCompatible(obj);
             return frame;
         }
+
         public static Frame BuildRequestFrame(string inbox)
         {
             var frame = Frame.FromPool();
             frame.FrameId = Frame.GetMessageId();
             frame.IsRequest = true;
-            frame.Inbox = inbox;            
+            frame.Inbox = inbox;
             frame.Payload = null;
             return frame;
         }
+
         public static Frame BuildResponseFrame(object obj, Frame request)
         {
             var frame = Frame.FromPool();
@@ -50,6 +53,7 @@ namespace ZeroLevel.Services.Network
             frame.Payload = MessageSerializer.SerializeCompatible(obj);
             return frame;
         }
+
         public static Frame BuildResponseFrame<T>(T obj, Frame request)
         {
             var frame = Frame.FromPool();
@@ -59,6 +63,7 @@ namespace ZeroLevel.Services.Network
             frame.Payload = MessageSerializer.SerializeCompatible(obj);
             return frame;
         }
+
         public static Frame BuildResponseFrame<T>(T obj, Frame request, string inbox)
         {
             var frame = Frame.FromPool();

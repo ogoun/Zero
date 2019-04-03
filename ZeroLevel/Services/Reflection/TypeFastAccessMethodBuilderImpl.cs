@@ -33,6 +33,7 @@ namespace ZeroLevel.Services.Reflection
             var lambda = Expression.Lambda(castToObject, entity);
             return (Func<object, object>)lambda.Compile();
         }
+
         /// <summary>
         /// Creates a quick setter for a property
         /// </summary>
@@ -52,6 +53,7 @@ namespace ZeroLevel.Services.Reflection
                         obj, value);
             return expr.Compile();
         }
+
         /// <summary>
         /// Creates a quick setter for a field.
         /// </summary>

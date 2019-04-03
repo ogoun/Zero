@@ -38,7 +38,7 @@ namespace ZeroLevel.DocumentObjectModel
             Deserialize(reader);
         }
 
-        #endregion
+        #endregion Ctors
 
         #region Fields
 
@@ -67,7 +67,7 @@ namespace ZeroLevel.DocumentObjectModel
         /// </summary>
         public bool IsSystem { get; set; }
 
-        #endregion
+        #endregion Fields
 
         #region IBinarySerializable
 
@@ -89,7 +89,7 @@ namespace ZeroLevel.DocumentObjectModel
             this.IsSystem = reader.ReadBoolean();
         }
 
-        #endregion
+        #endregion IBinarySerializable
 
         #region ICloneable
 
@@ -98,7 +98,7 @@ namespace ZeroLevel.DocumentObjectModel
             return new Category(this);
         }
 
-        #endregion
+        #endregion ICloneable
 
         #region IEquatable
 
@@ -113,7 +113,7 @@ namespace ZeroLevel.DocumentObjectModel
             return true;
         }
 
-        #endregion
+        #endregion IEquatable
 
         #region Equals & Hash
 
@@ -131,6 +131,6 @@ namespace ZeroLevel.DocumentObjectModel
                    IsSystem.GetHashCode();
         }
 
-        #endregion
+        #endregion Equals & Hash
     }
 }

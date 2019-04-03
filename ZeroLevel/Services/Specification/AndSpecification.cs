@@ -8,9 +8,10 @@ namespace ZeroLevel.Specification
     public class AndSpecification<T> : BaseSpecification<T>
     {
         [DataMember]
-        ISpecification<T> leftSpecification;
+        private ISpecification<T> leftSpecification;
+
         [DataMember]
-        ISpecification<T> rightSpecification;
+        private ISpecification<T> rightSpecification;
 
         public AndSpecification(ISpecification<T> left, ISpecification<T> right)
         {

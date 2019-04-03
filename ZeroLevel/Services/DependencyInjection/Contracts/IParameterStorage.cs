@@ -8,6 +8,7 @@ namespace ZeroLevel.Patterns.DependencyInjection
     public interface IParameterStorage
     {
         #region IEverythingStorage
+
         /// <summary>
         /// Save parameter
         /// </summary>
@@ -15,6 +16,7 @@ namespace ZeroLevel.Patterns.DependencyInjection
         /// <param name="key">Key</param>
         /// <param name="value">Parameter value</param>
         void Save<T>(string key, T value);
+
         /// <summary>
         /// Save or update parameter
         /// </summary>
@@ -22,6 +24,7 @@ namespace ZeroLevel.Patterns.DependencyInjection
         /// <param name="key">Key</param>
         /// <param name="value">Parameter value</param>
         void SaveOrUpdate<T>(string key, T value);
+
         /// <summary>
         /// Safe save parameter
         /// </summary>
@@ -29,18 +32,21 @@ namespace ZeroLevel.Patterns.DependencyInjection
         /// <param name="key">Key</param>
         /// <param name="value">Parameter value</param>
         bool TrySave<T>(string key, T value);
+
         /// <summary>
         /// Remove parameter by key
         /// </summary>
         /// <typeparam name="T">Parameter type</typeparam>
         /// <param name="key">Key</param>
         void Remove<T>(string key);
+
         /// <summary>
         /// Safe remove parameter by key
         /// </summary>
         /// <typeparam name="T">Parameter type</typeparam>
         /// <param name="key">Key</param>
         bool TryRemove<T>(string key);
+
         /// <summary>
         /// Get parameter value by key
         /// </summary>
@@ -48,8 +54,11 @@ namespace ZeroLevel.Patterns.DependencyInjection
         /// <param name="key">Key</param>
         /// <returns>Parameter value</returns>
         T Get<T>(string key);
+
         T GetOrDefault<T>(string key);
+
         T GetOrDefault<T>(string key, T defaultValue);
+
         /// <summary>
         /// Get parameter value by key
         /// </summary>
@@ -57,12 +66,14 @@ namespace ZeroLevel.Patterns.DependencyInjection
         /// <param name="key">Key</param>
         /// <returns>Parameter value</returns>
         object Get(Type type, string key);
+
         /// <summary>
         /// Check for parameter existence by key
         /// </summary>
         /// <typeparam name="T">Parameter type</typeparam>
         /// <param name="key">Key</param>
         bool Contains<T>(string key);
-        #endregion
+
+        #endregion IEverythingStorage
     }
 }

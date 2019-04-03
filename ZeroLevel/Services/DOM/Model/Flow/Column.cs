@@ -2,7 +2,7 @@
 
 namespace ZeroLevel.DocumentObjectModel.Flow
 {
-    public class Column : 
+    public class Column :
         ContentElement
     {
         public string Caption { get; set; }
@@ -15,6 +15,7 @@ namespace ZeroLevel.DocumentObjectModel.Flow
         {
             this.Caption = caption;
         }
+
         public Column(IBinaryReader reader) : base(ContentElementType.Column)
         {
             Deserialize(reader);

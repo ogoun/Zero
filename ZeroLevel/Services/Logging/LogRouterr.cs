@@ -1,23 +1,25 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 
 namespace ZeroLevel.Services.Logging
 {
-    internal sealed class LogRouter : 
-        ILogger, 
+    internal sealed class LogRouter :
+        ILogger,
         ILogComposer
     {
         #region Fields
+
         private long _backlog = -1;
         private volatile bool _stopped;
         private readonly object LogsCacheeLocker = new object();
         private readonly Dictionary<int, List<ILogger>> LogWriters = new Dictionary<int, List<ILogger>>();
         private volatile ILogMessageBuffer _messageQueue;
-        #endregion
 
-        #region  Ctor
+        #endregion Fields
+
+        #region Ctor
+
         public LogRouter()
         {
             _messageQueue = new NoLimitedLogMessageBuffer();
@@ -26,9 +28,11 @@ namespace ZeroLevel.Services.Logging
             var thread = new Thread(ProcessMessageQueueMethod) { IsBackground = true };
             thread.Start();
         }
-        #endregion
+
+        #endregion Ctor
 
         #region Routing
+
         public void SetupBacklog(long backlog)
         {
             if (backlog != _backlog)
@@ -94,9 +98,11 @@ namespace ZeroLevel.Services.Logging
                 }
             }
         }
-        #endregion
+
+        #endregion Routing
 
         #region ILogger
+
         public void Write(LogLevel level, string message)
         {
             if (false == _stopped)
@@ -104,9 +110,11 @@ namespace ZeroLevel.Services.Logging
                 _messageQueue.Push(level, message);
             }
         }
-        #endregion
+
+        #endregion ILogger
 
         #region IDisposable
+
         public void Dispose()
         {
             if (false == _stopped)
@@ -136,6 +144,7 @@ namespace ZeroLevel.Services.Logging
                 GC.WaitForPendingFinalizers();
             }
         }
-        #endregion
+
+        #endregion IDisposable
     }
 }

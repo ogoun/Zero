@@ -9,11 +9,31 @@ namespace ZeroLevel.DocumentObjectModel
         ICloneable
     {
         #region Ctors
-        public Header() { }
-        public Header(string name) { this.Name = name; }
-        public Header(string name, string value) { this.Name = name; this.Value = value; }
-        public Header(string name, string value, string type) { this.Name = name; this.Value = value; this.Type = type; }
-        public Header(string name, string value, string type, string tag) { this.Name = name; this.Value = value; this.Type = type; this.Tag = tag; }
+
+        public Header()
+        {
+        }
+
+        public Header(string name)
+        {
+            this.Name = name;
+        }
+
+        public Header(string name, string value)
+        {
+            this.Name = name; this.Value = value;
+        }
+
+        public Header(string name, string value, string type)
+        {
+            this.Name = name; this.Value = value; this.Type = type;
+        }
+
+        public Header(string name, string value, string type, string tag)
+        {
+            this.Name = name; this.Value = value; this.Type = type; this.Tag = tag;
+        }
+
         public Header(Header other)
         {
             this.Name = other.Name;
@@ -21,16 +41,20 @@ namespace ZeroLevel.DocumentObjectModel
             this.Type = other.Type;
             this.Value = other.Value;
         }
-        #endregion
+
+        #endregion Ctors
 
         #region Fields
+
         public string Name;
         public string Value;
         public string Type;
         public string Tag;
-        #endregion
+
+        #endregion Fields
 
         #region IBinarySerializable
+
         public void Serialize(IBinaryWriter writer)
         {
             writer.WriteString(Name);
@@ -46,9 +70,11 @@ namespace ZeroLevel.DocumentObjectModel
             Type = reader.ReadString();
             Tag = reader.ReadString();
         }
-        #endregion
+
+        #endregion IBinarySerializable
 
         #region IEquatable
+
         public bool Equals(Header other)
         {
             if (other == null) return false;
@@ -58,9 +84,11 @@ namespace ZeroLevel.DocumentObjectModel
             if (string.Compare(this.Tag, other.Tag, StringComparison.Ordinal) != 0) return false;
             return true;
         }
-        #endregion
+
+        #endregion IEquatable
 
         #region Equals & Hash
+
         public override bool Equals(object obj)
         {
             return this.Equals(obj as Header);
@@ -73,13 +101,16 @@ namespace ZeroLevel.DocumentObjectModel
                 Type.GetHashCode() ^
                 Tag.GetHashCode();
         }
-        #endregion
+
+        #endregion Equals & Hash
 
         #region ICloneable
+
         public object Clone()
         {
             return new Header(this);
         }
-        #endregion
+
+        #endregion ICloneable
     }
 }

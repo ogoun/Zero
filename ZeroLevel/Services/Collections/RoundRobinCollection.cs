@@ -15,7 +15,9 @@ namespace ZeroLevel.Services.Collections
     {
         private readonly List<T> _collection =
             new List<T>();
+
         private int _index = -1;
+
         private readonly ReaderWriterLockSlim _lock =
             new ReaderWriterLockSlim();
 

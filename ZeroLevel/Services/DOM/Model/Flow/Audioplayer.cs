@@ -3,18 +3,18 @@ using ZeroLevel.Services.Serialization;
 
 namespace ZeroLevel.DocumentObjectModel.Flow
 {
-    public sealed class Audioplayer : 
+    public sealed class Audioplayer :
         ContentElement
     {
         public Text Title;
         public List<Audio> Tracks = new List<Audio>();
 
-        public Audioplayer() : 
+        public Audioplayer() :
             base(ContentElementType.Audioplayer)
         {
         }
 
-        public Audioplayer(IBinaryReader reader) : 
+        public Audioplayer(IBinaryReader reader) :
             base(ContentElementType.Audioplayer)
         {
             Deserialize(reader);

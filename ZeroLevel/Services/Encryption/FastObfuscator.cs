@@ -8,8 +8,8 @@ namespace ZeroLevel.Services.Encryption
     {
         private readonly byte[] _salt;
         private int _index = -1;
-        private byte GetInitial() => (_salt == null || _salt.Length == 0) ? (byte)177 : _salt[Interlocked.Increment(ref _index) % _salt.Length];
 
+        private byte GetInitial() => (_salt == null || _salt.Length == 0) ? (byte)177 : _salt[Interlocked.Increment(ref _index) % _salt.Length];
 
         public FastObfuscator(string key)
         {

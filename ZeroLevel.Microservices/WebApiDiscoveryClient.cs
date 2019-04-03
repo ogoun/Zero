@@ -15,6 +15,7 @@ namespace ZeroLevel.Microservices
         BaseProxy, IDiscoveryClient
     {
         #region WebAPI
+
         private IEnumerable<ServiceEndpointsInfo> GetRecords()
         {
             return GET<IEnumerable<ServiceEndpointsInfo>>("api/v0/routes");
@@ -24,13 +25,16 @@ namespace ZeroLevel.Microservices
         {
             return POST<InvokeResult>("api/v0/routes", info);
         }
-        #endregion
+
+        #endregion WebAPI
 
         // Таблица по ключам
         private readonly ConcurrentDictionary<string, RoundRobinCollection<ServiceEndpointInfo>> _tableByKey =
             new ConcurrentDictionary<string, RoundRobinCollection<ServiceEndpointInfo>>();
+
         private readonly ConcurrentDictionary<string, RoundRobinCollection<ServiceEndpointInfo>> _tableByGroups =
             new ConcurrentDictionary<string, RoundRobinCollection<ServiceEndpointInfo>>();
+
         private readonly ConcurrentDictionary<string, RoundRobinCollection<ServiceEndpointInfo>> _tableByTypes =
             new ConcurrentDictionary<string, RoundRobinCollection<ServiceEndpointInfo>>();
 

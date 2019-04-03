@@ -26,7 +26,9 @@ namespace DOM.Services
         }
 
         #region Helpers
+
         #region Map
+
         private readonly Dictionary<ContentElementType, HashSet<ContentElementType>> _includingMap =
             new Dictionary<ContentElementType, HashSet<ContentElementType>>
             {
@@ -158,7 +160,9 @@ namespace DOM.Services
                     }
                 }
             };
-        #endregion
+
+        #endregion Map
+
         /// <summary>
         /// Verify that one element can be included as a child of the second element
         /// </summary>
@@ -166,6 +170,7 @@ namespace DOM.Services
         {
             return _includingMap[elementType].Contains(containerType);
         }
+
         /// <summary>
         /// Writing element to content, dependent on current context.
         /// </summary>
@@ -182,15 +187,19 @@ namespace DOM.Services
                 case ContentElementType.Section:
                     (current as Section).Parts.Add(element);
                     break;
+
                 case ContentElementType.Paragraph:
                     (current as Paragraph).Parts.Add(element);
                     break;
+
                 case ContentElementType.List:
                     (current as List).Items.Add(element);
                     break;
+
                 case ContentElementType.Row:
                     (current as Row).Cells.Add(element);
                     break;
+
                 case ContentElementType.Audioplayer:
                     if (element.Type == ContentElementType.Text)
                     {
@@ -201,6 +210,7 @@ namespace DOM.Services
                         (current as Audioplayer).Tracks.Add(element as Audio);
                     }
                     break;
+
                 case ContentElementType.Videoplayer:
                     if (element.Type == ContentElementType.Text)
                     {
@@ -211,6 +221,7 @@ namespace DOM.Services
                         (current as Videoplayer).Playlist.Add(element as Video);
                     }
                     break;
+
                 case ContentElementType.Gallery:
                     if (element.Type == ContentElementType.Text)
                     {
@@ -221,6 +232,7 @@ namespace DOM.Services
                         (current as Gallery).Images.Add(element as Image);
                     }
                     break;
+
                 case ContentElementType.Table:
                     if (element.Type == ContentElementType.Column)
                     {
@@ -254,35 +266,45 @@ namespace DOM.Services
                     case ContentElementType.Section:
                         LeaveSection();
                         break;
+
                     case ContentElementType.Paragraph:
                         LeaveParagraph();
                         break;
+
                     case ContentElementType.Audioplayer:
                         LeaveAudioplayer();
                         break;
+
                     case ContentElementType.Videoplayer:
                         LeaveVideoplayer();
                         break;
+
                     case ContentElementType.Gallery:
                         LeaveGallery();
                         break;
+
                     case ContentElementType.List:
                         LeaveList();
                         break;
+
                     case ContentElementType.Table:
                         LeaveTable();
                         break;
+
                     case ContentElementType.Row:
                         LeaveRow();
                         break;
+
                     default:
                         throw new Exception($"Uncknown container type {current.Type}");
                 }
             }
         }
-        #endregion
+
+        #endregion Helpers
 
         #region Containers
+
         public void EnterSection()
         {
             ReduceContainers();
@@ -379,9 +401,11 @@ namespace DOM.Services
             }
             WriteElement(videoplayer);
         }
-        #endregion
+
+        #endregion Containers
 
         #region List
+
         public void EnterList()
         {
             if (_containers.Count == 0) EnterSection();
@@ -403,9 +427,11 @@ namespace DOM.Services
             }
             WriteElement(list);
         }
-        #endregion
+
+        #endregion List
 
         #region Table
+
         public void EnterTable(string name, string summary)
         {
             if (_containers.Count == 0) EnterSection();
@@ -449,9 +475,11 @@ namespace DOM.Services
             }
             WriteElement(table);
         }
-        #endregion
+
+        #endregion Table
 
         #region Primitives
+
         public void WriteColumn(Column column)
         {
             if (column == null)
@@ -469,18 +497,22 @@ namespace DOM.Services
             }
             WriteElement(text);
         }
+
         public void WriteText(string text)
         {
             WriteElement(new Text(text));
         }
+
         public void WriteText(string text, TextStyle style)
         {
             WriteElement(new Text(text) { Style = style });
         }
+
         public void WriteHeader(string text)
         {
             WriteElement(new Text(text) { Style = new TextStyle { Size = TextSize.MediumHeader, Formatting = TextFormatting.None } });
         }
+
         public void WriteQuote(Quote quote)
         {
             if (quote == null)
@@ -489,10 +521,12 @@ namespace DOM.Services
             }
             WriteElement(quote);
         }
+
         public void WriteQuote(string quote)
         {
             WriteElement(new Quote(quote));
         }
+
         public void WriteLink(Link link)
         {
             if (link == null)
@@ -501,10 +535,12 @@ namespace DOM.Services
             }
             WriteElement(link);
         }
+
         public void WriteLink(string href, string value)
         {
             WriteElement(new Link(href, value));
         }
+
         public void WriteForm(FormContent form)
         {
             if (form == null)
@@ -513,6 +549,7 @@ namespace DOM.Services
             }
             WriteElement(form);
         }
+
         public void WriteImage(Image image)
         {
             if (image == null)
@@ -521,6 +558,7 @@ namespace DOM.Services
             }
             WriteElement(image);
         }
+
         public void WriteAudio(Audio audio)
         {
             if (audio == null)
@@ -529,6 +567,7 @@ namespace DOM.Services
             }
             WriteElement(audio);
         }
+
         public void WriteVideo(Video video)
         {
             if (video == null)
@@ -537,7 +576,8 @@ namespace DOM.Services
             }
             WriteElement(video);
         }
-        #endregion
+
+        #endregion Primitives
 
         public void Complete()
         {

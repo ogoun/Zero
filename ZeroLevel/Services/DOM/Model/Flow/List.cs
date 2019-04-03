@@ -4,17 +4,17 @@ using ZeroLevel.Services.Serialization;
 
 namespace ZeroLevel.DocumentObjectModel.Flow
 {
-    public class List : 
+    public class List :
         ContentElement
     {
         public List<IContentElement> Items = new List<IContentElement>();
 
-        public List() : 
+        public List() :
             base(ContentElementType.List)
         {
         }
 
-        public List(IBinaryReader reader) : 
+        public List(IBinaryReader reader) :
             base(ContentElementType.List)
         {
             Deserialize(reader);

@@ -4,7 +4,6 @@ using System.Runtime.Serialization;
 using System.Text;
 using System.Threading;
 using ZeroLevel.Services.Pools;
-using ZeroLevel.Services.Reflection;
 using ZeroLevel.Services.Serialization;
 
 namespace ZeroLevel.Services.Network
@@ -17,6 +16,7 @@ namespace ZeroLevel.Services.Network
         ICloneable
     {
         private static ObjectPool<Frame> _pool = new ObjectPool<Frame>(() => new Frame(), 256);
+
         public static Frame FromPool()
         {
             var frame = _pool.Allocate();
@@ -25,20 +25,25 @@ namespace ZeroLevel.Services.Network
             frame.IsRequest = false;
             return frame;
         }
+
         public void Release()
         {
             _pool.Free(this);
         }
 
         private static long _id_counter = 0;
+
         internal static long GetMessageId() => Interlocked.Increment(ref _id_counter);
 
         [DataMember]
         public long FrameId { get; set; }
+
         [DataMember]
         public string Inbox { get; set; }
+
         [DataMember]
         public byte[] Payload { get; set; }
+
         [DataMember]
         public bool IsRequest { get; set; }
 
@@ -46,6 +51,7 @@ namespace ZeroLevel.Services.Network
         {
             FrameId = GetMessageId();
         }
+
         public Frame(Frame other)
         {
             var data = MessageSerializer.Serialize(other);
@@ -76,23 +82,28 @@ namespace ZeroLevel.Services.Network
             if (this.Payload == null || this.Payload.Length == 0) return default(T);
             return MessageSerializer.DeserializeCompatible<T>(this.Payload);
         }
+
         public IEnumerable<T> ReadCollection<T>() where T : IBinarySerializable
         {
             return MessageSerializer.DeserializeCollection<T>(this.Payload);
         }
+
         public string ReadText()
         {
             if (this.Payload == null || this.Payload.Length == 0) return null;
             return Encoding.UTF32.GetString(this.Payload);
         }
+
         public void Write<T>(T data) where T : IBinarySerializable
         {
             this.Payload = MessageSerializer.Serialize<T>(data);
         }
+
         public void Write<T>(IEnumerable<T> items) where T : IBinarySerializable
         {
             this.Payload = MessageSerializer.Serialize<T>(items);
         }
+
         public void Write(string data)
         {
             this.Payload = Encoding.UTF32.GetBytes(data);

@@ -7,7 +7,7 @@ namespace ZeroLevel.DocumentObjectModel.Flow
     /// <summary>
     /// Document block
     /// </summary>
-    public class Section : 
+    public class Section :
         ContentElement
     {
         public List<IContentElement> Parts;
@@ -17,7 +17,7 @@ namespace ZeroLevel.DocumentObjectModel.Flow
             Initialize();
         }
 
-        public Section(IBinaryReader reader) : 
+        public Section(IBinaryReader reader) :
             base(ContentElementType.Section)
         {
             Deserialize(reader);
@@ -35,6 +35,7 @@ namespace ZeroLevel.DocumentObjectModel.Flow
         }
 
         #region Serialization
+
         public override void Serialize(IBinaryWriter writer)
         {
             ContentElementSerializer.WriteCollection(writer, this.Parts);
@@ -44,6 +45,7 @@ namespace ZeroLevel.DocumentObjectModel.Flow
         {
             this.Parts = ContentElementSerializer.ReadCollection(reader);
         }
-        #endregion
+
+        #endregion Serialization
     }
 }

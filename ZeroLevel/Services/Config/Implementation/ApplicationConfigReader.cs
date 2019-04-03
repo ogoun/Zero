@@ -1,12 +1,19 @@
 ﻿namespace ZeroLevel.Services.Config.Implementation
 {
-    internal sealed class ApplicationConfigReader 
+    internal sealed class ApplicationConfigReader
         : IConfigurationReader
     {
         private readonly AppWebConfigReader _reader;
 
-        internal ApplicationConfigReader() { _reader = new AppWebConfigReader(); }
-        internal ApplicationConfigReader(string configFilePath) { _reader = new AppWebConfigReader(configFilePath); }
+        internal ApplicationConfigReader()
+        {
+            _reader = new AppWebConfigReader();
+        }
+
+        internal ApplicationConfigReader(string configFilePath)
+        {
+            _reader = new AppWebConfigReader(configFilePath);
+        }
 
         public IConfiguration ReadConfiguration()
         {

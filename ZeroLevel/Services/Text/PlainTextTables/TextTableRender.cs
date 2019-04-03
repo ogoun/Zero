@@ -133,6 +133,7 @@ namespace ZeroLevel.Services.PlainTextTables
             }
             return result;
         }
+
         /// <summary>
         /// Splitting a text string into substrings of the specified length
         /// </summary>
@@ -168,6 +169,7 @@ namespace ZeroLevel.Services.PlainTextTables
             }
             return result;
         }
+
         /// <summary>
         /// Calculate the actual width of the table for the specified style
         /// </summary>
@@ -187,6 +189,7 @@ namespace ZeroLevel.Services.PlainTextTables
             }
             return width;
         }
+
         /// <summary>
         /// Rendering column separator
         /// </summary>
@@ -199,12 +202,14 @@ namespace ZeroLevel.Services.PlainTextTables
                 case TextTableStyle.DoubleHeaderLine:
                     sb.Append(' ');
                     break;
+
                 case TextTableStyle.Columns:
                 case TextTableStyle.Simple:
                 case TextTableStyle.Borders:
                 case TextTableStyle.DoubleBorders:
                     sb.Append(options.VerticalLine);
                     break;
+
                 case TextTableStyle.DoubleHeaderAndFirstColumn:
                 case TextTableStyle.HeaderAndFirstColumn:
                     if (column_index == 1)
@@ -218,6 +223,7 @@ namespace ZeroLevel.Services.PlainTextTables
                     break;
             }
         }
+
         /// <summary>
         /// Row separator rendering
         /// </summary>
@@ -276,6 +282,7 @@ namespace ZeroLevel.Services.PlainTextTables
                         sb.Append(options.VerticalToLeftLine);
                     }
                     break;
+
                 case TextTableStyle.HeaderLine:
                 case TextTableStyle.DoubleHeaderLine:
                     if (row_index == 1)
@@ -283,6 +290,7 @@ namespace ZeroLevel.Services.PlainTextTables
                         sb.Append(sym, width);
                     }
                     break;
+
                 case TextTableStyle.HeaderAndFirstColumn:
                 case TextTableStyle.DoubleHeaderAndFirstColumn:
                     if (row_index == 1)

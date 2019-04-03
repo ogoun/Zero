@@ -11,6 +11,7 @@ namespace ZeroLevel.Discovery
     public abstract class BaseController : ApiController
     {
         #region Responce create helpers
+
         public static HttpResponseMessage BadRequestAnswer(HttpRequestMessage request, string message)
         {
             return request.CreateSelfDestroyingResponse(HttpStatusCode.BadRequest,
@@ -90,6 +91,7 @@ namespace ZeroLevel.Discovery
             }
             return null;
         }
-        #endregion
+
+        #endregion Responce create helpers
     }
 }

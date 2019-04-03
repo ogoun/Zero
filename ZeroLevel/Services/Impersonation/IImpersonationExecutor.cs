@@ -8,6 +8,7 @@ namespace ZeroLevel.Services.Impersonation
     public interface IImpersonationExecutor
     {
         void ExecuteCode<T>(Action<T> action, T arg);
+
         void ExecuteCode(Action action);
     }
 }

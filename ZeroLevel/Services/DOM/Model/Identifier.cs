@@ -2,28 +2,39 @@
 
 namespace ZeroLevel.DocumentObjectModel
 {
-    public class Identifier : 
+    public class Identifier :
         IBinarySerializable
     {
-        public Identifier() { }
-        public Identifier(IBinaryReader reader) { Deserialize(reader); }
+        public Identifier()
+        {
+        }
 
-        #region Fields        
+        public Identifier(IBinaryReader reader)
+        {
+            Deserialize(reader);
+        }
+
+        #region Fields
+
         /// <summary>
         /// Version
         /// </summary>
         public int Version;
+
         /// <summary>
         /// Timestamp ID
         /// </summary>
         public long Timestamp;
+
         /// <summary>
-        /// Label with day accurcy 
+        /// Label with day accurcy
         /// </summary>
         public string DateLabel;
-        #endregion
+
+        #endregion Fields
 
         #region IBinarySerializable
+
         public void Serialize(IBinaryWriter writer)
         {
             writer.WriteInt32(this.Version);
@@ -37,6 +48,7 @@ namespace ZeroLevel.DocumentObjectModel
             this.Timestamp = reader.ReadLong();
             this.DateLabel = reader.ReadString();
         }
-        #endregion
+
+        #endregion IBinarySerializable
     }
 }

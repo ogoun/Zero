@@ -3,7 +3,6 @@ using System.Collections.Concurrent;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
-using ZeroLevel.Services.Network.Contract;
 using ZeroLevel.Services.Serialization;
 
 namespace ZeroLevel.Services.Network
@@ -29,7 +28,6 @@ namespace ZeroLevel.Services.Network
         {
             try { OnConnectionBroken?.Invoke(this); } catch { }
         }
-
 
         public ZSocketServerClient(Socket socket,
             Action<Frame, IZBackward> handler,
@@ -100,7 +98,6 @@ namespace ZeroLevel.Services.Network
                     _status = ZTransportStatus.Broken;
                     RizeConnectionBrokenEvent();
                 }
-
             }
         }
 

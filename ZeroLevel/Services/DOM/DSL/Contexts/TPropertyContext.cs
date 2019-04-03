@@ -69,6 +69,7 @@ namespace DOM.DSL.Contexts
                     switch (reader.Current)
                     {
                         #region Ecsaping
+
                         case TChar.Escape:
                             {
                                 switch (reader.Next)
@@ -77,18 +78,22 @@ namespace DOM.DSL.Contexts
                                         text.Append(' ');
                                         reader.Move(2);
                                         break;
+
                                     case 'r':
                                         text.Append(TChar.CaretReturn);
                                         reader.Move(2);
                                         break;
+
                                     case 'n':
                                         text.Append(TChar.Newline);
                                         reader.Move(2);
                                         break;
+
                                     case 't':
                                         text.Append(TChar.Tab);
                                         reader.Move(2);
                                         break;
+
                                     case '@':
                                     case '(':
                                     case ')':
@@ -98,6 +103,7 @@ namespace DOM.DSL.Contexts
                                         text.Append(reader.Next);
                                         reader.Move(2);
                                         break;
+
                                     default:
                                         text.Append(reader.Current);
                                         reader.Move();
@@ -105,7 +111,8 @@ namespace DOM.DSL.Contexts
                                 }
                             }
                             break;
-                        #endregion
+
+                        #endregion Ecsaping
 
                         case TChar.PropertyIndexEnd:
                             {
@@ -160,6 +167,7 @@ namespace DOM.DSL.Contexts
                                 }
                             }
                             break;
+
                         default:
                             {
                                 text.Append(reader.Current);

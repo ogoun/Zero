@@ -25,23 +25,94 @@
         public int GalleryId { get; private set; } = -1;
         public int ImageId { get; private set; } = -1;
 
-        public void IncSectionId() { SectionId++; }
-        public void IncParagraphId() { ParagraphId++; }
-        public void IncListId() { ListId++; }
-        public void IncListItemId() { ListItemId++; }
-        public void IncTableId() { TableId++; }
-        public void IncColumnId() { ColumnId++; }
-        public void IncRowId() { RowId++; }
-        public void IncCellId() { CellId++; }
-        public void IncFormId() { FormId++; }
-        public void IncLinkId() { LinkId++; }
-        public void IncQuoteId() { QuoteId++; }
-        public void IncTextId() { TextId++; }
-        public void IncAudioplayerId() { AudioplayerId++; }
-        public void IncAudioId() { AudioId++; }
-        public void IncVideoplayerId() { VideoplayerId++; }
-        public void IncVideoId() { VideoId++; }
-        public void IncGalleryId() { GalleryId++; }
-        public void IncImageId() { ImageId++; }
+        public void IncSectionId()
+        {
+            SectionId++;
+        }
+
+        public void IncParagraphId()
+        {
+            ParagraphId++;
+        }
+
+        public void IncListId()
+        {
+            ListId++;
+        }
+
+        public void IncListItemId()
+        {
+            ListItemId++;
+        }
+
+        public void IncTableId()
+        {
+            TableId++;
+        }
+
+        public void IncColumnId()
+        {
+            ColumnId++;
+        }
+
+        public void IncRowId()
+        {
+            RowId++;
+        }
+
+        public void IncCellId()
+        {
+            CellId++;
+        }
+
+        public void IncFormId()
+        {
+            FormId++;
+        }
+
+        public void IncLinkId()
+        {
+            LinkId++;
+        }
+
+        public void IncQuoteId()
+        {
+            QuoteId++;
+        }
+
+        public void IncTextId()
+        {
+            TextId++;
+        }
+
+        public void IncAudioplayerId()
+        {
+            AudioplayerId++;
+        }
+
+        public void IncAudioId()
+        {
+            AudioId++;
+        }
+
+        public void IncVideoplayerId()
+        {
+            VideoplayerId++;
+        }
+
+        public void IncVideoId()
+        {
+            VideoId++;
+        }
+
+        public void IncGalleryId()
+        {
+            GalleryId++;
+        }
+
+        public void IncImageId()
+        {
+            ImageId++;
+        }
     }
 }

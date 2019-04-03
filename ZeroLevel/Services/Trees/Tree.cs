@@ -6,7 +6,9 @@ namespace ZeroLevel.Services.Trees
 {
     public class Tree : ITree
     {
-        public Tree() { }
+        public Tree()
+        {
+        }
 
         public Tree(ITree other)
         {

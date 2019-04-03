@@ -186,6 +186,7 @@ namespace ZeroLevel.Services.Async
 
             public IAsyncWaitQueue<IDisposable> WaitQueue { get { return _mutex._queue; } }
         }
+
         // ReSharper restore UnusedMember.Local
     }
 }

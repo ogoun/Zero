@@ -82,6 +82,7 @@ namespace ZeroLevel.Services.Async
 
         [DebuggerNonUserCode]
         internal int GetReaderCountForDebugger { get { return (_locksHeld > 0 ? _locksHeld : 0); } }
+
         [DebuggerNonUserCode]
         internal bool GetUpgradeInProgressForDebugger { get { return !_upgradeReaderQueue.IsEmpty; } }
 
@@ -764,6 +765,7 @@ namespace ZeroLevel.Services.Async
 
             public IAsyncWaitQueue<IDisposable> UpgradeReaderWaitQueue { get { return _rwl._upgradeReaderQueue; } }
         }
+
         // ReSharper restore UnusedMember.Local
     }
 }

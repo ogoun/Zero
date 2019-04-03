@@ -2,7 +2,7 @@
  *  Port of Snowball stemmers on C#
  *  Original stemmers can be found on http://snowball.tartarus.org
  *  Licence still BSD: http://snowball.tartarus.org/license.php
- *  
+ *
  *  Most of stemmers are ported from Java by Iveonik Systems ltd. (www.iveonik.com)
  */
 
@@ -13,7 +13,7 @@ namespace Iveonik.Stemmers
     public class HungarianStemmer : StemmerOperations, ILexer
     {
         //private readonly static HungarianStemmer methodObject = new HungarianStemmer();
-        private readonly static Among[] a_0 = 
+        private readonly static Among[] a_0 =
         {
             new Among ( "cs", -1, -1, null ),
             new Among ( "dzs", -1, -1, null ),
@@ -25,13 +25,13 @@ namespace Iveonik.Stemmers
             new Among ( "zs", -1, -1, null )
         };
 
-        private readonly static Among[] a_1 = 
+        private readonly static Among[] a_1 =
         {
             new Among ( "\u00E1", -1, 1, null ),
             new Among ( "\u00E9", -1, 2, null )
         };
 
-        private readonly static Among[] a_2 = 
+        private readonly static Among[] a_2 =
         {
             new Among ( "bb", -1, -1, null ),
             new Among ( "cc", -1, -1, null ),
@@ -58,13 +58,13 @@ namespace Iveonik.Stemmers
             new Among ( "zz", -1, -1, null )
         };
 
-        private readonly static Among[] a_3 = 
+        private readonly static Among[] a_3 =
         {
             new Among ( "al", -1, 1, null ),
             new Among ( "el", -1, 2, null )
         };
 
-        private readonly static Among[] a_4 = 
+        private readonly static Among[] a_4 =
         {
             new Among ( "ba", -1, -1, null ),
             new Among ( "ra", -1, -1, null ),
@@ -112,14 +112,14 @@ namespace Iveonik.Stemmers
             new Among ( "v\u00E9", -1, -1, null )
         };
 
-        private readonly static Among[] a_5 = 
+        private readonly static Among[] a_5 =
         {
             new Among ( "\u00E1n", -1, 2, null ),
             new Among ( "\u00E9n", -1, 1, null ),
             new Among ( "\u00E1nk\u00E9nt", -1, 3, null )
         };
 
-        private readonly static Among[] a_6 = 
+        private readonly static Among[] a_6 =
         {
             new Among ( "stul", -1, 2, null ),
             new Among ( "astul", 0, 1, null ),
@@ -129,13 +129,13 @@ namespace Iveonik.Stemmers
             new Among ( "\u00E9st\u00FCl", 3, 4, null )
         };
 
-        private readonly static Among[] a_7 = 
+        private readonly static Among[] a_7 =
         {
             new Among ( "\u00E1", -1, 1, null ),
             new Among ( "\u00E9", -1, 2, null )
         };
 
-        private readonly static Among[] a_8 = 
+        private readonly static Among[] a_8 =
         {
             new Among ( "k", -1, 7, null ),
             new Among ( "ak", 0, 4, null ),
@@ -146,7 +146,7 @@ namespace Iveonik.Stemmers
             new Among ( "\u00F6k", 0, 3, null )
         };
 
-        private readonly static Among[] a_9 = 
+        private readonly static Among[] a_9 =
         {
             new Among ( "\u00E9i", -1, 7, null ),
             new Among ( "\u00E1\u00E9i", 0, 6, null ),
@@ -162,7 +162,7 @@ namespace Iveonik.Stemmers
             new Among ( "\u00E9\u00E9", 3, 8, null )
         };
 
-        private readonly static Among[] a_10 = 
+        private readonly static Among[] a_10 =
         {
             new Among ( "a", -1, 18, null ),
             new Among ( "ja", 0, 17, null ),
@@ -197,7 +197,7 @@ namespace Iveonik.Stemmers
             new Among ( "\u00E9", -1, 20, null )
         };
 
-        private readonly static Among[] a_11 = 
+        private readonly static Among[] a_11 =
         {
             new Among ( "id", -1, 10, null ),
             new Among ( "aid", 0, 9, null ),
@@ -392,11 +392,13 @@ namespace Iveonik.Stemmers
             {
                 case 0:
                     return false;
+
                 case 1:
                     // (, line 62
                     // <-, line 62
                     slice_from("a");
                     break;
+
                 case 2:
                     // (, line 63
                     // <-, line 63
@@ -471,6 +473,7 @@ namespace Iveonik.Stemmers
             {
                 case 0:
                     return false;
+
                 case 1:
                     // (, line 78
                     // call double, line 78
@@ -479,6 +482,7 @@ namespace Iveonik.Stemmers
                         return false;
                     }
                     break;
+
                 case 2:
                     // (, line 79
                     // call double, line 79
@@ -548,16 +552,19 @@ namespace Iveonik.Stemmers
             {
                 case 0:
                     return false;
+
                 case 1:
                     // (, line 117
                     // <-, line 117
                     slice_from("e");
                     break;
+
                 case 2:
                     // (, line 118
                     // <-, line 118
                     slice_from("a");
                     break;
+
                 case 3:
                     // (, line 119
                     // <-, line 119
@@ -590,21 +597,25 @@ namespace Iveonik.Stemmers
             {
                 case 0:
                     return false;
+
                 case 1:
                     // (, line 125
                     // delete, line 125
                     slice_del();
                     break;
+
                 case 2:
                     // (, line 126
                     // delete, line 126
                     slice_del();
                     break;
+
                 case 3:
                     // (, line 127
                     // <-, line 127
                     slice_from("a");
                     break;
+
                 case 4:
                     // (, line 128
                     // <-, line 128
@@ -637,6 +648,7 @@ namespace Iveonik.Stemmers
             {
                 case 0:
                     return false;
+
                 case 1:
                     // (, line 134
                     // call double, line 134
@@ -645,6 +657,7 @@ namespace Iveonik.Stemmers
                         return false;
                     }
                     break;
+
                 case 2:
                     // (, line 135
                     // call double, line 135
@@ -687,36 +700,43 @@ namespace Iveonik.Stemmers
             {
                 case 0:
                     return false;
+
                 case 1:
                     // (, line 143
                     // <-, line 143
                     slice_from("a");
                     break;
+
                 case 2:
                     // (, line 144
                     // <-, line 144
                     slice_from("e");
                     break;
+
                 case 3:
                     // (, line 145
                     // delete, line 145
                     slice_del();
                     break;
+
                 case 4:
                     // (, line 146
                     // delete, line 146
                     slice_del();
                     break;
+
                 case 5:
                     // (, line 147
                     // delete, line 147
                     slice_del();
                     break;
+
                 case 6:
                     // (, line 148
                     // delete, line 148
                     slice_del();
                     break;
+
                 case 7:
                     // (, line 149
                     // delete, line 149
@@ -749,46 +769,55 @@ namespace Iveonik.Stemmers
             {
                 case 0:
                     return false;
+
                 case 1:
                     // (, line 155
                     // delete, line 155
                     slice_del();
                     break;
+
                 case 2:
                     // (, line 156
                     // <-, line 156
                     slice_from("e");
                     break;
+
                 case 3:
                     // (, line 157
                     // <-, line 157
                     slice_from("a");
                     break;
+
                 case 4:
                     // (, line 158
                     // delete, line 158
                     slice_del();
                     break;
+
                 case 5:
                     // (, line 159
                     // <-, line 159
                     slice_from("e");
                     break;
+
                 case 6:
                     // (, line 160
                     // <-, line 160
                     slice_from("a");
                     break;
+
                 case 7:
                     // (, line 161
                     // delete, line 161
                     slice_del();
                     break;
+
                 case 8:
                     // (, line 162
                     // <-, line 162
                     slice_from("e");
                     break;
+
                 case 9:
                     // (, line 163
                     // delete, line 163
@@ -821,101 +850,121 @@ namespace Iveonik.Stemmers
             {
                 case 0:
                     return false;
+
                 case 1:
                     // (, line 169
                     // delete, line 169
                     slice_del();
                     break;
+
                 case 2:
                     // (, line 170
                     // <-, line 170
                     slice_from("a");
                     break;
+
                 case 3:
                     // (, line 171
                     // <-, line 171
                     slice_from("e");
                     break;
+
                 case 4:
                     // (, line 172
                     // delete, line 172
                     slice_del();
                     break;
+
                 case 5:
                     // (, line 173
                     // <-, line 173
                     slice_from("a");
                     break;
+
                 case 6:
                     // (, line 174
                     // <-, line 174
                     slice_from("e");
                     break;
+
                 case 7:
                     // (, line 175
                     // delete, line 175
                     slice_del();
                     break;
+
                 case 8:
                     // (, line 176
                     // delete, line 176
                     slice_del();
                     break;
+
                 case 9:
                     // (, line 177
                     // delete, line 177
                     slice_del();
                     break;
+
                 case 10:
                     // (, line 178
                     // <-, line 178
                     slice_from("a");
                     break;
+
                 case 11:
                     // (, line 179
                     // <-, line 179
                     slice_from("e");
                     break;
+
                 case 12:
                     // (, line 180
                     // delete, line 180
                     slice_del();
                     break;
+
                 case 13:
                     // (, line 181
                     // delete, line 181
                     slice_del();
                     break;
+
                 case 14:
                     // (, line 182
                     // <-, line 182
                     slice_from("a");
                     break;
+
                 case 15:
                     // (, line 183
                     // <-, line 183
                     slice_from("e");
                     break;
+
                 case 16:
                     // (, line 184
                     // delete, line 184
                     slice_del();
                     break;
+
                 case 17:
                     // (, line 185
                     // delete, line 185
                     slice_del();
                     break;
+
                 case 18:
                     // (, line 186
                     // delete, line 186
                     slice_del();
                     break;
+
                 case 19:
                     // (, line 187
                     // <-, line 187
                     slice_from("a");
                     break;
+
                 case 20:
                     // (, line 188
                     // <-, line 188
@@ -948,146 +997,175 @@ namespace Iveonik.Stemmers
             {
                 case 0:
                     return false;
+
                 case 1:
                     // (, line 194
                     // delete, line 194
                     slice_del();
                     break;
+
                 case 2:
                     // (, line 195
                     // <-, line 195
                     slice_from("a");
                     break;
+
                 case 3:
                     // (, line 196
                     // <-, line 196
                     slice_from("e");
                     break;
+
                 case 4:
                     // (, line 197
                     // delete, line 197
                     slice_del();
                     break;
+
                 case 5:
                     // (, line 198
                     // delete, line 198
                     slice_del();
                     break;
+
                 case 6:
                     // (, line 199
                     // delete, line 199
                     slice_del();
                     break;
+
                 case 7:
                     // (, line 200
                     // <-, line 200
                     slice_from("a");
                     break;
+
                 case 8:
                     // (, line 201
                     // <-, line 201
                     slice_from("e");
                     break;
+
                 case 9:
                     // (, line 202
                     // delete, line 202
                     slice_del();
                     break;
+
                 case 10:
                     // (, line 203
                     // delete, line 203
                     slice_del();
                     break;
+
                 case 11:
                     // (, line 204
                     // delete, line 204
                     slice_del();
                     break;
+
                 case 12:
                     // (, line 205
                     // <-, line 205
                     slice_from("a");
                     break;
+
                 case 13:
                     // (, line 206
                     // <-, line 206
                     slice_from("e");
                     break;
+
                 case 14:
                     // (, line 207
                     // delete, line 207
                     slice_del();
                     break;
+
                 case 15:
                     // (, line 208
                     // delete, line 208
                     slice_del();
                     break;
+
                 case 16:
                     // (, line 209
                     // delete, line 209
                     slice_del();
                     break;
+
                 case 17:
                     // (, line 210
                     // delete, line 210
                     slice_del();
                     break;
+
                 case 18:
                     // (, line 211
                     // <-, line 211
                     slice_from("a");
                     break;
+
                 case 19:
                     // (, line 212
                     // <-, line 212
                     slice_from("e");
                     break;
+
                 case 20:
                     // (, line 214
                     // delete, line 214
                     slice_del();
                     break;
+
                 case 21:
                     // (, line 215
                     // delete, line 215
                     slice_del();
                     break;
+
                 case 22:
                     // (, line 216
                     // <-, line 216
                     slice_from("a");
                     break;
+
                 case 23:
                     // (, line 217
                     // <-, line 217
                     slice_from("e");
                     break;
+
                 case 24:
                     // (, line 218
                     // delete, line 218
                     slice_del();
                     break;
+
                 case 25:
                     // (, line 219
                     // delete, line 219
                     slice_del();
                     break;
+
                 case 26:
                     // (, line 220
                     // delete, line 220
                     slice_del();
                     break;
+
                 case 27:
                     // (, line 221
                     // <-, line 221
                     slice_from("a");
                     break;
+
                 case 28:
                     // (, line 222
                     // <-, line 222
                     slice_from("e");
                     break;
+
                 case 29:
                     // (, line 223
                     // delete, line 223

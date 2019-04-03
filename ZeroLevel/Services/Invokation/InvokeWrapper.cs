@@ -55,7 +55,7 @@ namespace ZeroLevel.Services.Invokation
             return CreateCompiledExpression(handler.GetMethodInfo());
         }
 
-        #endregion
+        #endregion Static helpers
 
         #region Helpers
 
@@ -83,7 +83,7 @@ namespace ZeroLevel.Services.Invokation
             return identity.ToString();
         }
 
-        #endregion
+        #endregion Helpers
 
         #region Configure by Type
 
@@ -185,7 +185,7 @@ namespace ZeroLevel.Services.Invokation
             return result.Select(r => r.Item1).ToList();
         }
 
-        #endregion
+        #endregion Configure by Type
 
         #region Configure by MethodInfo
 
@@ -225,7 +225,7 @@ namespace ZeroLevel.Services.Invokation
             return Enumerable.Empty<string>();
         }
 
-        #endregion
+        #endregion Configure by MethodInfo
 
         #region Configuration
 
@@ -248,7 +248,7 @@ namespace ZeroLevel.Services.Invokation
             _invokeCachee[invoke.Item1] = invoke.Item2;
         }
 
-        #endregion
+        #endregion Configuration
 
         #region Invoking
 
@@ -306,7 +306,7 @@ namespace ZeroLevel.Services.Invokation
             return InvokeStatic(CreateMethodIdentity(methodName, args.Select(a => a.GetType()).ToArray()), args);
         }
 
-        #endregion
+        #endregion Invoking
 
         #region Helpers
 
@@ -347,7 +347,7 @@ namespace ZeroLevel.Services.Invokation
             return GetInvoker(CreateMethodIdentity(methodName, argsTypes));
         }
 
-        #endregion
+        #endregion Helpers
 
         #region Factories
 
@@ -356,6 +356,6 @@ namespace ZeroLevel.Services.Invokation
             return new InvokeWrapper();
         }
 
-        #endregion
+        #endregion Factories
     }
 }

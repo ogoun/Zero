@@ -88,21 +88,27 @@ namespace ZeroLevel.Patterns.Queries
                 case QueryOperation.EQ:
                     return Expression.Lambda<Func<T, bool>>(Expression.Equal(param, constant),
                         new[] { argument });
+
                 case QueryOperation.GT:
                     return Expression.Lambda<Func<T, bool>>(Expression.GreaterThan(param, constant),
                         new[] { argument });
+
                 case QueryOperation.GTE:
                     return Expression.Lambda<Func<T, bool>>(Expression.GreaterThanOrEqual(param, constant),
                         new[] { argument });
+
                 case QueryOperation.LT:
                     return Expression.Lambda<Func<T, bool>>(Expression.LessThan(param, constant),
                         new[] { argument });
+
                 case QueryOperation.LTE:
                     return Expression.Lambda<Func<T, bool>>(Expression.LessThanOrEqual(param, constant),
                         new[] { argument });
+
                 case QueryOperation.NEQ:
                     return Expression.Lambda<Func<T, bool>>(Expression.NotEqual(param, constant),
                         new[] { argument });
+
                 case QueryOperation.IN:
                     var overload = typeof(Enumerable).GetMethods()
                                       .Single(mi => mi.Name.Equals("Contains", StringComparison.Ordinal) && mi.GetParameters().Count() == 2);

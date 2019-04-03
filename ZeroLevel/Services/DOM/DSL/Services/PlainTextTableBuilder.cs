@@ -31,6 +31,7 @@ namespace DOM.DSL.Services
             public int RowCellIndex = -1;
 
             private StringBuilder _cellBody = new StringBuilder();
+
             public void FlushCell()
             {
                 if (RowCellIndex >= 0)
@@ -51,6 +52,7 @@ namespace DOM.DSL.Services
                 return TextTableRender.Render(Data, options);
             }
         }
+
         private readonly TextTableRenderOptions _options;
         private Stack<TextTableMeta> _textTables = new Stack<TextTableMeta>();
 

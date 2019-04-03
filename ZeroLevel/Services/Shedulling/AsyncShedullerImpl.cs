@@ -15,6 +15,7 @@ namespace ZeroLevel.Services.Shedulling
         }
 
         #region One time events
+
         public long RemindAsyncAfter(TimeSpan timespan, Func<long, Task> callback)
         {
             return _asyncSheduller.Push(timespan, callback);
@@ -24,30 +25,33 @@ namespace ZeroLevel.Services.Shedulling
         {
             return _asyncSheduller.Push(date, callback);
         }
-        #endregion
+
+        #endregion One time events
 
         #region Repitable behaviour
+
         private readonly ConcurrentDictionary<long, ExpiredAsyncObject> _repitableAsyncActions = new ConcurrentDictionary<long, ExpiredAsyncObject>();
 
         /// <summary>
         /// Performs an action once a period, while the period is recalculated according to the transferred function at each re-creation of the task.
         /// </summary>
-        /// <param name="nextEventPeriodCalcFunction">Функция для расчета следующего периода</param>
-        /// <param name="callback">Действие</param>
-        /// <returns>Идентификатор задания</returns>
+        /// <param name="nextEventPeriodCalcFunction">Function to calculate the next period</param>
+        /// <param name="callback">Action</param>
+        /// <returns>Task ID</returns>
         public long RemindAsyncEveryNonlinearPeriod(Func<TimeSpan> nextEventPeriodCalcFunction,
             Func<long, Task> callback,
             bool breakWherError = false)
         {
             return RemindAsyncEveryNonlinearPeriod(nextEventPeriodCalcFunction, nextEventPeriodCalcFunction, callback, breakWherError);
         }
+
         /// <summary>
-        ///  Исполняет действие раз в период, при этом период перерасчитывается по переданной функции при каждом пересоздании задачи
+        ///  Performs an action once a period, while the period is recalculated according to the transferred function at each re-creation of the task.
         /// </summary>
-        /// <param name="firstEventPeriodCalcFunction">Функция для расчета периода до первого исполнения</param>
-        /// <param name="nextEventPeriodCalcFunction">Функция для расчета периода до последующих исполнений</param>
-        /// <param name="callback">Действие</param>
-        /// <returns>Идентификатор задания</returns>
+        /// <param name="firstEventPeriodCalcFunction">The function to calculate the period to the first execution</param>
+        /// <param name="nextEventPeriodCalcFunction">The function for calculating the period until subsequent performances</param>
+        /// <param name="callback">Action</param>
+        /// <returns>Task ID</returns>
         public long RemindAsyncEveryNonlinearPeriod(Func<TimeSpan> firstEventPeriodCalcFunction,
             Func<TimeSpan> nextEventPeriodCalcFunction,
             Func<long, Task> callback,
@@ -77,17 +81,18 @@ namespace ZeroLevel.Services.Shedulling
         }
 
         /// <summary>
-        /// Исполняет действие раз в период, при этом дата перерасчитывается по переданной функции при каждом пересоздании задачи
+        /// Performs an action once per period, while the date is recalculated from the function transferred each time the task is recreated.
         /// </summary>
-        /// <param name="nextEventDateCalcFunction">Функция для расчета следующей даты</param>
+        /// <param name="nextEventDateCalcFunction">The function to calculate the next date</param>
         /// <param name="callback">Действие</param>
-        /// <returns>Идентификатор задания</returns>
+        /// <returns>Task ID</returns>
         public long RemindAsyncEveryNonlinearDate(Func<DateTime, DateTime> nextEventDateCalcFunction,
             Func<long, Task> callback,
             bool breakWherError = false)
         {
             return RemindAsyncEveryNonlinearDate(nextEventDateCalcFunction, nextEventDateCalcFunction, callback, breakWherError);
         }
+
         public long RemindAsyncEveryNonlinearDate(DateTime firstTime,
             Func<DateTime, DateTime> nextEventDateCalcFunction,
             Func<long, Task> callback,
@@ -123,13 +128,14 @@ namespace ZeroLevel.Services.Shedulling
             };
             return _asyncSheduller.Push(obj);
         }
+
         /// <summary>
-        /// Исполняет действие раз в период, при этом дата перерасчитывается по переданной функции при каждом пересоздании задачи
+        /// Performs an action once per period, while the date is recalculated from the function transferred each time the task is recreated.
         /// </summary>
-        /// <param name="firstEventDateCalcFunction">Функция для расчет даты первого запуска</param>
-        /// <param name="nextEventDateCalcFunction">Функция для расчета следующей даты</param>
-        /// <param name="callback">Действие</param>
-        /// <returns>Идентификатор задания</returns>
+        /// <param name="firstEventDateCalcFunction">The function to calculate the first run date</param>
+        /// <param name="nextEventDateCalcFunction">The function to calculate the next date</param>
+        /// <param name="callback">Action</param>
+        /// <returns>Task ID</returns>
         public long RemindAsyncEveryNonlinearDate(Func<DateTime, DateTime> firstEventDateCalcFunction,
             Func<DateTime, DateTime> nextEventDateCalcFunction,
             Func<long, Task> callback,
@@ -165,25 +171,27 @@ namespace ZeroLevel.Services.Shedulling
             };
             return _asyncSheduller.Push(obj);
         }
+
         /// <summary>
-        /// Исполняет действие раз в указанный период
+        /// Performs an action once in a specified period
         /// </summary>
-        /// <param name="timespan">Период</param>
-        /// <param name="callback">Действие</param>
-        /// <returns>Идентификатор задания</returns>
+        /// <param name="timespan">Period</param>
+        /// <param name="callback">Action</param>
+        /// <returns>Task ID</returns>
         public long RemindAsyncEvery(TimeSpan timespan,
             Func<long, Task> callback,
             bool breakWherError = false)
         {
             return RemindAsyncEvery(timespan, timespan, callback, breakWherError);
         }
+
         /// <summary>
-        /// Исполняет действие раз в указанный период
+        /// Performs an action once in a specified period
         /// </summary>
-        /// <param name="first">Период до первого выполнения</param>
-        /// <param name="next">Период</param>
-        /// <param name="callback">Действие</param>
-        /// <returns>Идентификатор задания</returns>
+        /// <param name="first">Period to first run</param>
+        /// <param name="next">Period</param>
+        /// <param name="callback">Action</param>
+        /// <returns>Task ID</returns>
         public long RemindAsyncEvery(TimeSpan first,
             TimeSpan next,
             Func<long, Task> callback,
@@ -249,9 +257,11 @@ namespace ZeroLevel.Services.Shedulling
             };
             return _asyncSheduller.Push(obj);
         }
-        #endregion
+
+        #endregion Repitable behaviour
 
         #region Sheduller control
+
         public void Pause()
         {
             _asyncSheduller.Pause();
@@ -277,9 +287,11 @@ namespace ZeroLevel.Services.Shedulling
             }
             return success;
         }
-        #endregion
+
+        #endregion Sheduller control
 
         #region IDisposable
+
         public void Dispose()
         {
             Dispose(true);
@@ -293,6 +305,7 @@ namespace ZeroLevel.Services.Shedulling
                 _asyncSheduller.Dispose();
             }
         }
-        #endregion
+
+        #endregion IDisposable
     }
 }

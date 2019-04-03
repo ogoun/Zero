@@ -3,6 +3,7 @@
     public interface IConfigurationReader
     {
         IConfiguration ReadConfiguration();
+
         IConfigurationSet ReadConfigurationSet();
     }
 }

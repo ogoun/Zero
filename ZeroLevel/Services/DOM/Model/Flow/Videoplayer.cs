@@ -3,17 +3,18 @@ using ZeroLevel.Services.Serialization;
 
 namespace ZeroLevel.DocumentObjectModel.Flow
 {
-    public sealed class Videoplayer : 
+    public sealed class Videoplayer :
         ContentElement
     {
         public Text Title;
         public List<Video> Playlist = new List<Video>();
 
-        public Videoplayer() : 
+        public Videoplayer() :
             base(ContentElementType.Videoplayer)
         {
         }
-        public Videoplayer(IBinaryReader reader) : 
+
+        public Videoplayer(IBinaryReader reader) :
             base(ContentElementType.Videoplayer)
         {
             Deserialize(reader);

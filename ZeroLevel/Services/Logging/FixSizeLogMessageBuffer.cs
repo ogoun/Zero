@@ -4,7 +4,7 @@ using ZeroLevel.Services.Collections;
 
 namespace ZeroLevel.Services.Logging
 {
-    internal sealed class FixSizeLogMessageBuffer 
+    internal sealed class FixSizeLogMessageBuffer
         : ILogMessageBuffer
     {
         private readonly FixSizeQueue<Tuple<LogLevel, string>> _queue;

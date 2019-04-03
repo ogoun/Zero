@@ -7,6 +7,7 @@ namespace DOM.DSL.Model
     internal sealed class TFlowRules
     {
         #region Rules
+
         public TBlockToken ListPrefix;
         public TBlockToken ListPostfix;
         public TBlockToken ListItemPrefix;
@@ -55,12 +56,15 @@ namespace DOM.DSL.Model
         public TBlockToken VideoplayerPostfix;
         public TBlockToken GalleryPrefix;
         public TBlockToken GalleryPostfix;
-        #endregion
+
+        #endregion Rules
 
         #region Special table builder
+
         public bool UseSpecialTableBuilder = false;
         public ISpecialTableBuilder SpecialTableBuilder;
-        #endregion
+
+        #endregion Special table builder
 
         public void Bootstrap()
         {
@@ -124,297 +128,361 @@ namespace DOM.DSL.Model
                         case "prefix":
                             ListPrefix = rule_token;
                             break;
+
                         case "postfix":
                             ListPostfix = rule_token;
                             break;
+
                         case "ignore":
                             ListPostfix = ListPrefix = null;
                             break;
                     }
                     break;
+
                 case "listitem":
                     switch (functionName)
                     {
                         case "prefix":
                             ListItemPrefix = rule_token;
                             break;
+
                         case "postfix":
                             ListItemPostfix = rule_token;
                             break;
+
                         case "ignore":
                             ListItemPrefix = ListItemPostfix = null;
                             break;
                     }
                     break;
+
                 case "text":
                     switch (functionName)
                     {
                         case "prefix":
                             TextPrefix = rule_token;
                             break;
+
                         case "template":
                             TextTemplate = rule_token;
                             break;
+
                         case "postfix":
                             TextPostfix = rule_token;
                             break;
+
                         case "ignore":
                             TextPrefix = TextTemplate = TextPostfix = null;
                             break;
                     }
                     break;
+
                 case "link":
                     switch (functionName)
                     {
                         case "prefix":
                             LinkPrefix = rule_token;
                             break;
+
                         case "template":
                             LinkTemplate = rule_token;
                             break;
+
                         case "postfix":
                             LinkPostfix = rule_token;
                             break;
+
                         case "ignore":
                             LinkPrefix = LinkTemplate = LinkPostfix = null;
                             break;
                     }
                     break;
+
                 case "image":
                     switch (functionName)
                     {
                         case "prefix":
                             ImagePrefix = rule_token;
                             break;
+
                         case "template":
                             ImageTemplate = rule_token;
                             break;
+
                         case "postfix":
                             ImagePostfix = rule_token;
                             break;
+
                         case "ignore":
                             ImagePrefix = ImageTemplate = ImagePostfix = null;
                             break;
                     }
                     break;
+
                 case "quote":
                     switch (functionName)
                     {
                         case "prefix":
                             QuotePrefix = rule_token;
                             break;
+
                         case "template":
                             QuoteTemplate = rule_token;
                             break;
+
                         case "postfix":
                             QuotePostfix = rule_token;
                             break;
+
                         case "ignore":
                             QuotePrefix = QuoteTemplate = QuotePostfix = null;
                             break;
                     }
                     break;
+
                 case "form":
                     switch (functionName)
                     {
                         case "prefix":
                             FormPrefix = rule_token;
                             break;
+
                         case "template":
                             FormTemplate = rule_token;
                             break;
+
                         case "postfix":
                             FormPostfix = rule_token;
                             break;
+
                         case "ignore":
                             FormPrefix = FormTemplate = FormPostfix = null;
                             break;
                     }
                     break;
+
                 case "video":
                     switch (functionName)
                     {
                         case "prefix":
                             VideoPrefix = rule_token;
                             break;
+
                         case "template":
                             VideoTemplate = rule_token;
                             break;
+
                         case "postfix":
                             VideoPostfix = rule_token;
                             break;
+
                         case "ignore":
                             VideoPrefix = VideoTemplate = VideoPostfix = null;
                             break;
                     }
                     break;
+
                 case "audio":
                     switch (functionName)
                     {
                         case "prefix":
                             AudioPrefix = rule_token;
                             break;
+
                         case "template":
                             AudioTemplate = rule_token;
                             break;
+
                         case "postfix":
                             AudioPostfix = rule_token;
                             break;
+
                         case "ignore":
                             AudioPrefix = AudioTemplate = AudioPostfix = null;
                             break;
                     }
                     break;
+
                 case "section":
                     switch (functionName)
                     {
                         case "prefix":
                             SectionPrefix = rule_token;
                             break;
+
                         case "postfix":
                             SectionPostfix = rule_token;
                             break;
+
                         case "ignore":
                             SectionPrefix = SectionPostfix = null;
                             break;
                     }
                     break;
+
                 case "paragraph":
                     switch (functionName)
                     {
                         case "prefix":
                             ParagraphPrefix = rule_token;
                             break;
+
                         case "postfix":
                             ParagraphPostfix = rule_token;
                             break;
+
                         case "ignore":
                             ParagraphPrefix = ParagraphPostfix = null;
                             break;
                     }
                     break;
+
                 case "table":
                     switch (functionName)
                     {
                         case "prefix":
                             TablePrefix = rule_token;
                             break;
+
                         case "postfix":
                             TablePostfix = rule_token;
                             break;
+
                         case "ignore":
                             TablePrefix = TablePostfix = null;
                             break;
+
                         case "special": // Using a hardcoded table conversion
                                         //TablePrefix = TablePostfix = null;
                             ColumnsPrefix = ColumnsPostfix = null;
                             ColumnPrefix = ColumnTemplate = ColumnPostfix = null;
                             RowPrefix = RowPostfix = null;
                             CellPrefix = CellPostfix = null;
-                            // Args: (style, paddings l-t-r-b, maxcellwidth, maxtablewidth)                            
+                            // Args: (style, paddings l-t-r-b, maxcellwidth, maxtablewidth)
                             UseSpecialTableBuilder = true;
                             SpecialTableBuilder = SpecialTableBuilderFactory.CreateSpecialTableBuilder(special);
                             if (SpecialTableBuilder == null) UseSpecialTableBuilder = false;
                             break;
                     }
                     break;
+
                 case "columns":
                     switch (functionName)
                     {
                         case "prefix":
                             ColumnsPrefix = rule_token;
                             break;
+
                         case "postfix":
                             ColumnsPostfix = rule_token;
                             break;
+
                         case "ignore":
                             ColumnsPrefix = ColumnsPostfix = null;
                             break;
                     }
                     break;
+
                 case "column":
                     switch (functionName)
                     {
                         case "prefix":
                             ColumnPrefix = rule_token;
                             break;
+
                         case "template":
                             ColumnTemplate = rule_token;
                             break;
+
                         case "postfix":
                             ColumnPostfix = rule_token;
                             break;
+
                         case "ignore":
                             ColumnPrefix = ColumnTemplate = ColumnPostfix = null;
                             break;
-
                     }
                     break;
+
                 case "tablerow":
                     switch (functionName)
                     {
                         case "prefix":
                             RowPrefix = rule_token;
                             break;
+
                         case "postfix":
                             RowPostfix = rule_token;
                             break;
+
                         case "ignore":
                             RowPrefix = RowPostfix = null;
                             break;
                     }
                     break;
+
                 case "tablecell":
                     switch (functionName)
                     {
                         case "prefix":
                             CellPrefix = rule_token;
                             break;
+
                         case "postfix":
                             CellPostfix = rule_token;
                             break;
+
                         case "ignore":
                             CellPrefix = CellPostfix = null;
                             break;
                     }
                     break;
+
                 case "videoplayer":
                     switch (functionName)
                     {
                         case "prefix":
                             VideoplayerPrefix = rule_token;
                             break;
+
                         case "postfix":
                             VideoplayerPostfix = rule_token;
                             break;
+
                         case "ignore":
                             VideoplayerPrefix = VideoplayerPostfix = null;
                             break;
                     }
                     break;
+
                 case "audioplayer":
                     switch (functionName)
                     {
                         case "prefix":
                             AudioplayerPrefix = rule_token;
                             break;
+
                         case "postfix":
                             AudioplayerPostfix = rule_token;
                             break;
+
                         case "ignore":
                             AudioplayerPrefix = AudioplayerPostfix = null;
                             break;
                     }
                     break;
+
                 case "gallery":
                     switch (functionName)
                     {
                         case "prefix":
                             GalleryPrefix = rule_token;
                             break;
+
                         case "postfix":
                             GalleryPostfix = rule_token;
                             break;
+
                         case "ignore":
                             GalleryPrefix = GalleryPostfix = null;
                             break;

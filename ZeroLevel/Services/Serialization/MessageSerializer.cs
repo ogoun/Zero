@@ -77,7 +77,6 @@ namespace ZeroLevel.Services.Serialization
             }
         }
 
-
         public static bool TrySerialize<T>(T obj, out byte[] data)
         {
             if (null == obj)

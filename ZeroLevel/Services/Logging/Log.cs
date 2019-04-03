@@ -7,15 +7,19 @@ namespace ZeroLevel
     public static class Log
     {
         #region Fields
+
         internal static ILogger _router;
-        #endregion
+
+        #endregion Fields
 
         #region Ctor
+
         static Log()
         {
             _router = new LogRouter();
         }
-        #endregion
+
+        #endregion Ctor
 
         private static string FormatMessage(string line, params object[] args)
         {
@@ -31,10 +35,12 @@ namespace ZeroLevel
         }
 
         #region Logging
+
         public static void Raw(string line, params object[] args)
         {
             _router.Write(LogLevel.Raw, FormatMessage(line, args));
         }
+
         /// <summary>
         /// Info message
         /// </summary>
@@ -42,6 +48,7 @@ namespace ZeroLevel
         {
             _router.Write(LogLevel.Info, FormatMessage(line, args));
         }
+
         /// <summary>
         /// Warning message
         /// </summary>
@@ -49,6 +56,7 @@ namespace ZeroLevel
         {
             _router.Write(LogLevel.Warning, FormatMessage(line, args));
         }
+
         /// <summary>
         /// Error message
         /// </summary>
@@ -56,6 +64,7 @@ namespace ZeroLevel
         {
             _router.Write(LogLevel.Error, FormatMessage(line, args));
         }
+
         /// <summary>
         /// Error message
         /// </summary>
@@ -63,6 +72,7 @@ namespace ZeroLevel
         {
             _router.Write(LogLevel.Error, FormatMessage(line, args) + "\r\n" + ex.ToString());
         }
+
         /// <summary>
         /// Fatal crash
         /// </summary>
@@ -70,6 +80,7 @@ namespace ZeroLevel
         {
             _router.Write(LogLevel.Fatal, FormatMessage(line, args));
         }
+
         /// <summary>
         /// Fatal message (mean stop app after crash)
         /// </summary>
@@ -77,6 +88,7 @@ namespace ZeroLevel
         {
             _router.Write(LogLevel.Fatal, FormatMessage(line, args) + "\r\n" + ex.ToString());
         }
+
         /// <summary>
         /// Debug message
         /// </summary>
@@ -84,6 +96,7 @@ namespace ZeroLevel
         {
             _router.Write(LogLevel.Debug, FormatMessage(line, args));
         }
+
         /// <summary>
         /// Low-level debug message
         /// </summary>
@@ -92,7 +105,6 @@ namespace ZeroLevel
             _router.Write(LogLevel.Verbose, FormatMessage(line, args));
         }
 
-
         /// <summary>
         /// System message
         /// </summary>
@@ -100,6 +112,7 @@ namespace ZeroLevel
         {
             _router.Write(LogLevel.SystemInfo, FormatMessage(line, args));
         }
+
         /// <summary>
         /// System warning
         /// </summary>
@@ -107,6 +120,7 @@ namespace ZeroLevel
         {
             _router.Write(LogLevel.SystemWarning, FormatMessage(line, args));
         }
+
         /// <summary>
         /// System error
         /// </summary>
@@ -114,6 +128,7 @@ namespace ZeroLevel
         {
             _router.Write(LogLevel.SystemError, FormatMessage(line, args));
         }
+
         /// <summary>
         /// System error
         /// </summary>
@@ -121,29 +136,36 @@ namespace ZeroLevel
         {
             _router.Write(LogLevel.SystemError, FormatMessage(line, args) + "\r\n" + ex.ToString());
         }
-        #endregion
+
+        #endregion Logging
 
         #region Register loggers
+
         public static void AddLogger(ILogger logger, LogLevel level = LogLevel.Standart)
         {
             (_router as ILogComposer)?.AddLogger(logger, level);
         }
 
-        #region Delegate logger        
+        #region Delegate logger
+
         public static void AddDelegateLogger(Action<string> handler, LogLevel level = LogLevel.Standart)
         {
             AddLogger(new DelegateLogger(handler), level);
         }
-        #endregion
+
+        #endregion Delegate logger
 
         #region Console
+
         public static void AddConsoleLogger(LogLevel level = LogLevel.Standart)
         {
             AddLogger(new ConsoleLogger(), level);
         }
-        #endregion
+
+        #endregion Console
 
         #region TextLogs
+
         public static void AddTextFileLogger(TextFileLoggerOptions options, LogLevel level = LogLevel.FullDebug)
         {
             AddLogger(new TextFileLogger(options), level);
@@ -153,18 +175,22 @@ namespace ZeroLevel
         {
             AddLogger(new FileLogger(path), level);
         }
-        #endregion
+
+        #endregion TextLogs
 
         #region Encrypted file log
+
         public static void AddEncryptedFileLogger(EncryptedFileLogOptions options, LogLevel level = LogLevel.FullDebug)
         {
             AddLogger(new EncryptedFileLog(options), level);
         }
-        #endregion
 
-        #endregion
+        #endregion Encrypted file log
+
+        #endregion Register loggers
 
         #region Settings
+
         public static void CreateLoggingFromConfiguration()
         {
             CreateLoggingFromConfiguration(Configuration.ReadFromApplicationConfig());
@@ -202,6 +228,7 @@ namespace ZeroLevel
                 }
             }
         }
+
         /// <summary>
         /// Set mam count log-messages in queue
         /// </summary>
@@ -209,13 +236,16 @@ namespace ZeroLevel
         {
             (_router as ILogComposer)?.SetupBacklog(backlog);
         }
-        #endregion
+
+        #endregion Settings
 
         #region Disposable
+
         public static void Dispose()
         {
             _router.Dispose();
         }
-        #endregion
+
+        #endregion Disposable
     }
 }

@@ -11,8 +11,11 @@ namespace ZeroLevel.Services.Network
         : ZBaseNetwork
     {
         public IPEndPoint LocalEndpoint { get { return _endpoint; } }
+
         public event Action<IZBackward> OnDisconnect = (c) => { };
+
         public event Action<IZBackward> OnConnect = (c) => { };
+
         public IEnumerable<IPEndPoint> ConnectionList
         {
             get
@@ -30,6 +33,7 @@ namespace ZeroLevel.Services.Network
         }
 
         #region Private members
+
         private Socket _serverSocket;
         private IPEndPoint _endpoint;
         private ReaderWriterLockSlim _connection_set_lock = new ReaderWriterLockSlim();
@@ -46,6 +50,7 @@ namespace ZeroLevel.Services.Network
             catch
             { }
         }
+
         private void ConnectEventRise(IZBackward client)
         {
             try
@@ -55,6 +60,7 @@ namespace ZeroLevel.Services.Network
             catch
             { }
         }
+
         private void Heartbeat()
         {
             var enumerator = _connections.GetEnumerator();
@@ -72,6 +78,7 @@ namespace ZeroLevel.Services.Network
             catch { }
             GC.Collect(1, GCCollectionMode.Forced, false);
         }
+
         private void BeginAcceptCallback(IAsyncResult ar)
         {
             if (_status == ZTransportStatus.Working)
@@ -97,6 +104,7 @@ namespace ZeroLevel.Services.Network
                 }
             }
         }
+
         private void Connection_OnConnectionBroken(ZSocketServerClient connection)
         {
             connection.OnConnectionBroken -= Connection_OnConnectionBroken;
@@ -111,7 +119,8 @@ namespace ZeroLevel.Services.Network
             }
             connection.Dispose();
         }
-        #endregion
+
+        #endregion Private members
 
         public ZSocketServer(IPEndPoint endpoint)
         {
@@ -126,6 +135,7 @@ namespace ZeroLevel.Services.Network
         }
 
         protected abstract void Handle(Frame frame, IZBackward client);
+
         protected abstract Frame HandleRequest(Frame frame, IZBackward client);
 
         public override void Dispose()

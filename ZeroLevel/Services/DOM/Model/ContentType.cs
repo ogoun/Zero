@@ -2,7 +2,7 @@
 
 namespace ZeroLevel.DocumentObjectModel
 {
-    public enum ContentType: Int32
+    public enum ContentType : Int32
     {
         Raw = 0,
         Text = 1,

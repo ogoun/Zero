@@ -9,6 +9,7 @@ namespace ZeroLevel.Specification
     {
         [DataMember]
         private string _name;
+
         [DataMember]
         private string _description;
 

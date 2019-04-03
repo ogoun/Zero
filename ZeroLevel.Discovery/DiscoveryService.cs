@@ -5,7 +5,7 @@ namespace ZeroLevel.Discovery
     public sealed class DiscoveryService
         : BaseWindowsService, IZeroService
     {
-        public DiscoveryService() 
+        public DiscoveryService()
             : base("Discovery")
         {
         }

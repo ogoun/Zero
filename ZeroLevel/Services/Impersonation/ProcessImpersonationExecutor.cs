@@ -5,7 +5,7 @@ namespace ZeroLevel.Services.Impersonation
     /// <summary>
     /// Implements the execution of an code from the rights of the specified process
     /// </summary>
-    public class ProcessImpersonationExecutor 
+    public class ProcessImpersonationExecutor
         : IImpersonationExecutor
     {
         private string _processName = string.Empty;
@@ -20,6 +20,7 @@ namespace ZeroLevel.Services.Impersonation
         {
             _pid = pid;
         }
+
         /// <summary>
         /// Code execution
         /// </summary>
@@ -42,6 +43,7 @@ namespace ZeroLevel.Services.Impersonation
                 action(arg);
             }
         }
+
         /// <summary>
         /// Code execution
         /// </summary>

@@ -14,19 +14,24 @@ namespace ZeroLevel.Services.Config
         IConfiguration
     {
         #region Private members
+
         /// <summary>
         /// When true, any changes disallow
         /// </summary>
         private bool _freezed = false;
+
         /// <summary>
         /// When true, freeze permanent, can't be canceled
         /// </summary>
         private bool _permanentFreezed = false;
+
         private readonly object _freezeLock = new object();
+
         /// <summary>
         /// Key-values dictionary
         /// </summary>
         private readonly ConcurrentDictionary<string, IList<string>> _keyValues = new ConcurrentDictionary<string, IList<string>>();
+
         /// <summary>
         /// Empty list
         /// </summary>
@@ -40,9 +45,11 @@ namespace ZeroLevel.Services.Config
             }
             return key.Trim().ToLower(CultureInfo.InvariantCulture);
         }
-        #endregion
+
+        #endregion Private members
 
         #region Properties
+
         /// <summary>
         /// Get values by key
         /// </summary>
@@ -61,6 +68,7 @@ namespace ZeroLevel.Services.Config
                 return EmptyValuesList;
             }
         }
+
         /// <summary>
         /// Keys  list
         /// </summary>
@@ -76,11 +84,13 @@ namespace ZeroLevel.Services.Config
                 return _freezed;
             }
         }
-        #endregion
+
+        #endregion Properties
 
         #region Public methods
 
         #region Get
+
         /// <summary>
         /// Получение списка значение соотвествующих указанному ключу
         /// </summary>
@@ -90,6 +100,7 @@ namespace ZeroLevel.Services.Config
         {
             return this[key];
         }
+
         /// <summary>
         /// Получение первого значения для указанного ключа
         /// </summary>
@@ -140,6 +151,7 @@ namespace ZeroLevel.Services.Config
             }
             throw new KeyNotFoundException("Parameter not found: " + key);
         }
+
         /// <summary>
         /// Получение первого значения для указанного ключа, или значения по умолчанию
         /// </summary>
@@ -156,6 +168,7 @@ namespace ZeroLevel.Services.Config
             }
             return defaultValue;
         }
+
         /// <summary>
         /// Получение первого значения для указанного ключа, или значения по умолчанию, с попыткой преобразования в указанный тип
         /// </summary>
@@ -172,6 +185,7 @@ namespace ZeroLevel.Services.Config
             }
             return default(T);
         }
+
         /// <summary>
         /// Получение первого значения для указанного ключа, или значения по умолчанию, с попыткой преобразования в указанный тип
         /// </summary>
@@ -189,6 +203,7 @@ namespace ZeroLevel.Services.Config
             }
             return defaultValue;
         }
+
         /// <summary>
         /// Проверка наличия ключа и непустого списка связанных с ним значений
         /// </summary>
@@ -199,6 +214,7 @@ namespace ZeroLevel.Services.Config
             key = GetKey(key);
             return _keyValues.ContainsKey(key) && _keyValues[key].Count > 0;
         }
+
         /// <summary>
         /// Проверка наличия одного из ключей
         /// </summary>
@@ -208,6 +224,7 @@ namespace ZeroLevel.Services.Config
                 if (Contains(key)) return true;
             return false;
         }
+
         /// <summary>
         /// Проверка наличия ключа и связанного с ним значения
         /// </summary>
@@ -223,6 +240,7 @@ namespace ZeroLevel.Services.Config
             }
             return false;
         }
+
         /// <summary>
         /// Количество значений связанных с указанным ключом
         /// </summary>
@@ -237,7 +255,8 @@ namespace ZeroLevel.Services.Config
             }
             return 0;
         }
-        #endregion
+
+        #endregion Get
 
         /// <summary>
         /// Add key-value
@@ -257,6 +276,7 @@ namespace ZeroLevel.Services.Config
             }
             return this;
         }
+
         /// <summary>
         /// Set unique value for key
         /// </summary>
@@ -277,6 +297,7 @@ namespace ZeroLevel.Services.Config
             }
             return this;
         }
+
         /// <summary>
         /// Clean values binded with key
         /// </summary>
@@ -293,6 +314,7 @@ namespace ZeroLevel.Services.Config
             }
             return this;
         }
+
         /// <summary>
         /// Configuration drop
         /// </summary>
@@ -304,6 +326,7 @@ namespace ZeroLevel.Services.Config
             }
             return this;
         }
+
         /// <summary>
         /// Remove key and binded values
         /// </summary>
@@ -349,9 +372,11 @@ namespace ZeroLevel.Services.Config
                 return false;
             }
         }
-        #endregion
+
+        #endregion Public methods
 
         #region IEquatable
+
         public bool Equals(IConfiguration other)
         {
             if (other == null)
@@ -371,9 +396,11 @@ namespace ZeroLevel.Services.Config
             }
             return true;
         }
-        #endregion       
+
+        #endregion IEquatable
 
         #region Binary Serializable
+
         public void Serialize(IBinaryWriter writer)
         {
             writer.WriteBoolean(this._freezed);
@@ -408,6 +435,7 @@ namespace ZeroLevel.Services.Config
                 _keyValues.TryAdd(key, list_values);
             }
         }
-        #endregion
+
+        #endregion Binary Serializable
     }
 }

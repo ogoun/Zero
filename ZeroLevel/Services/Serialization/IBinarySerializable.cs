@@ -3,6 +3,7 @@
     public interface IBinarySerializable
     {
         void Serialize(IBinaryWriter writer);
+
         void Deserialize(IBinaryReader reader);
     }
 }

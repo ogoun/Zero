@@ -9,10 +9,11 @@ namespace ZeroLevel.Services.Extensions
     public static class FPCommon
     {
         /*
-         * Func<int,int,int> add = (x,y) => x + y; 
+         * Func<int,int,int> add = (x,y) => x + y;
          * Func<int,Func<int,int>> curriedAdd = add.Curry();
          * Func<int,int> inc = curriedAdd(1);
          */
+
         /// <summary>
         /// Каррирование
         /// </summary>
@@ -20,10 +21,12 @@ namespace ZeroLevel.Services.Extensions
         {
             return a => b => f(a, b);
         }
+
         /*
-         * Func<int,int,int> add = (x,y) => x + y; 
+         * Func<int,int,int> add = (x,y) => x + y;
          * Func<int,int> inc = add.Partial(1);
          */
+
         /// <summary>
         /// Частичное исполнение
         /// </summary>
@@ -31,6 +34,7 @@ namespace ZeroLevel.Services.Extensions
         {
             return b => f(a, b);
         }
+
         /// <summary>
         /// PipeTo
         /// </summary>
@@ -40,6 +44,7 @@ namespace ZeroLevel.Services.Extensions
          * After
          * public IActionResult Get() =>  query.Where(x => x.IsActive).OrderBy(x => x.Id).ToArray().PipeTo(Ok);
          */
+
         public static TResult PipeTo<TSource, TResult>(this TSource source, Func<TSource, TResult> func) => func(source);
     }
 
@@ -120,7 +125,9 @@ namespace ZeroLevel.Services.Extensions
         }
 
         public TL LeftOrDefault() => Match(l => l, r => default(TL));
+
         public TR RightOrDefault() => Match(l => default(TR), r => r);
+
         public Either<TR, TL> Swap() => Match(Right<TR, TL>, Left<TR, TL>);
 
         public Either<TL, T> Bind<T>(Func<TR, T> f)
@@ -132,6 +139,7 @@ namespace ZeroLevel.Services.Extensions
             => BindMany(x => f(x).Bind(t => selector(_right, t)));
 
         public static implicit operator Either<TL, TR>(TL left) => new Either<TL, TR>(left);
+
         public static implicit operator Either<TL, TR>(TR right) => new Either<TL, TR>(right);
 
         public static Either<TLeft, TRight> Left<TLeft, TRight>(TLeft left)

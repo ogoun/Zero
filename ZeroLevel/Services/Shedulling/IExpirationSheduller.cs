@@ -2,32 +2,37 @@
 
 namespace ZeroLevel.Services.Shedulling
 {
-    public interface IExpirationSheduller 
+    public interface IExpirationSheduller
         : IDisposable
     {
         /// <summary>
-        /// Добавление задачи с указанием времени по истечении которого она должна быть исполнена
+        /// Adding a task with the time after which it should be completed
         /// </summary>
         long Push(TimeSpan timespan, Action<long> callback);
+
         /// <summary>
-        /// Добавление задачи с указанием даты/времени когда она должна быть исполнена
+        /// Adding a task with the date / time when it should be executed
         /// </summary>
         long Push(DateTime date, Action<long> callback);
+
         /// <summary>
-        /// Удаляет событие по его идентификатору
+        /// Delete task by ID
         /// </summary>
-        /// <param name="key">Идентификатор события</param>
+        /// <param name="key">Task ID</param>
         bool Remove(long key);
+
         /// <summary>
-        /// Очистка планировщика
+        /// Cleaning the scheduler
         /// </summary>
         void Clean();
+
         /// <summary>
-        /// Приостановка работы планировщика (не препятствует добавлению новых заданий)
+        /// Pausing the scheduler (does not prevent the addition of new tasks)
         /// </summary>
         void Pause();
+
         /// <summary>
-        /// Возобновление работы планировщика
+        /// Resumption of work scheduler
         /// </summary>
         void Resume();
     }

@@ -34,7 +34,7 @@ namespace ZeroLevel.Services.Semantic.Helpers
                     arr.Take();
             }
             return ngramms;
-        }        
+        }
 
         public static Dictionary<string, int> GetUnigramms(IEnumerable<string> input, Func<string, IEnumerable<string>> tokenizer)
             => BuildNGramm(input, tokenizer, 1);
@@ -44,7 +44,6 @@ namespace ZeroLevel.Services.Semantic.Helpers
 
         public static Dictionary<string, int> GetTrigramms(IEnumerable<string> input, Func<string, IEnumerable<string>> tokenizer)
             => BuildNGramm(input, tokenizer, 3);
-
 
         public static Dictionary<string, int> BuildNGramm<T>(IEnumerable<T> input, Func<T, IEnumerable<string>> tokenizer, int N)
         {
@@ -76,6 +75,5 @@ namespace ZeroLevel.Services.Semantic.Helpers
 
         public static Dictionary<string, int> GetTrigramms<T>(IEnumerable<T> input, Func<T, IEnumerable<string>> tokenizer)
             => BuildNGramm(input, tokenizer, 3);
-
     }
 }

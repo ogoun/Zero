@@ -1,6 +1,6 @@
 ﻿namespace ZeroLevel.Patterns.Queries
 {
-    public enum QueryOperation:
+    public enum QueryOperation :
         int
     {
         EQ = 0,

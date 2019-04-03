@@ -1,8 +1,8 @@
 ﻿namespace ZeroLevel.Discovery
 {
-    class Program
+    internal class Program
     {
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
             Bootstrap.Startup<DiscoveryService>(args);
         }

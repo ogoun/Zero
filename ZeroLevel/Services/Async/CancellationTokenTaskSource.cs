@@ -7,7 +7,7 @@ namespace ZeroLevel.Services.Async
     /// <summary>
     /// Holds the task for a cancellation token, as well as the token registration. The registration is disposed when this instance is disposed.
     /// </summary>
-    public sealed class CancellationTokenTaskSource<T> 
+    public sealed class CancellationTokenTaskSource<T>
         : IDisposable
     {
         /// <summary>

@@ -19,6 +19,7 @@ namespace ZeroLevel.Microservices.Model
         public byte[] Payload { get; set; }
 
         #region IBinarySerializable
+
         public void Deserialize(IBinaryReader reader)
         {
             this.Id = reader.ReadGuid();
@@ -40,19 +41,23 @@ namespace ZeroLevel.Microservices.Model
             writer.WriteInt32((int)this.CheckpointType);
             writer.WriteBytes(this.Payload);
         }
-        #endregion
+
+        #endregion IBinarySerializable
 
         #region Ctors
+
         public Checkpoint()
         {
             this.Id = Guid.NewGuid();
             this.Timestamp = DateTime.Now.Ticks;
         }
+
         public Checkpoint(Guid id)
         {
             this.Timestamp = DateTime.Now.Ticks;
             this.Id = id;
         }
+
         public Checkpoint(Checkpoint other)
         {
             this.Id = other.Id;
@@ -63,9 +68,11 @@ namespace ZeroLevel.Microservices.Model
             this.Payload = other.Payload;
             this.ReasonPhrase = other.ReasonPhrase;
         }
-        #endregion
+
+        #endregion Ctors
 
         #region Equals & Hash
+
         public override int GetHashCode()
         {
             return base.GetHashCode();
@@ -75,16 +82,20 @@ namespace ZeroLevel.Microservices.Model
         {
             return this.Equals(obj as Checkpoint);
         }
-        #endregion
+
+        #endregion Equals & Hash
 
         #region ICloneable
+
         public object Clone()
         {
             return new Checkpoint(this);
         }
-        #endregion
+
+        #endregion ICloneable
 
         #region IEquatable
+
         public bool Equals(Checkpoint other)
         {
             if (this.Id != other.Id) return false;
@@ -96,6 +107,7 @@ namespace ZeroLevel.Microservices.Model
             if (false == ArrayExtensions.Equals(this.Payload, other.Payload)) return false;
             return true;
         }
-        #endregion
+
+        #endregion IEquatable
     }
 }

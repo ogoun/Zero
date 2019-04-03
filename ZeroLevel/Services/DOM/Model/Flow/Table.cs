@@ -3,7 +3,7 @@ using ZeroLevel.Services.Serialization;
 
 namespace ZeroLevel.DocumentObjectModel.Flow
 {
-    public class Table : 
+    public class Table :
         ContentElement
     {
         public string Name;
@@ -15,7 +15,7 @@ namespace ZeroLevel.DocumentObjectModel.Flow
         {
         }
 
-        public Table(IBinaryReader reader) 
+        public Table(IBinaryReader reader)
             : base(ContentElementType.Table)
         {
             Deserialize(reader);

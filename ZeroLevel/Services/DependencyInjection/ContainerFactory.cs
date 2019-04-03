@@ -8,6 +8,7 @@ namespace ZeroLevel.Patterns.DependencyInjection
     public sealed class ContainerFactory : IContainerFactory
     {
         #region Private
+
         private bool _disposed = false;
 
         private static string GetKey(string key)
@@ -21,9 +22,11 @@ namespace ZeroLevel.Patterns.DependencyInjection
 
         private readonly ConcurrentDictionary<string, IContainer> _containers =
             new ConcurrentDictionary<string, IContainer>();
-        #endregion
+
+        #endregion Private
 
         #region Public
+
         public IContainer this[string containerName]
         {
             get
@@ -105,9 +108,11 @@ namespace ZeroLevel.Patterns.DependencyInjection
             }
             return false;
         }
-        #endregion
+
+        #endregion Public
 
         #region IDisposable
+
         public void Dispose()
         {
             if (false == _disposed)
@@ -120,6 +125,7 @@ namespace ZeroLevel.Patterns.DependencyInjection
                 _containers.Clear();
             }
         }
-        #endregion
+
+        #endregion IDisposable
     }
 }

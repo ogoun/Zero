@@ -9,6 +9,7 @@ namespace ZeroLevel.Services.Semantic
     {
         [DataMember]
         public readonly string Word;
+
         [DataMember]
         public readonly int Position;
 

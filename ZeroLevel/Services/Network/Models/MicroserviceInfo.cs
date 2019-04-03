@@ -17,26 +17,31 @@ namespace ZeroLevel.Network.Microservices
         /// </summary>
         [DataMember]
         public string ServiceKey { get; set; }
+
         /// <summary>
         /// The group can determine the services working in the same domain
         /// </summary>
         [DataMember]
         public string ServiceGroup { get; set; } = DEFAULT_GROUP_NAME;
+
         /// <summary>
         /// The type of service, for filtering, determines membership in a subgroup.
         /// </summary>
         [DataMember]
         public string ServiceType { get; set; } = DEFAULT_TYPE_NAME;
+
         /// <summary>
         /// Protocol on which access to the service API is allowed
         /// </summary>
         [DataMember]
         public string Protocol { get; set; }
+
         /// <summary>
         /// Connection point, address
         /// </summary>
         [DataMember]
         public string Endpoint { get; set; }
+
         /// <summary>
         /// Service version
         /// </summary>

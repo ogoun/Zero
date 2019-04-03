@@ -26,6 +26,7 @@ namespace ZeroLevel.Services.Trees
             });
             return result;
         }
+
         /// <summary>
         /// Selects all branches of the tree, returning an array of branches consisting of the specified node values.
         /// </summary>
@@ -52,6 +53,7 @@ namespace ZeroLevel.Services.Trees
             });
             return result;
         }
+
         /// <summary>
         /// Performs tree branch traversal.
         /// </summary>

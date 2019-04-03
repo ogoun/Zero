@@ -2,7 +2,7 @@
 
 namespace ZeroLevel.DocumentObjectModel.Flow
 {
-    public interface IContentElement : 
+    public interface IContentElement :
         IBinarySerializable
     {
         ContentElementType Type { get; }

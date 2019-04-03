@@ -57,6 +57,7 @@ namespace ZeroLevel
                 Log.Fatal(ex, "[Bootstrap] Fault service install");
             }
         }
+
         /// <summary>
         /// Uninstall from windows services
         /// </summary>

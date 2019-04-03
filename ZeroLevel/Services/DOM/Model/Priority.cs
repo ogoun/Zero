@@ -3,13 +3,15 @@ using System.ComponentModel;
 
 namespace ZeroLevel.DocumentObjectModel
 {
-    public enum Priority 
+    public enum Priority
         : Int32
     {
         [Description("Normal")]
         Normal = 0,
+
         [Description("Express")]
         Express = 1,
+
         [Description("Flash")]
         Flash = 2
     }

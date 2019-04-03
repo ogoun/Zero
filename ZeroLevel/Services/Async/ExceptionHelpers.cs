@@ -9,7 +9,7 @@ namespace ZeroLevel.Services.Async
     public static class ExceptionHelpers
     {
         /// <summary>
-        /// Attempts to prepare the exception for re-throwing by preserving the stack trace. 
+        /// Attempts to prepare the exception for re-throwing by preserving the stack trace.
         /// The returned exception should be immediately thrown.
         /// </summary>
         /// <param name="exception">The exception. May not be <c>null</c>.</param>

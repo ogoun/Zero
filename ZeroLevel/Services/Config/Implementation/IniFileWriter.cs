@@ -5,7 +5,7 @@ namespace ZeroLevel.Services.Config.Implementation
     /// <summary>
     /// Write config to ini-file
     /// </summary>
-    public class IniFileWriter 
+    public class IniFileWriter
         : IConfigurationWriter
     {
         /// <summary>
@@ -17,6 +17,7 @@ namespace ZeroLevel.Services.Config.Implementation
         {
             _iniPath = iniPath;
         }
+
         /// <summary>
         /// Write config to file
         /// </summary>
@@ -41,6 +42,7 @@ namespace ZeroLevel.Services.Config.Implementation
                 writer.Flush();
             }
         }
+
         /// <summary>
         /// Write configuration set to file
         /// </summary>

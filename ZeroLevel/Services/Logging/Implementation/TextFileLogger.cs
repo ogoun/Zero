@@ -21,18 +21,22 @@ namespace ZeroLevel.Services.Logging.Implementation
             RemoveOldFiles = false;
             ZipOldFiles = false;
         }
+
         public static readonly Encoding DEFAULT_ENCODING = Encoding.UTF8;
         internal string Folder { get; private set; }
         internal long LimitFileSize { get; private set; }
         internal Encoding TextEncoding { get; private set; }
+
         /// <summary>
         /// Delete files older than (aging period)
         /// </summary>
         internal TimeSpan RemoveOlderThen { get; private set; }
+
         /// <summary>
         /// Delete outdate files
         /// </summary>
         internal bool RemoveOldFiles { get; private set; }
+
         /// <summary>
         /// Archive files
         /// </summary>
@@ -55,6 +59,7 @@ namespace ZeroLevel.Services.Logging.Implementation
             this.ZipOldFiles = true;
             return this;
         }
+
         /// <summary>
         ///Enable automatic deletion of outdate files.
         /// </summary>
@@ -136,17 +141,21 @@ namespace ZeroLevel.Services.Logging.Implementation
     public sealed class TextFileLogger : ILogger
     {
         #region Fields
+
         private readonly TextFileLoggerOptions _options;
 
         private int _todayCountLogFiles = 0;
+
         /// <summary>
         /// Current log file
         /// </summary>
         private string _currentLogFile;
+
         /// <summary>
         /// Stream to output to file
         /// </summary>
         private TextWriter _writer;
+
         /// <summary>
         /// Lock on re-create file
         /// </summary>
@@ -155,7 +164,8 @@ namespace ZeroLevel.Services.Logging.Implementation
         private readonly HashSet<long> _taskKeys = new HashSet<long>();
 
         public static readonly Encoding DEFAULT_ENCODING = Encoding.UTF8;
-        #endregion
+
+        #endregion Fields
 
         #region Ctors
 
@@ -187,9 +197,11 @@ namespace ZeroLevel.Services.Logging.Implementation
                 (DateTime.Now.AddDays(1).Date - DateTime.Now).Add(TimeSpan.FromMilliseconds(100)),
                 RecreateLogFile));
         }
-        #endregion
+
+        #endregion Ctors
 
         #region Private member
+
         private void RemoveOldFiles()
         {
             try
@@ -261,6 +273,7 @@ namespace ZeroLevel.Services.Logging.Implementation
             }
             fi = null;
         }
+
         /// <summary>
         /// Checking the name of the log file (changes when the date changes to the next day)
         /// </summary>
@@ -315,9 +328,11 @@ namespace ZeroLevel.Services.Logging.Implementation
                 File.Delete(filePath);
             }
         }
-        #endregion
+
+        #endregion Private member
 
         #region ILog
+
         public void Write(LogLevel level, string message)
         {
             if (false == _disposed)
@@ -338,10 +353,13 @@ namespace ZeroLevel.Services.Logging.Implementation
                 }
             }
         }
-        #endregion
+
+        #endregion ILog
 
         #region IDisposable
+
         private bool _disposed = false;
+
         public void Dispose()
         {
             foreach (var tk in _taskKeys)
@@ -354,27 +372,34 @@ namespace ZeroLevel.Services.Logging.Implementation
                 CloseCurrentWriter();
             }
         }
-        #endregion
+
+        #endregion IDisposable
     }
 
     public sealed class FileLogger : ILogger
     {
         #region Fields
+
         /// <summary>
         /// Stream to output to file
         /// </summary>
         private TextWriter _writer;
+
         public static readonly Encoding DEFAULT_ENCODING = Encoding.UTF8;
-        #endregion
+
+        #endregion Fields
 
         #region Ctors
+
         public FileLogger(string path)
         {
             CreateLogFile(PreparePath(path));
         }
-        #endregion
+
+        #endregion Ctors
 
         #region Private member
+
         private static void PrepareFolder(string path)
         {
             if (Directory.Exists(path) == false)
@@ -430,9 +455,11 @@ namespace ZeroLevel.Services.Logging.Implementation
                 throw;
             }
         }
-        #endregion
+
+        #endregion Private member
 
         #region ILog
+
         public void Write(LogLevel level, string message)
         {
             if (false == _disposed)
@@ -450,10 +477,13 @@ namespace ZeroLevel.Services.Logging.Implementation
                 _writer.Flush();
             }
         }
-        #endregion
+
+        #endregion ILog
 
         #region IDisposable
+
         private bool _disposed = false;
+
         public void Dispose()
         {
             if (false == _disposed)
@@ -462,6 +492,7 @@ namespace ZeroLevel.Services.Logging.Implementation
                 CloseCurrentWriter();
             }
         }
-        #endregion
+
+        #endregion IDisposable
     }
 }

@@ -9,8 +9,16 @@ namespace ZeroLevel
         private sealed class SimpleComparer<T> : IEqualityComparer<T>
         {
             private readonly Func<T, T, bool> _comparer;
-            public SimpleComparer() { _comparer = (a, b) => object.Equals(a, b); }
-            public SimpleComparer(Func<T, T, bool> comparer) { _comparer = comparer; }
+
+            public SimpleComparer()
+            {
+                _comparer = (a, b) => object.Equals(a, b);
+            }
+
+            public SimpleComparer(Func<T, T, bool> comparer)
+            {
+                _comparer = comparer;
+            }
 
             public bool Equals(T x, T y)
             {
@@ -84,6 +92,7 @@ namespace ZeroLevel
             }
             return true;
         }
+
         /// <summary>
         /// Calculate hash for collection
         /// </summary>

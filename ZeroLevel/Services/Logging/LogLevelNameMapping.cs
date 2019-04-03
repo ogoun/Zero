@@ -18,6 +18,7 @@ namespace ZeroLevel.Services.Logging
             { LogLevel.SystemError, "SYSERR"},
             { LogLevel.SystemWarning, "SYSWRN"}
         };
+
         private static readonly Dictionary<LogLevel, string> _full = new Dictionary<LogLevel, string>
         {
             { LogLevel.Error, " error"},
@@ -33,7 +34,14 @@ namespace ZeroLevel.Services.Logging
             { LogLevel.SystemWarning, " systm warning"}
         };
 
-        public static string CompactName(LogLevel level) { return _compact[level]; }
-        public static string FullName(LogLevel level) { return _full[level]; }
+        public static string CompactName(LogLevel level)
+        {
+            return _compact[level];
+        }
+
+        public static string FullName(LogLevel level)
+        {
+            return _full[level];
+        }
     }
 }

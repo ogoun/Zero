@@ -7,6 +7,7 @@ namespace ZeroLevel.Services.Logging
     {
         private readonly BlockingCollection<Tuple<LogLevel, string>> _messageQueue =
             new BlockingCollection<Tuple<LogLevel, string>>();
+
         private bool _isDisposed = false;
 
         public long Count

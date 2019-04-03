@@ -3,7 +3,7 @@ using System.Globalization;
 
 namespace ZeroLevel.Services.Config.Implementation
 {
-    internal sealed class CommandLineReader 
+    internal sealed class CommandLineReader
         : IConfigurationReader
     {
         private readonly string[] _args;

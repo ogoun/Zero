@@ -68,6 +68,7 @@ namespace ZeroLevel.Services.Collections
                 return (T)_getter.Invoke(_instance, key);
             }
         }
+
         private readonly ConcurrentDictionary<Type, ConcreteTypeRepository> _shardedRepositories =
             new ConcurrentDictionary<Type, ConcreteTypeRepository>();
 

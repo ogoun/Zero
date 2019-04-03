@@ -22,6 +22,7 @@ namespace DOM.DSL.Contexts
         };
 
         public TContext ParentContext { get; protected set; }
+
         public abstract void Read(TStringReader reader);
     }
 }

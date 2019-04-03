@@ -2,22 +2,22 @@
 
 namespace ZeroLevel.DocumentObjectModel.Flow
 {
-    public class Link : 
+    public class Link :
         ContentElement
     {
-        public Link() : 
+        public Link() :
             base(ContentElementType.Link)
         {
         }
 
-        public Link(string href, string value) : 
+        public Link(string href, string value) :
             base(ContentElementType.Link)
         {
             this.Href = href;
             this.Value = value;
         }
 
-        public Link(IBinaryReader reader) : 
+        public Link(IBinaryReader reader) :
             base(ContentElementType.Link)
         {
             Deserialize(reader);

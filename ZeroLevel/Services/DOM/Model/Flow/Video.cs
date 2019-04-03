@@ -3,14 +3,16 @@ using ZeroLevel.Services.Serialization;
 
 namespace ZeroLevel.DocumentObjectModel.Flow
 {
-    public sealed class Video : 
+    public sealed class Video :
         ContentElement
     {
         public SourceType Source { get; set; }
+
         /// <summary>
         /// Title
         /// </summary>
         public string Title;
+
         /// <summary>
         /// Link or Attachment ID
         /// </summary>
@@ -19,7 +21,8 @@ namespace ZeroLevel.DocumentObjectModel.Flow
         public Video() : base(ContentElementType.Video)
         {
         }
-        public Video(IBinaryReader reader) : 
+
+        public Video(IBinaryReader reader) :
             base(ContentElementType.Video)
         {
             Deserialize(reader);

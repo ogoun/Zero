@@ -9,6 +9,7 @@ namespace ZeroLevel.Services.Trees
         object Tag { get; }
         bool IsSelected { get; set; }
         IEnumerable<ITreeNode> Children { get; }
+
         ITreeNode AppendChild(string name, object tag);
     }
 }

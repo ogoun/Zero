@@ -6,6 +6,7 @@ namespace ZeroLevel.Contracts.Specification.Building
     {
         string Name { get; }
         IEnumerable<string> VariantNames { get; }
+
         ISpecificationBuilder GetVariant(string variantName);
     }
 }

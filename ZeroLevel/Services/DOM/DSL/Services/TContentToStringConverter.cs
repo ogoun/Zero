@@ -54,6 +54,7 @@ namespace DOM.DSL.Services
         }
 
         #region Primitives
+
         public void ReadAudio(Audio audio, int order)
         {
             _render.Counter.IncAudioId();
@@ -189,9 +190,11 @@ namespace DOM.DSL.Services
                 WriteText(Resolve(_transformRules.VideoPostfix, video, order));
             }
         }
-        #endregion
+
+        #endregion Primitives
 
         #region Containers
+
         public void EnterParagraph(Paragraph paragraph)
         {
             _render.Counter.IncParagraphId();
@@ -200,6 +203,7 @@ namespace DOM.DSL.Services
                 WriteText(Resolve(_transformRules.ParagraphPrefix, paragraph, _render.Counter.ParagraphId));
             }
         }
+
         public void LeaveParagraph(Paragraph paragraph)
         {
             if (_transformRules.ParagraphPostfix != null)
@@ -207,6 +211,7 @@ namespace DOM.DSL.Services
                 WriteText(Resolve(_transformRules.ParagraphPostfix, paragraph, _render.Counter.ParagraphId));
             }
         }
+
         public void EnterSection(Section section)
         {
             _render.Counter.IncSectionId();
@@ -215,6 +220,7 @@ namespace DOM.DSL.Services
                 WriteText(Resolve(_transformRules.SectionPrefix, section, _render.Counter.SectionId));
             }
         }
+
         public void LeaveSection(Section section)
         {
             if (_transformRules.SectionPostfix != null)
@@ -222,9 +228,11 @@ namespace DOM.DSL.Services
                 WriteText(Resolve(_transformRules.SectionPostfix, section, _render.Counter.SectionId));
             }
         }
-        #endregion
+
+        #endregion Containers
 
         #region Table
+
         public void EnterTable(Table table)
         {
             _render.Counter.IncTableId();
@@ -238,6 +246,7 @@ namespace DOM.DSL.Services
                 _specialTableBuilder.EnterTable(table.Columns.ToArray());
             }
         }
+
         public void EnterColumns(Table table)
         {
             if (_useSpecialTableBuilder == false && _transformRules.ColumnsPrefix != null)
@@ -245,6 +254,7 @@ namespace DOM.DSL.Services
                 _builder.Append(Resolve(_transformRules.ColumnsPrefix, table.Columns, 0));
             }
         }
+
         public void EnterRow(Table table, Row row, int order)
         {
             _render.Counter.IncRowId();
@@ -257,6 +267,7 @@ namespace DOM.DSL.Services
                 _builder.Append(Resolve(_transformRules.RowPrefix, row, order));
             }
         }
+
         public void EnterRowCell(Table table, Row row, IContentElement cell, int order)
         {
             _render.Counter.IncCellId();
@@ -276,6 +287,7 @@ namespace DOM.DSL.Services
                 }
             }
         }
+
         public void LeaveColumns(Table table)
         {
             if (_useSpecialTableBuilder == false && _transformRules.ColumnsPostfix != null)
@@ -283,6 +295,7 @@ namespace DOM.DSL.Services
                 _builder.Append(Resolve(_transformRules.ColumnsPostfix, table.Columns, 0));
             }
         }
+
         public void LeaveRow(Table table, Row row, int order)
         {
             if (_useSpecialTableBuilder)
@@ -294,6 +307,7 @@ namespace DOM.DSL.Services
                 _builder.Append(Resolve(_transformRules.RowPostfix, row, order));
             }
         }
+
         public void LeaveRowCell(Table table, Row row, IContentElement cell, int order)
         {
             if (_useSpecialTableBuilder)
@@ -312,6 +326,7 @@ namespace DOM.DSL.Services
                 }
             }
         }
+
         public void LeaveTable(Table table)
         {
             if (_useSpecialTableBuilder)
@@ -323,9 +338,11 @@ namespace DOM.DSL.Services
                 _builder.Append(Resolve(_transformRules.TablePostfix, table, _render.Counter.TableId));
             }
         }
-        #endregion
+
+        #endregion Table
 
         #region List
+
         public void EnterList(List list)
         {
             _render.Counter.IncListId();
@@ -334,6 +351,7 @@ namespace DOM.DSL.Services
                 WriteText(Resolve(_transformRules.ListPrefix, list, 0));
             }
         }
+
         public void EnterListItem(List list, IContentElement item, int order)
         {
             _render.Counter.IncListItemId();
@@ -342,6 +360,7 @@ namespace DOM.DSL.Services
                 WriteText(Resolve(_transformRules.ListItemPrefix, item, order));
             }
         }
+
         public void LeaveList(List list)
         {
             if (_transformRules.ListPostfix != null)
@@ -349,6 +368,7 @@ namespace DOM.DSL.Services
                 WriteText(Resolve(_transformRules.ListPostfix, list, 0));
             }
         }
+
         public void LeaveListItem(List list, IContentElement item, int order)
         {
             if (_transformRules.ListItemPostfix != null)
@@ -356,9 +376,11 @@ namespace DOM.DSL.Services
                 WriteText(Resolve(_transformRules.ListItemPostfix, item, order));
             }
         }
-        #endregion
+
+        #endregion List
 
         #region Media
+
         public void EnterAudioplayer(Audioplayer player)
         {
             _render.Counter.IncAudioplayerId();
@@ -367,6 +389,7 @@ namespace DOM.DSL.Services
                 WriteText(Resolve(_transformRules.AudioplayerPrefix, player, 0));
             }
         }
+
         public void EnterGallery(Gallery gallery)
         {
             _render.Counter.IncGalleryId();
@@ -375,6 +398,7 @@ namespace DOM.DSL.Services
                 WriteText(Resolve(_transformRules.GalleryPrefix, gallery, 0));
             }
         }
+
         public void EnterVideoplayer(Videoplayer player)
         {
             _render.Counter.IncVideoplayerId();
@@ -383,6 +407,7 @@ namespace DOM.DSL.Services
                 WriteText(Resolve(_transformRules.VideoplayerPrefix, player, 0));
             }
         }
+
         public void LeaveAudioplayer(Audioplayer player)
         {
             if (_transformRules.AudioplayerPostfix != null)
@@ -390,6 +415,7 @@ namespace DOM.DSL.Services
                 WriteText(Resolve(_transformRules.AudioplayerPostfix, player, 0));
             }
         }
+
         public void LeaveGallery(Gallery gallery)
         {
             if (_transformRules.GalleryPostfix != null)
@@ -397,6 +423,7 @@ namespace DOM.DSL.Services
                 WriteText(Resolve(_transformRules.GalleryPostfix, gallery, 0));
             }
         }
+
         public void LeaveVideoplayer(Videoplayer player)
         {
             if (_transformRules.VideoplayerPostfix != null)
@@ -404,6 +431,7 @@ namespace DOM.DSL.Services
                 WriteText(Resolve(_transformRules.VideoplayerPostfix, player, 0));
             }
         }
-        #endregion
+
+        #endregion Media
     }
 }

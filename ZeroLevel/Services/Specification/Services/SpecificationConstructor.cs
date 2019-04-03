@@ -9,6 +9,7 @@ namespace ZeroLevel.Specification
     public class SpecificationConstructor : ISpecificationConstructor
     {
         private readonly Type _specificationType;
+
         private readonly Dictionary<string, List<SpecificationParameter>> _specificationActivateVariants =
             new Dictionary<string, List<SpecificationParameter>>();
 
@@ -19,6 +20,7 @@ namespace ZeroLevel.Specification
                 return _specificationActivateVariants.Keys;
             }
         }
+
         public string Name
         {
             get

@@ -3,11 +3,18 @@ using ZeroLevel.Services.Serialization;
 
 namespace ZeroLevel.DocumentObjectModel
 {
-    public sealed class TagMetadata 
+    public sealed class TagMetadata
         : IBinarySerializable
     {
-        public TagMetadata() { Initialize(); }
-        public TagMetadata(IBinaryReader reader) { Deserialize(reader); }
+        public TagMetadata()
+        {
+            Initialize();
+        }
+
+        public TagMetadata(IBinaryReader reader)
+        {
+            Deserialize(reader);
+        }
 
         private void Initialize()
         {
@@ -18,24 +25,30 @@ namespace ZeroLevel.DocumentObjectModel
         }
 
         #region Fields
+
         /// <summary>
         /// Placec (city, country, etc)
         /// </summary>
         public List<Tag> Places;
+
         /// <summary>
         /// Companies
         /// </summary>
         public List<Tag> Companies;
+
         /// <summary>
         /// Persons
         /// </summary>
         public List<Tag> Persons;
+
         /// <summary>Keywords
         /// </summary>
         public List<string> Keywords;
-        #endregion
+
+        #endregion Fields
 
         #region IBinarySerializable
+
         public void Serialize(IBinaryWriter writer)
         {
             writer.WriteCollection<Tag>(this.Companies);
@@ -51,6 +64,7 @@ namespace ZeroLevel.DocumentObjectModel
             this.Places = reader.ReadCollection<Tag>();
             this.Persons = reader.ReadCollection<Tag>();
         }
-        #endregion
+
+        #endregion IBinarySerializable
     }
 }

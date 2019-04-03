@@ -2,9 +2,10 @@
  *  Port of Snowball stemmers on C#
  *  Original stemmers can be found on http://snowball.tartarus.org
  *  Licence still BSD: http://snowball.tartarus.org/license.php
- *  
+ *
  *  Most of stemmers are ported from Java by Iveonik Systems ltd. (www.iveonik.com)
  */
+
 using ZeroLevel.Services.Semantic;
 
 namespace Iveonik.Stemmers
@@ -13,7 +14,7 @@ namespace Iveonik.Stemmers
     {
         private readonly static DutchStemmer methodObject = new DutchStemmer();
 
-        private readonly static Among[] a_0 = 
+        private readonly static Among[] a_0 =
         {
             new Among ( "", -1, 6, null ),
             new Among ( "\u00E1", 0, 1, null ),
@@ -28,21 +29,21 @@ namespace Iveonik.Stemmers
             new Among ( "\u00FC", 0, 5, null )
         };
 
-        private readonly static Among[] a_1 = 
+        private readonly static Among[] a_1 =
         {
             new Among ( "", -1, 3, null ),
             new Among ( "I", 0, 2, null ),
             new Among ( "Y", 0, 1, null )
         };
 
-        private readonly static Among[] a_2 = 
+        private readonly static Among[] a_2 =
         {
             new Among ( "dd", -1, -1, null ),
             new Among ( "kk", -1, -1, null ),
             new Among ( "tt", -1, -1, null )
         };
 
-        private readonly static Among[] a_3 = 
+        private readonly static Among[] a_3 =
         {
             new Among ( "ene", -1, 2, null ),
             new Among ( "se", -1, 3, null ),
@@ -51,7 +52,7 @@ namespace Iveonik.Stemmers
             new Among ( "s", -1, 3, null )
         };
 
-        private readonly static Among[] a_4 = 
+        private readonly static Among[] a_4 =
         {
             new Among ( "end", -1, 1, null ),
             new Among ( "ig", -1, 2, null ),
@@ -61,7 +62,7 @@ namespace Iveonik.Stemmers
             new Among ( "bar", -1, 5, null )
         };
 
-        private readonly static Among[] a_5 = 
+        private readonly static Among[] a_5 =
         {
             new Among ( "aa", -1, -1, null ),
             new Among ( "ee", -1, -1, null ),
@@ -69,7 +70,7 @@ namespace Iveonik.Stemmers
             new Among ( "uu", -1, -1, null )
         };
 
-        private static readonly char[] g_v = {(char)17, (char)65, (char)16, (char)1, (char)0, (char)0, (char)0, 
+        private static readonly char[] g_v = {(char)17, (char)65, (char)16, (char)1, (char)0, (char)0, (char)0,
                                                  (char)0, (char)0, (char)0, (char)0, (char)0, (char)0, (char)0,
                                                  (char)0, (char)0, (char)128 };
 
@@ -77,7 +78,7 @@ namespace Iveonik.Stemmers
                                                    (char)0, (char)0, (char)0, (char)0, (char)0, (char)0, (char)0,
                                                    (char)0, (char)0, (char)0, (char)0, (char)0, (char)128 };
 
-        private static readonly char[] g_v_j = { (char)17, (char)67, (char)16, (char)1, (char)0, (char)0,(char)0, 
+        private static readonly char[] g_v_j = { (char)17, (char)67, (char)16, (char)1, (char)0, (char)0,(char)0,
                                                    (char)0, (char)0, (char)0, (char)0, (char)0, (char)0, (char)0,
                                                    (char)0, (char)0, (char)128 };
 
@@ -128,31 +129,37 @@ namespace Iveonik.Stemmers
                         case 0:
                             subroot = true;
                             break;
+
                         case 1:
                             // (, line 45
                             // <-, line 45
                             slice_from("a");
                             break;
+
                         case 2:
                             // (, line 47
                             // <-, line 47
                             slice_from("e");
                             break;
+
                         case 3:
                             // (, line 49
                             // <-, line 49
                             slice_from("i");
                             break;
+
                         case 4:
                             // (, line 51
                             // <-, line 51
                             slice_from("o");
                             break;
+
                         case 5:
                             // (, line 53
                             // <-, line 53
                             slice_from("u");
                             break;
+
                         case 6:
                             // (, line 54
                             // next, line 54
@@ -281,7 +288,7 @@ namespace Iveonik.Stemmers
             I_p1 = limit;
             I_p2 = limit;
             // gopast, line 69
-            //        golab0: 
+            //        golab0:
             while (true)
             {
                 do
@@ -401,16 +408,19 @@ namespace Iveonik.Stemmers
                         case 0:
                             subroot = true;
                             break;
+
                         case 1:
                             // (, line 78
                             // <-, line 78
                             slice_from("y");
                             break;
+
                         case 2:
                             // (, line 79
                             // <-, line 79
                             slice_from("i");
                             break;
+
                         case 3:
                             // (, line 80
                             // next, line 80
@@ -597,6 +607,7 @@ namespace Iveonik.Stemmers
                     case 0:
                         subroot = true;
                         break;
+
                     case 1:
                         // (, line 110
                         // call R1, line 110
@@ -608,6 +619,7 @@ namespace Iveonik.Stemmers
                         // <-, line 110
                         slice_from("heid");
                         break;
+
                     case 2:
                         // (, line 113
                         // call en_ending, line 113
@@ -617,6 +629,7 @@ namespace Iveonik.Stemmers
                             break;
                         }
                         break;
+
                     case 3:
                         // (, line 116
                         // call R1, line 116
@@ -721,6 +734,7 @@ namespace Iveonik.Stemmers
                     case 0:
                         subroot = true;
                         break;
+
                     case 1:
                         // (, line 129
                         // call R2, line 129
@@ -735,7 +749,7 @@ namespace Iveonik.Stemmers
                         do
                         {
                             v_6 = limit - cursor;
-                            //    lab6: 
+                            //    lab6:
                             do
                             {
                                 // (, line 130
@@ -784,6 +798,7 @@ namespace Iveonik.Stemmers
                             }
                         } while (false);
                         break;
+
                     case 2:
                         // (, line 133
                         // call R2, line 133
@@ -811,6 +826,7 @@ namespace Iveonik.Stemmers
                         // delete, line 133
                         slice_del();
                         break;
+
                     case 3:
                         // (, line 136
                         // call R2, line 136
@@ -828,6 +844,7 @@ namespace Iveonik.Stemmers
                             goto breaklab4;
                         }
                         break;
+
                     case 4:
                         // (, line 139
                         // call R2, line 139
@@ -839,6 +856,7 @@ namespace Iveonik.Stemmers
                         // delete, line 139
                         slice_del();
                         break;
+
                     case 5:
                         // (, line 142
                         // call R2, line 142

@@ -12,6 +12,7 @@ namespace ZeroLevel.Patterns.DependencyInjection
         IContainer
     {
         #region Activator
+
         private static object Activate(Type type, object[] args)
         {
             var flags = BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Public;
@@ -78,11 +79,14 @@ namespace ZeroLevel.Patterns.DependencyInjection
             Compose(instance);
             return instance;
         }
-        #endregion
+
+        #endregion Activator
 
         #region Caching
+
         private readonly ReaderWriterLockSlim _rwLock =
             new ReaderWriterLockSlim();
+
         /// <summary>
         /// Map - contract - dependency resolving
         /// </summary>
@@ -90,14 +94,17 @@ namespace ZeroLevel.Patterns.DependencyInjection
             new Dictionary<Type, List<ResolveTypeInfo>>();
 
         private readonly object _constructorCacheeLocker = new object();
+
         /// <summary>
         /// Types constructors cache
         /// </summary>
         private readonly Dictionary<Type, IEnumerable<ConstructorMetadata>> _constructorCachee =
             new Dictionary<Type, IEnumerable<ConstructorMetadata>>();
-        #endregion
+
+        #endregion Caching
 
         #region Private
+
         /// <summary>
         /// Creating an instance of an object at the specified dependency resolution
         /// </summary>
@@ -126,6 +133,7 @@ namespace ZeroLevel.Patterns.DependencyInjection
             }
             return sessionInstance;
         }
+
         /// <summary>
         /// Creating an instance of the object at the specified dependency resolution, for a generic type of contract
         /// </summary>
@@ -170,6 +178,7 @@ namespace ZeroLevel.Patterns.DependencyInjection
             }
             return sessionInstance;
         }
+
         /// <summary>
         /// Collecting properties of the type marked with attribute dependency resolution
         /// </summary>
@@ -180,6 +189,7 @@ namespace ZeroLevel.Patterns.DependencyInjection
             return type.GetProperties(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.FlattenHierarchy).
                 Where(p => p.GetCustomAttribute<ResolveAttribute>() != null);
         }
+
         /// <summary>
         /// Collecting fields of type marked with an attribute of dependency resolution
         /// </summary>
@@ -190,6 +200,7 @@ namespace ZeroLevel.Patterns.DependencyInjection
             return type.GetFields(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.FlattenHierarchy).
                 Where(p => p.GetCustomAttribute<ResolveAttribute>() != null);
         }
+
         /// <summary>
         /// Search for dependency resolution
         /// </summary>
@@ -229,6 +240,7 @@ namespace ZeroLevel.Patterns.DependencyInjection
             }
             throw new KeyNotFoundException($"Can't resolve dependency by type '{type.FullName}' and dependency name '{resolveName}'");
         }
+
         /// <summary>
         /// Resolving dependency on attribute "Resolve
         /// </summary>
@@ -258,6 +270,7 @@ namespace ZeroLevel.Patterns.DependencyInjection
                 throw new Exception($"Can't create type '{type.FullName}' instance for contract type {type.FullName}. Dependency key: '{resolveAttribute?.ResolveName}'", ex);
             }
         }
+
         /// <summary>
         /// Collection of interfaces and abstract classes from which the type is inherited
         /// </summary>
@@ -275,6 +288,7 @@ namespace ZeroLevel.Patterns.DependencyInjection
             }
             return interfaces;
         }
+
         /// <summary>
         /// Getting a list of metadata by type constructors
         /// </summary>
@@ -297,6 +311,7 @@ namespace ZeroLevel.Patterns.DependencyInjection
             }
             return _constructorCachee[type];
         }
+
         /// <summary>
         /// Creating an instance of an object, including with non-public constructors
         /// </summary>
@@ -327,6 +342,7 @@ namespace ZeroLevel.Patterns.DependencyInjection
                 return Activator.CreateInstance(type, flags, null, args, culture);*/
             }
         }
+
         /// <summary>
         /// Dependency resolution registration
         /// </summary>
@@ -377,9 +393,11 @@ namespace ZeroLevel.Patterns.DependencyInjection
                 _rwLock.ExitUpgradeableReadLock();
             }
         }
-        #endregion
+
+        #endregion Private
 
         #region Register
+
         public void Register<TContract, TImplementation>()
         {
             var resolveType = new ResolveTypeInfo
@@ -475,9 +493,13 @@ namespace ZeroLevel.Patterns.DependencyInjection
             };
             Register(contractType, resolveType);
         }
-        #endregion 
+
+        #endregion Register
+
+
 
         #region Register with parameters
+
         public void ParameterizedRegister<TContract, TImplementation>(object[] constructorParameters)
         {
             var resolveType = new ResolveTypeInfo
@@ -581,9 +603,11 @@ namespace ZeroLevel.Patterns.DependencyInjection
             };
             Register(contractType, resolveType);
         }
-        #endregion
+
+        #endregion Register with parameters
 
         #region Register instance
+
         /// <summary>
         /// Register singletone
         /// </summary>
@@ -601,6 +625,7 @@ namespace ZeroLevel.Patterns.DependencyInjection
             };
             Register(typeof(TContract), resolveType);
         }
+
         public void Register(Type contractType, object implementation)
         {
             var resolveType = new ResolveTypeInfo
@@ -613,6 +638,7 @@ namespace ZeroLevel.Patterns.DependencyInjection
             };
             Register(contractType, resolveType);
         }
+
         public void Register<TContract>(TContract implementation, string resolveName)
         {
             var resolveType = new ResolveTypeInfo
@@ -625,6 +651,7 @@ namespace ZeroLevel.Patterns.DependencyInjection
             };
             Register(typeof(TContract), resolveType);
         }
+
         public void Register(Type contractType, string resolveName, object implementation)
         {
             var resolveType = new ResolveTypeInfo
@@ -637,9 +664,11 @@ namespace ZeroLevel.Patterns.DependencyInjection
             };
             Register(contractType, resolveType);
         }
-        #endregion
+
+        #endregion Register instance
 
         #region Safe register
+
         public bool TryRegister<TContract, TImplementation>(Action<Exception> fallback = null)
         {
             try
@@ -751,9 +780,11 @@ namespace ZeroLevel.Patterns.DependencyInjection
                 return false;
             }
         }
-        #endregion
+
+        #endregion Safe register
 
         #region Safe register with parameters
+
         public bool TryParameterizedRegister<TContract, TImplementation>(object[] constructorParameters, Action<Exception> fallback = null)
         {
             try
@@ -865,9 +896,11 @@ namespace ZeroLevel.Patterns.DependencyInjection
                 return false;
             }
         }
-        #endregion
+
+        #endregion Safe register with parameters
 
         #region Resolving
+
         public object Resolve(Type type, bool compose = true)
         {
             return Resolve(type, string.Empty, null, compose);
@@ -971,9 +1004,11 @@ namespace ZeroLevel.Patterns.DependencyInjection
                 throw new Exception($"Can't create instance for type {type.FullName} for resolved dependency {type.FullName} by key {resolveName}", ex);
             }
         }
-        #endregion
+
+        #endregion Resolving
 
         #region Safe resolving
+
         public object TryResolve(Type type, out object result, bool compose = true)
         {
             return TryResolve(type, string.Empty, null, out result, compose);
@@ -1066,9 +1101,11 @@ namespace ZeroLevel.Patterns.DependencyInjection
             result = null;
             return false;
         }
-        #endregion
+
+        #endregion Safe resolving
 
         #region Composition
+
         /// <summary>
         /// Filling in the fields and properties of an object with auto-set values flagged from the container parameters
         /// </summary>
@@ -1162,9 +1199,11 @@ namespace ZeroLevel.Patterns.DependencyInjection
             }
             return false;
         }
-        #endregion
+
+        #endregion Composition
 
         #region IDisposable
+
         public void Dispose()
         {
             try
@@ -1190,7 +1229,7 @@ namespace ZeroLevel.Patterns.DependencyInjection
                                 {
                                     (gitem as IDisposable)?.Dispose();
                                 }
-                                catch(Exception ex)
+                                catch (Exception ex)
                                 {
                                     Log.SystemError(ex, $"[Container] Generic singletone dispose error. Instance: '{gitem?.GetType()?.FullName ?? string.Empty}'");
                                 }
@@ -1208,9 +1247,11 @@ namespace ZeroLevel.Patterns.DependencyInjection
                 _rwLock.ExitWriteLock();
             }
         }
-        #endregion
+
+        #endregion IDisposable
 
         #region IEverythingStorage
+
         private readonly Lazy<IEverythingStorage> _everything =
             new Lazy<IEverythingStorage>(EverythingStorage.Create);
 
@@ -1218,18 +1259,22 @@ namespace ZeroLevel.Patterns.DependencyInjection
         {
             _everything.Value.Add<T>(key, value);
         }
+
         public void Remove<T>(string key)
         {
             _everything.Value.Remove<T>(key);
         }
+
         public bool Contains<T>(string key)
         {
             return _everything.Value.ContainsKey<T>(key);
         }
+
         public bool TrySave<T>(string key, T value)
         {
             return _everything.Value.TryAdd<T>(key, value);
         }
+
         public bool TryRemove<T>(string key)
         {
             return _everything.Value.TryRemove<T>(key);
@@ -1265,6 +1310,7 @@ namespace ZeroLevel.Patterns.DependencyInjection
                 return _everything.Value.Get<T>(key);
             return defaultValue;
         }
-        #endregion
+
+        #endregion IEverythingStorage
     }
 }

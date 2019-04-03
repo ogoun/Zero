@@ -3,29 +3,35 @@ using ZeroLevel.Services.Serialization;
 
 namespace ZeroLevel.DocumentObjectModel
 {
-    public sealed class Assotiation : 
+    public sealed class Assotiation :
         IBinarySerializable
     {
         #region Fields
+
         /// <summary>
         /// Title
         /// </summary>
         public string Title;
+
         /// <summary>
         /// Description
         /// </summary>
         public string Description;
+
         /// <summary>
         /// Binded document reference
         /// </summary>
         public Guid DocumentId;
+
         /// <summary>
         /// Relation type
         /// </summary>
         public AssotiationRelation Relation;
-        #endregion
+
+        #endregion Fields
 
         #region IBinarySerializable
+
         public void Serialize(IBinaryWriter writer)
         {
             writer.WriteString(this.Title);
@@ -41,6 +47,7 @@ namespace ZeroLevel.DocumentObjectModel
             this.DocumentId = reader.ReadGuid();
             this.Relation = (AssotiationRelation)reader.ReadInt32();
         }
-        #endregion
+
+        #endregion IBinarySerializable
     }
 }

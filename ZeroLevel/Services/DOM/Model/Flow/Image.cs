@@ -3,20 +3,21 @@ using ZeroLevel.Services.Serialization;
 
 namespace ZeroLevel.DocumentObjectModel.Flow
 {
-    public sealed class Image : 
+    public sealed class Image :
         ContentElement
     {
         public SourceType Source { get; set; }
         public FlowAlign Align = FlowAlign.None;
+
         /// <summary>
         /// Title
         /// </summary>
         public string Title;
+
         /// <summary>
         /// Link or Attachment ID
         /// </summary>
         public string Identifier;
-
 
         public Image() : base(ContentElementType.Image)
         {

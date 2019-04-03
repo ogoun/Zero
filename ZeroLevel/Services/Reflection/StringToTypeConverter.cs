@@ -35,6 +35,6 @@ namespace ZeroLevel.Services.Reflection
             return null;
         }
 
-        #endregion
+        #endregion TypeHelpers
     }
 }
