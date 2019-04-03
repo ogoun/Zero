@@ -92,20 +92,20 @@ namespace ZeroLevel.Services.Config
         #region Get
 
         /// <summary>
-        /// Получение списка значение соотвествующих указанному ключу
+        /// Getting a list of the value corresponding to the specified key
         /// </summary>
-        /// <param name="key">Ключ</param>
-        /// <returns>Список значений</returns>
+        /// <param name="key">Key</param>
+        /// <returns>Values list</returns>
         public IEnumerable<string> Items(string key)
         {
             return this[key];
         }
 
         /// <summary>
-        /// Получение первого значения для указанного ключа
+        /// Getting the first value for the specified key
         /// </summary>
-        /// <param name="key">Ключ</param>
-        /// <returns>Первое значение, или null если ключ есть, но нет значений, или KeyNotFoundException если нет ключа</returns>
+        /// <param name="key">Key</param>
+        /// <returns>The first value, or null if the key is, but there are no values, or KeyNotFoundException if there is no key</returns>
         public string First(string key)
         {
             IList<string> result;
@@ -135,11 +135,11 @@ namespace ZeroLevel.Services.Config
         }
 
         /// <summary>
-        /// Получение первого значения для указанного ключа, с попыткой преобразования в указанный тип
+        /// Getting the first value for the specified key, with an attempt to convert to the specified type
         /// </summary>
-        /// <typeparam name="T">Ожидаемый тип</typeparam>
-        /// <param name="key">Ключ</param>
-        /// <returns>Первое значение, или default(T) если ключ есть, но нет значений, или KeyNotFoundException если нет ключа</returns>
+        /// <typeparam name="T">Expected type</typeparam>
+        /// <param name="key">Key</param>
+        /// <returns>The first value, or default (T) if there is a key but no values, or KeyNotFoundException if there is no key</returns>
         public T First<T>(string key)
         {
             IList<string> result;
@@ -153,11 +153,11 @@ namespace ZeroLevel.Services.Config
         }
 
         /// <summary>
-        /// Получение первого значения для указанного ключа, или значения по умолчанию
+        /// First value, or Default value if no value or key
         /// </summary>
-        /// <param name="key">Ключ</param>
-        /// <param name="defaultValue">Значение по умолчанию</param>
-        /// <returns>Первое значение, или значение по умолчанию если нет значений или ключа</returns>
+        /// <param name="key">Key</param>
+        /// <param name="defaultValue">Default value</param>
+        /// <returns>First value, or Default value if no value or key</returns>
         public string FirstOrDefault(string key, string defaultValue)
         {
             IList<string> result;
@@ -170,11 +170,11 @@ namespace ZeroLevel.Services.Config
         }
 
         /// <summary>
-        /// Получение первого значения для указанного ключа, или значения по умолчанию, с попыткой преобразования в указанный тип
+        /// Getting the first value for the specified key, or defaults, with an attempt to convert to the specified type
         /// </summary>
-        /// <typeparam name="T">Ожидаемый тип</typeparam>
-        /// <param name="key">Ключ</param>
-        /// <returns>Первое значение, или default(T) если нет значений или ключа</returns>
+        /// <typeparam name="T">Expected type</typeparam>
+        /// <param name="key">Key</param>
+        /// <returns>The first value, or default (T) if there are no values or a key</returns>
         public T FirstOrDefault<T>(string key)
         {
             IList<string> result;
@@ -187,12 +187,12 @@ namespace ZeroLevel.Services.Config
         }
 
         /// <summary>
-        /// Получение первого значения для указанного ключа, или значения по умолчанию, с попыткой преобразования в указанный тип
+        /// Getting the first value for the specified key, or defaults, with an attempt to convert to the specified type
         /// </summary>
-        /// <typeparam name="T">Ожидаемый тип</typeparam>
-        /// <param name="key">Ключ</param>
-        /// <param name="defaultValue">Значение по умолчанию</param>
-        /// <returns>Первое значение, или значение по умолчанию если нет значений или ключа</returns>
+        /// <typeparam name="T">Expected type</typeparam>
+        /// <param name="key">Key</param>
+        /// <param name="defaultValue">Default value</param>
+        /// <returns>First value, or Default value if no value or key</returns>
         public T FirstOrDefault<T>(string key, T defaultValue)
         {
             IList<string> result;
@@ -205,10 +205,10 @@ namespace ZeroLevel.Services.Config
         }
 
         /// <summary>
-        /// Проверка наличия ключа и непустого списка связанных с ним значений
+        /// Check for the presence of a key and a non-empty list of values associated with it
         /// </summary>
-        /// <param name="key">Ключ</param>
-        /// <returns>true - если существует ключ и есть хотя бы одно значение</returns>
+        /// <param name="key">Key</param>
+        /// <returns>true - if a key exists and there is at least one value</returns>
         public bool Contains(string key)
         {
             key = GetKey(key);
@@ -216,7 +216,7 @@ namespace ZeroLevel.Services.Config
         }
 
         /// <summary>
-        /// Проверка наличия одного из ключей
+        /// Check for one of the keys
         /// </summary>
         public bool Contains(params string[] keys)
         {
@@ -226,11 +226,8 @@ namespace ZeroLevel.Services.Config
         }
 
         /// <summary>
-        /// Проверка наличия ключа и связанного с ним значения
+        /// Check for the presence of a key and its associated value
         /// </summary>
-        /// <param name="key"></param>
-        /// <param name="value"></param>
-        /// <returns></returns>
         public bool ContainsValue(string key, string value)
         {
             IList<string> result;
@@ -242,10 +239,10 @@ namespace ZeroLevel.Services.Config
         }
 
         /// <summary>
-        /// Количество значений связанных с указанным ключом
+        /// The number of values associated with the specified key
         /// </summary>
-        /// <param name="key">Ключ</param>
-        /// <returns>Количество значений</returns>
+        /// <param name="key">Key</param>
+        /// <returns>Number of values</returns>
         public int Count(string key)
         {
             key = GetKey(key);

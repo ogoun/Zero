@@ -125,48 +125,48 @@ namespace ZeroLevel
         #region Read configuration
 
         /// <summary>
-        /// Создание конфигурации из секции AppSettings файла app.config или web.config
+        /// Creating a configuration from the AppSettings section of the app.config or web.config file
         /// </summary>
-        /// <returns>Конфигурация</returns>
+        /// <returns>Configuration</returns>
         public static IConfiguration ReadFromApplicationConfig() { return new ApplicationConfigReader().ReadConfiguration(); }
 
         /// <summary>
-        /// Создание конфигурации из секции AppSettings файла app.config или web.config, дополняется секцией 'ConnectionStrings'
+        /// Creating a configuration from the AppSettings section of the app.config file or web.config, is supplemented by the 'ConnectionStrings' section
         /// </summary>
-        /// <returns>Конфигурация</returns>
+        /// <returns>Configuration</returns>
         public static IConfigurationSet ReadSetFromApplicationConfig() { return new ApplicationConfigReader().ReadConfigurationSet(); }
 
         /// <summary>
-        /// Создание конфигурации из секции AppSettings файла app.config или web.config
+        /// Creating a configuration from the AppSettings section of the app.config or web.config file
         /// </summary>
-        /// <returns>Конфигурация</returns>
+        /// <returns>Configuration</returns>
         public static IConfiguration ReadFromApplicationConfig(string configFilePath) { return new ApplicationConfigReader(configFilePath).ReadConfiguration(); }
 
         /// <summary>
-        /// Создание конфигурации из секции AppSettings файла app.config или web.config, дополняется секцией 'ConnectionStrings'
+        /// Creating a configuration from the AppSettings section of the app.config file or web.config, is supplemented by the 'ConnectionStrings' section
         /// </summary>
-        /// <returns>Конфигурация</returns>
+        /// <returns>Configuration</returns>
         public static IConfigurationSet ReadSetFromApplicationConfig(string configFilePath) { return new ApplicationConfigReader(configFilePath).ReadConfigurationSet(); }
 
         /// <summary>
-        /// Создание конфигурации из ini файла
+        /// Create configuration from ini file
         /// </summary>
-        /// <param name="path">Путь к ini-файлу</param>
-        /// <returns>Конфигурация</returns>
+        /// <param name="path">Path to the ini file</param>
+        /// <returns>Configuration</returns>
         public static IConfiguration ReadFromIniFile(string path) { return new IniFileReader(path).ReadConfiguration(); }
 
         /// <summary>
-        /// Создание конфигурации из ini файла, с учетом секций
+        /// Creating a configuration from an ini file, including sections
         /// </summary>
-        /// <param name="path">Путь к ini-файлу</param>
-        /// <returns>Конфигурация</returns>
+        /// <param name="path">Path to the ini file</param>
+        /// <returns>Configuration</returns>
         public static IConfigurationSet ReadSetFromIniFile(string path) { return new IniFileReader(path).ReadConfigurationSet(); }
 
         /// <summary>
-        /// Создание конфигурации из параметров командной строки
+        /// Creating configuration from command line parameters
         /// </summary>
-        /// <param name="args">Параметры командной строки</param>
-        /// <returns>Конфигурация</returns>
+        /// <param name="args">Command line parameters</param>
+        /// <returns>Configuration</returns>
         public static IConfiguration ReadFromCommandLine(string[] args) { return new CommandLineReader(args).ReadConfiguration(); }
 
         public static IConfigurationSet ReadBinary(IBinaryReader reader)
@@ -179,17 +179,17 @@ namespace ZeroLevel
         #region Write configuration
 
         /// <summary>
-        /// Запись простой конфигурации в ini-файл
+        /// Write a simple configuration to the ini file
         /// </summary>
-        /// <param name="configuration">Конфигурация</param>
-        /// <param name="path">Путь к ini-файлу</param>
+        /// <param name="configuration">Configuration</param>
+        /// <param name="path">Path to the ini file</param>
         public static void WriteToIniFile(IConfiguration configuration, string path) { new IniFileWriter(path).WriteConfiguration(configuration); }
 
         /// <summary>
-        /// Запись полной конфигурации в ini-файл
+        /// Write the complete configuration to the ini-file
         /// </summary>
-        /// <param name="configuration">Конфигурация</param>
-        /// <param name="path">Путь к ini-файлу</param>
+        /// <param name="configuration">Configuration</param>
+        /// <param name="path">Path to the ini file</param>
         public static void WriteSetToIniFile(IConfigurationSet configuration, string path) { new IniFileWriter(path).WriteConfigurationSet(configuration); }
 
         #endregion Write configuration

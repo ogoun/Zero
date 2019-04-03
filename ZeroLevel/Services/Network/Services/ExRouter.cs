@@ -19,13 +19,13 @@ namespace ZeroLevel.Services.Network.Services
             /// </summary>
             private static Invoker CreateCompiledExpression(MethodInfo method)
             {
-                var targetArg = Expression.Parameter(typeof(object)); //  Цель на которой происходит вызов
-                var argsArg = Expression.Parameter(typeof(object[])); //  Аргументы метода
+                var targetArg = Expression.Parameter(typeof(object)); //  Target
+                var argsArg = Expression.Parameter(typeof(object[])); //  Method's args
                 var parameters = method.GetParameters();
                 Expression body = Expression.Call(
                     method.IsStatic
                         ? null
-                        : Expression.Convert(targetArg, method.DeclaringType), //  тип в котором объявлен метод
+                        : Expression.Convert(targetArg, method.DeclaringType), //  Method's type
                     method,
                     parameters.Select((p, i) =>
                         Expression.Convert(Expression.ArrayIndex(argsArg, Expression.Constant(i)), p.ParameterType)));

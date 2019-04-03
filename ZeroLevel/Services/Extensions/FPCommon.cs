@@ -15,7 +15,7 @@ namespace ZeroLevel.Services.Extensions
          */
 
         /// <summary>
-        /// Каррирование
+        /// Currying
         /// </summary>
         public static Func<A, Func<B, R>> Curry<A, B, R>(this Func<A, B, R> f)
         {
@@ -28,7 +28,7 @@ namespace ZeroLevel.Services.Extensions
          */
 
         /// <summary>
-        /// Частичное исполнение
+        /// Partial currying
         /// </summary>
         public static Func<B, R> Partial<A, B, R>(this Func<A, B, R> f, A a)
         {

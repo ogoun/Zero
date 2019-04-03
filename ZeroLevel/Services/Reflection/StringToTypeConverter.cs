@@ -8,7 +8,7 @@ namespace ZeroLevel.Services.Reflection
         #region TypeHelpers
 
         /// <summary>
-        /// Сonverting a string to a type, if there is a corresponding converter for the type, in the absence of a converter, the default state for the specified type is returned
+        /// Converting a string to a type, if there is a corresponding converter for the type, in the absence of a converter, the default state for the specified type is returned
         /// </summary>
         public static object TryConvert(string input, Type to)
         {

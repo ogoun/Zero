@@ -51,8 +51,8 @@ namespace ZeroLevel
         /// <summary>
         /// Get configuration section by name
         /// </summary>
-        /// <param name="sectionName">Название секции</param>
-        /// <returns>Секция с данными</returns>
+        /// <param name="sectionName">Section name</param>
+        /// <returns>Data section</returns>
         IConfiguration GetSection(string sectionName);
 
         /// <summary>
@@ -79,7 +79,7 @@ namespace ZeroLevel
         /// <summary>
         /// Remove a prohibition on changing configurations
         /// </summary>
-        /// <returns>false - если запрет снят</returns>
+        /// <returns>false - if the prohibition is removed</returns>
         bool UnfreezeConfiguration();
 
         /// <summary>

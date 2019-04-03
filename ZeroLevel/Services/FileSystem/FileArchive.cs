@@ -159,7 +159,7 @@ namespace ZeroLevel.Services.FileSystem
     }
 
     /// <summary>
-    /// Файловый архив
+    /// File archive
     /// </summary>
     public sealed class FileArchive :
         IDisposable
@@ -457,7 +457,7 @@ namespace ZeroLevel.Services.FileSystem
         }
 
         /// <summary>
-        /// Сохранение данных в бинарном виде в архив
+        /// Saving data in binary form in the archive
         /// </summary>
         /// <param name="data">Data</param>
         /// <param name="name">Archive file name (HH_mm_ss_fff_counter.{ext} by default)</param>

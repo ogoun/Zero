@@ -81,12 +81,12 @@ namespace ZeroLevel.Services.Impersonation
         }
 
         /// <summary>
-        /// Вход от имени указанного пользователя с указанием способа авторизации
+        /// Login on behalf of the specified user with the authorization method
         /// </summary>
-        /// <param name="userName">Имя пользователя</param>
-        /// <param name="domain">Домен</param>
-        /// <param name="password">Пароль</param>
-        /// <param name="logonType">Тип авторизации</param>
+        /// <param name="userName">Login</param>
+        /// <param name="domain">Domain</param>
+        /// <param name="password">Password</param>
+        /// <param name="logonType">Authorization Type</param>
         public void ImpersonateByUser(String userName, String domain, String password, ImpersonationNativeMethods.LogonType logonType)
         {
             MySafeTokenHandle token;
@@ -101,9 +101,9 @@ namespace ZeroLevel.Services.Impersonation
         }
 
         /// <summary>
-        /// Копирование прав указанного процесса
+        /// Copying the rights of the specified process
         /// </summary>
-        /// <param name="ProcessName">Имя процесса</param>
+        /// <param name="ProcessName">Process name</param>
         public void ImpersonateByProcess(string ProcessName)
         {
             Process[] myProcesses = Process.GetProcesses();

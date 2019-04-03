@@ -253,12 +253,12 @@ namespace ZeroLevel.Microservices
         #region Inboxes
 
         /// <summary>
-        /// Регистрация обработчика входящих сообщений
+        /// Registering an Inbox Handler
         /// </summary>
-        /// <typeparam name="T">Тип сообщения</typeparam>
-        /// <param name="protocol">Транспортный протокол</param>
-        /// <param name="inbox">Имя точки приема</param>
-        /// <param name="handler">Обработчик</param>
+        /// <typeparam name="T">Message type</typeparam>
+        /// <param name="protocol">Protocol</param>
+        /// <param name="inbox">Inbox name</param>
+        /// <param name="handler">Handler</param>
         private void RegisterHandler<T>(MetaService meta, string inbox, Action<T, long, IZBackward> handler)
         {
             if (_disposed) return;
@@ -273,13 +273,13 @@ namespace ZeroLevel.Microservices
         }
 
         /// <summary>
-        /// Регистрация метода отдающего ответ на входящий запрос
+        /// Registration method responding to an incoming request
         /// </summary>
-        /// <typeparam name="Treq">Тип входного сообщения</typeparam>
-        /// <typeparam name="Tresp">Тип ответа</typeparam>
-        /// <param name="protocol">Транспортный протокол</param>
-        /// <param name="inbox">Имя точки приема</param>
-        /// <param name="replier">Обработчик</param>
+        /// <typeparam name="Treq">Request message type</typeparam>
+        /// <typeparam name="Tresp">Response message type</typeparam>
+        /// <param name="protocol">Protocol</param>
+        /// <param name="inbox">Inbox name</param>
+        /// <param name="replier">Handler</param>
         private void RegisterReplier<Treq, Tresp>(MetaService meta, string inbox, Func<Treq, long, IZBackward, Tresp> handler)
         {
             if (_disposed) return;
@@ -294,12 +294,12 @@ namespace ZeroLevel.Microservices
         }
 
         /// <summary>
-        /// Регистрация метода отдающего ответ на входящий запрос, не принимающего входящих данных
+        /// Registration of the method of responding to the incoming request, not receiving incoming data
         /// </summary>
-        /// <typeparam name="Tresp">Тип ответа</typeparam>
-        /// <param name="protocol">Транспортный протокол</param>
-        /// <param name="inbox">Имя точки приема</param>
-        /// <param name="replier">Обработчик</param>
+        /// <typeparam name="Tresp">Response message type</typeparam>
+        /// <param name="protocol">Protocol</param>
+        /// <param name="inbox">Inbox name</param>
+        /// <param name="replier">Handler</param>
         private void RegisterReplierWithNoRequestBody<Tresp>(MetaService meta, string inbox, Func<long, IZBackward, Tresp> handler)
         {
             if (_disposed) return;

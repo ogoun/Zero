@@ -115,11 +115,7 @@ namespace ZeroLevel.ProxyREST
             }
             catch (Exception ex)
             {
-                var line = string.Format("Сбой запроса ресурса {0} методом {1}. Код ошибки: {2}. Комментарий: {3}",
-                    resource,
-                   method,
-                   statusCode ?? "Uncknown",
-                   reason ?? ex.Message);
+                var line = $"Resource request failed. [{method}] {resource}. Error code: {(statusCode ?? "Uncknown")}. Comment: {(reason ?? ex.Message)}";
                 Log.Error(ex, line);
                 throw new InvalidOperationException(line, ex);
             }

@@ -15,8 +15,7 @@ namespace ZeroLevel.Microservices
         private static readonly ConcurrentDictionary<string, ExClient> _clientInstances = new ConcurrentDictionary<string, ExClient>();
 
         /// <summary>
-        /// Сканирование указанной сборки для поиска типов реализующих интерфейсы
-        /// IExchangeServer или IExchangeClient
+        /// Scanning the specified assembly to find the types that implement the IExchangeServer or IExchangeClient interfaces
         /// </summary>
         internal static void ScanAndRegisterCustomTransport(Assembly asm)
         {
@@ -40,10 +39,10 @@ namespace ZeroLevel.Microservices
         }
 
         /// <summary>
-        /// Создает сервер для приема сообщений по указанному протоколу
+        /// Creates a server to receive messages using the specified protocol
         /// </summary>
-        /// <param name="protocol">Протокол</param>
-        /// <returns>Сервер</returns>
+        /// <param name="protocol">Protocol</param>
+        /// <returns>Server</returns>
         internal static ExService GetServer(string protocol)
         {
             ExService instance = null;
@@ -67,11 +66,11 @@ namespace ZeroLevel.Microservices
         }
 
         /// <summary>
-        /// Создает клиента для обращений к серверу по указанному протоколу
+        /// Creates a client to access the server using the specified protocol
         /// </summary>
-        /// <param name="protocol">Протокол</param>
-        /// <param name="endpoint">Адрес сервера</param>
-        /// <returns>Клиент</returns>
+        /// <param name="protocol">Protocol</param>
+        /// <param name="endpoint">Server endpoint</param>
+        /// <returns>Client</returns>
         internal static ExClient GetClient(string protocol, string endpoint)
         {
             ExClient instance = null;

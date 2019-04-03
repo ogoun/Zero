@@ -84,7 +84,7 @@ namespace ZeroLevel.Services.Shedulling
         /// Performs an action once per period, while the date is recalculated from the function transferred each time the task is recreated.
         /// </summary>
         /// <param name="nextEventDateCalcFunction">The function to calculate the next date</param>
-        /// <param name="callback">Действие</param>
+        /// <param name="callback">Action</param>
         /// <returns>Task ID</returns>
         public long RemindAsyncEveryNonlinearDate(Func<DateTime, DateTime> nextEventDateCalcFunction,
             Func<long, Task> callback,

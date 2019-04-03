@@ -10,7 +10,7 @@ using ZeroLevel.Services.Network;
 namespace ZeroLevel.Microservices
 {
     /// <summary>
-    /// Обеспечивает обмен данными между сервисами
+    /// Provides data exchange between services
     /// </summary>
     public sealed class Exchange :
         IDisposable
@@ -29,7 +29,7 @@ namespace ZeroLevel.Microservices
         #endregion Ctor
 
         /// <summary>
-        ///  Регистрация сервиса
+        ///  Registration service
         /// </summary>
         public IExService RegisterService(IExchangeService service)
         {
@@ -44,11 +44,11 @@ namespace ZeroLevel.Microservices
         #region Balanced send
 
         /// <summary>
-        /// Отправка сообщения сервису
+        /// Sending a message to the service
         /// </summary>
-        /// <param name="serviceKey">Ключ сервиса</param>
-        /// <param name="inbox">Имя точки приема сообщений</param>
-        /// <param name="data">Сообщение</param>
+        /// <param name="serviceKey">Service key</param>
+        /// <param name="inbox">Inbox name</param>
+        /// <param name="data">Message</param>
         /// <returns></returns>
         public bool Send<T>(string serviceKey, string inbox, T data)
         {
@@ -262,13 +262,13 @@ namespace ZeroLevel.Microservices
         #region Broadcast
 
         /// <summary>
-        /// Отправка сообщения всем сервисам с указанным ключом в указанный обработчик
+        /// Sending a message to all services with the specified key to the specified handler
         /// </summary>
-        /// <typeparam name="T">Тип сообщения</typeparam>
-        /// <param name="serviceKey">Ключ сервиса</param>
-        /// <param name="inbox">Имя обработчика</param>
-        /// <param name="data">Сообщение</param>
-        /// <returns>true - при успешной отправке</returns>
+        /// <typeparam name="T">Message type</typeparam>
+        /// <param name="serviceKey">Service key</param>
+        /// <param name="inbox">Inbox name</param>
+        /// <param name="data">Message</param>
+        /// <returns>true - on successful submission</returns>
         public bool SendBroadcast<T>(string serviceKey, string inbox, T data)
         {
             try
@@ -296,22 +296,22 @@ namespace ZeroLevel.Microservices
         }
 
         /// <summary>
-        /// Отправка сообщения всем сервисам с указанным ключом, в обработчик по умолчанию
+        /// Sending a message to all services with the specified key, to the default handler
         /// </summary>
-        /// <typeparam name="T">Тип сообщения</typeparam>
-        /// <param name="serviceKey">Ключ сервиса</param>
-        /// <param name="data">Сообщение</param>
-        /// <returns>true - при успешной отправке</returns>
+        /// <typeparam name="T">Message type</typeparam>
+        /// <param name="serviceKey">Service key</param>
+        /// <param name="data">Message</param>
+        /// <returns>true - on successful submission</returns>
         public bool SendBroadcast<T>(string serviceKey, T data) => SendBroadcast(serviceKey, ZBaseNetwork.DEFAULT_MESSAGE_INBOX, data);
 
         /// <summary>
-        /// Отправка сообщения всем сервисам конкретного типа в указанный обработчик
+        /// Sending a message to all services of a specific type to the specified handler
         /// </summary>
-        /// <typeparam name="T">Тип сообщения</typeparam>
-        /// <param name="serviceType">Тип сервиса</param>
-        /// <param name="inbox">Имя обработчика</param>
-        /// <param name="data">Сообщение</param>
-        /// <returns>true - при успешной отправке</returns>
+        /// <typeparam name="T">Message type</typeparam>
+        /// <param name="serviceType">Service type</param>
+        /// <param name="inbox">Inbox name</param>
+        /// <param name="data">Message</param>
+        /// <returns>true - on successful submission</returns>
         public bool SendBroadcastByType<T>(string serviceType, string inbox, T data)
         {
             try
@@ -339,23 +339,23 @@ namespace ZeroLevel.Microservices
         }
 
         /// <summary>
-        /// Отправка сообщения всем сервисам конкретного типа, в обработчик по умолчанию
+        /// Sending a message to all services of a particular type, to the default handler
         /// </summary>
-        /// <typeparam name="T">Тип сообщения</typeparam>
-        /// <param name="serviceType">Тип сервиса</param>
-        /// <param name="data">Сообщение</param>
-        /// <returns>true - при успешной отправке</returns>
+        /// <typeparam name="T">Message type</typeparam>
+        /// <param name="serviceType">Service type</param>
+        /// <param name="data">Message</param>
+        /// <returns>true - on successful submission</returns>
         public bool SendBroadcastByType<T>(string serviceType, T data) =>
             SendBroadcastByType(serviceType, ZBaseNetwork.DEFAULT_MESSAGE_INBOX, data);
 
         /// <summary>
-        /// Отправка сообщения всем сервисам конкретной группы в указанный обработчик
+        /// Sending a message to all services of a specific group to the specified handler
         /// </summary>
-        /// <typeparam name="T">Тип сообщения</typeparam>
-        /// <param name="serviceGroup">Группа сервиса</param>
-        /// <param name="inbox">Имя обработчика</param>
-        /// <param name="data">Сообщение</param>
-        /// <returns>true - при успешной отправке</returns>
+        /// <typeparam name="T">Message type</typeparam>
+        /// <param name="serviceGroup">Service group</param>
+        /// <param name="inbox">Inbox name</param>
+        /// <param name="data">Message</param>
+        /// <returns>true - on successful submission</returns>
         public bool SendBroadcastByGroup<T>(string serviceGroup, string inbox, T data)
         {
             try
@@ -383,25 +383,25 @@ namespace ZeroLevel.Microservices
         }
 
         /// <summary>
-        /// Отправка сообщения всем сервисам конкретной группы, в обработчик по умолчанию
+        /// Sending a message to all services of a specific group in the default handler
         /// </summary>
-        /// <typeparam name="T">Тип сообщения</typeparam>
-        /// <param name="serviceGroup">Группа сервиса</param>
-        /// <param name="data">Сообщение</param>
-        /// <returns>true - при успешной отправке</returns>
+        /// <typeparam name="T">Message type</typeparam>
+        /// <param name="serviceGroup">Service group</param>
+        /// <param name="data">Messsage</param>
+        /// <returns>true - on successful submission</returns>
         public bool SendBroadcastByGroup<T>(string serviceGroup, T data) =>
             SendBroadcastByGroup(serviceGroup, ZBaseNetwork.DEFAULT_MESSAGE_INBOX, data);
 
         /// <summary>
-        /// Широковещательный опрос сервисов по ключу
+        /// Broadcast polling services by key
         /// </summary>
-        /// <typeparam name="Treq">Тип запроса</typeparam>
-        /// <typeparam name="Tresp">Тип ответа</typeparam>
-        /// <param name="serviceKey">Ключ сервиса</param>
-        /// <param name="inbox">Имя обработчика</param>
-        /// <param name="data">Запрос</param>
-        /// <param name="responseHandler">Обработчик ответа</param>
-        /// <returns>true - в случае успешной рассылки</returns>
+        /// <typeparam name="Treq">Request message type</typeparam>
+        /// <typeparam name="Tresp">Response message type</typeparam>
+        /// <param name="serviceKey">Service key</param>
+        /// <param name="inbox">Inbox name</param>
+        /// <param name="data">Request message</param>
+        /// <param name="responseHandler">Response handler</param>
+        /// <returns>true - in case of successful mailing</returns>
         public IEnumerable<Tresp> RequestBroadcast<Treq, Tresp>(string serviceKey, string inbox, Treq data)
         {
             try
@@ -417,13 +417,13 @@ namespace ZeroLevel.Microservices
         }
 
         /// <summary>
-        /// Широковещательный опрос сервисов по ключу, без сообщеня запроса
+        /// Broadcast polling services by key, without message request
         /// </summary>
-        /// <typeparam name="Tresp">Тип ответа</typeparam>
-        /// <param name="serviceKey">Ключ сервиса</param>
-        /// <param name="inbox">Имя обработчика</param>
-        /// <param name="responseHandler">Обработчик ответа</param>
-        /// <returns>true - в случае успешной рассылки</returns>
+        /// <typeparam name="Tresp">Response message type</typeparam>
+        /// <param name="serviceKey">Service key</param>
+        /// <param name="inbox">Inbox name</param>
+        /// <param name="responseHandler">Response handler</param>
+        /// <returns>true - in case of successful mailing</returns>
         public IEnumerable<Tresp> RequestBroadcast<Tresp>(string serviceKey, string inbox)
         {
             try
@@ -439,37 +439,37 @@ namespace ZeroLevel.Microservices
         }
 
         /// <summary>
-        /// Широковещательный опрос сервисов по ключу, в обработчик по умолчанию
+        /// Broadcast polling services by key, to default handler
         /// </summary>
-        /// <typeparam name="Treq">Тип запроса</typeparam>
-        /// <typeparam name="Tresp">Тип ответа</typeparam>
-        /// <param name="serviceKey">Ключ сервиса</param>
-        /// <param name="data">Запрос</param>
-        /// <param name="responseHandler">Обработчик ответа</param>
-        /// <returns>true - в случае успешной рассылки</returns>
+        /// <typeparam name="Treq">Request message type</typeparam>
+        /// <typeparam name="Tresp">Response message type</typeparam>
+        /// <param name="serviceKey">Service key</param>
+        /// <param name="data">Request message</param>
+        /// <param name="responseHandler">Response handler</param>
+        /// <returns>true - in case of successful mailing</returns>
         public IEnumerable<Tresp> RequestBroadcast<Treq, Tresp>(string serviceKey, Treq data) =>
             RequestBroadcast<Treq, Tresp>(serviceKey, ZBaseNetwork.DEFAULT_REQUEST_INBOX, data);
 
         /// <summary>
-        /// Широковещательный опрос сервисов по ключу, без сообщеня запроса, в обработчик по умолчанию
+        /// Broadcast polling of services by key, without message of request, to default handler
         /// </summary>
-        /// <typeparam name="Tresp">Тип ответа</typeparam>
-        /// <param name="serviceKey">Ключ сервиса</param>
-        /// <param name="responseHandler">Обработчик ответа</param>
-        /// <returns>true - в случае успешной рассылки</returns>
+        /// <typeparam name="Tresp">Response message type</typeparam>
+        /// <param name="serviceKey">Service key</param>
+        /// <param name="responseHandler">Response handler</param>
+        /// <returns>true - in case of successful mailing</returns>
         public IEnumerable<Tresp> RequestBroadcast<Tresp>(string serviceKey) =>
             RequestBroadcast<Tresp>(serviceKey, ZBaseNetwork.DEFAULT_REQUEST_INBOX);
 
         /// <summary>
-        /// Широковещательный опрос сервисов по типу сервису
+        /// Broadcast polling services by type of service
         /// </summary>
-        /// <typeparam name="Treq">Тип запроса</typeparam>
-        /// <typeparam name="Tresp">Тип ответа</typeparam>
-        /// <param name="serviceType">Тип сервиса</param>
-        /// <param name="inbox">Имя обработчика</param>
-        /// <param name="data">Запрос</param>
-        /// <param name="responseHandler">Обработчик ответа</param>
-        /// <returns>true - в случае успешной рассылки</returns>
+        /// <typeparam name="Treq">Request message type</typeparam>
+        /// <typeparam name="Tresp">Response message type</typeparam>
+        /// <param name="serviceType">Service type</param>
+        /// <param name="inbox">Inbox name</param>
+        /// <param name="data">Request message</param>
+        /// <param name="responseHandler">Response handler</param>
+        /// <returns>true - in case of successful mailing</returns>
         public IEnumerable<Tresp> RequestBroadcastByType<Treq, Tresp>(string serviceType, string inbox, Treq data)
         {
             try
@@ -485,13 +485,13 @@ namespace ZeroLevel.Microservices
         }
 
         /// <summary>
-        /// Широковещательный опрос сервисов по типу сервису, без сообщеня запроса
+        /// Broadcast polling of services by type of service, without a request message
         /// </summary>
-        /// <typeparam name="Tresp">Тип ответа</typeparam>
-        /// <param name="serviceType">Тип сервиса</param>
-        /// <param name="inbox">Имя обработчика</param>
-        /// <param name="responseHandler">Обработчик ответа</param>
-        /// <returns>true - в случае успешной рассылки</returns>
+        /// <typeparam name="Tresp">Response message type</typeparam>
+        /// <param name="serviceType">Service type</param>
+        /// <param name="inbox">Inbox name</param>
+        /// <param name="responseHandler">Response handler</param>
+        /// <returns>true - in case of successful mailing</returns>
         public IEnumerable<Tresp> RequestBroadcastByType<Tresp>(string serviceType, string inbox)
         {
             try
@@ -507,37 +507,37 @@ namespace ZeroLevel.Microservices
         }
 
         /// <summary>
-        /// Широковещательный опрос сервисов по типу сервису, в обработчик по умолчанию
+        /// Broadcast polling services by type of service, in the default handler
         /// </summary>
-        /// <typeparam name="Treq">Тип запроса</typeparam>
-        /// <typeparam name="Tresp">Тип ответа</typeparam>
-        /// <param name="serviceType">Тип сервиса</param>
-        /// <param name="data">Запрос</param>
-        /// <param name="responseHandler">Обработчик ответа</param>
-        /// <returns>true - в случае успешной рассылки</returns>
+        /// <typeparam name="Treq">Request message type</typeparam>
+        /// <typeparam name="Tresp">Response message type</typeparam>
+        /// <param name="serviceType">Service type</param>
+        /// <param name="data">Request message</param>
+        /// <param name="responseHandler">Response handler</param>
+        /// <returns>true - in case of successful mailing</returns>
         public IEnumerable<Tresp> RequestBroadcastByType<Treq, Tresp>(string serviceType, Treq data) =>
             RequestBroadcastByType<Treq, Tresp>(serviceType, ZBaseNetwork.DEFAULT_REQUEST_INBOX, data);
 
         /// <summary>
-        /// Широковещательный опрос сервисов по типу, без сообщеня запроса, в обработчик по умолчанию
+        /// Broadcast polling services by type, without message request, in the default handler
         /// </summary>
-        /// <typeparam name="Tresp">Тип ответа</typeparam>
-        /// <param name="serviceType">Тип сервиса</param>
-        /// <param name="responseHandler">Обработчик ответа</param>
-        /// <returns>true - в случае успешной рассылки</returns>
+        /// <typeparam name="Tresp">Response message type</typeparam>
+        /// <param name="serviceType">Service type</param>
+        /// <param name="responseHandler">Response handler</param>
+        /// <returns>true - in case of successful mailing</returns>
         public IEnumerable<Tresp> RequestBroadcastByType<Tresp>(string serviceType) =>
             RequestBroadcastByType<Tresp>(serviceType, ZBaseNetwork.DEFAULT_REQUEST_INBOX);
 
         /// <summary>
-        /// Широковещательный опрос сервисов по группе сервисов
+        /// Broadcast polling services for a group of services
         /// </summary>
-        /// <typeparam name="Treq">Тип запроса</typeparam>
-        /// <typeparam name="Tresp">Тип ответа</typeparam>
-        /// <param name="serviceGroup">Группа сервиса</param>
-        /// <param name="inbox">Имя обработчика</param>
-        /// <param name="data">Запрос</param>
-        /// <param name="responseHandler">Обработчик ответа</param>
-        /// <returns>true - в случае успешной рассылки</returns>
+        /// <typeparam name="Treq">Request message type</typeparam>
+        /// <typeparam name="Tresp">Response message type</typeparam>
+        /// <param name="serviceGroup">Service group</param>
+        /// <param name="inbox">Inbox name</param>
+        /// <param name="data">Request message</param>
+        /// <param name="responseHandler">Response handler</param>
+        /// <returns>true - in case of successful mailing</returns>
         public IEnumerable<Tresp> RequestBroadcastByGroup<Treq, Tresp>(string serviceGroup, string inbox, Treq data)
         {
             try
@@ -553,13 +553,13 @@ namespace ZeroLevel.Microservices
         }
 
         /// <summary>
-        /// Широковещательный опрос сервисов по группе сервисов, без сообщения запроса
+        /// Broadcast polling services for a group of services, without prompting
         /// </summary>
-        /// <typeparam name="Tresp">Тип ответа</typeparam>
-        /// <param name="serviceGroup">Группа сервиса</param>
-        /// <param name="inbox">Имя обработчика</param>
-        /// <param name="responseHandler">Обработчик ответа</param>
-        /// <returns>true - в случае успешной рассылки</returns>
+        /// <typeparam name="Tresp">Response message type</typeparam>
+        /// <param name="serviceGroup">Service group</param>
+        /// <param name="inbox">Inbox name</param>
+        /// <param name="responseHandler">Response handler</param>
+        /// <returns>true - in case of successful mailing</returns>
         public IEnumerable<Tresp> RequestBroadcastByGroup<Tresp>(string serviceGroup, string inbox)
         {
             try
@@ -575,24 +575,24 @@ namespace ZeroLevel.Microservices
         }
 
         /// <summary>
-        /// Широковещательный опрос сервисов по группе сервисов в обработчик по умолчанию
+        /// Broadcast polling services by service group to default handler
         /// </summary>
-        /// <typeparam name="Treq">Тип запроса</typeparam>
-        /// <typeparam name="Tresp">Тип ответа</typeparam>
-        /// <param name="serviceGroup">Группа сервиса</param>
-        /// <param name="data">Запрос</param>
-        /// <param name="responseHandler">Обработчик ответа</param>
-        /// <returns>true - в случае успешной рассылки</returns>
+        /// <typeparam name="Treq">Request message type</typeparam>
+        /// <typeparam name="Tresp">Response message type</typeparam>
+        /// <param name="serviceGroup">Service group</param>
+        /// <param name="data">Request message</param>
+        /// <param name="responseHandler">Response handler</param>
+        /// <returns>true - in case of successful mailing</returns>
         public IEnumerable<Tresp> RequestBroadcastByGroup<Treq, Tresp>(string serviceGroup, Treq data) =>
             RequestBroadcastByGroup<Treq, Tresp>(serviceGroup, ZBaseNetwork.DEFAULT_REQUEST_INBOX, data);
 
         /// <summary>
-        /// Широковещательный опрос сервисов по группе сервисов, без сообщения запроса, в обработчик по умолчанию
+        ///Broadcast polling services for a group of services, without sending a request, to the default handler
         /// </summary>
-        /// <typeparam name="Tresp">Тип ответа</typeparam>
-        /// <param name="serviceGroup">Группа сервиса</param>
-        /// <param name="responseHandler">Обработчик ответа</param>
-        /// <returns>true - в случае успешной рассылки</returns>
+        /// <typeparam name="Tresp">Response message type</typeparam>
+        /// <param name="serviceGroup">Service group</param>
+        /// <param name="responseHandler">Response handler</param>
+        /// <returns>true - in case of successful mailing</returns>
         public IEnumerable<Tresp> RequestBroadcastByGroup<Tresp>(string serviceGroup) =>
             RequestBroadcastByGroup<Tresp>(serviceGroup, ZBaseNetwork.DEFAULT_REQUEST_INBOX);
 

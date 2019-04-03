@@ -5,7 +5,7 @@ using System.IO;
 namespace ZeroLevel.Services.Config.Implementation
 {
     /// <summary>
-    /// Чтение конфигурации из ini файла
+    /// Reading configuration from ini file
     /// </summary>
     internal sealed class IniFileReader
         : IConfigurationReader

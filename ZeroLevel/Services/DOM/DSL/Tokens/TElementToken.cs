@@ -7,7 +7,7 @@
         TToken
     {
         /// <summary>
-        /// Имя элемента
+        /// Element name
         /// </summary>
         public string ElementName;
 

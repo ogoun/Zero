@@ -28,7 +28,6 @@ namespace ZeroLevel.Microservices
 
         #endregion WebAPI
 
-        // Таблица по ключам
         private readonly ConcurrentDictionary<string, RoundRobinCollection<ServiceEndpointInfo>> _tableByKey =
             new ConcurrentDictionary<string, RoundRobinCollection<ServiceEndpointInfo>>();
 
