@@ -254,7 +254,7 @@ namespace ZeroLevel.Services.Serialization
             {
                 instance.Deserialize(reader);
             }
-            return TypeFastAccessMethodBuilder.BuildGetter(rt.GetProperty("Value"))(instance);
+            return TypeGetterSetterBuilder.BuildGetter(rt.GetProperty("Value"))(instance);
         }
     }
 }

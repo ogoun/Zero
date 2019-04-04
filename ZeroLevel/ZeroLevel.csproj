@@ -279,12 +279,10 @@
     <Compile Include="Services\Queries\Storage\IStorage.cs" />
     <Compile Include="Services\Queries\Storage\MemoryStorage.cs" />
     <Compile Include="Services\Queries\Storage\QueryResult.cs" />
-    <Compile Include="Services\Reflection\ITypeFastAccessMethodBuilder.cs" />
     <Compile Include="Services\Reflection\ReferenceHelper.cs" />
     <Compile Include="Services\Reflection\StringToTypeConverter.cs" />
     <Compile Include="Services\Reflection\TypeActivator.cs" />
-    <Compile Include="Services\Reflection\TypeFastAccessMethodBuilder.cs" />
-    <Compile Include="Services\Reflection\TypeFastAccessMethodBuilderImpl.cs" />
+    <Compile Include="Services\Reflection\TypeGetterSetterBuilder.cs" />
     <Compile Include="Services\Reflection\TypeHelpers.cs" />
     <Compile Include="Services\Semantic\Contracts\ILexer.cs" />
     <Compile Include="Services\Semantic\Contracts\ILexProvider.cs" />

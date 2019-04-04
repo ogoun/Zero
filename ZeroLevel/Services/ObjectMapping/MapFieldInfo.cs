@@ -55,7 +55,7 @@ namespace ZeroLevel.Services.ObjectMapping
 
         private static MapMemberInfo FromField(FieldInfo fieldInfo)
         {
-            var field = new MapMemberInfo(fieldInfo.BuildSetter(), fieldInfo.BuildGetter())
+            var field = new MapMemberInfo(TypeGetterSetterBuilder.BuildSetter(fieldInfo), TypeGetterSetterBuilder.BuildGetter(fieldInfo))
             {
                 Name = fieldInfo.Name
             };
@@ -67,7 +67,7 @@ namespace ZeroLevel.Services.ObjectMapping
 
         private static IMemberInfo FromProperty(PropertyInfo propertyInfo)
         {
-            var field = new MapMemberInfo(propertyInfo.BuildSetter(), propertyInfo.BuildGetter())
+            var field = new MapMemberInfo(TypeGetterSetterBuilder.BuildSetter(propertyInfo), TypeGetterSetterBuilder.BuildGetter(propertyInfo))
             {
                 Name = propertyInfo.Name
             };
