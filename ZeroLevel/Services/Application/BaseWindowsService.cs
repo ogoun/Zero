@@ -7,14 +7,14 @@ namespace ZeroLevel.Services.Applications
     public abstract class BaseWindowsService
         : ServiceBase, IZeroService
     {
-        public string Name { get; }
+        public string Name { get; protected set; }
 
-        public BaseWindowsService()
+        protected BaseWindowsService()
         {
             Name = GetType().Name;
         }
 
-        public BaseWindowsService(string name)
+        protected BaseWindowsService(string name)
         {
             Name = name;
         }
@@ -42,6 +42,8 @@ namespace ZeroLevel.Services.Applications
         public abstract void PauseAction();
 
         public abstract void ResumeAction();
+
+        public abstract void DisposeResources();
 
         #endregion IZeroService
 

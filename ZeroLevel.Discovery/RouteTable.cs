@@ -6,7 +6,6 @@ using System.Linq;
 using System.Threading;
 using ZeroLevel.Models;
 using ZeroLevel.Network;
-using ZeroLevel.Network.Microservices;
 
 namespace ZeroLevel.Discovery
 {
@@ -98,7 +97,8 @@ namespace ZeroLevel.Discovery
             {
                 using (var client = ExchangeTransportFactory.GetClient(protocol, endpoint))
                 {
-                    return client.Status == Services.Network.ZTransportStatus.Working;
+                    client.ForceConnect();
+                    return client.Status == ZTransportStatus.Working;
                 }
             }
             catch (Exception ex)
@@ -190,7 +190,7 @@ namespace ZeroLevel.Discovery
                             Endpoint = serviceInfo.Endpoint,
                             Protocol = serviceInfo.Protocol
                         });
-                        Log.SystemInfo($"The service '{serviceInfo.ServiceKey}' registered on protocol {serviceInfo.Protocol}, endpoint: {serviceInfo.Endpoint}");
+                        Log.Info($"The service '{serviceInfo.ServiceKey}' registered on protocol {serviceInfo.Protocol}, endpoint: {serviceInfo.Endpoint}");
                     }
                     else
                     {

@@ -7,7 +7,7 @@ using ZeroLevel.Services.Applications;
 
 namespace ZeroLevel
 {
-    public class Bootstrap
+    public static class Bootstrap
     {
         static Bootstrap()
         {
@@ -78,6 +78,7 @@ namespace ZeroLevel
         public static void Startup<T>(string[] args, Func<bool> preStartConfiguration = null, Func<bool> postStartConfiguration = null)
             where T : IZeroService, new()
         {
+            IZeroService service = null;
             var cmd = Configuration.ReadFromCommandLine(args);
             if (cmd.Contains("install", "setup"))
             {
@@ -90,8 +91,7 @@ namespace ZeroLevel
             else
             {
                 Configuration.Save(Configuration.ReadFromApplicationConfig());
-                Log.CreateLoggingFromConfiguration(Configuration.Default);
-                IZeroService service = null;
+                Log.CreateLoggingFromConfiguration(Configuration.Default);                
                 if (preStartConfiguration != null)
                 {
                     try
@@ -159,9 +159,10 @@ namespace ZeroLevel
                     }
                 }
             }
-            try { Sheduller.Dispose(); } catch { }
-            try { Log.Dispose(); } catch { }
-            try { Injector.Default.Dispose(); Injector.Dispose(); } catch { }
+            try { Sheduller.Dispose(); } catch (Exception ex) { Log.Error(ex, "Dispose default sheduller error"); }
+            try { Log.Dispose(); } catch (Exception ex) { Log.Error(ex, "Dispose log error"); }
+            try { Injector.Default.Dispose(); Injector.Dispose(); } catch (Exception ex) { Log.Error(ex, "Dispose DI containers error"); }
+            try { service?.DisposeResources(); } catch (Exception ex) { Log.Error(ex, "Dispose service error"); }
         }
     }
 }

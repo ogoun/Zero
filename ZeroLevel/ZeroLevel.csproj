@@ -57,11 +57,14 @@
     <Compile Include="Models\IEntity.cs" />
     <Compile Include="Models\InvokeResult.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Services\Application\BaseWindowsExService.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Services\Application\BaseWindowsService.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Services\Application\BasicServiceInstaller.cs" />
-    <Compile Include="Services\Application\BusinessApplication.cs" />
+    <Compile Include="Services\Application\Bootstrap.cs" />
     <Compile Include="Services\Application\IZeroService.cs" />
     <Compile Include="Services\Application\ZeroServiceState.cs" />
     <Compile Include="Services\Async\AsyncConditionVariable.cs" />

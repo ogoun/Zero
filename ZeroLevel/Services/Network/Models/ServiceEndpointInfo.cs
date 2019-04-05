@@ -1,4 +1,5 @@
 ﻿using System;
+using ZeroLevel.Services.Serialization;
 
 namespace ZeroLevel.Network
 {
@@ -6,7 +7,7 @@ namespace ZeroLevel.Network
     /// Endpoint
     /// </summary>
     public class ServiceEndpointInfo :
-        IEquatable<ServiceEndpointInfo>
+        IEquatable<ServiceEndpointInfo>, IBinarySerializable
     {
         public string Endpoint { get; set; }
         public string Protocol { get; set; }
@@ -27,6 +28,18 @@ namespace ZeroLevel.Network
         public override int GetHashCode()
         {
             return Endpoint?.GetHashCode() ?? 0 ^ Protocol?.GetHashCode() ?? 0;
+        }
+
+        public void Serialize(IBinaryWriter writer)
+        {
+            writer.WriteString(this.Protocol);
+            writer.WriteString(this.Endpoint);
+        }
+
+        public void Deserialize(IBinaryReader reader)
+        {
+            this.Protocol = reader.ReadString();
+            this.Endpoint = reader.ReadString();
         }
     }
 }

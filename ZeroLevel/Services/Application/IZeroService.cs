@@ -1,4 +1,6 @@
-﻿namespace ZeroLevel.Services.Applications
+﻿using System;
+
+namespace ZeroLevel.Services.Applications
 {
     public interface IZeroService
     {
@@ -13,5 +15,7 @@
         void ResumeAction();
 
         void InteractiveStart(string[] args);
+
+        void DisposeResources();
     }
 }

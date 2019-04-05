@@ -4,7 +4,7 @@ using System.Net.Http;
 using System.Web.Http;
 using System.Web.Http.Description;
 using ZeroLevel.Models;
-using ZeroLevel.Network.Microservices;
+using ZeroLevel.Network;
 
 namespace ZeroLevel.Discovery
 {
@@ -37,7 +37,7 @@ namespace ZeroLevel.Discovery
         [HttpPost]
         [Route("api/v0/routes")]
         [ResponseType(typeof(InvokeResult))]
-        public HttpResponseMessage AddRoute(HttpRequestMessage request, MicroserviceInfo service)
+        public HttpResponseMessage AddRoute(HttpRequestMessage request, ExServiceInfo service)
         {
             try
             {

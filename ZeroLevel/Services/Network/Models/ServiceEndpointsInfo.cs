@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using ZeroLevel.Services.Serialization;
 
 namespace ZeroLevel.Network
 {
@@ -7,13 +8,12 @@ namespace ZeroLevel.Network
     /// Information about service connection points
     /// </summary>
     public class ServiceEndpointsInfo :
-        IEquatable<ServiceEndpointsInfo>
+        IEquatable<ServiceEndpointsInfo>, IBinarySerializable
     {
         public string ServiceKey { get; set; }
         public string Version { get; set; }
         public string ServiceGroup { get; set; }
         public string ServiceType { get; set; }
-
         public List<ServiceEndpointInfo> Endpoints { get; set; }
 
         public bool Equals(ServiceEndpointsInfo other)
@@ -35,6 +35,24 @@ namespace ZeroLevel.Network
         public override int GetHashCode()
         {
             return ServiceKey?.GetHashCode() ?? 0 ^ Version?.GetHashCode() ?? 0 ^ ServiceGroup?.GetHashCode() ?? 0 ^ ServiceType?.GetHashCode() ?? 0;
+        }
+
+        public void Serialize(IBinaryWriter writer)
+        {
+            writer.WriteString(this.ServiceKey);
+            writer.WriteString(this.Version);
+            writer.WriteString(this.ServiceGroup);
+            writer.WriteString(this.ServiceType);
+            writer.WriteCollection(this.Endpoints);
+        }
+
+        public void Deserialize(IBinaryReader reader)
+        {
+            this.ServiceKey = reader.ReadString();
+            this.Version = reader.ReadString();
+            this.ServiceGroup = reader.ReadString();
+            this.ServiceType = reader.ReadString();
+            this.Endpoints = reader.ReadCollection<ServiceEndpointInfo>();
         }
     }
 }

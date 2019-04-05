@@ -1,10 +1,7 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using ZeroLevel.Models;
 using ZeroLevel.Network;
-using ZeroLevel.Network.Microservices;
 using ZeroLevel.Services.Applications;
-using ZeroLevel.Services.Network;
 
 namespace ZeroLevel.Discovery
 {
@@ -15,6 +12,10 @@ namespace ZeroLevel.Discovery
 
         public DiscoveryService()
             : base("Discovery")
+        {
+        }
+
+        public override void DisposeResources()
         {
         }
 
