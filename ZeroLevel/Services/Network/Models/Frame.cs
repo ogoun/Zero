@@ -6,7 +6,7 @@ using System.Threading;
 using ZeroLevel.Services.Pools;
 using ZeroLevel.Services.Serialization;
 
-namespace ZeroLevel.Services.Network
+namespace ZeroLevel.Network
 {
     [Serializable]
     [DataContract]

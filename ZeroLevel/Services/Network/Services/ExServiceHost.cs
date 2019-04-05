@@ -4,18 +4,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using ZeroLevel.Network;
-using ZeroLevel.Network.Microservices;
-using ZeroLevel.Services.Network;
 
-namespace ZeroLevel.Microservices
+namespace ZeroLevel.Network
 {
     public sealed class ExServiceHost
         : IDisposable
     {
         private class MetaService
         {
-            public MicroserviceInfo ServiceInfo { get; set; }
+            public ExServiceInfo ServiceInfo { get; set; }
             public IExService Server { get; set; }
         }
 
@@ -50,7 +47,7 @@ namespace ZeroLevel.Microservices
                 if (false == _services.TryAdd(key, new MetaService
                 {
                     Server = server,
-                    ServiceInfo = new MicroserviceInfo
+                    ServiceInfo = new ExServiceInfo
                     {
                         Endpoint = $"{server.Endpoint.Address}:{server.Endpoint.Port}",
                         Protocol = service.Protocol,
@@ -76,7 +73,7 @@ namespace ZeroLevel.Microservices
             }
         }
 
-        public IExService RegisterService(MicroserviceInfo serviceInfo)
+        public IExService RegisterService(ExServiceInfo serviceInfo)
         {
             try
             {
@@ -94,7 +91,7 @@ namespace ZeroLevel.Microservices
                 if (false == _services.TryAdd(key, new MetaService
                 {
                     Server = server,
-                    ServiceInfo = new MicroserviceInfo
+                    ServiceInfo = new ExServiceInfo
                     {
                         Endpoint = $"{server.Endpoint.Address}:{server.Endpoint.Port}",
                         Protocol = serviceInfo.Protocol,
@@ -131,7 +128,7 @@ namespace ZeroLevel.Microservices
             }
         }
 
-        private void ValidateService(MicroserviceInfo service)
+        private void ValidateService(ExServiceInfo service)
         {
             if (string.IsNullOrWhiteSpace(service.Protocol))
             {

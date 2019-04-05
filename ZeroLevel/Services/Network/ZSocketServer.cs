@@ -5,7 +5,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 
-namespace ZeroLevel.Services.Network
+namespace ZeroLevel.Network
 {
     public abstract class ZSocketServer
         : ZBaseNetwork

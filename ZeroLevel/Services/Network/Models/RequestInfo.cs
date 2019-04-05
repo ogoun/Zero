@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ZeroLevel.Services.Network.Models
+namespace ZeroLevel.Network
 {
     internal sealed class RequestInfo
     {

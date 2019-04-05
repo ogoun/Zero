@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ZeroLevel.Network.Microservices
+namespace ZeroLevel.Network
 {
     /// <summary>
     /// Endpoint

@@ -3,11 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using ZeroLevel.Network;
-using ZeroLevel.Network.Microservices;
-using ZeroLevel.Services.Network;
 
-namespace ZeroLevel.Microservices
+namespace ZeroLevel.Network
 {
     /// <summary>
     /// Provides data exchange between services
@@ -36,7 +33,7 @@ namespace ZeroLevel.Microservices
             return _host.RegisterService(service);
         }
 
-        public IExService RegisterService(MicroserviceInfo service)
+        public IExService RegisterService(ExServiceInfo service)
         {
             return _host.RegisterService(service);
         }

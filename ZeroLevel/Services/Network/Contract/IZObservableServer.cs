@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Net;
 
-namespace ZeroLevel.Services.Network.Contract
+namespace ZeroLevel.Network
 {
     public interface IZObservableServer
         : IDisposable

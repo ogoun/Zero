@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Net;
 using ZeroLevel.Models;
-using ZeroLevel.Services.Network.Contract;
-using ZeroLevel.Services.Network.Services;
 
-namespace ZeroLevel.Services.Network
+namespace ZeroLevel.Network
 {
     internal sealed class ExClient
         : ZBaseNetwork, IExClient, IZBackward

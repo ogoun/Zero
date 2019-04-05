@@ -166,7 +166,7 @@ namespace ZeroLevel.Discovery
             Save();
         }
 
-        public InvokeResult Append(MicroserviceInfo serviceInfo)
+        public InvokeResult Append(ExServiceInfo serviceInfo)
         {
             InvokeResult result = null;
             if (Ping(serviceInfo.Protocol, serviceInfo.Endpoint, serviceInfo.ServiceKey))

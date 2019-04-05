@@ -4,12 +4,10 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
-using ZeroLevel.Services.Network.Contract;
-using ZeroLevel.Services.Network.Models;
 using ZeroLevel.Services.Pools;
 using ZeroLevel.Services.Serialization;
 
-namespace ZeroLevel.Services.Network
+namespace ZeroLevel.Network
 {
     public class ZSocketClient
         : ZBaseNetwork, IZTransport

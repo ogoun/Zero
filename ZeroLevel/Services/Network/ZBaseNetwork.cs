@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ZeroLevel.Services.Network
+namespace ZeroLevel.Network
 {
     public abstract class ZBaseNetwork
         : IDisposable

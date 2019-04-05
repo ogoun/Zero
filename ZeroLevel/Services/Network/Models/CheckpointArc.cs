@@ -1,6 +1,6 @@
 ﻿using System.Runtime.Serialization;
 
-namespace ZeroLevel.Network.Microservices
+namespace ZeroLevel.Network
 {
     [DataContract]
     public sealed class CheckpointArc

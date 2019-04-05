@@ -5,7 +5,7 @@ using System.Net.Sockets;
 using System.Threading;
 using ZeroLevel.Services.Serialization;
 
-namespace ZeroLevel.Services.Network
+namespace ZeroLevel.Network
 {
     internal sealed class ZSocketServerClient
         : ZBaseNetwork, IZBackward, IEquatable<ZSocketServerClient>

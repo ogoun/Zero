@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Net;
 
-namespace ZeroLevel.Services.Network
+namespace ZeroLevel.Network
 {
     public interface IExService
         : IDisposable

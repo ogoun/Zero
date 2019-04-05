@@ -1,11 +1,10 @@
 ﻿using System.Collections.Generic;
-using ZeroLevel.Network.Microservices;
 
 namespace ZeroLevel.Network
 {
     public interface IDiscoveryClient
     {
-        bool Register(MicroserviceInfo info);
+        bool Register(ExServiceInfo info);
 
         IEnumerable<ServiceEndpointInfo> GetServiceEndpoints(string serviceKey);
 

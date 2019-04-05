@@ -2,9 +2,6 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Reflection;
-using ZeroLevel.Network.Microservices;
-using ZeroLevel.Services.Network;
-using ZeroLevel.Services.Network.Contract;
 
 namespace ZeroLevel.Network
 {
@@ -64,6 +61,7 @@ namespace ZeroLevel.Network
             }
             throw new NotSupportedException($"Protocol {protocol} not supported");
         }
+
         /// <summary>
         /// Creates a client to access the server using the specified protocol
         /// </summary>

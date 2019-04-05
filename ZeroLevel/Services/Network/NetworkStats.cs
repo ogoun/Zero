@@ -1,4 +1,4 @@
-﻿namespace ZeroLevel.Services.Network
+﻿namespace ZeroLevel.Network
 {/*
     public static class NetworkStats
     {

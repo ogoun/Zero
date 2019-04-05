@@ -4,11 +4,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using ZeroLevel.Models;
-using ZeroLevel.Network;
-using ZeroLevel.Network.Microservices;
 using ZeroLevel.Services.Collections;
 
-namespace ZeroLevel.Services.Network.Microservices
+namespace ZeroLevel.Network
 {
     public class DiscoveryClient
         : IDiscoveryClient
@@ -121,7 +119,7 @@ namespace ZeroLevel.Services.Network.Microservices
             }
         }
 
-        public bool Register(MicroserviceInfo info)
+        public bool Register(ExServiceInfo info)
         {
             _discoveryServerClient.ForceConnect();
             if (_discoveryServerClient.Status == ZTransportStatus.Working)
@@ -129,7 +127,7 @@ namespace ZeroLevel.Services.Network.Microservices
                 bool result = false;
                 try
                 {
-                    _discoveryServerClient.Request<MicroserviceInfo, InvokeResult>("register", info, r =>
+                    _discoveryServerClient.Request<ExServiceInfo, InvokeResult>("register", info, r =>
                     {
                         result = r.Success;
                         if (!result)

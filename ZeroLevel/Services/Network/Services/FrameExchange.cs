@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Net;
 using ZeroLevel.Models;
-using ZeroLevel.Services.Network.Contract;
 
-namespace ZeroLevel.Services.Network.Services
+namespace ZeroLevel.Network
 {
     internal sealed class FrameExchange
         : IDisposable

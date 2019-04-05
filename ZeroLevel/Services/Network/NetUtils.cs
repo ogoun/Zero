@@ -4,7 +4,7 @@ using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 
-namespace ZeroLevel.Services.Network
+namespace ZeroLevel.Network
 {
     public static class NetUtils
     {

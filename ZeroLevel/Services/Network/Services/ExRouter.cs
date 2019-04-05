@@ -6,7 +6,7 @@ using System.Reflection;
 using ZeroLevel.Services.Invokation;
 using ZeroLevel.Services.Serialization;
 
-namespace ZeroLevel.Services.Network.Services
+namespace ZeroLevel.Network
 {
     internal sealed class ExRouter
     {

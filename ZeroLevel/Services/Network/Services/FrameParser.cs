@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using ZeroLevel.Services.Serialization;
 
-namespace ZeroLevel.Services.Network
+namespace ZeroLevel.Network
 {
     public sealed class FrameParser
     {

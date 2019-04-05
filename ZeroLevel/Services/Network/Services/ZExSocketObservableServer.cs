@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Net;
-using ZeroLevel.Services.Network.Contract;
 
-namespace ZeroLevel.Services.Network
+namespace ZeroLevel.Network
 {
     public class ZExSocketObservableServer :
         ZSocketServer, IZObservableServer

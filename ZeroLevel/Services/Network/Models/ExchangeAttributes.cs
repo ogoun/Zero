@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ZeroLevel.Network.Microservices
+namespace ZeroLevel.Network
 {
     [AttributeUsage(AttributeTargets.All, AllowMultiple = false)]
     public abstract class ExchangeAttribute : Attribute { }

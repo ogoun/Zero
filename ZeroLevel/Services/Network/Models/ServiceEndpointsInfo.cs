@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace ZeroLevel.Network.Microservices
+namespace ZeroLevel.Network
 {
     /// <summary>
     /// Information about service connection points

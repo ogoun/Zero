@@ -2,7 +2,7 @@
 using System.Runtime.Serialization;
 using ZeroLevel.Services.Serialization;
 
-namespace ZeroLevel.Network.Microservices
+namespace ZeroLevel.Network
 {
     [DataContract]
     public class Checkpoint :

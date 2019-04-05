@@ -2,12 +2,12 @@
 using System.Runtime.Serialization;
 using ZeroLevel.Services.Serialization;
 
-namespace ZeroLevel.Network.Microservices
+namespace ZeroLevel.Network
 {
     [Serializable]
     [DataContract]
-    public sealed class MicroserviceInfo :
-       IEquatable<MicroserviceInfo>, IBinarySerializable
+    public sealed class ExServiceInfo :
+       IEquatable<ExServiceInfo>, IBinarySerializable
     {
         public const string DEFAULT_GROUP_NAME = "__service_default_group__";
         public const string DEFAULT_TYPE_NAME = "__service_default_type__";
@@ -49,7 +49,7 @@ namespace ZeroLevel.Network.Microservices
         [DataMember]
         public string Version { get; set; }
 
-        public bool Equals(MicroserviceInfo other)
+        public bool Equals(ExServiceInfo other)
         {
             if (other == null) return false;
             if (object.ReferenceEquals(this, other)) return true;

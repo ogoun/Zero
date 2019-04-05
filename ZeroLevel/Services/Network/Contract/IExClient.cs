@@ -2,7 +2,7 @@
 using System.Net;
 using ZeroLevel.Models;
 
-namespace ZeroLevel.Services.Network
+namespace ZeroLevel.Network
 {
     public interface IExClient
         : IDisposable
