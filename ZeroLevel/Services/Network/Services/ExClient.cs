@@ -6,8 +6,8 @@ using ZeroLevel.Services.Network.Services;
 
 namespace ZeroLevel.Services.Network
 {
-    public class ExClient
-        : ZBaseNetwork, IExClient, IZBackward, IDisposable
+    internal sealed class ExClient
+        : ZBaseNetwork, IExClient, IZBackward
     {
         private readonly IZTransport _transport;
         private readonly ExRouter _router;

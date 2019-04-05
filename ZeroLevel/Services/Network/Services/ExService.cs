@@ -5,7 +5,7 @@ using ZeroLevel.Services.Network.Services;
 
 namespace ZeroLevel.Services.Network
 {
-    public class ExService
+    internal sealed class ExService
         : ZBaseNetwork, IExService
     {
         private readonly ExRouter _router;

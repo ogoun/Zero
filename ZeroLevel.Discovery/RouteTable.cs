@@ -4,8 +4,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
-using ZeroLevel.Microservices;
 using ZeroLevel.Models;
+using ZeroLevel.Network;
 using ZeroLevel.Network.Microservices;
 
 namespace ZeroLevel.Discovery

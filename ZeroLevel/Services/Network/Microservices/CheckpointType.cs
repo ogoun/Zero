@@ -1,4 +1,4 @@
-﻿namespace ZeroLevel.Microservices.Model
+﻿namespace ZeroLevel.Network.Microservices
 {
     public enum CheckpointType
     {

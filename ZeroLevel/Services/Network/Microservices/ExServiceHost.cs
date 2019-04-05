@@ -4,19 +4,19 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using ZeroLevel.Microservices.Contracts;
+using ZeroLevel.Network;
 using ZeroLevel.Network.Microservices;
 using ZeroLevel.Services.Network;
 
 namespace ZeroLevel.Microservices
 {
-    internal sealed class ExServiceHost
+    public sealed class ExServiceHost
         : IDisposable
     {
         private class MetaService
         {
             public MicroserviceInfo ServiceInfo { get; set; }
-            public ExService Server { get; set; }
+            public IExService Server { get; set; }
         }
 
         private bool _disposed = false;
@@ -26,13 +26,13 @@ namespace ZeroLevel.Microservices
         private readonly ConcurrentDictionary<string, MetaService> _services
             = new ConcurrentDictionary<string, MetaService>();
 
-        internal ExServiceHost(IDiscoveryClient client)
+        public ExServiceHost(IDiscoveryClient client)
         {
             _discoveryClient = client;
             _registerTaskKey = Sheduller.RemindEvery(TimeSpan.FromMilliseconds(50), TimeSpan.FromSeconds(15), RegisterServicesInDiscovery);
         }
 
-        internal IExService RegisterService(IExchangeService service)
+        public IExService RegisterService(IExchangeService service)
         {
             try
             {
@@ -76,7 +76,7 @@ namespace ZeroLevel.Microservices
             }
         }
 
-        internal IExService RegisterService(MicroserviceInfo serviceInfo)
+        public IExService RegisterService(MicroserviceInfo serviceInfo)
         {
             try
             {

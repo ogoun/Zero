@@ -5,8 +5,13 @@ using ZeroLevel.Models;
 namespace ZeroLevel.Services.Network
 {
     public interface IExClient
+        : IDisposable
     {
         event Action Connected;
+
+        void ForceConnect();
+
+        ZTransportStatus Status { get; }
 
         IPEndPoint Endpoint { get; }
 

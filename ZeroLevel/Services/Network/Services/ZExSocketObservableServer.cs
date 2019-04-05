@@ -14,9 +14,9 @@ namespace ZeroLevel.Services.Network
 
         public IPEndPoint Endpoint => base.LocalEndpoint;
 
-        public event Action<Frame, IZBackward> OnMessage = (f, c) => { };
+        public event Action<Frame, IZBackward> OnMessage = (_, __) => { };
 
-        public event Func<Frame, IZBackward, Frame> OnRequest = (f, c) => null;
+        public event Func<Frame, IZBackward, Frame> OnRequest = (_, __) => null;
 
         protected override void Handle(Frame frame, IZBackward client)
         {

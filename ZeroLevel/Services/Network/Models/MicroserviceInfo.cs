@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Runtime.Serialization;
+using ZeroLevel.Services.Serialization;
 
 namespace ZeroLevel.Network.Microservices
 {
     [Serializable]
     [DataContract]
     public sealed class MicroserviceInfo :
-       IEquatable<MicroserviceInfo>
+       IEquatable<MicroserviceInfo>, IBinarySerializable
     {
         public const string DEFAULT_GROUP_NAME = "__service_default_group__";
         public const string DEFAULT_TYPE_NAME = "__service_default_type__";
@@ -71,6 +72,26 @@ namespace ZeroLevel.Network.Microservices
         public override int GetHashCode()
         {
             return this.ServiceKey.GetHashCode() ^ this.Protocol.GetHashCode() ^ this.Endpoint.GetHashCode();
+        }
+
+        public void Serialize(IBinaryWriter writer)
+        {
+            writer.WriteString(this.ServiceKey);
+            writer.WriteString(this.ServiceGroup);
+            writer.WriteString(this.ServiceType);
+            writer.WriteString(this.Protocol);
+            writer.WriteString(this.Endpoint);
+            writer.WriteString(this.Version);
+        }
+
+        public void Deserialize(IBinaryReader reader)
+        {
+            this.ServiceKey = reader.ReadString();
+            this.ServiceGroup = reader.ReadString();
+            this.ServiceType = reader.ReadString();
+            this.Protocol = reader.ReadString();
+            this.Endpoint = reader.ReadString();
+            this.Version = reader.ReadString();
         }
 
         public override string ToString()

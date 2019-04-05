@@ -6,13 +6,13 @@ using ZeroLevel.Network.Microservices;
 using ZeroLevel.Services.Network;
 using ZeroLevel.Services.Network.Contract;
 
-namespace ZeroLevel.Microservices
+namespace ZeroLevel.Network
 {
-    internal static class ExchangeTransportFactory
+    public static class ExchangeTransportFactory
     {
         private static readonly Dictionary<string, Type> _customServers = new Dictionary<string, Type>();
         private static readonly Dictionary<string, Type> _customClients = new Dictionary<string, Type>();
-        private static readonly ConcurrentDictionary<string, ExClient> _clientInstances = new ConcurrentDictionary<string, ExClient>();
+        private static readonly ConcurrentDictionary<string, IExClient> _clientInstances = new ConcurrentDictionary<string, IExClient>();
 
         /// <summary>
         /// Scanning the specified assembly to find the types that implement the IExchangeServer or IExchangeClient interfaces
@@ -43,12 +43,12 @@ namespace ZeroLevel.Microservices
         /// </summary>
         /// <param name="protocol">Protocol</param>
         /// <returns>Server</returns>
-        internal static ExService GetServer(string protocol)
+        public static IExService GetServer(string protocol, int port = -1)
         {
             ExService instance = null;
             if (protocol.Equals("socket", StringComparison.OrdinalIgnoreCase))
             {
-                instance = new ExService(new ZExSocketObservableServer(new System.Net.IPEndPoint(IPFinder.GetNonLoopbackAddress(), IPFinder.GetFreeTcpPort())));
+                instance = new ExService(new ZExSocketObservableServer(new System.Net.IPEndPoint(NetUtils.GetNonLoopbackAddress(), port == -1 ? NetUtils.GetFreeTcpPort() : port)));
             }
             else
             {
@@ -64,16 +64,15 @@ namespace ZeroLevel.Microservices
             }
             throw new NotSupportedException($"Protocol {protocol} not supported");
         }
-
         /// <summary>
         /// Creates a client to access the server using the specified protocol
         /// </summary>
         /// <param name="protocol">Protocol</param>
         /// <param name="endpoint">Server endpoint</param>
         /// <returns>Client</returns>
-        internal static ExClient GetClient(string protocol, string endpoint)
+        public static IExClient GetClientWithCache(string protocol, string endpoint)
         {
-            ExClient instance = null;
+            IExClient instance = null;
             var cachee_key = $"{protocol}:{endpoint}";
             if (_clientInstances.ContainsKey(cachee_key))
             {
@@ -86,9 +85,17 @@ namespace ZeroLevel.Microservices
                 instance.Dispose();
                 instance = null;
             }
+            instance = GetClient(protocol, endpoint);
+            _clientInstances[cachee_key] = instance;
+            return instance;
+        }
+
+        public static IExClient GetClient(string protocol, string endpoint)
+        {
+            ExClient instance = null;
             if (protocol.Equals("socket", StringComparison.OrdinalIgnoreCase))
             {
-                instance = new ExClient(new ZSocketClient(SocketExtensions.CreateIPEndPoint(endpoint)));
+                instance = new ExClient(new ZSocketClient(NetUtils.CreateIPEndPoint(endpoint)));
             }
             else
             {
@@ -100,7 +107,6 @@ namespace ZeroLevel.Microservices
             }
             if (instance != null)
             {
-                _clientInstances[cachee_key] = instance;
                 return instance;
             }
             throw new NotSupportedException($"Protocol {protocol} not supported");

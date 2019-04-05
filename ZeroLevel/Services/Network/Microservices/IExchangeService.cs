@@ -1,4 +1,4 @@
-﻿namespace ZeroLevel.Microservices.Contracts
+﻿namespace ZeroLevel.Network
 {
     public interface IExchangeService
     {

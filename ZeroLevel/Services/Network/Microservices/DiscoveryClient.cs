@@ -3,31 +3,16 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using ZeroLevel.Microservices.Contracts;
 using ZeroLevel.Models;
+using ZeroLevel.Network;
 using ZeroLevel.Network.Microservices;
-using ZeroLevel.ProxyREST;
 using ZeroLevel.Services.Collections;
 
-namespace ZeroLevel.Microservices
+namespace ZeroLevel.Services.Network.Microservices
 {
-    public sealed class WebApiDiscoveryClient :
-        BaseProxy, IDiscoveryClient
+    public class DiscoveryClient
+        : IDiscoveryClient
     {
-        #region WebAPI
-
-        private IEnumerable<ServiceEndpointsInfo> GetRecords()
-        {
-            return GET<IEnumerable<ServiceEndpointsInfo>>("api/v0/routes");
-        }
-
-        public InvokeResult Post(MicroserviceInfo info)
-        {
-            return POST<InvokeResult>("api/v0/routes", info);
-        }
-
-        #endregion WebAPI
-
         private readonly ConcurrentDictionary<string, RoundRobinCollection<ServiceEndpointInfo>> _tableByKey =
             new ConcurrentDictionary<string, RoundRobinCollection<ServiceEndpointInfo>>();
 
@@ -38,10 +23,11 @@ namespace ZeroLevel.Microservices
             new ConcurrentDictionary<string, RoundRobinCollection<ServiceEndpointInfo>>();
 
         private ReaderWriterLockSlim _lock = new ReaderWriterLockSlim();
+        private readonly IExClient _discoveryServerClient;
 
-        public WebApiDiscoveryClient(string url)
-            : base(url)
+        public DiscoveryClient(string protocol, string endpoint)
         {
+            _discoveryServerClient = ExchangeTransportFactory.GetClient(protocol, endpoint);
             UpdateServiceListInfo();
             Sheduller.RemindEvery(TimeSpan.FromSeconds(30), UpdateServiceListInfo);
         }
@@ -79,63 +65,89 @@ namespace ZeroLevel.Microservices
 
         private void UpdateServiceListInfo()
         {
-            IEnumerable<ServiceEndpointsInfo> records;
-            try
+            _discoveryServerClient.ForceConnect();
+            if (_discoveryServerClient.Status == ZTransportStatus.Working)
             {
-                records = GetRecords();
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "[WebApiDiscoveryClient] Update service list error, discrovery service response is absent");
-                return;
-            }
-            if (records == null)
-            {
-                Log.Warning("[WebApiDiscoveryClient] Update service list canceled, discrovery response is empty");
-                return;
-            }
-            _lock.EnterWriteLock();
-            try
-            {
-                _tableByGroups.Clear();
-                _tableByTypes.Clear();
-                var keysToRemove = new List<string>(_tableByKey.Keys);
-                foreach (var info in records)
+                IEnumerable<ServiceEndpointsInfo> records = null;
+                try
                 {
-                    var key = info.ServiceKey.Trim().ToLowerInvariant();
-                    UpdateOrAddRecord(key, info);
-                    keysToRemove.Remove(key);
+                    var ir = _discoveryServerClient.Request<IEnumerable<ServiceEndpointsInfo>>("services", response => records = response);
+                    if (!ir.Success)
+                    {
+                        Log.Warning($"[DiscoveryClient] UpdateServiceListInfo. Error request to inbox 'services'. {ir.Comment}");
+                        return;
+                    }
                 }
-                RoundRobinCollection<ServiceEndpointInfo> removed;
-                foreach (var key in keysToRemove)
+                catch (Exception ex)
                 {
-                    _tableByKey.TryRemove(key, out removed);
-                    removed.Dispose();
+                    Log.Error(ex, "[DiscoveryClient] UpdateServiceListInfo. Discrovery service response is absent");
+                    return;
+                }
+                if (records == null)
+                {
+                    Log.Warning("[DiscoveryClient] UpdateServiceListInfo. Discrovery response is empty");
+                    return;
+                }
+                _lock.EnterWriteLock();
+                try
+                {
+                    _tableByGroups.Clear();
+                    _tableByTypes.Clear();
+                    var keysToRemove = new List<string>(_tableByKey.Keys);
+                    foreach (var info in records)
+                    {
+                        var key = info.ServiceKey.Trim().ToLowerInvariant();
+                        UpdateOrAddRecord(key, info);
+                        keysToRemove.Remove(key);
+                    }
+                    foreach (var key in keysToRemove)
+                    {
+                        _tableByKey.TryRemove(key, out RoundRobinCollection<ServiceEndpointInfo> removed);
+                        removed.Dispose();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex, "[DiscoveryClient] UpdateServiceListInfo. Update local routing table error.");
+                }
+                finally
+                {
+                    _lock.ExitWriteLock();
                 }
             }
-            catch (Exception ex)
+            else
             {
-                Log.Error(ex, "[WebApiDiscoveryClient] Update service list error");
-            }
-            finally
-            {
-                _lock.ExitWriteLock();
+                Log.Warning("[DiscoveryClient] UpdateServiceListInfo. No connection to discovery server");
             }
         }
 
-        public void Register(MicroserviceInfo info)
+        public bool Register(MicroserviceInfo info)
         {
-            try
+            _discoveryServerClient.ForceConnect();
+            if (_discoveryServerClient.Status == ZTransportStatus.Working)
             {
-                var result = Post(info);
-                if (result.Success == false)
+                bool result = false;
+                try
                 {
-                    Log.Warning($"[WebApiDiscoveryClient] Service can't register. Discovery reason: {result.Comment}. Comment: {result.Comment}");
+                    _discoveryServerClient.Request<MicroserviceInfo, InvokeResult>("register", info, r =>
+                    {
+                        result = r.Success;
+                        if (!result)
+                        {
+                            Log.Warning($"[DiscoveryClient] Register canceled. Discovery reason: {r.Comment}. Comment: {r.Comment}");
+                        }
+                    });
                 }
+                catch (Exception ex)
+                {
+                    Log.Error(ex, "[DiscoveryClient] Register fault");
+                }
+                return result;
             }
-            catch (Exception ex)
+            else
             {
-                Log.Error(ex, "[WebApiDiscoveryClient] Fault register");
+                Log.Warning("[DiscoveryClient] Register. No connection to discovery server");
+                return false;
             }
         }
 

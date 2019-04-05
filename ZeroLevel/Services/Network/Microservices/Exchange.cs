@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using ZeroLevel.Microservices.Contracts;
+using ZeroLevel.Network;
 using ZeroLevel.Network.Microservices;
 using ZeroLevel.Services.Network;
 
