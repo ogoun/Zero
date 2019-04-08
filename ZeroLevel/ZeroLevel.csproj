@@ -290,6 +290,7 @@
     <Compile Include="Services\Queries\Storage\IStorage.cs" />
     <Compile Include="Services\Queries\Storage\MemoryStorage.cs" />
     <Compile Include="Services\Queries\Storage\QueryResult.cs" />
+    <Compile Include="Services\Reflection\DTOTypeBuilder.cs" />
     <Compile Include="Services\Reflection\ReferenceHelper.cs" />
     <Compile Include="Services\Reflection\StringToTypeConverter.cs" />
     <Compile Include="Services\Reflection\TypeActivator.cs" />
