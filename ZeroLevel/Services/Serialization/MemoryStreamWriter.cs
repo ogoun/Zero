@@ -93,6 +93,11 @@ namespace ZeroLevel.Services.Serialization
             _stream.Write(BitConverter.GetBytes(val), 0, 8);
         }
 
+        public void WriteFloat(float val)
+        {
+            _stream.Write(BitConverter.GetBytes(val), 0, 4);
+        }
+
         /// <summary>
         /// Write string (4 bytes long + Length bytes)
         /// </summary>
@@ -271,6 +276,18 @@ namespace ZeroLevel.Services.Serialization
             }
         }
 
+        public void WriteCollection(IEnumerable<float> collection)
+        {
+            WriteInt32(collection?.Count() ?? 0);
+            if (collection != null)
+            {
+                foreach (var item in collection)
+                {
+                    WriteFloat(item);
+                }
+            }
+        }
+
         public void WriteCollection(IEnumerable<Double> collection)
         {
             WriteInt32(collection?.Count() ?? 0);
@@ -322,6 +339,30 @@ namespace ZeroLevel.Services.Serialization
         public void WriteCompatible<T>(T item)
         {
             WriteBytes(MessageSerializer.SerializeCompatible(item));
+        }
+
+        public void WriteCollection(IEnumerable<decimal> collection)
+        {
+            WriteInt32(collection?.Count() ?? 0);
+            if (collection != null)
+            {
+                foreach (var item in collection)
+                {
+                    WriteDecimal(item);
+                }
+            }
+        }
+
+        public void WriteCollection(IEnumerable<TimeSpan> collection)
+        {
+            WriteInt32(collection?.Count() ?? 0);
+            if (collection != null)
+            {
+                foreach (var item in collection)
+                {
+                    WriteTimeSpan(item);
+                }
+            }
         }
 
         #endregion Extension

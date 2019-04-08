@@ -14,7 +14,7 @@ namespace ZeroLevel.Network
         public string Version { get; set; }
         public string ServiceGroup { get; set; }
         public string ServiceType { get; set; }
-        public List<ServiceEndpointInfo> Endpoints { get; set; }
+        public List<string> Endpoints { get; set; }
 
         public bool Equals(ServiceEndpointsInfo other)
         {
@@ -23,7 +23,7 @@ namespace ZeroLevel.Network
             if (string.Compare(this.Version, other.Version, true) != 0) return false;
             if (string.Compare(this.ServiceGroup, other.ServiceGroup, true) != 0) return false;
             if (string.Compare(this.ServiceType, other.ServiceType, true) != 0) return false;
-            if (false == CollectionComparsionExtensions.OrderingEquals(this.Endpoints, other.Endpoints, (a, b) => a.Equals(b))) return false;
+            if (!CollectionComparsionExtensions.NoOrderingEquals(this.Endpoints, other.Endpoints, (a, b) => a.Equals(b))) return false;
             return true;
         }
 
@@ -52,7 +52,7 @@ namespace ZeroLevel.Network
             this.Version = reader.ReadString();
             this.ServiceGroup = reader.ReadString();
             this.ServiceType = reader.ReadString();
-            this.Endpoints = reader.ReadCollection<ServiceEndpointInfo>();
+            this.Endpoints = reader.ReadStringCollection();
         }
     }
 }

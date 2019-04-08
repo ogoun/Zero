@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -8,57 +7,134 @@ using ZeroLevel.Services.Collections;
 
 namespace ZeroLevel.Network
 {
+    internal sealed class DCRouter
+    {
+        private ReaderWriterLockSlim _lock = new ReaderWriterLockSlim();
+        private IEnumerable<ServiceEndpointInfo> _empty = Enumerable.Empty<ServiceEndpointInfo>();
+        private List<ServiceEndpointInfo> _services = new List<ServiceEndpointInfo>();
+
+        private Dictionary<string, RoundRobinOverCollection<ServiceEndpointInfo>> _tableByKey;
+        private Dictionary<string, RoundRobinOverCollection<ServiceEndpointInfo>> _tableByGroups;
+        private Dictionary<string, RoundRobinOverCollection<ServiceEndpointInfo>> _tableByTypes;
+
+        internal void Update(IEnumerable<ServiceEndpointsInfo> records)
+        {
+            if (records == null)
+            {
+                Log.Warning("[DiscoveryClient] UpdateServiceListInfo. Discrovery response is empty");
+                return;
+            }
+            var services = new List<ServiceEndpointInfo>();
+            foreach (var service in records)
+            {
+                var key = service.ServiceKey.ToUpperInvariant();
+                var type = service.ServiceType.ToUpperInvariant();
+                var group = service.ServiceGroup.ToUpperInvariant();
+                services.AddRange(service.Endpoints.Select(e => new ServiceEndpointInfo { Endpoint = e, Group = group, Key = key, Type = type }));
+            }
+            _lock.EnterWriteLock();
+            try
+            {
+                _services = services;
+                _tableByKey = _services.GroupBy(r => r.Key).ToDictionary(g => g.Key, g => new RoundRobinOverCollection<ServiceEndpointInfo>(g));
+                _tableByTypes = _services.GroupBy(r => r.Type).ToDictionary(g => g.Key, g => new RoundRobinOverCollection<ServiceEndpointInfo>(g));
+                _tableByGroups = _services.GroupBy(r => r.Group).ToDictionary(g => g.Key, g => new RoundRobinOverCollection<ServiceEndpointInfo>(g));
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "[DiscoveryClient] UpdateServiceListInfo. Update local routing table error.");
+            }
+            finally
+            {
+                _lock.ExitWriteLock();
+            }
+        }
+
+        public ServiceEndpointInfo GetService(string serviceKey, string endpoint)
+        {
+            var key = serviceKey.ToUpperInvariant();
+            _lock.EnterReadLock();
+            try
+            {
+                if (_tableByKey.ContainsKey(key) && !_tableByKey[key].IsEmpty)
+                {
+                    return _tableByKey[key].Find(s => s.Endpoint.Equals(endpoint, StringComparison.OrdinalIgnoreCase)).FirstOrDefault();
+                }
+            }
+            finally
+            {
+                _lock.ExitReadLock();
+            }
+            return null;
+        }
+
+        public IEnumerable<ServiceEndpointInfo> GetServiceEndpoints(string serviceKey)
+        {
+            var key = serviceKey.Trim().ToLowerInvariant();
+            _lock.EnterReadLock();
+            try
+            {
+                if (_tableByKey.ContainsKey(key) && !_tableByKey[key].IsEmpty)
+                {
+                    return _tableByKey[key].GenerateSeq();
+                }
+            }
+            finally
+            {
+                _lock.ExitReadLock();
+            }
+            return _empty;
+        }
+
+        public IEnumerable<ServiceEndpointInfo> GetServiceEndpointsByGroup(string serviceGroup)
+        {
+            var group = serviceGroup.Trim().ToLowerInvariant();
+            _lock.EnterReadLock();
+            try
+            {
+                if (_tableByGroups.ContainsKey(group) && !_tableByGroups[group].IsEmpty)
+                {
+                    return _tableByGroups[group].GenerateSeq();
+                }
+            }
+            finally
+            {
+                _lock.ExitReadLock();
+            }
+            return _empty;
+        }
+
+        public IEnumerable<ServiceEndpointInfo> GetServiceEndpointsByType(string serviceType)
+        {
+            var type = serviceType.Trim().ToLowerInvariant();
+            _lock.EnterReadLock();
+            try
+            {
+                if (_tableByTypes.ContainsKey(type) && !_tableByTypes[type].IsEmpty)
+                {
+                    return _tableByTypes[type].GenerateSeq();
+                }
+            }
+            finally
+            {
+                _lock.ExitReadLock();
+            }
+            return _empty;
+        }
+    }
+
+
     public class DiscoveryClient
         : IDiscoveryClient
     {
-        private readonly ConcurrentDictionary<string, RoundRobinCollection<ServiceEndpointInfo>> _tableByKey =
-            new ConcurrentDictionary<string, RoundRobinCollection<ServiceEndpointInfo>>();
-
-        private readonly ConcurrentDictionary<string, RoundRobinCollection<ServiceEndpointInfo>> _tableByGroups =
-            new ConcurrentDictionary<string, RoundRobinCollection<ServiceEndpointInfo>>();
-
-        private readonly ConcurrentDictionary<string, RoundRobinCollection<ServiceEndpointInfo>> _tableByTypes =
-            new ConcurrentDictionary<string, RoundRobinCollection<ServiceEndpointInfo>>();
-
-        private ReaderWriterLockSlim _lock = new ReaderWriterLockSlim();
+        private readonly DCRouter _router = new DCRouter();
         private readonly IExClient _discoveryServerClient;
 
-        public DiscoveryClient(string protocol, string endpoint)
+        public DiscoveryClient(string endpoint)
         {
-            _discoveryServerClient = ExchangeTransportFactory.GetClient(protocol, endpoint);
+            _discoveryServerClient = ExchangeTransportFactory.GetClient(endpoint);
             UpdateServiceListInfo();
             Sheduller.RemindEvery(TimeSpan.FromSeconds(30), UpdateServiceListInfo);
-        }
-
-        private void UpdateOrAddRecord(string key, ServiceEndpointsInfo info)
-        {
-            var groupName = info.ServiceGroup.ToLowerInvariant();
-            var typeName = info.ServiceType.ToLowerInvariant();
-            if (_tableByKey.ContainsKey(key) == false)
-            {
-                _tableByKey.TryAdd(key, new RoundRobinCollection<ServiceEndpointInfo>());
-            }
-            else
-            {
-                _tableByKey[key].Clear();
-            }
-            if (_tableByGroups.ContainsKey(groupName) == false)
-            {
-                _tableByGroups.TryAdd(groupName, new RoundRobinCollection<ServiceEndpointInfo>());
-            }
-            if (_tableByTypes.ContainsKey(typeName) == false)
-            {
-                _tableByTypes.TryAdd(typeName, new RoundRobinCollection<ServiceEndpointInfo>());
-            }
-            foreach (var e in info.Endpoints)
-            {
-                if (false == _tableByKey[key].Contains(e))
-                {
-                    _tableByKey[key].Add(e);
-                    _tableByGroups[groupName].Add(e);
-                    _tableByTypes[typeName].Add(e);
-                }
-            }
         }
 
         private void UpdateServiceListInfo()
@@ -68,50 +144,15 @@ namespace ZeroLevel.Network
             {
                 try
                 {
-                    var ir = _discoveryServerClient.Request<IEnumerable<ServiceEndpointsInfo>>("services", records => 
-                    {
-                        if (records == null)
-                        {
-                            Log.Warning("[DiscoveryClient] UpdateServiceListInfo. Discrovery response is empty");
-                            return;
-                        }
-                        _lock.EnterWriteLock();
-                        try
-                        {
-                            _tableByGroups.Clear();
-                            _tableByTypes.Clear();
-                            var keysToRemove = new List<string>(_tableByKey.Keys);
-                            foreach (var info in records)
-                            {
-                                var key = info.ServiceKey.Trim().ToLowerInvariant();
-                                UpdateOrAddRecord(key, info);
-                                keysToRemove.Remove(key);
-                            }
-                            foreach (var key in keysToRemove)
-                            {
-                                _tableByKey.TryRemove(key, out RoundRobinCollection<ServiceEndpointInfo> removed);
-                                removed.Dispose();
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            Log.Error(ex, "[DiscoveryClient] UpdateServiceListInfo. Update local routing table error.");
-                        }
-                        finally
-                        {
-                            _lock.ExitWriteLock();
-                        }
-                    });
+                    var ir = _discoveryServerClient.Request<IEnumerable<ServiceEndpointsInfo>>("services", records => _router.Update(records));
                     if (!ir.Success)
                     {
                         Log.Warning($"[DiscoveryClient] UpdateServiceListInfo. Error request to inbox 'services'. {ir.Comment}");
-                        return;
                     }
                 }
                 catch (Exception ex)
                 {
                     Log.Error(ex, "[DiscoveryClient] UpdateServiceListInfo. Discrovery service response is absent");
-                    return;
                 }
             }
             else
@@ -150,44 +191,9 @@ namespace ZeroLevel.Network
             }
         }
 
-        public ServiceEndpointInfo GetService(string serviceKey, string endpoint)
-        {
-            var key = serviceKey.Trim().ToLowerInvariant();
-            if (_tableByKey.ContainsKey(key) && _tableByKey[key].MoveNext())
-            {
-                return _tableByKey[key].Find(s => s.Endpoint.Equals(endpoint, StringComparison.OrdinalIgnoreCase)).FirstOrDefault();
-            }
-            return null;
-        }
-
-        public IEnumerable<ServiceEndpointInfo> GetServiceEndpoints(string serviceKey)
-        {
-            var key = serviceKey.Trim().ToLowerInvariant();
-            if (_tableByKey.ContainsKey(key) && _tableByKey[key].MoveNext())
-            {
-                return _tableByKey[key].GetCurrentSeq();
-            }
-            return Enumerable.Empty<ServiceEndpointInfo>();
-        }
-
-        public IEnumerable<ServiceEndpointInfo> GetServiceEndpointsByGroup(string serviceGroup)
-        {
-            var group = serviceGroup.Trim().ToLowerInvariant();
-            if (_tableByGroups.ContainsKey(group) && _tableByGroups[group].MoveNext())
-            {
-                return _tableByGroups[group].GetCurrentSeq();
-            }
-            return Enumerable.Empty<ServiceEndpointInfo>();
-        }
-
-        public IEnumerable<ServiceEndpointInfo> GetServiceEndpointsByType(string serviceType)
-        {
-            var type = serviceType.Trim().ToLowerInvariant();
-            if (_tableByTypes.ContainsKey(type) && _tableByTypes[type].MoveNext())
-            {
-                return _tableByTypes[type].GetCurrentSeq();
-            }
-            return Enumerable.Empty<ServiceEndpointInfo>();
-        }
+        public IEnumerable<ServiceEndpointInfo> GetServiceEndpoints(string serviceKey) => _router.GetServiceEndpoints(serviceKey);
+        public IEnumerable<ServiceEndpointInfo> GetServiceEndpointsByGroup(string serviceGroup) => _router.GetServiceEndpointsByGroup(serviceGroup);
+        public IEnumerable<ServiceEndpointInfo> GetServiceEndpointsByType(string serviceType) => _router.GetServiceEndpointsByType(serviceType);
+        public ServiceEndpointInfo GetService(string serviceKey, string endpoint) => _router.GetService(serviceKey, endpoint);
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
@@ -42,7 +43,7 @@ namespace ZeroLevel.Network
             _parser = new FrameParser();
             _parser.OnIncomingFrame += _parser_OnIncomingFrame;
 
-            _status = ZTransportStatus.Working;
+            Working();
 
             _sendThread = new Thread(SendFramesJob);
             _sendThread.IsBackground = true;
@@ -53,7 +54,7 @@ namespace ZeroLevel.Network
 
         public void SendBackward(Frame frame)
         {
-            if (frame != null && _status == ZTransportStatus.Working && false == _send_queue.IsCompleted && false == _send_queue.IsAddingCompleted)
+            if (frame != null && Status == ZTransportStatus.Working && false == _send_queue.IsCompleted && false == _send_queue.IsAddingCompleted)
             {
                 var data = MessageSerializer.Serialize(frame);
                 try
@@ -74,7 +75,7 @@ namespace ZeroLevel.Network
         private void SendFramesJob()
         {
             byte[] data;
-            while (_status == ZTransportStatus.Working)
+            while (Status == ZTransportStatus.Working)
             {
                 if (_send_queue.IsCompleted)
                 {
@@ -95,7 +96,7 @@ namespace ZeroLevel.Network
                 catch (Exception ex)
                 {
                     Log.SystemError(ex, $"[ZSocketServerClient] Backward send error.");
-                    _status = ZTransportStatus.Broken;
+                    Broken();
                     RizeConnectionBrokenEvent();
                 }
             }
@@ -111,7 +112,7 @@ namespace ZeroLevel.Network
                     _parser.Push(_buffer, 0, count);
                     _last_rw_time = DateTime.UtcNow.Ticks;
                 }
-                if (_status == ZTransportStatus.Working)
+                if (Status == ZTransportStatus.Working)
                 {
                     _stream.BeginRead(_buffer, 0, DEFAULT_RECEIVE_BUFFER_SIZE, ReceiveAsyncCallback, null);
                 }
@@ -123,7 +124,7 @@ namespace ZeroLevel.Network
             catch (Exception ex)
             {
                 Log.SystemError(ex, $"[ZSocketServerClient] Error read data");
-                _status = ZTransportStatus.Broken;
+                Broken();
                 RizeConnectionBrokenEvent();
             }
         }
@@ -140,7 +141,7 @@ namespace ZeroLevel.Network
                 Frame response;
                 try
                 {
-                    response = _requestor(frame, this);
+                    response = _requestor?.Invoke(frame, this);
                 }
                 catch (Exception ex)
                 {
@@ -160,7 +161,7 @@ namespace ZeroLevel.Network
             {
                 try
                 {
-                    _handler(frame, this);
+                    _handler?.Invoke(frame, this);
                 }
                 catch (Exception ex)
                 {
@@ -175,11 +176,11 @@ namespace ZeroLevel.Network
 
         public override void Dispose()
         {
-            if (_status == ZTransportStatus.Disposed)
+            if (Status == ZTransportStatus.Disposed)
             {
                 return;
             }
-            _status = ZTransportStatus.Disposed;
+            Disposed();
 
             _send_queue.CompleteAdding();
             _send_queue.Dispose();

@@ -81,7 +81,7 @@ namespace ZeroLevel.Network
 
         private void BeginAcceptCallback(IAsyncResult ar)
         {
-            if (_status == ZTransportStatus.Working)
+            if (Status == ZTransportStatus.Working)
             {
                 try
                 {
@@ -95,7 +95,7 @@ namespace ZeroLevel.Network
                 }
                 catch (Exception ex)
                 {
-                    _status = ZTransportStatus.Broken;
+                    Broken();
                     Log.SystemError(ex, $"[ZSocketServer] Error with connect accepting");
                 }
                 finally
@@ -130,7 +130,7 @@ namespace ZeroLevel.Network
             _serverSocket.Bind(endpoint);
             _serverSocket.Listen(100);
             _heartbeat_task = Sheduller.RemindEvery(TimeSpan.FromMilliseconds(HEARTBEAT_UPDATE_PERIOD_MS), Heartbeat);
-            _status = ZTransportStatus.Working;
+            Working();
             _serverSocket.BeginAccept(BeginAcceptCallback, null);
         }
 
@@ -140,12 +140,12 @@ namespace ZeroLevel.Network
 
         public override void Dispose()
         {
-            if (_status == ZTransportStatus.Disposed)
+            if (Status == ZTransportStatus.Disposed)
             {
                 return;
             }
             Sheduller.Remove(_heartbeat_task);
-            _status = ZTransportStatus.Disposed;
+            Disposed();
             _serverSocket.Close();
             _serverSocket.Dispose();
             try

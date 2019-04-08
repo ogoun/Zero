@@ -36,21 +36,17 @@ namespace ZeroLevel.Network
                 if (_disposed) throw new ObjectDisposedException("ExServiceHost");
                 if (service == null) throw new ArgumentNullException(nameof(service));
                 ValidateService(service);
-
-                var key = $"{service.Key}.{service.Protocol}";
-                if (_services.ContainsKey(key))
+                if (_services.ContainsKey(service.Key))
                 {
-                    throw new Exception($"[ExServiceHost] Service {key} already registered");
+                    throw new Exception($"[ExServiceHost] Service {service.Key} already registered");
                 }
-
-                var server = ExchangeTransportFactory.GetServer(service.Protocol);
-                if (false == _services.TryAdd(key, new MetaService
+                var server = ExchangeTransportFactory.GetServer();
+                if (false == _services.TryAdd(service.Key, new MetaService
                 {
                     Server = server,
                     ServiceInfo = new ExServiceInfo
                     {
                         Endpoint = $"{server.Endpoint.Address}:{server.Endpoint.Port}",
-                        Protocol = service.Protocol,
                         ServiceKey = service.Key,
                         Version = service.Version,
                         ServiceGroup = service.Group,
@@ -81,20 +77,18 @@ namespace ZeroLevel.Network
                 if (serviceInfo == null) throw new ArgumentNullException(nameof(serviceInfo));
                 ValidateService(serviceInfo);
 
-                var key = $"{serviceInfo.ServiceKey}.{serviceInfo.Protocol}";
-                if (_services.ContainsKey(key))
+                if (_services.ContainsKey(serviceInfo.ServiceKey))
                 {
-                    throw new Exception($"[ExServiceHost] Service {key} already registered");
+                    throw new Exception($"[ExServiceHost] Service {serviceInfo.ServiceKey} already registered");
                 }
 
-                var server = ExchangeTransportFactory.GetServer(serviceInfo.Protocol);
-                if (false == _services.TryAdd(key, new MetaService
+                var server = ExchangeTransportFactory.GetServer();
+                if (false == _services.TryAdd(serviceInfo.ServiceKey, new MetaService
                 {
                     Server = server,
                     ServiceInfo = new ExServiceInfo
                     {
                         Endpoint = $"{server.Endpoint.Address}:{server.Endpoint.Port}",
-                        Protocol = serviceInfo.Protocol,
                         ServiceKey = serviceInfo.ServiceKey,
                         Version = serviceInfo.Version,
                         ServiceGroup = serviceInfo.ServiceGroup,
@@ -118,10 +112,6 @@ namespace ZeroLevel.Network
 
         private void ValidateService(IExchangeService service)
         {
-            if (string.IsNullOrWhiteSpace(service.Protocol))
-            {
-                throw new ArgumentNullException("Service.Protocol");
-            }
             if (string.IsNullOrWhiteSpace(service.Key))
             {
                 throw new ArgumentNullException("Service.Key");
@@ -130,10 +120,6 @@ namespace ZeroLevel.Network
 
         private void ValidateService(ExServiceInfo service)
         {
-            if (string.IsNullOrWhiteSpace(service.Protocol))
-            {
-                throw new ArgumentNullException("Service.Protocol");
-            }
             if (string.IsNullOrWhiteSpace(service.ServiceKey))
             {
                 throw new ArgumentNullException("ServiceKey");
@@ -163,47 +149,47 @@ namespace ZeroLevel.Network
                         {
                             var firstArgType = mi.GetParameters().First().ParameterType;
                             MethodInfo genericMethod = registerHandler.MakeGenericMethod(firstArgType);
-                            genericMethod.Invoke(this, new object[] { service.Protocol, ZBaseNetwork.DEFAULT_MESSAGE_INBOX, CreateDelegate(mi, service) });
+                            genericMethod.Invoke(this, new object[] { ZBaseNetwork.DEFAULT_MESSAGE_INBOX, CreateDelegate(mi, service) });
                         }
                         else if (attr.GetType() == typeof(ExchangeHandlerAttribute))
                         {
                             var firstArgType = mi.GetParameters().First().ParameterType;
                             MethodInfo genericMethod = registerHandler.MakeGenericMethod(firstArgType);
-                            genericMethod.Invoke(this, new object[] { service.Protocol, (attr as ExchangeHandlerAttribute).Inbox, CreateDelegate(mi, service) });
+                            genericMethod.Invoke(this, new object[] { (attr as ExchangeHandlerAttribute).Inbox, CreateDelegate(mi, service) });
                         }
                         else if (attr.GetType() == typeof(ExchangeMainReplierAttribute))
                         {
                             var returnType = mi.ReturnType;
                             var firstArgType = mi.GetParameters().First().ParameterType;
                             MethodInfo genericMethod = registerReplier.MakeGenericMethod(firstArgType, returnType);
-                            genericMethod.Invoke(this, new object[] { service.Protocol, ZBaseNetwork.DEFAULT_REQUEST_INBOX, CreateDelegate(mi, service) });
+                            genericMethod.Invoke(this, new object[] { ZBaseNetwork.DEFAULT_REQUEST_INBOX, CreateDelegate(mi, service) });
                         }
                         else if (attr.GetType() == typeof(ExchangeReplierAttribute))
                         {
                             var returnType = mi.ReturnType;
                             var firstArgType = mi.GetParameters().First().ParameterType;
                             MethodInfo genericMethod = registerReplier.MakeGenericMethod(firstArgType, returnType);
-                            genericMethod.Invoke(this, new object[] { service.Protocol, (attr as ExchangeReplierAttribute).Inbox, CreateDelegate(mi, service) });
+                            genericMethod.Invoke(this, new object[] { (attr as ExchangeReplierAttribute).Inbox, CreateDelegate(mi, service) });
                         }
                         else if (attr.GetType() == typeof(ExchangeMainReplierWithoutArgAttribute))
                         {
                             var returnType = mi.ReturnType;
                             var firstArgType = mi.GetParameters().First().ParameterType;
                             MethodInfo genericMethod = registerReplierWithNoRequestBody.MakeGenericMethod(returnType);
-                            genericMethod.Invoke(this, new object[] { service.Protocol, ZBaseNetwork.DEFAULT_REQUEST_INBOX, CreateDelegate(mi, service) });
+                            genericMethod.Invoke(this, new object[] { ZBaseNetwork.DEFAULT_REQUEST_INBOX, CreateDelegate(mi, service) });
                         }
                         else if (attr.GetType() == typeof(ExchangeReplierWithoutArgAttribute))
                         {
                             var returnType = mi.ReturnType;
                             var firstArgType = mi.GetParameters().First().ParameterType;
                             MethodInfo genericMethod = registerReplierWithNoRequestBody.MakeGenericMethod(returnType);
-                            genericMethod.Invoke(this, new object[] { service.Protocol, (attr as ExchangeReplierAttribute).Inbox, CreateDelegate(mi, service) });
+                            genericMethod.Invoke(this, new object[] { (attr as ExchangeReplierAttribute).Inbox, CreateDelegate(mi, service) });
                         }
                     }
                 }
                 catch (Exception ex)
                 {
-                    Log.Debug($"[ZExchange] Can't register method {mi.Name} as inbox handler. {ex.ToString()}");
+                    Log.Debug($"[ZExchange] Can't register method {mi.Name} as inbox handler. {ex}");
                 }
             }
         }
@@ -265,7 +251,7 @@ namespace ZeroLevel.Network
             }
             catch (Exception ex)
             {
-                Log.SystemError(ex, $"[Exchange] Register inbox handler error. Protocol '{meta.ServiceInfo.Protocol}'. Inbox '{inbox}'. Service '{meta.ServiceInfo.ServiceKey}'");
+                Log.SystemError(ex, $"[Exchange] Register inbox handler error. Inbox '{inbox}'. Service '{meta.ServiceInfo.ServiceKey}'");
             }
         }
 
@@ -286,7 +272,7 @@ namespace ZeroLevel.Network
             }
             catch (Exception ex)
             {
-                Log.SystemError(ex, $"[Exchange] Register inbox replier error. Protocol '{meta.ServiceInfo.Protocol}'. Inbox '{inbox}'. Service '{meta.ServiceInfo.ServiceKey}'");
+                Log.SystemError(ex, $"[Exchange] Register inbox replier error. Inbox '{inbox}'. Service '{meta.ServiceInfo.ServiceKey}'");
             }
         }
 
@@ -306,7 +292,7 @@ namespace ZeroLevel.Network
             }
             catch (Exception ex)
             {
-                Log.SystemError(ex, $"[Exchange] Register inbox replier error. Protocol '{meta.ServiceInfo.Protocol}'. Inbox '{inbox}'. Service '{meta.ServiceInfo.ServiceKey}'");
+                Log.SystemError(ex, $"[Exchange] Register inbox replier error. Inbox '{inbox}'. Service '{meta.ServiceInfo.ServiceKey}'");
             }
         }
 
@@ -344,11 +330,11 @@ namespace ZeroLevel.Network
                 IExClient transport;
                 try
                 {
-                    transport = ExchangeTransportFactory.GetClient(service.Protocol, service.Endpoint);
+                    transport = ExchangeTransportFactory.GetClient(service.Endpoint);
                 }
                 catch (Exception ex)
                 {
-                    Log.SystemError(ex, "[ExServiceHost] Can't get transport for protocol '{0}', service '{1}'", service.Protocol, serviceKey);
+                    Log.SystemError(ex, $"[ExServiceHost] Can't get transport for service '{serviceKey}'");
                     continue;
                 }
                 try
@@ -389,11 +375,11 @@ namespace ZeroLevel.Network
             IExClient transport;
             try
             {
-                transport = ExchangeTransportFactory.GetClient(candidate.Protocol, candidate.Endpoint);
+                transport = ExchangeTransportFactory.GetClient(candidate.Endpoint);
             }
             catch (Exception ex)
             {
-                Log.SystemError(ex, $"[ExServiceHost] Can't get transport for protocol '{candidate.Protocol}', service '{serviceKey}'");
+                Log.SystemError(ex, $"[ExServiceHost] Can't get transport for service '{serviceKey}'");
                 return false;
             }
             return callHandler(transport);
@@ -420,11 +406,11 @@ namespace ZeroLevel.Network
                         IExClient transport;
                         try
                         {
-                            transport = ExchangeTransportFactory.GetClient(service.Protocol, service.Endpoint);
+                            transport = ExchangeTransportFactory.GetClient(service.Endpoint);
                         }
                         catch (Exception ex)
                         {
-                            Log.SystemError(ex, "[Exchange] Can't get transport for protocol '{0}', endpoint '{1}'", service.Protocol, service.Endpoint);
+                            Log.SystemError(ex, $"[Exchange] Can't get transport for endpoint '{service.Endpoint}'");
                             continue;
                         }
                         yield return transport;
@@ -458,11 +444,11 @@ namespace ZeroLevel.Network
                         IExClient transport;
                         try
                         {
-                            transport = ExchangeTransportFactory.GetClient(service.Protocol, service.Endpoint);
+                            transport = ExchangeTransportFactory.GetClient(service.Endpoint);
                         }
                         catch (Exception ex)
                         {
-                            Log.SystemError(ex, "[Exchange] Can't get transport for protocol '{0}', endpoint '{1}'", service.Protocol, service.Endpoint);
+                            Log.SystemError(ex, $"[Exchange] Can't get transport for endpoint '{service.Endpoint}'");
                             continue;
                         }
                         yield return transport;
@@ -496,11 +482,11 @@ namespace ZeroLevel.Network
                         IExClient transport;
                         try
                         {
-                            transport = ExchangeTransportFactory.GetClient(service.Protocol, service.Endpoint);
+                            transport = ExchangeTransportFactory.GetClient(service.Endpoint);
                         }
                         catch (Exception ex)
                         {
-                            Log.SystemError(ex, "[Exchange] Can't get transport for protocol '{0}', endpoint '{1}'", service.Protocol, service.Endpoint);
+                            Log.SystemError(ex, $"[Exchange] Can't get transport for endpoint '{service.Endpoint}'");
                             continue;
                         }
                         yield return transport;

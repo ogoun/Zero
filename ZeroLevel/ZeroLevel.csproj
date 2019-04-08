@@ -90,6 +90,7 @@
     <Compile Include="Services\Collections\EverythingStorage.cs" />
     <Compile Include="Services\Collections\IEverythingStorage.cs" />
     <Compile Include="Services\Collections\RoundRobinCollection.cs" />
+    <Compile Include="Services\Collections\RoundRobinOverCollection.cs" />
     <Compile Include="Services\DependencyInjection\Container.cs" />
     <Compile Include="Services\DependencyInjection\ContainerFactory.cs" />
     <Compile Include="Services\DependencyInjection\Contracts\ICompositionProvider.cs" />
@@ -330,8 +331,7 @@
     <Compile Include="Services\Serialization\MemoryStreamReader.cs" />
     <Compile Include="Services\Serialization\MemoryStreamWriter.cs" />
     <Compile Include="Services\Serialization\MessageSerializer.cs" />
-    <Compile Include="Services\Serialization\SerializedObjectWrapper.cs" />
-    <Compile Include="Services\Serialization\SerializedObjectWrapperExtension.cs" />
+    <Compile Include="Services\Serialization\PrimitiveTypeSerializer.cs" />
     <Compile Include="Services\Shedulling\AsyncShedullerImpl.cs" />
     <Compile Include="Services\Shedulling\DateTimeAsyncSheduller.cs" />
     <Compile Include="Services\Shedulling\DateTimeSheduller.cs" />

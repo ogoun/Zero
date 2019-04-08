@@ -7,7 +7,6 @@ namespace ZeroLevel.Services.Applications
     {
         public string Key { get; private set; }
         public string Version { get; private set; }
-        public string Protocol { get; private set; }
         public string Group { get; private set; }
         public string Type { get; private set; }
 
@@ -21,14 +20,12 @@ namespace ZeroLevel.Services.Applications
             base.Name = ReadName(_config);
             this.Key = ReadKey(_config);
             this.Version = ReadVersion(_config);
-            this.Protocol = ReadProtocol(_config);
             this.Group = ReadServiceGroup(_config);
             this.Type = ReadServiceType(_config);
 
             var discovery = _config.First("discovery");
-            var discoveryProtocol = _config.FirstOrDefault("discoveryProtocol", "socket");
 
-            _exchange = new Exchange(new DiscoveryClient(discoveryProtocol, discovery));
+            _exchange = new Exchange(new DiscoveryClient(discovery));
         }
 
         private IExService _self_service = null;
@@ -78,15 +75,6 @@ namespace ZeroLevel.Services.Applications
             if (_config.Contains("AppVersion"))
                 return _config.First("AppVersion");
             return "1.0";
-        }
-
-        private string ReadProtocol(IConfiguration configuration)
-        {
-            if (_config.Contains("Protocol"))
-                return _config.First("Protocol");
-            if (_config.Contains("Transport"))
-                return _config.First("Transport");
-            return null;
         }
 
         private string ReadServiceGroup(IConfiguration configuration)

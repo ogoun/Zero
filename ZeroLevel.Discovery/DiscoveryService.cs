@@ -2,6 +2,7 @@
 using ZeroLevel.Models;
 using ZeroLevel.Network;
 using ZeroLevel.Services.Applications;
+using ZeroLevel.Services.Serialization;
 
 namespace ZeroLevel.Discovery
 {
@@ -36,7 +37,7 @@ namespace ZeroLevel.Discovery
             Startup.StartWebPanel(port, false);
 
             var socketPort = Configuration.Default.First<int>("socketport");
-            _exInbox = ExchangeTransportFactory.GetServer("socket", socketPort);
+            _exInbox = ExchangeTransportFactory.GetServer(socketPort);
             _exInbox.RegisterInbox<IEnumerable<ServiceEndpointsInfo>>("services", (_, __) => routeTable.Get());
             _exInbox.RegisterInbox<ExServiceInfo, InvokeResult>("register", (info, _, __) => routeTable.Append(info));
 

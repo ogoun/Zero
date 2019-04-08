@@ -16,6 +16,8 @@ namespace ZeroLevel.Services.Serialization
 
         void WriteDouble(double val);
 
+        void WriteFloat(float val);
+
         void WriteInt32(Int32 number);
 
         void WriteLong(Int64 number);
@@ -50,6 +52,12 @@ namespace ZeroLevel.Services.Serialization
         void WriteCollection(IEnumerable<Int32> collection);
 
         void WriteCollection(IEnumerable<Double> collection);
+
+        void WriteCollection(IEnumerable<Decimal> collection);
+
+        void WriteCollection(IEnumerable<TimeSpan> collection);
+
+        void WriteCollection(IEnumerable<float> collection);
 
         void WriteCollection(IEnumerable<bool> collection);
 

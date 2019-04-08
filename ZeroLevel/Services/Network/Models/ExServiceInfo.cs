@@ -32,12 +32,6 @@ namespace ZeroLevel.Network
         public string ServiceType { get; set; } = DEFAULT_TYPE_NAME;
 
         /// <summary>
-        /// Protocol on which access to the service API is allowed
-        /// </summary>
-        [DataMember]
-        public string Protocol { get; set; }
-
-        /// <summary>
         /// Connection point, address
         /// </summary>
         [DataMember]
@@ -60,7 +54,6 @@ namespace ZeroLevel.Network
 
             if (string.Compare(this.Endpoint, other.Endpoint, true) != 0) return false;
             if (string.Compare(this.Version, other.Version, true) != 0) return false;
-            if (string.Compare(this.Protocol, other.Protocol, true) != 0) return false;
             return true;
         }
 
@@ -71,7 +64,7 @@ namespace ZeroLevel.Network
 
         public override int GetHashCode()
         {
-            return this.ServiceKey.GetHashCode() ^ this.Protocol.GetHashCode() ^ this.Endpoint.GetHashCode();
+            return this.ServiceKey.GetHashCode() ^ this.Endpoint.GetHashCode();
         }
 
         public void Serialize(IBinaryWriter writer)
@@ -79,7 +72,6 @@ namespace ZeroLevel.Network
             writer.WriteString(this.ServiceKey);
             writer.WriteString(this.ServiceGroup);
             writer.WriteString(this.ServiceType);
-            writer.WriteString(this.Protocol);
             writer.WriteString(this.Endpoint);
             writer.WriteString(this.Version);
         }
@@ -89,7 +81,6 @@ namespace ZeroLevel.Network
             this.ServiceKey = reader.ReadString();
             this.ServiceGroup = reader.ReadString();
             this.ServiceType = reader.ReadString();
-            this.Protocol = reader.ReadString();
             this.Endpoint = reader.ReadString();
             this.Version = reader.ReadString();
         }

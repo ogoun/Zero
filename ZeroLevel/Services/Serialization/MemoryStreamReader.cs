@@ -81,6 +81,12 @@ namespace ZeroLevel.Services.Serialization
             return new TimeSpan(ReadLong());
         }
 
+        public float ReadFloat()
+        {
+            var buffer = ReadBuffer(4);
+            return BitConverter.ToSingle(buffer, 0);
+        }
+
         public double ReadDouble()
         {
             var buffer = ReadBuffer(8);
@@ -287,6 +293,20 @@ namespace ZeroLevel.Services.Serialization
             return collection;
         }
 
+        public List<float> ReadFloatCollection()
+        {
+            int count = ReadInt32();
+            var collection = new List<float>(count);
+            if (count > 0)
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    collection.Add(ReadFloat());
+                }
+            }
+            return collection;
+        }
+
         public List<Double> ReadDoubleCollection()
         {
             int count = ReadInt32();
@@ -338,6 +358,34 @@ namespace ZeroLevel.Services.Serialization
                 for (int i = 0; i < count; i++)
                 {
                     collection.Add(ReadBytes());
+                }
+            }
+            return collection;
+        }
+
+        public List<decimal> ReadDecimalCollection()
+        {
+            int count = ReadInt32();
+            var collection = new List<decimal>(count);
+            if (count > 0)
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    collection.Add(ReadDecimal());
+                }
+            }
+            return collection;
+        }
+
+        public List<TimeSpan> ReadTimeSpanCollection()
+        {
+            int count = ReadInt32();
+            var collection = new List<TimeSpan>(count);
+            if (count > 0)
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    collection.Add(ReadTimeSpan());
                 }
             }
             return collection;

@@ -14,6 +14,8 @@ namespace ZeroLevel.Services.Serialization
 
         Double ReadDouble();
 
+        float ReadFloat();
+
         Int32 ReadInt32();
 
         Int64 ReadLong();
@@ -51,6 +53,12 @@ namespace ZeroLevel.Services.Serialization
         List<Int32> ReadInt32Collection();
 
         List<Double> ReadDoubleCollection();
+
+        List<Decimal> ReadDecimalCollection();
+
+        List<TimeSpan> ReadTimeSpanCollection();
+
+        List<float> ReadFloatCollection();
 
         List<bool> ReadBooleanCollection();
 

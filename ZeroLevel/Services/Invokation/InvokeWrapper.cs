@@ -102,9 +102,9 @@ namespace ZeroLevel.Services.Invokation
             return Configure(typeof(T), filter);
         }
 
-        public IEnumerable<string> Configure(Type type)
+        public IEnumerable<string> Configure(Type instanceType)
         {
-            var result = type.GetMethods(BindingFlags.Static |
+            var result = instanceType.GetMethods(BindingFlags.Static |
                                          BindingFlags.Instance |
                                          BindingFlags.Public |
                                          BindingFlags.NonPublic |
@@ -113,9 +113,9 @@ namespace ZeroLevel.Services.Invokation
             return result.Select(r => r.Item1).ToList();
         }
 
-        public IEnumerable<string> Configure(Type type, string methodName)
+        public IEnumerable<string> Configure(Type instanceType, string methodName)
         {
-            var result = type.GetMethods(BindingFlags.Static |
+            var result = instanceType.GetMethods(BindingFlags.Static |
                                          BindingFlags.Instance |
                                          BindingFlags.Public |
                                          BindingFlags.NonPublic |
@@ -125,9 +125,9 @@ namespace ZeroLevel.Services.Invokation
             return result.Select(r => r.Item1).ToList();
         }
 
-        public IEnumerable<string> ConfigureGeneric<T>(Type type, string methodName)
+        public IEnumerable<string> ConfigureGeneric<T>(Type instanceType, string methodName)
         {
-            var result = type.GetMethods(BindingFlags.Static |
+            var result = instanceType.GetMethods(BindingFlags.Static |
                                          BindingFlags.Instance |
                                          BindingFlags.Public |
                                          BindingFlags.NonPublic |
@@ -149,9 +149,9 @@ namespace ZeroLevel.Services.Invokation
             return result.Select(r => r.Item1).ToList();
         }
 
-        public IEnumerable<string> ConfigureGeneric<T>(Type type, Func<MethodInfo, bool> filter)
+        public IEnumerable<string> ConfigureGeneric<T>(Type instanceType, Func<MethodInfo, bool> filter)
         {
-            var result = type.GetMethods(BindingFlags.Static |
+            var result = instanceType.GetMethods(BindingFlags.Static |
                                          BindingFlags.Instance |
                                          BindingFlags.Public |
                                          BindingFlags.NonPublic |
@@ -173,9 +173,9 @@ namespace ZeroLevel.Services.Invokation
             return result.Select(r => r.Item1).ToList();
         }
 
-        public IEnumerable<string> Configure(Type type, Func<MethodInfo, bool> filter)
+        public IEnumerable<string> Configure(Type instanceType, Func<MethodInfo, bool> filter)
         {
-            var result = type.GetMethods(BindingFlags.Static |
+            var result = instanceType.GetMethods(BindingFlags.Static |
                                          BindingFlags.Instance |
                                          BindingFlags.Public |
                                          BindingFlags.NonPublic |

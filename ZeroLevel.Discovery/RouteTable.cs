@@ -91,11 +91,11 @@ namespace ZeroLevel.Discovery
 
         #endregion Snapshot
 
-        private bool Ping(string protocol, string endpoint, string msg)
+        private bool Ping(string endpoint, string msg)
         {
             try
             {
-                using (var client = ExchangeTransportFactory.GetClient(protocol, endpoint))
+                using (var client = ExchangeTransportFactory.GetClient(endpoint))
                 {
                     client.ForceConnect();
                     return client.Status == ZTransportStatus.Working;
@@ -103,7 +103,7 @@ namespace ZeroLevel.Discovery
             }
             catch (Exception ex)
             {
-                Log.Error(ex, $"[RouteTable] Fault ping endpoint {endpoint}, protocol {protocol}");
+                Log.Error(ex, $"[RouteTable] Fault ping endpoint {endpoint}");
                 return false;
             }
         }
@@ -112,20 +112,20 @@ namespace ZeroLevel.Discovery
         {
             try
             {
-                var removeEntities = new Dictionary<string, List<ServiceEndpointInfo>>();
+                var removeEntities = new Dictionary<string, List<string>>();
                 _lock.EnterReadLock();
                 try
                 {
                     foreach (var pair in _table)
                     {
-                        var endpointsToRemove = new List<ServiceEndpointInfo>();
+                        var endpointsToRemove = new List<string>();
                         foreach (var e in pair.Value.Endpoints)
                         {
-                            if (Ping(e.Protocol, e.Endpoint, "HELLO") == false)
+                            if (Ping(e, "HELLO") == false)
                             {
                                 if (false == removeEntities.ContainsKey(pair.Key))
                                 {
-                                    removeEntities.Add(pair.Key, new List<ServiceEndpointInfo>());
+                                    removeEntities.Add(pair.Key, new List<string>());
                                 }
                                 removeEntities[pair.Key].Add(e);
                             }
@@ -169,7 +169,7 @@ namespace ZeroLevel.Discovery
         public InvokeResult Append(ExServiceInfo serviceInfo)
         {
             InvokeResult result = null;
-            if (Ping(serviceInfo.Protocol, serviceInfo.Endpoint, serviceInfo.ServiceKey))
+            if (Ping(serviceInfo.Endpoint, serviceInfo.ServiceKey))
             {
                 var key = $"{serviceInfo.ServiceGroup}:{serviceInfo.ServiceType}:{serviceInfo.ServiceKey.Trim().ToLowerInvariant()}";
                 _lock.EnterWriteLock();
@@ -183,27 +183,18 @@ namespace ZeroLevel.Discovery
                             Version = serviceInfo.Version,
                             ServiceGroup = serviceInfo.ServiceGroup,
                             ServiceType = serviceInfo.ServiceType,
-                            Endpoints = new List<ServiceEndpointInfo>()
+                            Endpoints = new List<string>()
                         });
-                        _table[key].Endpoints.Add(new ServiceEndpointInfo
-                        {
-                            Endpoint = serviceInfo.Endpoint,
-                            Protocol = serviceInfo.Protocol
-                        });
-                        Log.Info($"The service '{serviceInfo.ServiceKey}' registered on protocol {serviceInfo.Protocol}, endpoint: {serviceInfo.Endpoint}");
+                        _table[key].Endpoints.Add(serviceInfo.Endpoint);
+                        Log.Info($"The service '{serviceInfo.ServiceKey}' registered on endpoint: {serviceInfo.Endpoint}");
                     }
                     else
                     {
                         var exists = _table[key];
-                        var endpoint = new ServiceEndpointInfo
+                        if (exists.Endpoints.Contains(serviceInfo.Endpoint) == false)
                         {
-                            Endpoint = serviceInfo.Endpoint,
-                            Protocol = serviceInfo.Protocol
-                        };
-                        if (exists.Endpoints.Contains(endpoint) == false)
-                        {
-                            Log.Info($"The service '{serviceInfo.ServiceKey}' register endpoint: {serviceInfo.Endpoint} on protocol {serviceInfo.Protocol}");
-                            exists.Endpoints.Add(endpoint);
+                            Log.Info($"The service '{serviceInfo.ServiceKey}' register endpoint: {serviceInfo.Endpoint}");
+                            exists.Endpoints.Add(serviceInfo.Endpoint);
                         }
                     }
                 }

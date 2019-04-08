@@ -7,16 +7,17 @@ namespace ZeroLevel.Network
     /// Endpoint
     /// </summary>
     public class ServiceEndpointInfo :
-        IEquatable<ServiceEndpointInfo>, IBinarySerializable
+        IEquatable<ServiceEndpointInfo>
     {
+        public string Key { get; set; }
+        public string Type { get; set; }
+        public string Group { get; set; }
         public string Endpoint { get; set; }
-        public string Protocol { get; set; }
 
         public bool Equals(ServiceEndpointInfo other)
         {
             if (other == null) return false;
             if (string.Compare(this.Endpoint, other.Endpoint, true) != 0) return false;
-            if (string.Compare(this.Protocol, other.Protocol, true) != 0) return false;
             return true;
         }
 
@@ -27,18 +28,16 @@ namespace ZeroLevel.Network
 
         public override int GetHashCode()
         {
-            return Endpoint?.GetHashCode() ?? 0 ^ Protocol?.GetHashCode() ?? 0;
+            return Endpoint?.GetHashCode() ?? 0;
         }
 
         public void Serialize(IBinaryWriter writer)
         {
-            writer.WriteString(this.Protocol);
             writer.WriteString(this.Endpoint);
         }
 
         public void Deserialize(IBinaryReader reader)
         {
-            this.Protocol = reader.ReadString();
             this.Endpoint = reader.ReadString();
         }
     }
