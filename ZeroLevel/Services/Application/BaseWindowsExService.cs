@@ -29,7 +29,26 @@ namespace ZeroLevel.Services.Applications
             var discoveryProtocol = _config.FirstOrDefault("discoveryProtocol", "socket");
 
             _exchange = new Exchange(new DiscoveryClient(discoveryProtocol, discovery));
+        }
 
+        private IExService _self_service = null;
+        private readonly object _self_create_lock = new object();
+        protected IExService Self
+        {
+            get
+            {
+                if (_self_service == null)
+                {
+                    lock (_self_create_lock)
+                    {
+                        if (_self_service == null)
+                        {
+                            _self_service = _exchange.RegisterService(this);
+                        }
+                    }
+                }
+                return _self_service;
+            }
         }
 
         #region Config

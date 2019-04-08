@@ -66,10 +66,42 @@ namespace ZeroLevel.Network
             _discoveryServerClient.ForceConnect();
             if (_discoveryServerClient.Status == ZTransportStatus.Working)
             {
-                IEnumerable<ServiceEndpointsInfo> records = null;
                 try
                 {
-                    var ir = _discoveryServerClient.Request<IEnumerable<ServiceEndpointsInfo>>("services", response => records = response);
+                    var ir = _discoveryServerClient.Request<IEnumerable<ServiceEndpointsInfo>>("services", records => 
+                    {
+                        if (records == null)
+                        {
+                            Log.Warning("[DiscoveryClient] UpdateServiceListInfo. Discrovery response is empty");
+                            return;
+                        }
+                        _lock.EnterWriteLock();
+                        try
+                        {
+                            _tableByGroups.Clear();
+                            _tableByTypes.Clear();
+                            var keysToRemove = new List<string>(_tableByKey.Keys);
+                            foreach (var info in records)
+                            {
+                                var key = info.ServiceKey.Trim().ToLowerInvariant();
+                                UpdateOrAddRecord(key, info);
+                                keysToRemove.Remove(key);
+                            }
+                            foreach (var key in keysToRemove)
+                            {
+                                _tableByKey.TryRemove(key, out RoundRobinCollection<ServiceEndpointInfo> removed);
+                                removed.Dispose();
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Log.Error(ex, "[DiscoveryClient] UpdateServiceListInfo. Update local routing table error.");
+                        }
+                        finally
+                        {
+                            _lock.ExitWriteLock();
+                        }
+                    });
                     if (!ir.Success)
                     {
                         Log.Warning($"[DiscoveryClient] UpdateServiceListInfo. Error request to inbox 'services'. {ir.Comment}");
@@ -80,37 +112,6 @@ namespace ZeroLevel.Network
                 {
                     Log.Error(ex, "[DiscoveryClient] UpdateServiceListInfo. Discrovery service response is absent");
                     return;
-                }
-                if (records == null)
-                {
-                    Log.Warning("[DiscoveryClient] UpdateServiceListInfo. Discrovery response is empty");
-                    return;
-                }
-                _lock.EnterWriteLock();
-                try
-                {
-                    _tableByGroups.Clear();
-                    _tableByTypes.Clear();
-                    var keysToRemove = new List<string>(_tableByKey.Keys);
-                    foreach (var info in records)
-                    {
-                        var key = info.ServiceKey.Trim().ToLowerInvariant();
-                        UpdateOrAddRecord(key, info);
-                        keysToRemove.Remove(key);
-                    }
-                    foreach (var key in keysToRemove)
-                    {
-                        _tableByKey.TryRemove(key, out RoundRobinCollection<ServiceEndpointInfo> removed);
-                        removed.Dispose();
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Log.Error(ex, "[DiscoveryClient] UpdateServiceListInfo. Update local routing table error.");
-                }
-                finally
-                {
-                    _lock.ExitWriteLock();
                 }
             }
             else

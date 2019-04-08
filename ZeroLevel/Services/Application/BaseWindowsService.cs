@@ -28,9 +28,13 @@ namespace ZeroLevel.Services.Applications
         {
             InteraciveModeWorkingFlag.Reset();
             OnStart(args);
-            while (false == InteraciveModeWorkingFlag.WaitOne(2000))
+            try
             {
+                while (false == InteraciveModeWorkingFlag.WaitOne(2000))
+                {
+                }
             }
+            catch { }
         }
 
         #region IZeroService

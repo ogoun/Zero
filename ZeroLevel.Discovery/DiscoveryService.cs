@@ -40,7 +40,7 @@ namespace ZeroLevel.Discovery
             _exInbox.RegisterInbox<IEnumerable<ServiceEndpointsInfo>>("services", (_, __) => routeTable.Get());
             _exInbox.RegisterInbox<ExServiceInfo, InvokeResult>("register", (info, _, __) => routeTable.Append(info));
 
-            Log.Info($"TCP server started on port {socketPort}");
+            Log.Info($"TCP server started {_exInbox.Endpoint.Address}:{socketPort}");
         }
 
         public override void StopAction()

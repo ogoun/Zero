@@ -53,23 +53,28 @@ namespace ZeroLevel.Network
             return port;
         }
 
-        public static IPAddress GetNonLoopbackAddress()
+        public static IPAddress GetNonLoopbackAddress(bool ignore_virtual_devices = true, bool ignore_docker_devices = true)
         {
             if (NetworkInterface.GetIsNetworkAvailable())
             {
                 foreach (var adapter in NetworkInterface.GetAllNetworkInterfaces())
                 {
-                    if (adapter.Description.IndexOf("VirtualBox", StringComparison.OrdinalIgnoreCase) >= 0)
-                        continue;
-                    if (adapter.NetworkInterfaceType != NetworkInterfaceType.Ethernet)
-                        continue;
-                    foreach (UnicastIPAddressInformation address in adapter.GetIPProperties().UnicastAddresses)
+                    if (adapter.OperationalStatus == OperationalStatus.Up)
                     {
-                        if (address.Address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
+                        if (ignore_virtual_devices && (adapter.Description.IndexOf("Virtual", StringComparison.OrdinalIgnoreCase) >= 0 || adapter.Name.IndexOf("Virtual", StringComparison.OrdinalIgnoreCase) >= 0))
+                            continue;
+                        if (ignore_docker_devices && (adapter.Description.IndexOf("Docker", StringComparison.OrdinalIgnoreCase) >= 0 || adapter.Name.IndexOf("Docker", StringComparison.OrdinalIgnoreCase) >= 0))
+                            continue;
+                        if (adapter.NetworkInterfaceType != NetworkInterfaceType.Ethernet)
+                            continue;
+                        foreach (UnicastIPAddressInformation address in adapter.GetIPProperties().UnicastAddresses)
                         {
-                            if (!IPAddress.IsLoopback(address.Address))
+                            if (address.Address.AddressFamily == AddressFamily.InterNetwork)
                             {
-                                return address.Address;
+                                if (!IPAddress.IsLoopback(address.Address))
+                                {
+                                    return address.Address;
+                                }
                             }
                         }
                     }
