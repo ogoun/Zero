@@ -51,6 +51,7 @@
   <ItemGroup>
     <Compile Include="ArrayToolsTest.cs" />
     <Compile Include="CollectionsTests.cs" />
+    <Compile Include="ExchangeTests.cs" />
     <Compile Include="InvokingTest.cs" />
     <Compile Include="MappingTest.cs" />
     <Compile Include="Models\BaseClass.cs" />

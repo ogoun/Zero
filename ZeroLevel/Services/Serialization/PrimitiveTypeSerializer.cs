@@ -282,17 +282,25 @@ namespace ZeroLevel.Services.Serialization
                         }
                         else if (TypeHelpers.IsAssignableToGenericType(type, typeof(IEnumerable<>)))
                         {
-                            var typeArg = type.GetGenericArguments().First();
-                            if (_enumTypesCachee.ContainsKey(typeArg))
+                            Type elementType;
+                            if (TypeHelpers.IsArray(type))
                             {
-                                _concrete_type_cachee[type] = _cachee[_enumTypesCachee[typeArg]];
+                                elementType = type.GetElementType();
                             }
-                            else if (typeof(IBinarySerializable).IsAssignableFrom(typeArg))
+                            else
+                            {
+                                elementType = type.GetGenericArguments().First();
+                            }
+                            if (_enumTypesCachee.ContainsKey(elementType))
+                            {
+                                _concrete_type_cachee[type] = _cachee[_enumTypesCachee[elementType]];
+                            }
+                            else if (typeof(IBinarySerializable).IsAssignableFrom(elementType))
                             {
                                 var wrapper = new Wrapper { Invoker = InvokeWrapper.Create() };
 
-                                wrapper.ReadId = wrapper.Invoker.ConfigureGeneric(typeof(MemoryStreamReader), typeArg, "ReadCollection").First();
-                                wrapper.WriteId = wrapper.Invoker.ConfigureGeneric(typeof(MemoryStreamWriter), typeArg,
+                                wrapper.ReadId = wrapper.Invoker.ConfigureGeneric(typeof(MemoryStreamReader), elementType, "ReadCollection").First();
+                                wrapper.WriteId = wrapper.Invoker.ConfigureGeneric(typeof(MemoryStreamWriter), elementType,
                                         mi => mi.Name.Equals("WriteCollection") && mi.IsGenericMethod).First();
                                 _concrete_type_cachee[type] = wrapper;
                             }

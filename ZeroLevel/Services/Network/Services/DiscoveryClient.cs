@@ -70,7 +70,7 @@ namespace ZeroLevel.Network
 
         public IEnumerable<ServiceEndpointInfo> GetServiceEndpoints(string serviceKey)
         {
-            var key = serviceKey.Trim().ToLowerInvariant();
+            var key = serviceKey.Trim().ToUpperInvariant();
             _lock.EnterReadLock();
             try
             {
@@ -88,7 +88,7 @@ namespace ZeroLevel.Network
 
         public IEnumerable<ServiceEndpointInfo> GetServiceEndpointsByGroup(string serviceGroup)
         {
-            var group = serviceGroup.Trim().ToLowerInvariant();
+            var group = serviceGroup.Trim().ToUpperInvariant();
             _lock.EnterReadLock();
             try
             {
@@ -106,7 +106,7 @@ namespace ZeroLevel.Network
 
         public IEnumerable<ServiceEndpointInfo> GetServiceEndpointsByType(string serviceType)
         {
-            var type = serviceType.Trim().ToLowerInvariant();
+            var type = serviceType.Trim().ToUpperInvariant();
             _lock.EnterReadLock();
             try
             {
