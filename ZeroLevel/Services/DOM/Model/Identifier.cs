@@ -31,6 +31,11 @@ namespace ZeroLevel.DocumentObjectModel
         /// </summary>
         public string DateLabel;
 
+        /// <summary>
+        /// Document unique link
+        /// </summary>
+        public string Link;
+
         #endregion Fields
 
         #region IBinarySerializable
@@ -40,6 +45,7 @@ namespace ZeroLevel.DocumentObjectModel
             writer.WriteInt32(this.Version);
             writer.WriteLong(this.Timestamp);
             writer.WriteString(this.DateLabel);
+            writer.WriteString(this.Link);
         }
 
         public void Deserialize(IBinaryReader reader)
@@ -47,6 +53,7 @@ namespace ZeroLevel.DocumentObjectModel
             this.Version = reader.ReadInt32();
             this.Timestamp = reader.ReadLong();
             this.DateLabel = reader.ReadString();
+            this.Link = reader.ReadString();
         }
 
         #endregion IBinarySerializable

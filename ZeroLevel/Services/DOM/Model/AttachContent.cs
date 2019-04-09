@@ -40,8 +40,26 @@ namespace ZeroLevel.DocumentObjectModel
             Deserialize(reader);
         }
 
+        public AttachContent(string identity, ContentType contentType)
+        { Identity = identity; ContentType = contentType; }
+
+        public AttachContent(string identity, string caption, ContentType contentType)
+        { Identity = identity; Caption = caption; ContentType = contentType; }
+
         public AttachContent(string identity, string caption, string description)
         { Identity = identity; Summary = description; Caption = caption; }
+
+        public AttachContent Write<T>(T value)
+        {
+            this.Payload = MessageSerializer.SerializeCompatible<T>(value);
+            return this;
+        }
+
+        public T Read<T>()
+        {
+            if (this.Payload == null || this.Payload.Length == 0) return default(T);
+            return MessageSerializer.DeserializeCompatible<T>(this.Payload);
+        }
 
         #region IBinarySerializable
 

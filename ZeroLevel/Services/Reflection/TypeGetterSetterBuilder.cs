@@ -49,11 +49,17 @@ namespace ZeroLevel.Services.Reflection
                             Expression.Unbox(instance, field.DeclaringType) :
                             Expression.Convert(instance, field.DeclaringType);
             var fieldExp = Expression.Field(target, field);
-
-            var typeCode = Type.GetTypeCode(field.FieldType);
-            var changeTypeMethod = typeof(Convert).GetMethod("ChangeType", new Type[] { typeof(object), typeof(TypeCode) });
-            var convertExpression = Expression.Call(changeTypeMethod, inputValue, Expression.Constant(typeCode));
-
+            UnaryExpression convertExpression;
+            if (typeof(IConvertible).IsAssignableFrom(field.FieldType))
+            {
+                var typeCode = Type.GetTypeCode(field.FieldType);
+                var changeTypeMethod = typeof(Convert).GetMethod("ChangeType", new Type[] { typeof(object), typeof(TypeCode) });
+                convertExpression = Expression.Convert(Expression.Call(changeTypeMethod, inputValue, Expression.Constant(typeCode)), field.FieldType);
+            }
+            else
+            {
+                convertExpression = Expression.Convert(inputValue, field.FieldType);
+            }
             var assignExp = Expression.Assign(fieldExp, field.FieldType.IsValueType ?
                 Expression.Convert(convertExpression, field.FieldType) :
                 Expression.TypeAs(convertExpression, field.FieldType));
@@ -76,10 +82,19 @@ namespace ZeroLevel.Services.Reflection
                             Expression.Unbox(instance, property.DeclaringType) :
                             Expression.Convert(instance, property.DeclaringType);
             var method = property.GetSetMethod(true);
-            var typeCode = Type.GetTypeCode(property.PropertyType);
-            var changeTypeMethod = typeof(Convert).GetMethod("ChangeType", new Type[] { typeof(object), typeof(TypeCode) });
-            var convertExpression = Expression.Call(changeTypeMethod, inputValue, Expression.Constant(typeCode));
-            var setterCall = Expression.Call(target, method, Expression.Convert(convertExpression, property.PropertyType));
+
+            UnaryExpression convertExpression;
+            if (typeof(IConvertible).IsAssignableFrom(property.PropertyType))
+            {
+                var typeCode = Type.GetTypeCode(property.PropertyType);
+                var changeTypeMethod = typeof(Convert).GetMethod("ChangeType", new Type[] { typeof(object), typeof(TypeCode) });
+                convertExpression = Expression.Convert(Expression.Call(changeTypeMethod, inputValue, Expression.Constant(typeCode)), property.PropertyType);
+            }
+            else
+            {
+                convertExpression = Expression.Convert(inputValue, property.PropertyType);
+            }
+            var setterCall = Expression.Call(target, method, convertExpression);
             var expr = Expression.Lambda<Action<object, object>>(setterCall, instance, inputValue);
             return expr.Compile();
         }
@@ -96,10 +111,18 @@ namespace ZeroLevel.Services.Reflection
             var targetExp = Expression.Parameter(typeof(T), "target");
             var inputValue = Expression.Parameter(typeof(object), "o");
             var fieldExp = Expression.Field(targetExp, field);
-            var typeCode = Type.GetTypeCode(field.FieldType);
-            var changeTypeMethod = typeof(Convert).GetMethod("ChangeType", new Type[] { typeof(object), typeof(TypeCode) });
-            var convertExpression = Expression.Call(changeTypeMethod, inputValue, Expression.Constant(typeCode));
-            var assignExp = Expression.Assign(fieldExp, Expression.Convert(convertExpression, field.FieldType));
+            UnaryExpression convertExpression;
+            if (typeof(IConvertible).IsAssignableFrom(field.FieldType))
+            {
+                var typeCode = Type.GetTypeCode(field.FieldType);
+                var changeTypeMethod = typeof(Convert).GetMethod("ChangeType", new Type[] { typeof(object), typeof(TypeCode) });
+                convertExpression = Expression.Convert(Expression.Call(changeTypeMethod, inputValue, Expression.Constant(typeCode)), field.FieldType);
+            }
+            else
+            {
+                convertExpression = Expression.Convert(inputValue, field.FieldType);
+            }
+            var assignExp = Expression.Assign(fieldExp, convertExpression);
             return Expression.Lambda<Action<T, object>>(assignExp, targetExp, inputValue).Compile();
         }
 
@@ -118,10 +141,18 @@ namespace ZeroLevel.Services.Reflection
                             Expression.Unbox(instance, method.DeclaringType) :
                             Expression.Convert(instance, method.DeclaringType);
             var value = Expression.Parameter(typeof(object), "v");
-            var typeCode = Type.GetTypeCode(property.PropertyType);
-            var changeTypeMethod = typeof(Convert).GetMethod("ChangeType", new Type[] { typeof(object), typeof(TypeCode) });
-            var convertExpression = Expression.Call(changeTypeMethod, value, Expression.Constant(typeCode));
-            var setterCall = Expression.Call(target, method, Expression.Convert(convertExpression, property.PropertyType));
+            UnaryExpression convertExpression;
+            if (typeof(IConvertible).IsAssignableFrom(property.PropertyType))
+            {
+                var typeCode = Type.GetTypeCode(property.PropertyType);
+                var changeTypeMethod = typeof(Convert).GetMethod("ChangeType", new Type[] { typeof(object), typeof(TypeCode) });
+                convertExpression = Expression.Convert(Expression.Call(changeTypeMethod, value, Expression.Constant(typeCode)), property.PropertyType);
+            }
+            else
+            {
+                convertExpression = Expression.Convert(value, property.PropertyType);
+            }
+            var setterCall = Expression.Call(target, method, convertExpression);
             var expr = Expression.Lambda<Action<T, object>>(setterCall, instance, value);
             return expr.Compile();
         }
