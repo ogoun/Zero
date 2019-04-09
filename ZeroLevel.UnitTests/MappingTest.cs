@@ -3,6 +3,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using ZeroLevel.Services.ObjectMapping;
 using ZeroMappingTest.Models;
 using System.Collections.Generic;
+using BusinessApp.DatabaseTest.Model;
 
 namespace ZeroMappingTest
 {
@@ -202,6 +203,52 @@ namespace ZeroMappingTest
             Assert.AreSame(mapper1, mapper2);
             Assert.AreNotSame(mapper1, mapper3);
             Assert.AreNotSame(mapper3, mapper2);
+        }
+
+        [TestMethod]
+        public void PocoFieldMapper()
+        {
+            // Arrange
+            var date = new DateTime(2005, 09, 27);
+            var mapper = new TypeMapper(typeof(PocoFields));
+            var obj = new PocoFields { Id = 1000, Date = date, Title = "Caption" };
+
+            // Assert
+            Assert.AreEqual(mapper.EntityType, typeof(PocoFields));
+
+            Assert.IsTrue(mapper.Exists("Id"));
+            Assert.IsTrue(mapper.Exists("Date"));
+            Assert.IsTrue(mapper.Exists("Title"));
+
+            Assert.AreEqual(mapper.Get(obj, "Id"), (long)1000);
+            Assert.AreEqual(mapper.Get(obj, "Date"), date);
+            Assert.AreEqual(mapper.Get(obj, "Title"), "Caption");
+
+            mapper.Set(obj, "Id", 1001);
+            Assert.AreEqual(mapper.Get(obj, "Id"), (long)1001);
+        }
+
+        [TestMethod]
+        public void PocoPropertiesMapper()
+        {
+            // Arrange
+            var date = new DateTime(2005, 09, 27);
+            var mapper = new TypeMapper(typeof(PocoProperties));
+            var obj = new PocoProperties { Id = 1000, Date = date, Title = "Caption" };
+
+            // Assert
+            Assert.AreEqual(mapper.EntityType, typeof(PocoProperties));
+
+            Assert.IsTrue(mapper.Exists("Id"));
+            Assert.IsTrue(mapper.Exists("Date"));
+            Assert.IsTrue(mapper.Exists("Title"));
+
+            Assert.AreEqual(mapper.Get(obj, "Id"), (long)1000);
+            Assert.AreEqual(mapper.Get(obj, "Date"), date);
+            Assert.AreEqual(mapper.Get(obj, "Title"), "Caption");
+
+            mapper.Set(obj, "Id", 1001);
+            Assert.AreEqual(mapper.Get(obj, "Id"), (long)1001);
         }
     }
 }

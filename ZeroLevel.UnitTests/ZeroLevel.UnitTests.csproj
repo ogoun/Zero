@@ -50,15 +50,28 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ArrayToolsTest.cs" />
+    <Compile Include="CollectionsTests.cs" />
     <Compile Include="InvokingTest.cs" />
     <Compile Include="MappingTest.cs" />
     <Compile Include="Models\BaseClass.cs" />
     <Compile Include="Models\BaseFakeClass.cs" />
     <Compile Include="Models\ChildClass.cs" />
     <Compile Include="Models\FakeClass.cs" />
+    <Compile Include="Models\PocoFields.cs" />
+    <Compile Include="Models\PocoProperties.cs" />
+    <Compile Include="Models\Specifications\IsFlagSpecification.cs" />
+    <Compile Include="Models\Specifications\LongNumberSpecification.cs" />
+    <Compile Include="Models\Specifications\NumberSpecification.cs" />
+    <Compile Include="Models\Specifications\RealSpecification.cs" />
+    <Compile Include="Models\Specifications\SummarySpecification.cs" />
+    <Compile Include="Models\Specifications\TitleSpecification.cs" />
     <Compile Include="Models\StaticFakeClass.cs" />
+    <Compile Include="Models\TestDTO.cs" />
+    <Compile Include="PredicateBuilderTests.cs" />
+    <Compile Include="QueriesTests.cs" />
     <Compile Include="SerializationTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SpecificationPatternTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
