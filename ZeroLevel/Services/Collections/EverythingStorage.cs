@@ -9,6 +9,11 @@ namespace ZeroLevel.Services.Collections
     public class EverythingStorage :
         IEverythingStorage
     {
+        public static IEverythingStorage Create()
+        {
+            return new EverythingStorage();
+        }
+
         private class ConcreteTypeRepository
         {
             private readonly IInvokeWrapper _wrapper;
@@ -58,7 +63,7 @@ namespace ZeroLevel.Services.Collections
                 return (bool)_containsKey.Invoke(_instance, key);
             }
 
-            public void Remove<T>(string key)
+            public void Remove(string key)
             {
                 _remove.Invoke(_instance, key);
             }
@@ -66,6 +71,11 @@ namespace ZeroLevel.Services.Collections
             public T Get<T>(string key)
             {
                 return (T)_getter.Invoke(_instance, key);
+            }
+
+            public object Get(string key)
+            {
+                return _getter.Invoke(_instance, key);
             }
         }
 
@@ -106,7 +116,7 @@ namespace ZeroLevel.Services.Collections
         {
             try
             {
-                this[typeof(T)].Remove<T>(key);
+                this[typeof(T)].Remove(key);
                 return true;
             }
             catch
@@ -121,22 +131,66 @@ namespace ZeroLevel.Services.Collections
 
         public void Remove<T>(string key)
         {
-            this[typeof(T)].Remove<T>(key);
+            this[typeof(T)].Remove(key);
         }
 
         public T Get<T>(string key)
         {
             return this[typeof(T)].Get<T>(key);
-        }
-
-        public static IEverythingStorage Create()
-        {
-            return new EverythingStorage();
-        }
+        }        
 
         public void AddOrUpdate<T>(string key, T value)
         {
             this[typeof(T)].InsertOrUpdate<T>(key, value);
+        }
+
+        public bool TryAdd(Type type, string key, object value)
+        {
+            try
+            {
+                this[type].Insert(key, value);
+                return true;
+            }
+            catch
+            { }
+            return false;
+        }
+
+        public bool ContainsKey(Type type, string key)
+        {
+            return this[type].ContainsKey(key);
+        }
+
+        public bool TryRemove(Type type, string key)
+        {
+            try
+            {
+                this[type].Remove(key);
+                return true;
+            }
+            catch
+            { }
+            return false;
+        }
+
+        public void Add(Type type, string key, object value)
+        {
+            this[type].Insert(key, value);
+        }
+
+        public void AddOrUpdate(Type type, string key, object value)
+        {
+            this[type].InsertOrUpdate(key, value);
+        }
+
+        public void Remove(Type type, string key)
+        {
+            this[type].Remove(key);
+        }
+
+        public object Get(Type type, string key)
+        {
+            return this[type].Get(key);
         }
     }
 }

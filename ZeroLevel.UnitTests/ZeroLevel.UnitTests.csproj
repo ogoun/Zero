@@ -51,12 +51,14 @@
   <ItemGroup>
     <Compile Include="ArrayToolsTest.cs" />
     <Compile Include="CollectionsTests.cs" />
+    <Compile Include="EncryptionTests.cs" />
     <Compile Include="ExchangeTests.cs" />
     <Compile Include="InvokingTest.cs" />
     <Compile Include="MappingTest.cs" />
     <Compile Include="Models\BaseClass.cs" />
     <Compile Include="Models\BaseFakeClass.cs" />
     <Compile Include="Models\ChildClass.cs" />
+    <Compile Include="Models\CompositeInstanceFactory.cs" />
     <Compile Include="Models\FakeClass.cs" />
     <Compile Include="Models\PocoFields.cs" />
     <Compile Include="Models\PocoProperties.cs" />
