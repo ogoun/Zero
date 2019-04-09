@@ -70,6 +70,7 @@
     <Compile Include="Models\TestDTO.cs" />
     <Compile Include="PredicateBuilderTests.cs" />
     <Compile Include="QueriesTests.cs" />
+    <Compile Include="ReflectionTests.cs" />
     <Compile Include="SerializationTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SpecificationPatternTest.cs" />

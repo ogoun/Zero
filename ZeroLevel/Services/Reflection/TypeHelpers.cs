@@ -185,5 +185,14 @@ namespace ZeroLevel.Services.Reflection
                 return Activator.CreateInstance(type);
             return FormatterServices.GetUninitializedObject(type);
         }
+
+        public static object CreateNonInitializedInstance(Type type)
+        {
+            if (type == null)
+            {
+                throw new ArgumentNullException(nameof(type));
+            }
+            return FormatterServices.GetUninitializedObject(type);
+        }
     }
 }
