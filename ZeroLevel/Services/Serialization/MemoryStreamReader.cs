@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Text;
+using ZeroLevel.Services.Extensions;
 
 namespace ZeroLevel.Services.Serialization
 {
@@ -63,8 +64,11 @@ namespace ZeroLevel.Services.Serialization
 
         public decimal ReadDecimal()
         {
-            var buffer = ReadBuffer(4);
-            return BitConverter.ToInt32(buffer, 0);
+            var p1 = ReadInt32();
+            var p2 = ReadInt32();
+            var p3 = ReadInt32();
+            var p4 = ReadInt32();
+            return BitConverterExt.ToDecimal(new int[] { p1, p2, p3, p4 });
         }
 
         /// <summary>
@@ -143,13 +147,13 @@ namespace ZeroLevel.Services.Serialization
 
         public IPAddress ReadIP()
         {
-            var addr = ReadLong();
+            var addr = ReadBytes();
             return new IPAddress(addr);
         }
 
         public IPEndPoint ReadIPEndpoint()
         {
-            var addr = ReadLong();
+            var addr = ReadIP();
             var port = ReadInt32();
             return new IPEndPoint(addr, port);
         }

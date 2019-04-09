@@ -16,14 +16,11 @@ namespace ZeroLevel.Services.Extensions
             return bytes.ToArray();
         }
 
-        public static decimal ToDecimal(this byte[] bytes)
+        public static decimal ToDecimal(this int[] parts)
         {
-            var arr = new int[4];
-            for (int i = 0; i < 15; i += 4)
-            {
-                arr[i % 4] = BitConverter.ToInt32(bytes, i);
-            }
-            return new Decimal(arr);
+            bool sign = (parts[3] & 0x80000000) != 0;
+            byte scale = (byte)((parts[3] >> 16) & 0x7F);
+            return new Decimal(parts[0], parts[1], parts[2], sign, scale);
         }
     }
 }

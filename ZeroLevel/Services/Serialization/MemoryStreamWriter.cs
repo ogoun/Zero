@@ -144,12 +144,12 @@ namespace ZeroLevel.Services.Serialization
 
         public void WriteIP(IPAddress ip)
         {
-            WriteLong(ip.Address);
+            WriteBytes(ip.GetAddressBytes());
         }
 
         public void WriteIPEndpoint(IPEndPoint endpoint)
         {
-            WriteLong(endpoint.Address.Address);
+            WriteIP(endpoint.Address);
             WriteInt32(endpoint.Port);
         }
 

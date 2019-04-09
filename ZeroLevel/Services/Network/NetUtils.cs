@@ -16,6 +16,13 @@ namespace ZeroLevel.Network
             return result == 0 ? x.Port.CompareTo(y.Port) : result;
         }
 
+        public static int Compare(this IPAddress x, IPAddress y)
+        {
+            var xx = x.ToString();
+            var yy = y.ToString();
+            return string.CompareOrdinal(xx, yy);
+        }
+
         public static IPEndPoint CreateIPEndPoint(string endPoint)
         {
             string[] ep = endPoint.Split(':');
