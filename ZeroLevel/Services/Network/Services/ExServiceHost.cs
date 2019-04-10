@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Net;
 using System.Reflection;
 
 namespace ZeroLevel.Network
@@ -46,7 +47,6 @@ namespace ZeroLevel.Network
                     Server = server,
                     ServiceInfo = new ExServiceInfo
                     {
-                        Endpoint = $"{server.Endpoint.Address}:{server.Endpoint.Port}",
                         ServiceKey = service.Key,
                         Version = service.Version,
                         ServiceGroup = service.Group,
@@ -88,7 +88,6 @@ namespace ZeroLevel.Network
                     Server = server,
                     ServiceInfo = new ExServiceInfo
                     {
-                        Endpoint = $"{server.Endpoint.Address}:{server.Endpoint.Port}",
                         ServiceKey = serviceInfo.ServiceKey,
                         Version = serviceInfo.Version,
                         ServiceGroup = serviceInfo.ServiceGroup,

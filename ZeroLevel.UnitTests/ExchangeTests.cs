@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -18,7 +19,6 @@ namespace ZeroLevel.NetworkUnitTests
             // Arrange
             var info = new ExServiceInfo
             {
-                Endpoint = "192.168.1.11:7755",
                 ServiceGroup = "MyServiceGroup",
                 ServiceKey = "MyServiceKey",
                 ServiceType = "MyServiceType",
@@ -35,7 +35,7 @@ namespace ZeroLevel.NetworkUnitTests
             });
 
             // Act
-            var client = ExchangeTransportFactory.GetClient(server.Endpoint.Address.ToString() + ":6666");
+            var client = ExchangeTransportFactory.GetClient(IPAddress.Loopback.ToString() + ":6666");
             var ir = client.Send<ExServiceInfo>("register", info);
 
             locker.WaitOne(1000);
@@ -56,7 +56,6 @@ namespace ZeroLevel.NetworkUnitTests
             // Arrange
             var info1 = new ExServiceInfo
             {
-                Endpoint = "192.168.1.11:7755",
                 ServiceGroup = "MyServiceGroup",
                 ServiceKey = "MyServiceKey",
                 ServiceType = "MyServiceType",
@@ -64,7 +63,6 @@ namespace ZeroLevel.NetworkUnitTests
             };
             var info2 = new ExServiceInfo
             {
-                Endpoint = "192.168.41.11:4564",
                 ServiceGroup = "MyServiceGroup",
                 ServiceKey = "MyServiceKey2",
                 ServiceType = "MyServiceType",
@@ -77,7 +75,7 @@ namespace ZeroLevel.NetworkUnitTests
             server.RegisterInbox<IEnumerable<ExServiceInfo>>("services", (_, __) => new[] { info1, info2 });
 
             // Act
-            var client = ExchangeTransportFactory.GetClient(server.Endpoint.Address.ToString() + ":6666");
+            var client = ExchangeTransportFactory.GetClient(IPAddress.Loopback.ToString() + ":6666");
             var ir = client.Request<IEnumerable<ExServiceInfo>>("services", response =>
             {
                 received = response;

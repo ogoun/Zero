@@ -39,7 +39,7 @@ namespace ZeroLevel.Discovery
             var socketPort = Configuration.Default.First<int>("socketport");
             _exInbox = ExchangeTransportFactory.GetServer(socketPort);
             _exInbox.RegisterInbox<IEnumerable<ServiceEndpointsInfo>>("services", (_, __) => routeTable.Get());
-            _exInbox.RegisterInbox<ExServiceInfo, InvokeResult>("register", (info, _, __) => routeTable.Append(info));
+            _exInbox.RegisterInbox<ExServiceInfo, InvokeResult>("register", (info, _, client) => routeTable.Append(info, client));
 
             Log.Info($"TCP server started {_exInbox.Endpoint.Address}:{socketPort}");
         }

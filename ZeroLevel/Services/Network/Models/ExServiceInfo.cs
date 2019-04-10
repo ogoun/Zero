@@ -30,13 +30,6 @@ namespace ZeroLevel.Network
         /// </summary>
         [DataMember]
         public string ServiceType { get; set; } = DEFAULT_TYPE_NAME;
-
-        /// <summary>
-        /// Connection point, address
-        /// </summary>
-        [DataMember]
-        public string Endpoint { get; set; }
-
         /// <summary>
         /// Service version
         /// </summary>
@@ -51,8 +44,6 @@ namespace ZeroLevel.Network
             if (string.Compare(this.ServiceKey, other.ServiceKey, true) != 0) return false;
             if (string.Compare(this.ServiceGroup, other.ServiceGroup, true) != 0) return false;
             if (string.Compare(this.ServiceType, other.ServiceType, true) != 0) return false;
-
-            if (string.Compare(this.Endpoint, other.Endpoint, true) != 0) return false;
             if (string.Compare(this.Version, other.Version, true) != 0) return false;
             return true;
         }
@@ -64,7 +55,7 @@ namespace ZeroLevel.Network
 
         public override int GetHashCode()
         {
-            return this.ServiceKey.GetHashCode() ^ this.Endpoint.GetHashCode();
+            return this.ServiceKey.GetHashCode();
         }
 
         public void Serialize(IBinaryWriter writer)
@@ -72,7 +63,6 @@ namespace ZeroLevel.Network
             writer.WriteString(this.ServiceKey);
             writer.WriteString(this.ServiceGroup);
             writer.WriteString(this.ServiceType);
-            writer.WriteString(this.Endpoint);
             writer.WriteString(this.Version);
         }
 
@@ -81,7 +71,6 @@ namespace ZeroLevel.Network
             this.ServiceKey = reader.ReadString();
             this.ServiceGroup = reader.ReadString();
             this.ServiceType = reader.ReadString();
-            this.Endpoint = reader.ReadString();
             this.Version = reader.ReadString();
         }
 

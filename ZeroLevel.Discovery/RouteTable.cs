@@ -166,10 +166,11 @@ namespace ZeroLevel.Discovery
             Save();
         }
 
-        public InvokeResult Append(ExServiceInfo serviceInfo)
+        public InvokeResult Append(ExServiceInfo serviceInfo, IZBackward client)
         {
             InvokeResult result = null;
-            if (Ping(serviceInfo.Endpoint, serviceInfo.ServiceKey))
+            var endpoint = $"{client.Endpoint.Address}:{client.Endpoint.Port}";
+            if (Ping(endpoint, serviceInfo.ServiceKey))
             {
                 var key = $"{serviceInfo.ServiceGroup}:{serviceInfo.ServiceType}:{serviceInfo.ServiceKey.Trim().ToLowerInvariant()}";
                 _lock.EnterWriteLock();
@@ -185,22 +186,22 @@ namespace ZeroLevel.Discovery
                             ServiceType = serviceInfo.ServiceType,
                             Endpoints = new List<string>()
                         });
-                        _table[key].Endpoints.Add(serviceInfo.Endpoint);
-                        Log.Info($"The service '{serviceInfo.ServiceKey}' registered on endpoint: {serviceInfo.Endpoint}");
+                        _table[key].Endpoints.Add(endpoint);
+                        Log.Info($"The service '{serviceInfo.ServiceKey}' registered on endpoint: {endpoint}");
                     }
                     else
                     {
                         var exists = _table[key];
-                        if (exists.Endpoints.Contains(serviceInfo.Endpoint) == false)
+                        if (exists.Endpoints.Contains(endpoint) == false)
                         {
-                            Log.Info($"The service '{serviceInfo.ServiceKey}' register endpoint: {serviceInfo.Endpoint}");
-                            exists.Endpoints.Add(serviceInfo.Endpoint);
+                            Log.Info($"The service '{serviceInfo.ServiceKey}' register endpoint: {endpoint}");
+                            exists.Endpoints.Add(endpoint);
                         }
                     }
                 }
                 catch (Exception ex)
                 {
-                    Log.Error(ex, "Fault append service ({0} {1}) endpoint '{2}'", serviceInfo.ServiceKey, serviceInfo.Version, serviceInfo.Endpoint);
+                    Log.Error(ex, "Fault append service ({0} {1}) endpoint '{2}'", serviceInfo.ServiceKey, serviceInfo.Version, endpoint);
                     result = InvokeResult.Fault(ex.Message);
                 }
                 finally
@@ -212,7 +213,7 @@ namespace ZeroLevel.Discovery
             }
             else
             {
-                result = InvokeResult.Fault($"Appending endpoint '{serviceInfo.Endpoint}' canceled for service {serviceInfo.ServiceKey} ({serviceInfo.Version}) because endpoind no avaliable");
+                result = InvokeResult.Fault($"Appending endpoint '{endpoint}' canceled for service {serviceInfo.ServiceKey} ({serviceInfo.Version}) because endpoind no avaliable");
             }
             return result;
         }

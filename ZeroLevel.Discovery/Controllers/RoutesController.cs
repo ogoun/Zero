@@ -33,22 +33,5 @@ namespace ZeroLevel.Discovery
                 return BadRequestAnswer(request, ex);
             }
         }
-
-        [HttpPost]
-        [Route("api/v0/routes")]
-        [ResponseType(typeof(InvokeResult))]
-        public HttpResponseMessage AddRoute(HttpRequestMessage request, ExServiceInfo service)
-        {
-            try
-            {
-                var ir = Injector.Default.Resolve<RouteTable>().Append(service);
-                return request.CreateSelfDestroyingResponse(ir);
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "Error with append endpoint");
-                return BadRequestAnswer(request, ex);
-            }
-        }
     }
 }
