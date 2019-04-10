@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using System.Net;
 
 namespace ZeroLevel.Network
 {
@@ -13,7 +14,7 @@ namespace ZeroLevel.Network
         /// <returns>Server</returns>
         public static IExService GetServer(int port = -1)
         {
-            return new ExService(new ZExSocketObservableServer(new System.Net.IPEndPoint(NetUtils.GetNonLoopbackAddress(), port == -1 ? NetUtils.GetFreeTcpPort() : port)));
+            return new ExService(new ZExSocketObservableServer(new System.Net.IPEndPoint(IPAddress.Any, port == -1 ? NetUtils.GetFreeTcpPort() : port)));
         }
         /// <summary>
         /// Creates a client to access the server using the specified protocol
