@@ -7,6 +7,8 @@ namespace ZeroLevel.Network
         : IDisposable
     {
         IPEndPoint Endpoint { get; }
+        event Action<IZBackward> OnConnect;
+        event Action<IZBackward> OnDisconnect;
 
         void RegisterInbox<T>(string inbox, Action<T, long, IZBackward> handler);
 

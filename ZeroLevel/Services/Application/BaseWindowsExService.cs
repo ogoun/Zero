@@ -10,8 +10,9 @@ namespace ZeroLevel.Services.Applications
         public string Group { get; private set; }
         public string Type { get; private set; }
 
-        protected readonly Exchange _exchange;
         protected readonly IConfiguration _config;
+
+        protected Exchange Exchange { get; }
 
         protected BaseWindowsExService(IConfiguration configuration = null)
             : base()
@@ -25,7 +26,7 @@ namespace ZeroLevel.Services.Applications
 
             var discovery = _config.First("discovery");
 
-            _exchange = new Exchange(new DiscoveryClient(discovery));
+            Exchange = new Exchange(new DiscoveryClient(discovery));
         }
 
         private IExService _self_service = null;
@@ -40,7 +41,7 @@ namespace ZeroLevel.Services.Applications
                     {
                         if (_self_service == null)
                         {
-                            _self_service = _exchange.RegisterService(this);
+                            _self_service = Exchange.RegisterService(this);
                         }
                     }
                 }
@@ -101,7 +102,7 @@ namespace ZeroLevel.Services.Applications
 
         public override void DisposeResources()
         {
-            this._exchange.Dispose();
+            this.Exchange.Dispose();
         }
     }
 }
