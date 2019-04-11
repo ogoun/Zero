@@ -243,9 +243,6 @@
     <Compile Include="Services\Network\Contract\IZObservableServer.cs" />
     <Compile Include="Services\Network\Contract\IZTransport.cs" />
     <Compile Include="Services\Network\ExchangeTransportFactory.cs" />
-    <Compile Include="Services\Network\Models\Checkpoint.cs" />
-    <Compile Include="Services\Network\Models\CheckpointArc.cs" />
-    <Compile Include="Services\Network\Models\CheckpointType.cs" />
     <Compile Include="Services\Network\Services\DiscoveryClient.cs" />
     <Compile Include="Services\Network\Services\Exchange.cs" />
     <Compile Include="Services\Network\Services\ExServiceHost.cs" />
