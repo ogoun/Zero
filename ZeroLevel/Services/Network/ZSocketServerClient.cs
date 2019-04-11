@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
@@ -20,8 +19,7 @@ namespace ZeroLevel.Network
         private readonly BlockingCollection<byte[]> _send_queue = new BlockingCollection<byte[]>();
         private Thread _sendThread;
         private readonly byte[] _buffer = new byte[DEFAULT_RECEIVE_BUFFER_SIZE];
-        private long _last_rw_time = DateTime.UtcNow.Ticks;
-        internal long LastNetworkActionTimestamp => _last_rw_time;
+        internal long LastNetworkActionTimestamp { get; private set; } = DateTime.UtcNow.Ticks;
 
         public event Action<ZSocketServerClient> OnConnectionBroken = (c) => { };
 
@@ -89,7 +87,7 @@ namespace ZeroLevel.Network
                         _stream.Write(data, 0, data.Length);
                         _stream.Flush();
                         //Thread.Sleep(1);
-                        _last_rw_time = DateTime.UtcNow.Ticks;
+                        LastNetworkActionTimestamp = DateTime.UtcNow.Ticks;
                         //NetworkStats.Send(data);
                     }
                 }
@@ -110,7 +108,7 @@ namespace ZeroLevel.Network
                 if (count > 0)
                 {
                     _parser.Push(_buffer, 0, count);
-                    _last_rw_time = DateTime.UtcNow.Ticks;
+                    LastNetworkActionTimestamp = DateTime.UtcNow.Ticks;
                 }
                 if (Status == ZTransportStatus.Working)
                 {

@@ -132,6 +132,8 @@ namespace ZeroLevel.Network
             _heartbeat_task = Sheduller.RemindEvery(TimeSpan.FromMilliseconds(HEARTBEAT_UPDATE_PERIOD_MS), Heartbeat);
             Working();
             _serverSocket.BeginAccept(BeginAcceptCallback, null);
+
+            Sheduller.RemindEvery(TimeSpan.FromSeconds(5), () => Log.Info($"Connections: {ConnectionList.Count()}"));
         }
 
         protected abstract void Handle(Frame frame, IZBackward client);

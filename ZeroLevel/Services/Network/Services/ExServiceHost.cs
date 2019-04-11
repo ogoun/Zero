@@ -27,7 +27,7 @@ namespace ZeroLevel.Network
         public ExServiceHost(IDiscoveryClient client)
         {
             _discoveryClient = client;
-            _registerTaskKey = Sheduller.RemindEvery(TimeSpan.FromMilliseconds(50), TimeSpan.FromSeconds(15), RegisterServicesInDiscovery);
+            _registerTaskKey = Sheduller.RemindEvery(TimeSpan.FromMilliseconds(50), TimeSpan.FromSeconds(55), RegisterServicesInDiscovery);
         }
 
         public IExService RegisterService(IExchangeService service)
@@ -47,6 +47,7 @@ namespace ZeroLevel.Network
                     Server = server,
                     ServiceInfo = new ExServiceInfo
                     {
+                        Port = server.Endpoint.Port,
                         ServiceKey = service.Key,
                         Version = service.Version,
                         ServiceGroup = service.Group,
@@ -88,6 +89,7 @@ namespace ZeroLevel.Network
                     Server = server,
                     ServiceInfo = new ExServiceInfo
                     {
+                        Port = server.Endpoint.Port,
                         ServiceKey = serviceInfo.ServiceKey,
                         Version = serviceInfo.Version,
                         ServiceGroup = serviceInfo.ServiceGroup,
@@ -329,7 +331,7 @@ namespace ZeroLevel.Network
                 IExClient transport;
                 try
                 {
-                    transport = ExchangeTransportFactory.GetClient(service.Endpoint);
+                    transport = ExchangeTransportFactory.GetClientWithCache(service.Endpoint);
                 }
                 catch (Exception ex)
                 {
@@ -374,7 +376,7 @@ namespace ZeroLevel.Network
             IExClient transport;
             try
             {
-                transport = ExchangeTransportFactory.GetClient(candidate.Endpoint);
+                transport = ExchangeTransportFactory.GetClientWithCache(candidate.Endpoint);
             }
             catch (Exception ex)
             {
@@ -405,7 +407,7 @@ namespace ZeroLevel.Network
                         IExClient transport;
                         try
                         {
-                            transport = ExchangeTransportFactory.GetClient(service.Endpoint);
+                            transport = ExchangeTransportFactory.GetClientWithCache(service.Endpoint);
                         }
                         catch (Exception ex)
                         {
@@ -443,7 +445,7 @@ namespace ZeroLevel.Network
                         IExClient transport;
                         try
                         {
-                            transport = ExchangeTransportFactory.GetClient(service.Endpoint);
+                            transport = ExchangeTransportFactory.GetClientWithCache(service.Endpoint);
                         }
                         catch (Exception ex)
                         {
@@ -481,7 +483,7 @@ namespace ZeroLevel.Network
                         IExClient transport;
                         try
                         {
-                            transport = ExchangeTransportFactory.GetClient(service.Endpoint);
+                            transport = ExchangeTransportFactory.GetClientWithCache(service.Endpoint);
                         }
                         catch (Exception ex)
                         {

@@ -35,12 +35,17 @@ namespace ZeroLevel.Network
         /// </summary>
         [DataMember]
         public string Version { get; set; }
+        /// <summary>
+        /// Service port
+        /// </summary>
+        [DataMember]
+        public int Port { get; set; }
 
         public bool Equals(ExServiceInfo other)
         {
             if (other == null) return false;
             if (object.ReferenceEquals(this, other)) return true;
-
+            if (this.Port != other.Port) return false;
             if (string.Compare(this.ServiceKey, other.ServiceKey, true) != 0) return false;
             if (string.Compare(this.ServiceGroup, other.ServiceGroup, true) != 0) return false;
             if (string.Compare(this.ServiceType, other.ServiceType, true) != 0) return false;
@@ -60,6 +65,7 @@ namespace ZeroLevel.Network
 
         public void Serialize(IBinaryWriter writer)
         {
+            writer.WriteInt32(this.Port);
             writer.WriteString(this.ServiceKey);
             writer.WriteString(this.ServiceGroup);
             writer.WriteString(this.ServiceType);
@@ -68,6 +74,7 @@ namespace ZeroLevel.Network
 
         public void Deserialize(IBinaryReader reader)
         {
+            this.Port = reader.ReadInt32();
             this.ServiceKey = reader.ReadString();
             this.ServiceGroup = reader.ReadString();
             this.ServiceType = reader.ReadString();

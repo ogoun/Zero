@@ -90,24 +90,6 @@ namespace ZeroLevel.Discovery
         }
 
         #endregion Snapshot
-
-        private bool Ping(string endpoint, string msg)
-        {
-            try
-            {
-                using (var client = ExchangeTransportFactory.GetClient(endpoint))
-                {
-                    client.ForceConnect();
-                    return client.Status == ZTransportStatus.Working;
-                }
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, $"[RouteTable] Fault ping endpoint {endpoint}");
-                return false;
-            }
-        }
-
         private void Heartbeat(long taskid)
         {
             try
@@ -121,7 +103,7 @@ namespace ZeroLevel.Discovery
                         var endpointsToRemove = new List<string>();
                         foreach (var e in pair.Value.Endpoints)
                         {
-                            if (Ping(e, "HELLO") == false)
+                            if (NetUtils.TestConnection(NetUtils.CreateIPEndPoint(e)) == false)
                             {
                                 if (false == removeEntities.ContainsKey(pair.Key))
                                 {
@@ -169,8 +151,9 @@ namespace ZeroLevel.Discovery
         public InvokeResult Append(ExServiceInfo serviceInfo, IZBackward client)
         {
             InvokeResult result = null;
-            var endpoint = $"{client.Endpoint.Address}:{client.Endpoint.Port}";
-            if (Ping(endpoint, serviceInfo.ServiceKey))
+            var endpoint = $"{client.Endpoint.Address}:{serviceInfo.Port}";
+            Log.Info($"Regiter request from {endpoint}. Service {serviceInfo?.ServiceKey}");
+            if (NetUtils.TestConnection(NetUtils.CreateIPEndPoint(endpoint)))
             {
                 var key = $"{serviceInfo.ServiceGroup}:{serviceInfo.ServiceType}:{serviceInfo.ServiceKey.Trim().ToLowerInvariant()}";
                 _lock.EnterWriteLock();
@@ -201,7 +184,7 @@ namespace ZeroLevel.Discovery
                 }
                 catch (Exception ex)
                 {
-                    Log.Error(ex, "Fault append service ({0} {1}) endpoint '{2}'", serviceInfo.ServiceKey, serviceInfo.Version, endpoint);
+                    Log.Error(ex, $"Fault append service ({serviceInfo.ServiceKey} {serviceInfo.Version}) endpoint '{endpoint}'");
                     result = InvokeResult.Fault(ex.Message);
                 }
                 finally

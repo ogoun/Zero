@@ -8,6 +8,34 @@ namespace ZeroLevel.Network
 {
     public static class NetUtils
     {
+        public static bool TestConnection(IPEndPoint endpoint)
+        {
+            using (var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
+            {
+                socket.SetIPProtectionLevel(IPProtectionLevel.Unrestricted);
+                socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.DontLinger, true);
+                socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive, false);
+                socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.NoDelay, true);
+                socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.NoChecksum, true);
+                socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
+                socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseUnicastPort, true);
+                socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.SendTimeout, 100);
+                socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReceiveTimeout, 100);
+                socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.DontRoute, true);
+                socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ExclusiveAddressUse, false);
+                try
+                {
+                    socket.Connect(endpoint);
+                    socket.Close();
+                    return true;
+                }
+                catch
+                {
+                }
+            }
+            return false;
+        }
+
         public static int Compare(this IPEndPoint x, IPEndPoint y)
         {
             var xx = x.Address.ToString();
