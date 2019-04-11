@@ -10,11 +10,11 @@ namespace ZeroLevel.Network
     public abstract class ZSocketServer
         : ZBaseNetwork
     {
-        public IPEndPoint LocalEndpoint { get { return _endpoint; } }
+        public IPEndPoint LocalEndpoint { get; }
 
-        public event Action<IZBackward> OnDisconnect = (c) => { };
+        public event Action<IZBackward> OnDisconnect = _ => { };
 
-        public event Action<IZBackward> OnConnect = (c) => { };
+        public event Action<IZBackward> OnConnect = _ => { };
 
         public IEnumerable<IPEndPoint> ConnectionList
         {
@@ -35,11 +35,10 @@ namespace ZeroLevel.Network
         #region Private members
 
         private Socket _serverSocket;
-        private IPEndPoint _endpoint;
+        private long _heartbeat_task = -1;
+        private readonly Frame _pingFrame = FrameBuilder.BuildFrame(DEFAULT_PING_INBOX);
         private ReaderWriterLockSlim _connection_set_lock = new ReaderWriterLockSlim();
         private HashSet<ZSocketServerClient> _connections = new HashSet<ZSocketServerClient>();
-        private readonly Frame _pingFrame = FrameBuilder.BuildFrame(DEFAULT_PING_INBOX);
-        private long _heartbeat_task = -1;
 
         private void DisconnectEventRise(IZBackward client)
         {
@@ -96,7 +95,7 @@ namespace ZeroLevel.Network
                 catch (Exception ex)
                 {
                     Broken();
-                    Log.SystemError(ex, $"[ZSocketServer] Error with connect accepting");
+                    Log.SystemError(ex, "[ZSocketServer] Error with connect accepting");
                 }
                 finally
                 {
@@ -118,13 +117,14 @@ namespace ZeroLevel.Network
                 _connection_set_lock.ExitWriteLock();
             }
             connection.Dispose();
+            DisconnectEventRise(connection);
         }
 
         #endregion Private members
 
         public ZSocketServer(IPEndPoint endpoint)
         {
-            _endpoint = endpoint;
+            LocalEndpoint = endpoint;
             _serverSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             _serverSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive, true);
             _serverSocket.Bind(endpoint);
@@ -154,6 +154,7 @@ namespace ZeroLevel.Network
                 foreach (var c in _connections)
                 {
                     c.Dispose();
+                    DisconnectEventRise(c);
                 }
             }
             finally

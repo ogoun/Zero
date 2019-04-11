@@ -10,18 +10,20 @@ namespace ZeroLevel.Network
     internal sealed class ZSocketServerClient
         : ZBaseNetwork, IZBackward, IEquatable<ZSocketServerClient>
     {
-        public IPEndPoint Endpoint { get; private set; }
-        private readonly FrameParser _parser;
-        private readonly Socket _socket;
-        private NetworkStream _stream;
-        private readonly Action<Frame, IZBackward> _handler;
-        private readonly Func<Frame, IZBackward, Frame> _requestor;
-        private readonly BlockingCollection<byte[]> _send_queue = new BlockingCollection<byte[]>();
-        private Thread _sendThread;
-        private readonly byte[] _buffer = new byte[DEFAULT_RECEIVE_BUFFER_SIZE];
+        public IPEndPoint Endpoint { get; }
+
         internal long LastNetworkActionTimestamp { get; private set; } = DateTime.UtcNow.Ticks;
 
-        public event Action<ZSocketServerClient> OnConnectionBroken = (c) => { };
+        private Thread _sendThread;
+        private NetworkStream _stream;
+        private readonly Socket _socket;
+        private readonly FrameParser _parser;
+        private readonly Action<Frame, IZBackward> _handler;
+        private readonly Func<Frame, IZBackward, Frame> _requestor;
+        private readonly byte[] _buffer = new byte[DEFAULT_RECEIVE_BUFFER_SIZE];
+        private readonly BlockingCollection<byte[]> _send_queue = new BlockingCollection<byte[]>();
+
+        public event Action<ZSocketServerClient> OnConnectionBroken = (_) => { };
 
         private void RizeConnectionBrokenEvent()
         {

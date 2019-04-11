@@ -48,11 +48,10 @@ namespace ZeroLevel.Network
         /// </summary>
         public const int MAX_SEND_QUEUE_SIZE = 1024;
 
-        private ZTransportStatus _socket_status = ZTransportStatus.Initialized;
-        protected void Broken() => _socket_status = _socket_status == ZTransportStatus.Disposed ? _socket_status : ZTransportStatus.Broken;
-        protected void Disposed() => _socket_status = ZTransportStatus.Disposed;
-        protected void Working() => _socket_status = _socket_status == ZTransportStatus.Disposed ? _socket_status : ZTransportStatus.Working;
-        public ZTransportStatus Status { get { return _socket_status; } }
+        protected void Broken() => Status = Status == ZTransportStatus.Disposed ? Status : ZTransportStatus.Broken;
+        protected void Disposed() => Status = ZTransportStatus.Disposed;
+        protected void Working() => Status = Status == ZTransportStatus.Disposed ? Status : ZTransportStatus.Working;
+        public ZTransportStatus Status { get; private set; } = ZTransportStatus.Initialized;
 
         public abstract void Dispose();
     }

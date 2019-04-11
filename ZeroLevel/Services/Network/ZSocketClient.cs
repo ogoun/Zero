@@ -107,7 +107,6 @@ namespace ZeroLevel.Network
 
         private Socket _clientSocket;
         private NetworkStream _stream;
-        private readonly IPEndPoint _endpoint;
         private FrameParser _parser = new FrameParser();
         private Thread _sendThread;
         private long _heartbeat_key;
@@ -127,12 +126,12 @@ namespace ZeroLevel.Network
 
         public event Action OnDisconnect = () => { };
 
-        public IPEndPoint Endpoint { get { return _endpoint; } }
+        public IPEndPoint Endpoint { get; }
         public bool IsEmptySendQueue { get { return _send_queue.Count == 0; } }
 
         public ZSocketClient(IPEndPoint ep)
         {
-            _endpoint = ep;
+            Endpoint = ep;
             _parser.OnIncomingFrame += _parser_OnIncomingFrame;
 
             _heartbeat_key = Sheduller.RemindEvery(TimeSpan.FromMilliseconds(HEARTBEAT_UPDATE_PERIOD_MS), Heartbeat);
@@ -322,7 +321,7 @@ namespace ZeroLevel.Network
             try
             {
                 _clientSocket = MakeClientSocket();
-                _clientSocket.Connect(_endpoint);
+                _clientSocket.Connect(Endpoint);
                 _stream = new NetworkStream(_clientSocket, true);
                 _stream.BeginRead(_buffer, 0, DEFAULT_RECEIVE_BUFFER_SIZE, ReceiveAsyncCallback, null);
             }
