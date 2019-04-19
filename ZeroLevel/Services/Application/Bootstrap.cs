@@ -159,10 +159,10 @@ namespace ZeroLevel
                     }
                 }
             }
-            try { Sheduller.Dispose(); } catch (Exception ex) { Log.Error(ex, "Dispose default sheduller error"); }
-            try { Log.Dispose(); } catch (Exception ex) { Log.Error(ex, "Dispose log error"); }
-            try { Injector.Default.Dispose(); Injector.Dispose(); } catch (Exception ex) { Log.Error(ex, "Dispose DI containers error"); }
-            try { service?.DisposeResources(); } catch (Exception ex) { Log.Error(ex, "Dispose service error"); }
+            try { Sheduller.Dispose(); } catch (Exception ex) { Log.Error(ex, "[Bootstrap] Dispose default sheduller error"); }
+            try { Log.Dispose(); } catch (Exception ex) { Log.Error(ex, "[Bootstrap] Dispose log error"); }
+            try { Injector.Default.Dispose(); Injector.Dispose(); } catch (Exception ex) { Log.Error(ex, "[Bootstrap] Dispose DI containers error"); }
+            try { service?.DisposeResources(); } catch (Exception ex) { Log.Error(ex, "[Bootstrap] Dispose service error"); }
         }
     }
 }
