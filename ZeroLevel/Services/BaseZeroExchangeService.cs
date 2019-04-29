@@ -1,9 +1,10 @@
-﻿using ZeroLevel.Network;
+﻿using System;
+using ZeroLevel.Network;
 
 namespace ZeroLevel.Services.Applications
 {
-    public abstract class BaseWindowsExService
-        : BaseWindowsService, IExchangeService
+    public abstract class BaseZeroExchangeService
+        : BaseZeroService, IExchangeService
     {
         public string Key { get; private set; }
         public string Version { get; private set; }
@@ -14,7 +15,7 @@ namespace ZeroLevel.Services.Applications
 
         protected Exchange Exchange { get; }
 
-        protected BaseWindowsExService(IConfiguration configuration = null)
+        protected BaseZeroExchangeService(IConfiguration configuration = null)
             : base()
         {
             _config = configuration ?? Configuration.Default;
@@ -100,7 +101,7 @@ namespace ZeroLevel.Services.Applications
 
         public string Endpoint { get; private set; }
 
-        public override void DisposeResources()
+        protected override void StopAction()
         {
             this.Exchange.Dispose();
         }

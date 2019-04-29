@@ -1,13 +1,12 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
+﻿using System;
+using Xunit;
 using ZeroLevel.Specification;
 
 namespace ZeroSpecificationPatternsTest
 {
-    [TestClass]
     public class PredicateBuilderTests
     {
-        [TestMethod]
+        [Fact]
         public void PredicateBuilder_FromExpression_AND()
         {
             // Arrange
@@ -18,13 +17,13 @@ namespace ZeroSpecificationPatternsTest
                 And(str => char.IsLetter(str[0])).
                 And(str => char.IsUpper(str[0])).Compile();
             // Assert
-            Assert.IsFalse(invoker("test"));
-            Assert.IsTrue(invoker("Test"));
-            Assert.IsFalse(invoker("1test"));
-            Assert.IsFalse(invoker("Test" + new string('_', 260)));
+            Assert.False(invoker("test"));
+            Assert.True(invoker("Test"));
+            Assert.False(invoker("1test"));
+            Assert.False(invoker("Test" + new string('_', 260)));
         }
 
-        [TestMethod]
+        [Fact]
         public void PredicateBuilder_FromFunc_AND()
         {
             // Arrange
@@ -35,13 +34,13 @@ namespace ZeroSpecificationPatternsTest
                 And(str => Char.IsLetter(str[0])).
                 And(str => Char.IsUpper(str[0])).Compile();
             // Assert
-            Assert.IsFalse(invoker("test"));
-            Assert.IsTrue(invoker("Test"));
-            Assert.IsFalse(invoker("1test"));
-            Assert.IsFalse(invoker("Test" + new string('_', 260)));
+            Assert.False(invoker("test"));
+            Assert.True(invoker("Test"));
+            Assert.False(invoker("1test"));
+            Assert.False(invoker("Test" + new string('_', 260)));
         }
 
-        [TestMethod]
+        [Fact]
         public void PredicateBuilder_FromExpression_OR()
         {
             // Arrange
@@ -54,14 +53,14 @@ namespace ZeroSpecificationPatternsTest
                 Or(str => str.Equals("wow", StringComparison.OrdinalIgnoreCase)).
                 Compile();
             // Assert
-            Assert.IsTrue(invoker("hello"));
-            Assert.IsTrue(invoker("world"));
-            Assert.IsTrue(invoker("test"));
-            Assert.IsTrue(invoker("wow"));
-            Assert.IsFalse(invoker("Tests"));
+            Assert.True(invoker("hello"));
+            Assert.True(invoker("world"));
+            Assert.True(invoker("test"));
+            Assert.True(invoker("wow"));
+            Assert.False(invoker("Tests"));
         }
 
-        [TestMethod]
+        [Fact]
         public void PredicateBuilder_FromFunc_OR()
         {
             // Arrange
@@ -73,14 +72,14 @@ namespace ZeroSpecificationPatternsTest
                 Or(str => str.Equals("wow", StringComparison.OrdinalIgnoreCase)).
                 Compile();
             // Assert
-            Assert.IsTrue(invoker("hello"));
-            Assert.IsTrue(invoker("world"));
-            Assert.IsTrue(invoker("test"));
-            Assert.IsTrue(invoker("wow"));
-            Assert.IsFalse(invoker("Tests"));
+            Assert.True(invoker("hello"));
+            Assert.True(invoker("world"));
+            Assert.True(invoker("test"));
+            Assert.True(invoker("wow"));
+            Assert.False(invoker("Tests"));
         }
 
-        [TestMethod]
+        [Fact]
         public void PredicateBuilder_FromExpression_NOT()
         {
             // Arrange
@@ -90,13 +89,13 @@ namespace ZeroSpecificationPatternsTest
             var invoker = expression.Not().
                 Compile();
             // Assert
-            Assert.IsFalse(invoker(1));
-            Assert.IsFalse(invoker(50));
-            Assert.IsTrue(invoker(100));
-            Assert.IsTrue(invoker(0));
+            Assert.False(invoker(1));
+            Assert.False(invoker(50));
+            Assert.True(invoker(100));
+            Assert.True(invoker(0));
         }
 
-        [TestMethod]
+        [Fact]
         public void PredicateBuilder_FromFunc_NOT()
         {
             // Arrange
@@ -105,10 +104,10 @@ namespace ZeroSpecificationPatternsTest
             var invoker = expression.Not().
                 Compile();
             // Assert
-            Assert.IsFalse(invoker(1));
-            Assert.IsFalse(invoker(50));
-            Assert.IsTrue(invoker(100));
-            Assert.IsTrue(invoker(0));
+            Assert.False(invoker(1));
+            Assert.False(invoker(50));
+            Assert.True(invoker(100));
+            Assert.True(invoker(0));
         }
     }
 }

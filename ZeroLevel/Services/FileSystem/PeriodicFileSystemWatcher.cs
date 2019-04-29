@@ -57,8 +57,6 @@ namespace ZeroLevel.Services.FileSystem
                 {
                     try
                     {
-                        FileIOPermission perm = new FileIOPermission(FileIOPermissionAccess.AllAccess, file);
-                        perm.Demand();
                         Log.Debug($"[PeriodicFileSystemWatcher] Find new file {file}");
                         if (FSUtils.IsFileLocked(new FileInfo(file)))
                         {

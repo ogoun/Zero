@@ -1,4 +1,4 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Xunit;
 using ZeroLevel.Specification;
 using ZeroSpecificationPatternsTest.Models;
 using ZeroSpecificationPatternsTest.Specifications;
@@ -8,10 +8,9 @@ namespace ZeroSpecificationPatternsTest
     /// <summary>
     /// Summary description for SpecificationPatternTest
     /// </summary>
-    [TestClass]
     public class SpecificationPatternTest
     {
-        [TestMethod]
+        [Fact]
         public void SimpleSpecificationTest()
         {
             // Assert
@@ -52,38 +51,38 @@ namespace ZeroSpecificationPatternsTest
             var title_specification_empty = new TitleSpecification(string.Empty);
 
             // Assert
-            Assert.IsTrue(flag_spec_true.IsSatisfiedBy(dto_one));
-            Assert.IsFalse(flag_spec_false.IsSatisfiedBy(dto_one));
-            Assert.IsTrue(flag_spec_false.IsSatisfiedBy(dto_two));
-            Assert.IsFalse(flag_spec_true.IsSatisfiedBy(dto_two));
+            Assert.True(flag_spec_true.IsSatisfiedBy(dto_one));
+            Assert.False(flag_spec_false.IsSatisfiedBy(dto_one));
+            Assert.True(flag_spec_false.IsSatisfiedBy(dto_two));
+            Assert.False(flag_spec_true.IsSatisfiedBy(dto_two));
 
-            Assert.IsTrue(long_specification_full.IsSatisfiedBy(dto_one));
-            Assert.IsFalse(long_specification_empty.IsSatisfiedBy(dto_one));
-            Assert.IsTrue(long_specification_empty.IsSatisfiedBy(dto_two));
-            Assert.IsFalse(long_specification_full.IsSatisfiedBy(dto_two));
+            Assert.True(long_specification_full.IsSatisfiedBy(dto_one));
+            Assert.False(long_specification_empty.IsSatisfiedBy(dto_one));
+            Assert.True(long_specification_empty.IsSatisfiedBy(dto_two));
+            Assert.False(long_specification_full.IsSatisfiedBy(dto_two));
 
-            Assert.IsTrue(number_specification_full.IsSatisfiedBy(dto_one));
-            Assert.IsFalse(number_specification_empty.IsSatisfiedBy(dto_one));
-            Assert.IsTrue(number_specification_empty.IsSatisfiedBy(dto_two));
-            Assert.IsFalse(number_specification_full.IsSatisfiedBy(dto_two));
+            Assert.True(number_specification_full.IsSatisfiedBy(dto_one));
+            Assert.False(number_specification_empty.IsSatisfiedBy(dto_one));
+            Assert.True(number_specification_empty.IsSatisfiedBy(dto_two));
+            Assert.False(number_specification_full.IsSatisfiedBy(dto_two));
 
-            Assert.IsTrue(real_specification_full.IsSatisfiedBy(dto_one));
-            Assert.IsFalse(real_specification_empty.IsSatisfiedBy(dto_one));
-            Assert.IsTrue(real_specification_empty.IsSatisfiedBy(dto_two));
-            Assert.IsFalse(real_specification_full.IsSatisfiedBy(dto_two));
+            Assert.True(real_specification_full.IsSatisfiedBy(dto_one));
+            Assert.False(real_specification_empty.IsSatisfiedBy(dto_one));
+            Assert.True(real_specification_empty.IsSatisfiedBy(dto_two));
+            Assert.False(real_specification_full.IsSatisfiedBy(dto_two));
 
-            Assert.IsTrue(summary_specification_full.IsSatisfiedBy(dto_one));
-            Assert.IsFalse(summary_specification_empty.IsSatisfiedBy(dto_one));
-            Assert.IsTrue(summary_specification_empty.IsSatisfiedBy(dto_two));
-            Assert.IsFalse(summary_specification_full.IsSatisfiedBy(dto_two));
+            Assert.True(summary_specification_full.IsSatisfiedBy(dto_one));
+            Assert.False(summary_specification_empty.IsSatisfiedBy(dto_one));
+            Assert.True(summary_specification_empty.IsSatisfiedBy(dto_two));
+            Assert.False(summary_specification_full.IsSatisfiedBy(dto_two));
 
-            Assert.IsTrue(title_specification_full.IsSatisfiedBy(dto_one));
-            Assert.IsFalse(title_specification_empty.IsSatisfiedBy(dto_one));
-            Assert.IsTrue(title_specification_empty.IsSatisfiedBy(dto_two));
-            Assert.IsFalse(title_specification_full.IsSatisfiedBy(dto_two));
+            Assert.True(title_specification_full.IsSatisfiedBy(dto_one));
+            Assert.False(title_specification_empty.IsSatisfiedBy(dto_one));
+            Assert.True(title_specification_empty.IsSatisfiedBy(dto_two));
+            Assert.False(title_specification_full.IsSatisfiedBy(dto_two));
         }
 
-        [TestMethod]
+        [Fact]
         public void NotSpecificationTest()
         {
             // Assert
@@ -124,38 +123,38 @@ namespace ZeroSpecificationPatternsTest
             var title_specification_empty = new TitleSpecification(string.Empty).Not();
 
             // Assert
-            Assert.IsFalse(flag_spec_true.IsSatisfiedBy(dto_one));
-            Assert.IsTrue(flag_spec_false.IsSatisfiedBy(dto_one));
-            Assert.IsFalse(flag_spec_false.IsSatisfiedBy(dto_two));
-            Assert.IsTrue(flag_spec_true.IsSatisfiedBy(dto_two));
+            Assert.False(flag_spec_true.IsSatisfiedBy(dto_one));
+            Assert.True(flag_spec_false.IsSatisfiedBy(dto_one));
+            Assert.False(flag_spec_false.IsSatisfiedBy(dto_two));
+            Assert.True(flag_spec_true.IsSatisfiedBy(dto_two));
 
-            Assert.IsFalse(long_specification_full.IsSatisfiedBy(dto_one));
-            Assert.IsTrue(long_specification_empty.IsSatisfiedBy(dto_one));
-            Assert.IsFalse(long_specification_empty.IsSatisfiedBy(dto_two));
-            Assert.IsTrue(long_specification_full.IsSatisfiedBy(dto_two));
+            Assert.False(long_specification_full.IsSatisfiedBy(dto_one));
+            Assert.True(long_specification_empty.IsSatisfiedBy(dto_one));
+            Assert.False(long_specification_empty.IsSatisfiedBy(dto_two));
+            Assert.True(long_specification_full.IsSatisfiedBy(dto_two));
 
-            Assert.IsFalse(number_specification_full.IsSatisfiedBy(dto_one));
-            Assert.IsTrue(number_specification_empty.IsSatisfiedBy(dto_one));
-            Assert.IsFalse(number_specification_empty.IsSatisfiedBy(dto_two));
-            Assert.IsTrue(number_specification_full.IsSatisfiedBy(dto_two));
+            Assert.False(number_specification_full.IsSatisfiedBy(dto_one));
+            Assert.True(number_specification_empty.IsSatisfiedBy(dto_one));
+            Assert.False(number_specification_empty.IsSatisfiedBy(dto_two));
+            Assert.True(number_specification_full.IsSatisfiedBy(dto_two));
 
-            Assert.IsFalse(real_specification_full.IsSatisfiedBy(dto_one));
-            Assert.IsTrue(real_specification_empty.IsSatisfiedBy(dto_one));
-            Assert.IsFalse(real_specification_empty.IsSatisfiedBy(dto_two));
-            Assert.IsTrue(real_specification_full.IsSatisfiedBy(dto_two));
+            Assert.False(real_specification_full.IsSatisfiedBy(dto_one));
+            Assert.True(real_specification_empty.IsSatisfiedBy(dto_one));
+            Assert.False(real_specification_empty.IsSatisfiedBy(dto_two));
+            Assert.True(real_specification_full.IsSatisfiedBy(dto_two));
 
-            Assert.IsFalse(summary_specification_full.IsSatisfiedBy(dto_one));
-            Assert.IsTrue(summary_specification_empty.IsSatisfiedBy(dto_one));
-            Assert.IsFalse(summary_specification_empty.IsSatisfiedBy(dto_two));
-            Assert.IsTrue(summary_specification_full.IsSatisfiedBy(dto_two));
+            Assert.False(summary_specification_full.IsSatisfiedBy(dto_one));
+            Assert.True(summary_specification_empty.IsSatisfiedBy(dto_one));
+            Assert.False(summary_specification_empty.IsSatisfiedBy(dto_two));
+            Assert.True(summary_specification_full.IsSatisfiedBy(dto_two));
 
-            Assert.IsFalse(title_specification_full.IsSatisfiedBy(dto_one));
-            Assert.IsTrue(title_specification_empty.IsSatisfiedBy(dto_one));
-            Assert.IsFalse(title_specification_empty.IsSatisfiedBy(dto_two));
-            Assert.IsTrue(title_specification_full.IsSatisfiedBy(dto_two));
+            Assert.False(title_specification_full.IsSatisfiedBy(dto_one));
+            Assert.True(title_specification_empty.IsSatisfiedBy(dto_one));
+            Assert.False(title_specification_empty.IsSatisfiedBy(dto_two));
+            Assert.True(title_specification_full.IsSatisfiedBy(dto_two));
         }
 
-        [TestMethod]
+        [Fact]
         public void ComposedAndSpecificationTest()
         {
             // Assert
@@ -212,13 +211,13 @@ namespace ZeroSpecificationPatternsTest
                 And(title_specification_empty);
 
             // Assert
-            Assert.IsTrue(composed_full.IsSatisfiedBy(dto_one));
-            Assert.IsFalse(composed_empty.IsSatisfiedBy(dto_one));
-            Assert.IsTrue(composed_empty.IsSatisfiedBy(dto_two));
-            Assert.IsFalse(composed_full.IsSatisfiedBy(dto_two));
+            Assert.True(composed_full.IsSatisfiedBy(dto_one));
+            Assert.False(composed_empty.IsSatisfiedBy(dto_one));
+            Assert.True(composed_empty.IsSatisfiedBy(dto_two));
+            Assert.False(composed_full.IsSatisfiedBy(dto_two));
         }
 
-        [TestMethod]
+        [Fact]
         public void ComposedOrSpecificationTest()
         {
             // Assert
@@ -275,13 +274,13 @@ namespace ZeroSpecificationPatternsTest
                 Or(title_specification_empty);
 
             // Assert
-            Assert.IsTrue(composed_full.IsSatisfiedBy(dto_one));
-            Assert.IsTrue(composed_empty.IsSatisfiedBy(dto_one));
-            Assert.IsTrue(composed_empty.IsSatisfiedBy(dto_two));
-            Assert.IsTrue(composed_full.IsSatisfiedBy(dto_two));
+            Assert.True(composed_full.IsSatisfiedBy(dto_one));
+            Assert.True(composed_empty.IsSatisfiedBy(dto_one));
+            Assert.True(composed_empty.IsSatisfiedBy(dto_two));
+            Assert.True(composed_full.IsSatisfiedBy(dto_two));
         }
 
-        [TestMethod]
+        [Fact]
         public void ExpressionSpecificationTest()
         {
             // Assert
@@ -322,38 +321,38 @@ namespace ZeroSpecificationPatternsTest
             var title_specification_empty = new ExpressionSpecification<TestDTO>(o => o.Title == string.Empty);
 
             // Assert
-            Assert.IsTrue(flag_spec_true.IsSatisfiedBy(dto_one));
-            Assert.IsFalse(flag_spec_false.IsSatisfiedBy(dto_one));
-            Assert.IsTrue(flag_spec_false.IsSatisfiedBy(dto_two));
-            Assert.IsFalse(flag_spec_true.IsSatisfiedBy(dto_two));
+            Assert.True(flag_spec_true.IsSatisfiedBy(dto_one));
+            Assert.False(flag_spec_false.IsSatisfiedBy(dto_one));
+            Assert.True(flag_spec_false.IsSatisfiedBy(dto_two));
+            Assert.False(flag_spec_true.IsSatisfiedBy(dto_two));
 
-            Assert.IsTrue(long_specification_full.IsSatisfiedBy(dto_one));
-            Assert.IsFalse(long_specification_empty.IsSatisfiedBy(dto_one));
-            Assert.IsTrue(long_specification_empty.IsSatisfiedBy(dto_two));
-            Assert.IsFalse(long_specification_full.IsSatisfiedBy(dto_two));
+            Assert.True(long_specification_full.IsSatisfiedBy(dto_one));
+            Assert.False(long_specification_empty.IsSatisfiedBy(dto_one));
+            Assert.True(long_specification_empty.IsSatisfiedBy(dto_two));
+            Assert.False(long_specification_full.IsSatisfiedBy(dto_two));
 
-            Assert.IsTrue(number_specification_full.IsSatisfiedBy(dto_one));
-            Assert.IsFalse(number_specification_empty.IsSatisfiedBy(dto_one));
-            Assert.IsTrue(number_specification_empty.IsSatisfiedBy(dto_two));
-            Assert.IsFalse(number_specification_full.IsSatisfiedBy(dto_two));
+            Assert.True(number_specification_full.IsSatisfiedBy(dto_one));
+            Assert.False(number_specification_empty.IsSatisfiedBy(dto_one));
+            Assert.True(number_specification_empty.IsSatisfiedBy(dto_two));
+            Assert.False(number_specification_full.IsSatisfiedBy(dto_two));
 
-            Assert.IsTrue(real_specification_full.IsSatisfiedBy(dto_one));
-            Assert.IsFalse(real_specification_empty.IsSatisfiedBy(dto_one));
-            Assert.IsTrue(real_specification_empty.IsSatisfiedBy(dto_two));
-            Assert.IsFalse(real_specification_full.IsSatisfiedBy(dto_two));
+            Assert.True(real_specification_full.IsSatisfiedBy(dto_one));
+            Assert.False(real_specification_empty.IsSatisfiedBy(dto_one));
+            Assert.True(real_specification_empty.IsSatisfiedBy(dto_two));
+            Assert.False(real_specification_full.IsSatisfiedBy(dto_two));
 
-            Assert.IsTrue(summary_specification_full.IsSatisfiedBy(dto_one));
-            Assert.IsFalse(summary_specification_empty.IsSatisfiedBy(dto_one));
-            Assert.IsTrue(summary_specification_empty.IsSatisfiedBy(dto_two));
-            Assert.IsFalse(summary_specification_full.IsSatisfiedBy(dto_two));
+            Assert.True(summary_specification_full.IsSatisfiedBy(dto_one));
+            Assert.False(summary_specification_empty.IsSatisfiedBy(dto_one));
+            Assert.True(summary_specification_empty.IsSatisfiedBy(dto_two));
+            Assert.False(summary_specification_full.IsSatisfiedBy(dto_two));
 
-            Assert.IsTrue(title_specification_full.IsSatisfiedBy(dto_one));
-            Assert.IsFalse(title_specification_empty.IsSatisfiedBy(dto_one));
-            Assert.IsTrue(title_specification_empty.IsSatisfiedBy(dto_two));
-            Assert.IsFalse(title_specification_full.IsSatisfiedBy(dto_two));
+            Assert.True(title_specification_full.IsSatisfiedBy(dto_one));
+            Assert.False(title_specification_empty.IsSatisfiedBy(dto_one));
+            Assert.True(title_specification_empty.IsSatisfiedBy(dto_two));
+            Assert.False(title_specification_full.IsSatisfiedBy(dto_two));
         }
 
-        [TestMethod]
+        [Fact]
         public void ComposedExpressionSpecificationTest()
         {
             // Assert
@@ -410,10 +409,10 @@ namespace ZeroSpecificationPatternsTest
                 And(title_specification_empty);
 
             // Assert
-            Assert.IsTrue(composed_full.IsSatisfiedBy(dto_one));
-            Assert.IsFalse(composed_empty.IsSatisfiedBy(dto_one));
-            Assert.IsTrue(composed_empty.IsSatisfiedBy(dto_two));
-            Assert.IsFalse(composed_full.IsSatisfiedBy(dto_two));
+            Assert.True(composed_full.IsSatisfiedBy(dto_one));
+            Assert.False(composed_empty.IsSatisfiedBy(dto_one));
+            Assert.True(composed_empty.IsSatisfiedBy(dto_two));
+            Assert.False(composed_full.IsSatisfiedBy(dto_two));
         }
     }
 }

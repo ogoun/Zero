@@ -1,7 +1,7 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Xunit;
 using ZeroLevel.Patterns.Queries;
 using ZeroSpecificationPatternsTest.Models;
 
@@ -10,7 +10,6 @@ namespace ZeroSpecificationPatternsTest
     /// <summary>
     /// Summary description for UnitTest1
     /// </summary>
-    [TestClass]
     public class QueriesTests
     {
         private static bool TestDTOEqual(TestDTO left, TestDTO right)
@@ -26,7 +25,7 @@ namespace ZeroSpecificationPatternsTest
             return true;
         }
 
-        [TestMethod]
+        [Fact]
         public void MemoryStoragePostTest()
         {
             var storage = new MemoryStorage<TestDTO>();
@@ -57,15 +56,15 @@ namespace ZeroSpecificationPatternsTest
                 Summary = "Summary #3",
                 Title = "Title #3"
             });
-            Assert.IsTrue(a1.Success);
-            Assert.AreEqual<long>(a1.Count, 1);
-            Assert.IsTrue(a2.Success);
-            Assert.AreEqual<long>(a2.Count, 1);
-            Assert.IsTrue(a3.Success);
-            Assert.AreEqual<long>(a3.Count, 1);
+            Assert.True(a1.Success);
+            Assert.Equal<long>(a1.Count, 1);
+            Assert.True(a2.Success);
+            Assert.Equal<long>(a2.Count, 1);
+            Assert.True(a3.Success);
+            Assert.Equal<long>(a3.Count, 1);
         }
 
-        [TestMethod]
+        [Fact]
         public void MemoryStorageGetAllTest()
         {
             var set = new List<TestDTO>();
@@ -100,13 +99,13 @@ namespace ZeroSpecificationPatternsTest
             foreach (var i in set)
             {
                 var ar = storage.Post(i);
-                Assert.IsTrue(ar.Success);
-                Assert.AreEqual<long>(ar.Count, 1);
+                Assert.True(ar.Success);
+                Assert.Equal<long>(ar.Count, 1);
             }
             // Test equals set and storage data
             foreach (var i in storage.Get())
             {
-                Assert.IsTrue(set.Exists(dto => TestDTOEqual(i, dto)));
+                Assert.True(set.Exists(dto => TestDTOEqual(i, dto)));
             }
             // Modify originals
             foreach (var i in set)
@@ -116,12 +115,12 @@ namespace ZeroSpecificationPatternsTest
             // Test independences storage from original
             foreach (var i in storage.Get())
             {
-                Assert.IsFalse(set.Exists(dto => TestDTOEqual(i, dto)));
+                Assert.False(set.Exists(dto => TestDTOEqual(i, dto)));
             }
         }
 
 
-        [TestMethod]
+        [Fact]
         public void MemoryStorageGetByTest()
         {
             var set = new List<TestDTO>();
@@ -156,35 +155,35 @@ namespace ZeroSpecificationPatternsTest
             foreach (var i in set)
             {
                 var ar = storage.Post(i);
-                Assert.IsTrue(ar.Success);
-                Assert.AreEqual<long>(ar.Count, 1);
+                Assert.True(ar.Success);
+                Assert.Equal<long>(ar.Count, 1);
             }
             // Test equals set and storage data
             foreach (var i in storage.Get())
             {
-                Assert.IsTrue(set.Exists(dto => TestDTOEqual(i, dto)));
+                Assert.True(set.Exists(dto => TestDTOEqual(i, dto)));
             }
             foreach (var i in storage.Get(Query.ALL()))
             {
-                Assert.IsTrue(set.Exists(dto => TestDTOEqual(i, dto)));
+                Assert.True(set.Exists(dto => TestDTOEqual(i, dto)));
             }
             var result_eq = storage.Get(Query.EQ("Title", "Title #1"));
-            Assert.AreEqual<int>(result_eq.Count(), 1);
-            Assert.IsTrue(TestDTOEqual(set[0], result_eq.First()));
+            Assert.Equal<int>(result_eq.Count(), 1);
+            Assert.True(TestDTOEqual(set[0], result_eq.First()));
 
             var result_neq = storage.Get(Query.NEQ("Title", "Title #1"));
-            Assert.AreEqual<int>(result_neq.Count(), 2);
-            Assert.IsTrue(TestDTOEqual(set[1], result_neq.First()));
-            Assert.IsTrue(TestDTOEqual(set[2], result_neq.Skip(1).First()));
+            Assert.Equal<int>(result_neq.Count(), 2);
+            Assert.True(TestDTOEqual(set[1], result_neq.First()));
+            Assert.True(TestDTOEqual(set[2], result_neq.Skip(1).First()));
 
             var result_gt = storage.Get(Query.GT("Number", 1));
-            Assert.AreEqual<int>(result_gt.Count(), 2);
-            Assert.IsTrue(TestDTOEqual(set[0], result_gt.First()));
-            Assert.IsTrue(TestDTOEqual(set[2], result_gt.Skip(1).First()));
+            Assert.Equal<int>(result_gt.Count(), 2);
+            Assert.True(TestDTOEqual(set[0], result_gt.First()));
+            Assert.True(TestDTOEqual(set[2], result_gt.Skip(1).First()));
 
             var result_lt = storage.Get(Query.LT("Number", 1));
-            Assert.AreEqual<int>(result_lt.Count(), 1);
-            Assert.IsTrue(TestDTOEqual(set[1], result_lt.First()));
+            Assert.Equal<int>(result_lt.Count(), 1);
+            Assert.True(TestDTOEqual(set[1], result_lt.First()));
         }
     }
 }

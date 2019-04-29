@@ -405,10 +405,6 @@ namespace ZeroLevel.Services.Logging.Implementation
             if (Directory.Exists(path) == false)
             {
                 Directory.CreateDirectory(path);
-                FSUtils.SetupFolderPermission(path,
-                    $"{Environment.UserDomainName}\\{Environment.UserName}",
-                    FileSystemRights.Write | FileSystemRights.Read | FileSystemRights.Delete | FileSystemRights.Modify,
-                    AccessControlType.Allow);
             }
         }
 

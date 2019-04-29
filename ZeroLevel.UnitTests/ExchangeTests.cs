@@ -1,19 +1,14 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.Net;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
+using Xunit;
 using ZeroLevel.Network;
 
 namespace ZeroLevel.NetworkUnitTests
 {
-    [TestClass]
     public class ExchangeTests
     {
-        [TestMethod]
+        [Fact]
         public void HandleMessageTest()
         {
             // Arrange
@@ -41,8 +36,8 @@ namespace ZeroLevel.NetworkUnitTests
             locker.WaitOne(1000);
 
             // Assert
-            Assert.IsTrue(ir.Success);
-            Assert.IsTrue(info.Equals(received));
+            Assert.True(ir.Success);
+            Assert.True(info.Equals(received));
 
             // Dispose
             locker.Dispose();
@@ -50,7 +45,7 @@ namespace ZeroLevel.NetworkUnitTests
             server.Dispose();
         }
 
-        [TestMethod]
+        [Fact]
         public void RequestMessageTest()
         {
             // Arrange
@@ -85,8 +80,8 @@ namespace ZeroLevel.NetworkUnitTests
             locker.WaitOne(1000);
 
             // Assert
-            Assert.IsTrue(ir.Success);
-            Assert.IsTrue(CollectionComparsionExtensions.OrderingEquals(new[] { info1, info2 }, received, (a, b) => a.Equals(b)));
+            Assert.True(ir.Success);
+            Assert.True(CollectionComparsionExtensions.OrderingEquals(new[] { info1, info2 }, received, (a, b) => a.Equals(b)));
 
             // Dispose
             locker.Dispose();

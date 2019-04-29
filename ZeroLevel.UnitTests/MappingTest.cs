@@ -1,16 +1,15 @@
 ﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using ZeroLevel.Services.ObjectMapping;
 using ZeroMappingTest.Models;
 using System.Collections.Generic;
 using BusinessApp.DatabaseTest.Model;
+using Xunit;
 
 namespace ZeroMappingTest
 {
-    [TestClass]
     public class MappingTest
     {
-        [TestMethod]
+        [Fact]
         public void TestAbstractClassGetInfo()
         {
             // Arrange
@@ -19,24 +18,24 @@ namespace ZeroMappingTest
             var list = new List<string>();
             mapper.TraversalMembers(f => list.Add(f.Name));
             // Assert
-            Assert.IsTrue(mapper.Exists("Id"));
-            Assert.IsTrue(mapper.Exists("Title"));
-            Assert.IsTrue(mapper.Exists("Description"));
+            Assert.True(mapper.Exists("Id"));
+            Assert.True(mapper.Exists("Title"));
+            Assert.True(mapper.Exists("Description"));
 
-            Assert.IsTrue(list.Contains("Id"));
-            Assert.IsTrue(list.Contains("Title"));
-            Assert.IsTrue(list.Contains("Description"));
+            Assert.True(list.Contains("Id"));
+            Assert.True(list.Contains("Title"));
+            Assert.True(list.Contains("Description"));
 
-            Assert.IsFalse(mapper.Exists("Version"));
-            Assert.IsFalse(mapper.Exists("Created"));
+            Assert.False(mapper.Exists("Version"));
+            Assert.False(mapper.Exists("Created"));
 
-            Assert.IsFalse(list.Contains("Version"));
-            Assert.IsFalse(list.Contains("Created"));
+            Assert.False(list.Contains("Version"));
+            Assert.False(list.Contains("Created"));
 
-            Assert.AreEqual(mapper.EntityType, typeof(BaseClass));
+            Assert.Equal(mapper.EntityType, typeof(BaseClass));
         }
 
-        [TestMethod]
+        [Fact]
         public void TestInheritedClassGetInfo()
         {
             // Arrange
@@ -45,34 +44,34 @@ namespace ZeroMappingTest
             var list = new List<string>();
             mapper.TraversalMembers(f => list.Add(f.Name));
             // Assert
-            Assert.IsTrue(mapper.Exists("Id"));
-            Assert.IsTrue(mapper.Exists("Title"));
-            Assert.IsTrue(mapper.Exists("Description"));
-            Assert.IsTrue(mapper.Exists("Number"));
-            Assert.IsTrue(mapper.Exists("Balance"));
-            Assert.IsTrue(mapper.Exists("ReadOnlyProperty"));
-            Assert.IsTrue(mapper.Exists("WriteOnlyProperty"));
+            Assert.True(mapper.Exists("Id"));
+            Assert.True(mapper.Exists("Title"));
+            Assert.True(mapper.Exists("Description"));
+            Assert.True(mapper.Exists("Number"));
+            Assert.True(mapper.Exists("Balance"));
+            Assert.True(mapper.Exists("ReadOnlyProperty"));
+            Assert.True(mapper.Exists("WriteOnlyProperty"));
 
-            Assert.IsTrue(list.Contains("Id"));
-            Assert.IsTrue(list.Contains("Title"));
-            Assert.IsTrue(list.Contains("Description"));
-            Assert.IsTrue(list.Contains("Number"));
-            Assert.IsTrue(list.Contains("Balance"));
-            Assert.IsTrue(list.Contains("ReadOnlyProperty"));
-            Assert.IsTrue(list.Contains("WriteOnlyProperty"));
+            Assert.True(list.Contains("Id"));
+            Assert.True(list.Contains("Title"));
+            Assert.True(list.Contains("Description"));
+            Assert.True(list.Contains("Number"));
+            Assert.True(list.Contains("Balance"));
+            Assert.True(list.Contains("ReadOnlyProperty"));
+            Assert.True(list.Contains("WriteOnlyProperty"));
 
-            Assert.IsFalse(mapper.Exists("HiddenField"));
-            Assert.IsFalse(mapper.Exists("Version"));
-            Assert.IsFalse(mapper.Exists("Created"));
+            Assert.False(mapper.Exists("HiddenField"));
+            Assert.False(mapper.Exists("Version"));
+            Assert.False(mapper.Exists("Created"));
 
-            Assert.IsFalse(list.Contains("HiddenField"));
-            Assert.IsFalse(list.Contains("Version"));
-            Assert.IsFalse(list.Contains("Created"));
+            Assert.False(list.Contains("HiddenField"));
+            Assert.False(list.Contains("Version"));
+            Assert.False(list.Contains("Created"));
 
-            Assert.AreEqual(mapper.EntityType, typeof(ChildClass));
+            Assert.Equal(mapper.EntityType, typeof(ChildClass));
         }
         
-        [TestMethod]
+        [Fact]
         public void TestAbstractClassMapping()
         {
             // Arrange
@@ -94,24 +93,25 @@ namespace ZeroMappingTest
             mapper.Set(instance, "Title", title);
             mapper.Set(instance, "Description", description);
             // Assert
-            Assert.AreEqual<Guid>(mapper.Get<Guid>(instance, "Id"), id);
-            Assert.AreEqual<string>(mapper.Get<string>(instance, "Title"), title);
-            Assert.AreEqual<string>(mapper.Get<string>(instance, "Description"), description);
+            Assert.Equal<Guid>(mapper.Get<Guid>(instance, "Id"), id);
+            Assert.Equal<string>(mapper.Get<string>(instance, "Title"), title);
+            Assert.Equal<string>(mapper.Get<string>(instance, "Description"), description);
 
-            Assert.AreEqual(mapper.Get(instance, "Id"), id);
-            Assert.AreEqual(mapper.Get(instance, "Title"), title);
-            Assert.AreEqual(mapper.Get(instance, "Description"), description);
+            Assert.Equal(mapper.Get(instance, "Id"), id);
+            Assert.Equal(mapper.Get(instance, "Title"), title);
+            Assert.Equal(mapper.Get(instance, "Description"), description);
+
             try
             {
                 mapper.Get(instance, "Number");
-                Assert.Fail("Must be inaccessability");
+                Assert.True(false, "Must be inaccessability");
             }
             catch
             {
             }
         }
         
-        [TestMethod]
+        [Fact]
         public void TestInheritedClassMapping()
         {
             // Arrange
@@ -139,23 +139,23 @@ namespace ZeroMappingTest
             mapper.Set(instance, "Number", number);
             mapper.Set(instance, "Balance", balance);
             // Assert
-            Assert.AreEqual<Guid>(mapper.Get<Guid>(instance, "Id"), id);
-            Assert.AreEqual<string>(mapper.Get<string>(instance, "Title"), title);
-            Assert.AreEqual<string>(mapper.Get<string>(instance, "Description"), description);
-            Assert.AreEqual<int>(mapper.Get<int>(instance, "Number"), number);
-            Assert.AreEqual<int>(mapper.Get<int>(instance, "Balance"), balance);
+            Assert.Equal<Guid>(mapper.Get<Guid>(instance, "Id"), id);
+            Assert.Equal<string>(mapper.Get<string>(instance, "Title"), title);
+            Assert.Equal<string>(mapper.Get<string>(instance, "Description"), description);
+            Assert.Equal<int>(mapper.Get<int>(instance, "Number"), number);
+            Assert.Equal<int>(mapper.Get<int>(instance, "Balance"), balance);
 
-            Assert.AreEqual(mapper.Get(instance, "Id"), id);
-            Assert.AreEqual(mapper.Get(instance, "Title"), title);
-            Assert.AreEqual(mapper.Get(instance, "Description"), description);
-            Assert.AreEqual(mapper.Get(instance, "Number"), number);
-            Assert.AreEqual(mapper.Get(instance, "Balance"), balance);
+            Assert.Equal(mapper.Get(instance, "Id"), id);
+            Assert.Equal(mapper.Get(instance, "Title"), title);
+            Assert.Equal(mapper.Get(instance, "Description"), description);
+            Assert.Equal(mapper.Get(instance, "Number"), number);
+            Assert.Equal(mapper.Get(instance, "Balance"), balance);
 
             try
             {
                 var test = 1000;
                 mapper.Set(instance, "ReadOnlyProperty", test);
-                Assert.Fail("There should be no possibility to set a value.");
+                Assert.True(false, "There should be no possibility to set a value.");
             }
             catch
             {
@@ -165,7 +165,7 @@ namespace ZeroMappingTest
             try
             {
                 mapper.Get(instance, "WriteOnlyProperty");
-                Assert.Fail("There should be no possibility to get a value.");
+                Assert.True(false, "There should be no possibility to get a value.");
             }
             catch
             {
@@ -178,7 +178,7 @@ namespace ZeroMappingTest
             }
             catch
             {
-                Assert.Fail("It should be possible to get the default value.");
+                Assert.True(false, "It should be possible to get the default value.");
             }
 
             try
@@ -187,11 +187,11 @@ namespace ZeroMappingTest
             }
             catch(Exception ex)
             {
-                Assert.Fail(ex.Message);
+                Assert.True(false, ex.Message);
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void TestMapperscaching()
         {
             // Arrange
@@ -200,12 +200,12 @@ namespace ZeroMappingTest
             var mapper3 = TypeMapper.Create<ChildClass>(false);
             // Act
             // Assert
-            Assert.AreSame(mapper1, mapper2);
-            Assert.AreNotSame(mapper1, mapper3);
-            Assert.AreNotSame(mapper3, mapper2);
+            Assert.Same(mapper1, mapper2);
+            Assert.NotSame(mapper1, mapper3);
+            Assert.NotSame(mapper3, mapper2);
         }
 
-        [TestMethod]
+        [Fact]
         public void PocoFieldMapper()
         {
             // Arrange
@@ -214,21 +214,21 @@ namespace ZeroMappingTest
             var obj = new PocoFields { Id = 1000, Date = date, Title = "Caption" };
 
             // Assert
-            Assert.AreEqual(mapper.EntityType, typeof(PocoFields));
+            Assert.Equal(mapper.EntityType, typeof(PocoFields));
 
-            Assert.IsTrue(mapper.Exists("Id"));
-            Assert.IsTrue(mapper.Exists("Date"));
-            Assert.IsTrue(mapper.Exists("Title"));
+            Assert.True(mapper.Exists("Id"));
+            Assert.True(mapper.Exists("Date"));
+            Assert.True(mapper.Exists("Title"));
 
-            Assert.AreEqual(mapper.Get(obj, "Id"), (long)1000);
-            Assert.AreEqual(mapper.Get(obj, "Date"), date);
-            Assert.AreEqual(mapper.Get(obj, "Title"), "Caption");
+            Assert.Equal(mapper.Get(obj, "Id"), (long)1000);
+            Assert.Equal(mapper.Get(obj, "Date"), date);
+            Assert.Equal(mapper.Get(obj, "Title"), "Caption");
 
             mapper.Set(obj, "Id", 1001);
-            Assert.AreEqual(mapper.Get(obj, "Id"), (long)1001);
+            Assert.Equal(mapper.Get(obj, "Id"), (long)1001);
         }
 
-        [TestMethod]
+        [Fact]
         public void PocoPropertiesMapper()
         {
             // Arrange
@@ -237,18 +237,18 @@ namespace ZeroMappingTest
             var obj = new PocoProperties { Id = 1000, Date = date, Title = "Caption" };
 
             // Assert
-            Assert.AreEqual(mapper.EntityType, typeof(PocoProperties));
+            Assert.Equal(mapper.EntityType, typeof(PocoProperties));
 
-            Assert.IsTrue(mapper.Exists("Id"));
-            Assert.IsTrue(mapper.Exists("Date"));
-            Assert.IsTrue(mapper.Exists("Title"));
+            Assert.True(mapper.Exists("Id"));
+            Assert.True(mapper.Exists("Date"));
+            Assert.True(mapper.Exists("Title"));
 
-            Assert.AreEqual(mapper.Get(obj, "Id"), (long)1000);
-            Assert.AreEqual(mapper.Get(obj, "Date"), date);
-            Assert.AreEqual(mapper.Get(obj, "Title"), "Caption");
+            Assert.Equal(mapper.Get(obj, "Id"), (long)1000);
+            Assert.Equal(mapper.Get(obj, "Date"), date);
+            Assert.Equal(mapper.Get(obj, "Title"), "Caption");
 
             mapper.Set(obj, "Id", 1001);
-            Assert.AreEqual(mapper.Get(obj, "Id"), (long)1001);
+            Assert.Equal(mapper.Get(obj, "Id"), (long)1001);
         }
     }
 }

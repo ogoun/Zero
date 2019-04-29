@@ -41,24 +41,6 @@ namespace ZeroLevel.Services.FileSystem
             return folderName;
         }
 
-        /// <summary>
-        /// Sets the directory permissions for the account
-        /// </summary>
-        /// <param name="folderPath">Directory path</param>
-        /// <param name="account">Account</param>
-        /// <param name="right">Access rights</param>
-        /// <param name="controlType">Access type</param>
-        public static void SetupFolderPermission(string folderPath, string account,
-            FileSystemRights right, AccessControlType controlType)
-        {
-            DirectoryInfo directory = new DirectoryInfo(folderPath);
-            DirectorySecurity security = directory.GetAccessControl();
-            security.AddAccessRule(new FileSystemAccessRule(account, right,
-                InheritanceFlags.ContainerInherit | InheritanceFlags.ObjectInherit,
-                PropagationFlags.None, controlType));
-            directory.SetAccessControl(security);
-        }
-
         #region FileName & Path correction
 
         private static string _invalid_path_characters = new string(Path.GetInvalidPathChars());

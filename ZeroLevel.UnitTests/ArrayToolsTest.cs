@@ -1,10 +1,9 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
+﻿using System;
+using Xunit;
 using ZeroLevel;
 
 namespace ZeroArrayExtensionsTest
 {
-    [TestClass]
     public class ArrayExtensionsTest
     {
         internal class EQDTO
@@ -30,7 +29,7 @@ namespace ZeroArrayExtensionsTest
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void ByteArrayEqualTest()
         {
             // Arrange
@@ -44,20 +43,20 @@ namespace ZeroArrayExtensionsTest
             var a8 = new byte[0];
 
             // Assert
-            Assert.IsTrue(ArrayExtensions.UnsafeEquals(a1, a2));
-            Assert.IsTrue(ArrayExtensions.UnsafeEquals(a5, a6));
-            Assert.IsTrue(ArrayExtensions.UnsafeEquals(a7, a8));
+            Assert.True(ArrayExtensions.UnsafeEquals(a1, a2));
+            Assert.True(ArrayExtensions.UnsafeEquals(a5, a6));
+            Assert.True(ArrayExtensions.UnsafeEquals(a7, a8));
 
-            Assert.IsFalse(ArrayExtensions.UnsafeEquals(a1, a3));
-            Assert.IsFalse(ArrayExtensions.UnsafeEquals(a1, a4));
+            Assert.False(ArrayExtensions.UnsafeEquals(a1, a3));
+            Assert.False(ArrayExtensions.UnsafeEquals(a1, a4));
 
-            Assert.IsFalse(ArrayExtensions.UnsafeEquals(a1, a5));
-            Assert.IsFalse(ArrayExtensions.UnsafeEquals(a1, a7));
+            Assert.False(ArrayExtensions.UnsafeEquals(a1, a5));
+            Assert.False(ArrayExtensions.UnsafeEquals(a1, a7));
 
-            Assert.IsFalse(ArrayExtensions.UnsafeEquals(a5, a7));
+            Assert.False(ArrayExtensions.UnsafeEquals(a5, a7));
         }
 
-        [TestMethod]
+        [Fact]
         public void ArrayEqualTest()
         {
             // Arrange
@@ -83,8 +82,8 @@ namespace ZeroArrayExtensionsTest
             };
 
             //Assert
-            Assert.IsTrue(ArrayExtensions.Contains(arr1, arr2));
-            Assert.IsFalse(ArrayExtensions.Contains(arr1, arr3));
+            Assert.True(ArrayExtensions.Contains(arr1, arr2));
+            Assert.False(ArrayExtensions.Contains(arr1, arr3));
         }
     }
 }

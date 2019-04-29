@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using DOM.Services;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 using ZeroLevel.DocumentObjectModel;
 using ZeroLevel.Network;
 using ZeroLevel.Services.Serialization;
@@ -11,7 +11,6 @@ using ZeroLevel.UnitTests.Models;
 
 namespace ZeroLevel.UnitTests
 {
-    [TestClass]
     public class SerializationTests
     {
         private static bool TestOrderingEquals<T>(IEnumerable<T> A, IEnumerable<T> B, Func<T, T, bool> comparer)
@@ -38,11 +37,11 @@ namespace ZeroLevel.UnitTests
             // Assert
             if (comparator == null)
             {
-                Assert.AreEqual<T>(value, clone);
+                Assert.Equal<T>(value, clone);
             }
             else
             {
-                Assert.IsTrue(comparator(value, clone));
+                Assert.True(comparator(value, clone));
             }
         }
 
@@ -56,15 +55,15 @@ namespace ZeroLevel.UnitTests
             if (value == null && clone != null && !clone.Any()) return; // OK
             if (comparator == null)
             {
-                Assert.IsTrue(CollectionComparsionExtensions.OrderingEquals(value, clone));
+                Assert.True(CollectionComparsionExtensions.OrderingEquals(value, clone));
             }
             else
             {
-                Assert.IsTrue(TestOrderingEquals(value, clone, comparator));
+                Assert.True(TestOrderingEquals(value, clone, comparator));
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void SerializeDateTime()
         {
             MakePrimitiveTest<DateTime>(DateTime.Now);
@@ -75,7 +74,7 @@ namespace ZeroLevel.UnitTests
             MakePrimitiveTest<DateTime>(DateTime.MaxValue);
         }
 
-        [TestMethod]
+        [Fact]
         public void SerializeIPAddress()
         {
             var comparator = new Func<IPAddress, IPAddress, bool>((left, right) => NetUtils.Compare(left, right) == 0);
@@ -89,7 +88,7 @@ namespace ZeroLevel.UnitTests
             MakePrimitiveTest<IPAddress>(IPAddress.Parse("93.111.16.58"), comparator);
         }
 
-        [TestMethod]
+        [Fact]
         public void SerializeIPEndPoint()
         {
             var comparator = new Func<IPEndPoint, IPEndPoint, bool>((left, right) => NetUtils.Compare(left, right) == 0);
@@ -103,14 +102,14 @@ namespace ZeroLevel.UnitTests
             MakePrimitiveTest<IPEndPoint>(new IPEndPoint(IPAddress.Parse("93.111.16.58"), IPEndPoint.MinPort), comparator);
         }
 
-        [TestMethod]
+        [Fact]
         public void SerializeGuid()
         {
             MakePrimitiveTest<Guid>(Guid.Empty);
             MakePrimitiveTest<Guid>(Guid.NewGuid());
         }
 
-        [TestMethod]
+        [Fact]
         public void SerializeTimeSpan()
         {
             MakePrimitiveTest<TimeSpan>(TimeSpan.MaxValue);
@@ -122,7 +121,7 @@ namespace ZeroLevel.UnitTests
             MakePrimitiveTest<TimeSpan>(TimeSpan.FromTicks(0));
         }
 
-        [TestMethod]
+        [Fact]
         public void SerializeString()
         {
             var comparator = new Func<string, string, bool>((left, right) =>
@@ -137,7 +136,7 @@ namespace ZeroLevel.UnitTests
             MakePrimitiveTest<String>("𐌼𐌰𐌲 𐌲𐌻𐌴𐍃 𐌹̈𐍄𐌰𐌽, 𐌽𐌹 𐌼𐌹𐍃 𐍅𐌿 𐌽𐌳𐌰𐌽 𐌱𐍂𐌹𐌲𐌲𐌹𐌸", comparator);
         }
 
-        [TestMethod]
+        [Fact]
         public void SerializeInt32()
         {
             MakePrimitiveTest<Int32>(-0);
@@ -148,7 +147,7 @@ namespace ZeroLevel.UnitTests
             MakePrimitiveTest<Int32>(Int32.MaxValue);
         }
 
-        [TestMethod]
+        [Fact]
         public void SerializeInt64()
         {
             MakePrimitiveTest<Int64>(-0);
@@ -161,7 +160,7 @@ namespace ZeroLevel.UnitTests
             MakePrimitiveTest<Int64>(Int64.MaxValue / 2);
         }
 
-        [TestMethod]
+        [Fact]
         public void SerializeDecimal()
         {
             MakePrimitiveTest<Decimal>(-0);
@@ -174,7 +173,7 @@ namespace ZeroLevel.UnitTests
             MakePrimitiveTest<Decimal>(Decimal.MaxValue / 2);
         }
 
-        [TestMethod]
+        [Fact]
         public void SerializeFloat()
         {
             MakePrimitiveTest<float>(-0);
@@ -187,7 +186,7 @@ namespace ZeroLevel.UnitTests
             MakePrimitiveTest<float>(float.MaxValue / 2);
         }
 
-        [TestMethod]
+        [Fact]
         public void SerializeDouble()
         {
             MakePrimitiveTest<Double>(-0);
@@ -200,14 +199,14 @@ namespace ZeroLevel.UnitTests
             MakePrimitiveTest<Double>(Double.MaxValue / 2);
         }
 
-        [TestMethod]
+        [Fact]
         public void SerializeBoolean()
         {
             MakePrimitiveTest<Boolean>(true);
             MakePrimitiveTest<Boolean>(false);
         }
 
-        [TestMethod]
+        [Fact]
         public void SerializeByte()
         {
             MakePrimitiveTest<Byte>(0);
@@ -218,7 +217,7 @@ namespace ZeroLevel.UnitTests
             MakePrimitiveTest<Byte>(255);
         }
 
-        [TestMethod]
+        [Fact]
         public void SerializeBytes()
         {
             var comparator = new Func<byte[], byte[], bool>((left, right) =>
@@ -233,7 +232,7 @@ namespace ZeroLevel.UnitTests
          COLLECTIONS
          */
 
-        [TestMethod]
+        [Fact]
         public void SerializeCollectionDateTime()
         {
             MakeCollectionTest<DateTime>(null);
@@ -241,7 +240,7 @@ namespace ZeroLevel.UnitTests
             MakeCollectionTest<DateTime>(new DateTime[] { DateTime.Now, DateTime.UtcNow, DateTime.Today, DateTime.Now.AddYears(2000), DateTime.MinValue, DateTime.MaxValue });
         }
 
-        [TestMethod]
+        [Fact]
         public void SerializeCollectionIPAddress()
         {
             var comparator = new Func<IPAddress, IPAddress, bool>((left, right) => NetUtils.Compare(left, right) == 0);
@@ -249,7 +248,7 @@ namespace ZeroLevel.UnitTests
             MakeCollectionTest<IPAddress>(new IPAddress[] { IPAddress.Any, IPAddress.Broadcast, IPAddress.IPv6Any, IPAddress.IPv6Loopback, IPAddress.IPv6None, IPAddress.Loopback, IPAddress.None, IPAddress.Parse("93.111.16.58") }, comparator);
         }
 
-        [TestMethod]
+        [Fact]
         public void SerializeCollectionIPEndPoint()
         {
             var comparator = new Func<IPEndPoint, IPEndPoint, bool>((left, right) => NetUtils.Compare(left, right) == 0);
@@ -258,7 +257,7 @@ namespace ZeroLevel.UnitTests
             MakeCollectionTest<IPEndPoint>(new IPEndPoint[] { new IPEndPoint(IPAddress.Any, 1), new IPEndPoint(IPAddress.Broadcast, 600), new IPEndPoint(IPAddress.IPv6Any, IPEndPoint.MaxPort), new IPEndPoint(IPAddress.IPv6Loopback, 8080), new IPEndPoint(IPAddress.IPv6None, 80), new IPEndPoint(IPAddress.Loopback, 9000), new IPEndPoint(IPAddress.None, 0), new IPEndPoint(IPAddress.Parse("93.111.16.58"), IPEndPoint.MinPort) }, comparator);
         }
 
-        [TestMethod]
+        [Fact]
         public void SerializeCollectionGuid()
         {
             MakeCollectionTest<Guid>(null);
@@ -266,13 +265,13 @@ namespace ZeroLevel.UnitTests
             MakeCollectionTest<Guid>(new Guid[] { Guid.Empty, Guid.NewGuid() });
         }
 
-        [TestMethod]
+        [Fact]
         public void SerializeCollectionTimeSpan()
         {
             MakeCollectionTest<TimeSpan>(new TimeSpan[] { TimeSpan.MaxValue, TimeSpan.MinValue, TimeSpan.Zero, TimeSpan.FromDays(1024), TimeSpan.FromMilliseconds(1), TimeSpan.FromTicks(1), TimeSpan.FromTicks(0) });
         }
 
-        [TestMethod]
+        [Fact]
         public void SerializeCollectionString()
         {
             var comparator = new Func<string, string, bool>((left, right) =>
@@ -284,49 +283,49 @@ namespace ZeroLevel.UnitTests
         }
 
 
-        [TestMethod]
+        [Fact]
         public void SerializeCollectionInt32()
         {
             MakeCollectionTest<Int32>(new int[] { -0, 0, -10, 10, Int32.MinValue, Int32.MaxValue });
         }
 
-        [TestMethod]
+        [Fact]
         public void SerializeCollectionInt64()
         {
             MakeCollectionTest<Int64>(new long[] { -0, 0, -10, 10, Int64.MinValue, Int64.MaxValue, Int64.MinValue / 2, Int64.MaxValue / 2 });
         }
 
-        [TestMethod]
+        [Fact]
         public void SerializeCollectionDecimal()
         {
             MakeCollectionTest<Decimal>(new Decimal[] { -0, 0, -10, 10, Decimal.MinValue, Decimal.MaxValue, Decimal.MinValue / 2, Decimal.MaxValue / 2 });
         }
 
-        [TestMethod]
+        [Fact]
         public void SerializeCollectionFloat()
         {
             MakeCollectionTest<float>(new float[] { -0, 0, -10, 10, float.MinValue, float.MaxValue, float.MinValue / 2, float.MaxValue / 2 });
         }
 
-        [TestMethod]
+        [Fact]
         public void SerializeCollectionDouble()
         {
             MakeCollectionTest<Double>(new Double[] { -0, 0, -10, 10, Double.MinValue, Double.MaxValue, Double.MinValue / 2, Double.MaxValue / 2 });
         }
 
-        [TestMethod]
+        [Fact]
         public void SerializeCollectionBoolean()
         {
             MakeCollectionTest<Boolean>(new Boolean[] { true, false, true });
         }
 
-        [TestMethod]
+        [Fact]
         public void SerializeCollectionByte()
         {
             MakeCollectionTest<Byte>(new byte[] { 0, 3, -0, 1, 10, 128, 255 });
         }
 
-        [TestMethod]
+        [Fact]
         public void SerializeCollectionBytes()
         {
             var comparator = new Func<byte[], byte[], bool>((left, right) =>
@@ -335,7 +334,7 @@ namespace ZeroLevel.UnitTests
             MakeCollectionTest<Byte[]>(new Byte[][] { null, new byte[] { }, new byte[] { 1 }, new byte[] { 0, 1, 10, 100, 128, 255 } }, comparator);
         }
 
-        [TestMethod]
+        [Fact]
         public void SerializeCompositeObject()
         {
             var comparator = new Func<Document, Document, bool>((left, right) =>

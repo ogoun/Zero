@@ -1,6 +1,6 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
+﻿using System;
 using System.Linq;
+using Xunit;
 using ZeroLevel.DocumentObjectModel;
 using ZeroLevel.Network;
 using ZeroLevel.Services.Encryption;
@@ -9,7 +9,6 @@ using ZeroLevel.UnitTests.Models;
 
 namespace ZeroLevel.EncryptionUnitTests
 {
-    [TestClass]
     public class EncryptionTests
     {
         private static double CalculateDeviation(byte[] data)
@@ -19,7 +18,7 @@ namespace ZeroLevel.EncryptionUnitTests
             return Math.Sqrt(sumOfSquaresOfDifferences / data.Length);
         }
 
-        [TestMethod]
+        [Fact]
         public void FastObfuscatorTest()
         {
             // Arrange
@@ -43,13 +42,13 @@ namespace ZeroLevel.EncryptionUnitTests
             var clone = MessageSerializer.Deserialize<Document>(data);
 
             // Assert
-            Assert.AreEqual(deviation, deobf_deviation);
-            Assert.AreNotEqual(deviation, obf_deviation);
-            Assert.IsTrue(obf_deviation >= deviation);
-            Assert.IsTrue(comparator(instance, clone));
+            Assert.Equal(deviation, deobf_deviation);
+            Assert.NotEqual(deviation, obf_deviation);
+            Assert.True(obf_deviation >= deviation);
+            Assert.True(comparator(instance, clone));
         }
 
-        [TestMethod]
+        [Fact]
         public void NetworkStreamDataObfuscatorTest()
         {            
             // Arrange
@@ -73,10 +72,10 @@ namespace ZeroLevel.EncryptionUnitTests
             var clone = MessageSerializer.Deserialize<Document>(data);
 
             // Assert
-            Assert.AreEqual(deviation, deobf_deviation);
-            Assert.AreNotEqual(deviation, obf_deviation);
-            Assert.IsTrue(obf_deviation >= deviation);
-            Assert.IsTrue(comparator(instance, clone));
+            Assert.Equal(deviation, deobf_deviation);
+            Assert.NotEqual(deviation, obf_deviation);
+            Assert.True(obf_deviation >= deviation);
+            Assert.True(comparator(instance, clone));
         }
     }
 }

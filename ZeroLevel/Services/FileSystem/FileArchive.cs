@@ -335,17 +335,6 @@ namespace ZeroLevel.Services.FileSystem
             return archive_file_path;
         }
 
-        private static void PrepareFolder(string path)
-        {
-            if (Directory.Exists(path) == false)
-            {
-                Directory.CreateDirectory(path);
-                FSUtils.SetupFolderPermission(path, $"{Environment.UserDomainName}\\{Environment.UserName}",
-                    FileSystemRights.Write | FileSystemRights.Read | FileSystemRights.Delete | FileSystemRights.Modify,
-                    AccessControlType.Allow);
-            }
-        }
-
         private static string PreparePath(string path)
         {
             if (path.IndexOf(':') == -1)
@@ -356,6 +345,13 @@ namespace ZeroLevel.Services.FileSystem
         }
 
         #endregion Helpers
+        private static void PrepareFolder(string path)
+        {
+            if (Directory.Exists(path) == false)
+            {
+                Directory.CreateDirectory(path);
+            }
+        }
 
         public void Dispose()
         {
@@ -487,10 +483,6 @@ namespace ZeroLevel.Services.FileSystem
             if (Directory.Exists(path) == false)
             {
                 Directory.CreateDirectory(path);
-                FSUtils.SetupFolderPermission(path,
-                    $"{Environment.UserDomainName}\\{Environment.UserName}",
-                    FileSystemRights.Write | FileSystemRights.Read | FileSystemRights.Delete | FileSystemRights.Modify,
-                    AccessControlType.Allow);
             }
         }
 

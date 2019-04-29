@@ -1,13 +1,12 @@
 ﻿using System;
 
-namespace ZeroLevel.Services.Applications
+namespace ZeroLevel
 {
     [Flags]
     public enum ZeroServiceState : int
     {
         Initialized = 0,
         Started = 1,
-        Paused = 2,
-        Stopped = 3
+        Stopped = 2
     }
 }
