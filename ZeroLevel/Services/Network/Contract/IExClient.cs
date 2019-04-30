@@ -26,5 +26,9 @@ namespace ZeroLevel.Network
         InvokeResult Request<Tresp>(Action<Tresp> callback);
 
         InvokeResult Request<Tresp>(string inbox, Action<Tresp> callback);
+
+        void RegisterInbox<T>(string inbox, Action<T, long, IZBackward> handler);
+
+        void RegisterInbox<T>(Action<T, long, IZBackward> handler);
     }
 }
