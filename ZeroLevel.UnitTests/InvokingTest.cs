@@ -20,11 +20,11 @@ namespace ZeroInvokingTest
             var identityGetDateTime = invoker.GetInvokerIdentity("GetDateTime", new Type[] { typeof(DateTime) });
             var identityGetHelp = invoker.GetInvokerIdentity("GetHelp", null);
             // Assert
-            Assert.Equal(invoker.Invoke(new FakeClass(), identityGetString, new object[] { "hello" }), "hello");
-            Assert.Equal(invoker.Invoke(new FakeClass(), identityGetNumber, new object[] { 100 }), 100);
+            Assert.Equal("hello", invoker.Invoke(new FakeClass(), identityGetString, new object[] { "hello" }));
+            Assert.Equal(100, invoker.Invoke(new FakeClass(), identityGetNumber, new object[] { 100 }));
             var date = DateTime.Now;
-            Assert.Equal(invoker.Invoke(new FakeClass(), identityGetDateTime, new object[] { date }), date);
-            Assert.Equal(invoker.Invoke(new FakeClass(), identityGetHelp), "help");
+            Assert.Equal(date, invoker.Invoke(new FakeClass(), identityGetDateTime, new object[] { date }));
+            Assert.Equal("help", invoker.Invoke(new FakeClass(), identityGetHelp));
         }
 
         [Fact]
@@ -42,10 +42,10 @@ namespace ZeroInvokingTest
             var identityGetDateTime = invoker.GetInvokerIdentity("GetDateTime", new Type[] { typeof(DateTime) });
             var identityGetHelp = invoker.GetInvokerIdentity("GetHelp", null);
             // Assert
-            Assert.Equal(invoker.Invoke(new FakeClass(), identityGetNumber, new object[] { 100 }), 100);
+            Assert.Equal(100, invoker.Invoke(new FakeClass(), identityGetNumber, new object[] { 100 }));
             var date = DateTime.Now;
-            Assert.Equal(invoker.Invoke(new FakeClass(), identityGetDateTime, new object[] { date }), date);
-            Assert.Equal(invoker.Invoke(new FakeClass(), identityGetHelp), "help");
+            Assert.Equal(date, invoker.Invoke(new FakeClass(), identityGetDateTime, new object[] { date }));
+            Assert.Equal("help", invoker.Invoke(new FakeClass(), identityGetHelp));
         }
 
         [Fact]
@@ -61,9 +61,9 @@ namespace ZeroInvokingTest
             var identityGetHelp = invoker.GetInvokerIdentity("GetHelp", null);
             // Assert
             var date = DateTime.Now;
-            Assert.Equal(invoker.Invoke(new FakeClass(), identityGetDateTime, new object[] { date }), date);
-            Assert.Equal(invoker.Invoke(new FakeClass(), identityGetNumber, new object[] { 100 }), 100);
-            Assert.Equal(invoker.Invoke(new FakeClass(), identityGetHelp), "help");
+            Assert.Equal(date, invoker.Invoke(new FakeClass(), identityGetDateTime, new object[] { date }));
+            Assert.Equal(100, invoker.Invoke(new FakeClass(), identityGetNumber, new object[] { 100 }));
+            Assert.Equal("help", invoker.Invoke(new FakeClass(), identityGetHelp));
         }
 
         [Fact]
@@ -84,11 +84,11 @@ namespace ZeroInvokingTest
             var identityGetDateTime = invoker.GetInvokerIdentity("GetDateTime", new Type[] { typeof(DateTime) });
             var identityGetHelp = invoker.GetInvokerIdentity("GetHelp", null);
             // Assert
-            Assert.Equal(invoker.Invoke(new FakeClass(), identityGetString, new object[] { "hello" }), "hello");
-            Assert.Equal(invoker.Invoke(new FakeClass(), identityGetNumber, new object[] { 100 }), 100);
+            Assert.Equal("hello", invoker.Invoke(new FakeClass(), identityGetString, new object[] { "hello" }));
+            Assert.Equal(100, invoker.Invoke(new FakeClass(), identityGetNumber, new object[] { 100 }));
             var date = DateTime.Now;
-            Assert.Equal(invoker.Invoke(new FakeClass(), identityGetDateTime, new object[] { date }), date);
-            Assert.Equal(invoker.Invoke(new FakeClass(), identityGetHelp), "help");
+            Assert.Equal(date, invoker.Invoke(new FakeClass(), identityGetDateTime, new object[] { date }));
+            Assert.Equal("help", invoker.Invoke(new FakeClass(), identityGetHelp));
         }
 
         [Fact]
@@ -106,11 +106,11 @@ namespace ZeroInvokingTest
             var identityGetDateTime = invoker.GetInvokerIdentity("GetDateTime", new Type[] { typeof(DateTime) });
             var identityGetHelp = invoker.GetInvokerIdentity("GetHelp", null);
             // Assert
-            Assert.Equal(invoker.Invoke(new FakeClass(), identityGetString, new object[] { "hello" }), "hello");
-            Assert.Equal(invoker.Invoke(new FakeClass(), identityGetNumber, new object[] { 100 }), 100);
+            Assert.Equal("hello", invoker.Invoke(new FakeClass(), identityGetString, new object[] { "hello" }));
+            Assert.Equal(100, invoker.Invoke(new FakeClass(), identityGetNumber, new object[] { 100 }));
             var date = DateTime.Now;
-            Assert.Equal(invoker.Invoke(new FakeClass(), identityGetDateTime, new object[] { date }), date);
-            Assert.Equal(invoker.Invoke(new FakeClass(), identityGetHelp), "help");
+            Assert.Equal(date, invoker.Invoke(new FakeClass(), identityGetDateTime, new object[] { date }));
+            Assert.Equal("help", invoker.Invoke(new FakeClass(), identityGetHelp));
         }
 
         [Fact]
@@ -126,8 +126,8 @@ namespace ZeroInvokingTest
             var identityGetNumber = invoker.GetInvokerIdentity("GetNumber", new Type[] { typeof(int) });
             var identityGetDateTime = invoker.GetInvokerIdentity("GetDateTime", new Type[] { typeof(DateTime) });
             // Assert
-            Assert.Equal(invoker.InvokeStatic(identityGetString, new object[] { "hello" }), "hello");
-            Assert.Equal(invoker.InvokeStatic(identityGetNumber, new object[] { 100 }), 100);
+            Assert.Equal("hello", invoker.InvokeStatic(identityGetString, new object[] { "hello" }));
+            Assert.Equal(100, invoker.InvokeStatic(identityGetNumber, new object[] { 100 }));
             var date = DateTime.Now;
             Assert.Equal(invoker.InvokeStatic(identityGetDateTime, new object[] { date }), date);
         }

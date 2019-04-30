@@ -64,6 +64,15 @@ namespace ZeroLevel.Models
         /// </summary>
         public static InvokeResult Succeeding() { return _successResultWitoutComment; }
 
+        public static InvokeResult<T> Succeeding<T>(T value, string comment = "")
+        {
+            return new InvokeResult<T>(value, true, comment);
+        }
+
+        public static InvokeResult<T> Fault<T>(string comment)
+        {
+            return new InvokeResult<T>(false, comment);
+        }
         #endregion Fabric methods
 
         public virtual void Serialize(IBinaryWriter writer)
@@ -101,20 +110,6 @@ namespace ZeroLevel.Models
         }
 
         #endregion Ctor
-
-        #region Fabric methods
-
-        public static InvokeResult<T> Succeeding(T value, string comment = "")
-        {
-            return new InvokeResult<T>(value, true, comment);
-        }
-
-        public static InvokeResult<T> Fault<T>(string comment)
-        {
-            return new InvokeResult<T>(false, comment);
-        }
-
-        #endregion Fabric methods
 
         public override void Serialize(IBinaryWriter writer)
         {

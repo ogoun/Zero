@@ -27,6 +27,11 @@ namespace ZeroArrayExtensionsTest
                 if (string.Compare(this.Title, other.Title, StringComparison.OrdinalIgnoreCase) != 0) return false;
                 return this.Num == other.Num;
             }
+
+            public override int GetHashCode()
+            {
+                return Num.GetHashCode();
+            }
         }
 
         [Fact]

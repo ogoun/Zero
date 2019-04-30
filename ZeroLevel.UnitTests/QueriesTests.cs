@@ -57,11 +57,11 @@ namespace ZeroSpecificationPatternsTest
                 Title = "Title #3"
             });
             Assert.True(a1.Success);
-            Assert.Equal<long>(a1.Count, 1);
+            Assert.Equal<long>(1, a1.Count);
             Assert.True(a2.Success);
-            Assert.Equal<long>(a2.Count, 1);
+            Assert.Equal<long>(1, a2.Count);
             Assert.True(a3.Success);
-            Assert.Equal<long>(a3.Count, 1);
+            Assert.Equal<long>(1, a3.Count);
         }
 
         [Fact]
@@ -100,7 +100,7 @@ namespace ZeroSpecificationPatternsTest
             {
                 var ar = storage.Post(i);
                 Assert.True(ar.Success);
-                Assert.Equal<long>(ar.Count, 1);
+                Assert.Equal<long>(1, ar.Count);
             }
             // Test equals set and storage data
             foreach (var i in storage.Get())
@@ -156,7 +156,7 @@ namespace ZeroSpecificationPatternsTest
             {
                 var ar = storage.Post(i);
                 Assert.True(ar.Success);
-                Assert.Equal<long>(ar.Count, 1);
+                Assert.Equal<long>(1, ar.Count);
             }
             // Test equals set and storage data
             foreach (var i in storage.Get())
@@ -168,21 +168,21 @@ namespace ZeroSpecificationPatternsTest
                 Assert.True(set.Exists(dto => TestDTOEqual(i, dto)));
             }
             var result_eq = storage.Get(Query.EQ("Title", "Title #1"));
-            Assert.Equal<int>(result_eq.Count(), 1);
+            Assert.Single(result_eq);
             Assert.True(TestDTOEqual(set[0], result_eq.First()));
 
             var result_neq = storage.Get(Query.NEQ("Title", "Title #1"));
-            Assert.Equal<int>(result_neq.Count(), 2);
+            Assert.Equal<int>(2, result_neq.Count());
             Assert.True(TestDTOEqual(set[1], result_neq.First()));
             Assert.True(TestDTOEqual(set[2], result_neq.Skip(1).First()));
 
             var result_gt = storage.Get(Query.GT("Number", 1));
-            Assert.Equal<int>(result_gt.Count(), 2);
+            Assert.Equal<int>(2, result_gt.Count());
             Assert.True(TestDTOEqual(set[0], result_gt.First()));
             Assert.True(TestDTOEqual(set[2], result_gt.Skip(1).First()));
 
             var result_lt = storage.Get(Query.LT("Number", 1));
-            Assert.Equal<int>(result_lt.Count(), 1);
+            Assert.Single(result_lt);
             Assert.True(TestDTOEqual(set[1], result_lt.First()));
         }
     }
