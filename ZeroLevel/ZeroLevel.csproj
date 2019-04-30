@@ -2,6 +2,18 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <Description>Infrastructure layer library</Description>
+    <Authors>ogoun</Authors>
+    <Company>ogoun</Company>
+    <AssemblyVersion>2.0.0.0</AssemblyVersion>
+    <PackageReleaseNotes>Move to .net standart</PackageReleaseNotes>
+    <PackageProjectUrl>https://github.com/ogoun/Zero/wiki</PackageProjectUrl>
+    <Copyright>Copyright Ogoun 2019</Copyright>
+    <PackageLicenseUrl>https://opensource.org/licenses/MIT</PackageLicenseUrl>
+    <PackageIconUrl>https://raw.githubusercontent.com/ogoun/Zero/master/zero.png</PackageIconUrl>
+    <RepositoryUrl>https://github.com/ogoun/Zero</RepositoryUrl>
+    <RepositoryType>GitHub</RepositoryType>
+    <Version>2.0.0</Version>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
