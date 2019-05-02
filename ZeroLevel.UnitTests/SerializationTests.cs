@@ -2,14 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using DOM.Services;
 using Xunit;
 using ZeroLevel.DocumentObjectModel;
 using ZeroLevel.Network;
 using ZeroLevel.Services.Serialization;
 using ZeroLevel.UnitTests.Models;
 
-namespace ZeroLevel.UnitTests
+namespace ZeroLevel.Serialization
 {
     public class SerializationTests
     {
@@ -345,6 +344,21 @@ namespace ZeroLevel.UnitTests
             });
 
             MakePrimitiveTest<Document>(CompositeInstanceFactory.MakeDocument(), comparator);
-        }        
+        }
+
+        [Fact]
+        public void ReverseByteOrderTest()
+        {
+            var data = new byte[4] { 0, 0, 8, 1 };
+            using (var reader = new MemoryStreamReader(data))
+            {
+                Assert.Equal(17301504, reader.ReadInt32());
+            }
+            using (var reader = new MemoryStreamReader(data))
+            {
+                reader.ReverseByteOrder(true);
+                Assert.Equal(2049, reader.ReadInt32());
+            }
+        }
     }
 }

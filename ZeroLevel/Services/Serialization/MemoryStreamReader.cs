@@ -142,14 +142,14 @@ namespace ZeroLevel.Services.Serialization
             var readedCount = _stream.Read(buffer, 0, count);
             if (count != readedCount)
                 throw new InvalidOperationException($"The stream returned less data ({count} bytes) than expected ({readedCount} bytes)");
-            if (_reverseByteOrder)
+            if (_reverseByteOrder && count > 1)
             {
                 byte b;
                 for (int i = 0; i < (count >> 1); i++)
                 {
                     b = buffer[i];
-                    buffer[i] = buffer[count - i];
-                    buffer[count - i] = b;
+                    buffer[i] = buffer[count - i - 1];
+                    buffer[count - i - 1] = b;
                 }
             }
             return buffer;
