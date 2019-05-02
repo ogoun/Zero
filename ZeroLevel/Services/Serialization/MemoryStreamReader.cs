@@ -13,13 +13,20 @@ namespace ZeroLevel.Services.Serialization
     public sealed class MemoryStreamReader
         : IBinaryReader
     {
-        private readonly MemoryStream _stream;
+        private readonly Stream _stream;
 
         public MemoryStreamReader(byte[] data)
         {
             if (data == null)
                 throw new ArgumentNullException(nameof(data));
             _stream = new MemoryStream(data);
+        }
+
+        public MemoryStreamReader(Stream stream)
+        {
+            if (stream == null)
+                throw new ArgumentNullException(nameof(stream));
+            _stream = stream;
         }
 
         /// <summary>
