@@ -5,7 +5,7 @@
     <Description>Infrastructure layer library</Description>
     <Authors>ogoun</Authors>
     <Company>ogoun</Company>
-    <AssemblyVersion>2.0.1.0</AssemblyVersion>
+    <AssemblyVersion>2.0.2.0</AssemblyVersion>
     <PackageReleaseNotes>Fix IExClient contract</PackageReleaseNotes>
     <PackageProjectUrl>https://github.com/ogoun/Zero/wiki</PackageProjectUrl>
     <Copyright>Copyright Ogoun 2019</Copyright>
@@ -13,7 +13,7 @@
     <PackageIconUrl>https://raw.githubusercontent.com/ogoun/Zero/master/zero.png</PackageIconUrl>
     <RepositoryUrl>https://github.com/ogoun/Zero</RepositoryUrl>
     <RepositoryType>GitHub</RepositoryType>
-    <Version>2.0.1</Version>
+    <Version>2.0.2</Version>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
