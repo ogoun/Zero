@@ -200,7 +200,7 @@ namespace ZeroLevel
         {
             if (config.FirstOrDefault("console", false))
             {
-                AddConsoleLogger();
+                AddConsoleLogger(LogLevel.System | LogLevel.FullDebug);
             }
             if (config.Contains("log"))
             {
