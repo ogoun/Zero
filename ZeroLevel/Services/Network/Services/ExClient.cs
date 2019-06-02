@@ -105,5 +105,10 @@ namespace ZeroLevel.Network
         {
             _fe.Send(frame);
         }
+
+        public void SendBackward<T>(string inbox, T obj)
+        {
+            Send(inbox, obj);
+        }
     }
 }

@@ -7,5 +7,6 @@ namespace ZeroLevel.Network
         IPEndPoint Endpoint { get; }
 
         void SendBackward(Frame frame);
+        void SendBackward<T>(string inbox, T message);
     }
 }

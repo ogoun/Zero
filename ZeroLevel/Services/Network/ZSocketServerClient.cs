@@ -205,5 +205,26 @@ namespace ZeroLevel.Network
             if (other == null) return false;
             return this.Endpoint.Compare(other.Endpoint) == 0;
         }
+
+        public void SendBackward<T>(string inbox, T message)
+        {
+            var frame = FrameBuilder.BuildFrame<T>(message, inbox);
+            if (Status == ZTransportStatus.Working && false == _send_queue.IsCompleted && false == _send_queue.IsAddingCompleted)
+            {
+                var data = MessageSerializer.Serialize(frame);
+                try
+                {
+                    _send_queue.Add(NetworkStreamFastObfuscator.PrepareData(data));
+                }
+                catch (ObjectDisposedException)
+                {
+                    // Ignore
+                }
+                finally
+                {
+                    frame?.Release();
+                }
+            }
+        }
     }
 }
