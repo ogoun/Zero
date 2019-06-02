@@ -20,6 +20,10 @@ namespace ZeroLevel.Services.Network.FileTransfer
             _baseFolder = baseFolder ?? throw new Exception(nameof(baseFolder));
             _nameMapper = nameMapper ?? throw new Exception(nameof(nameMapper));
             _disposeService = disposeService;
+
+            _service.RegisterInbox<FileStartFrame>("__upload_file_start", (f, _, client) => Receiver.Incoming(f, nameMapper(client)));
+            _service.RegisterInbox<FileFrame>("__upload_file_frame", (f, _, __) => Receiver.Incoming(f));
+            _service.RegisterInbox<FileEndFrame>("__upload_file_complete", (f, _, __) => Receiver.Incoming(f));
         }
 
         public void Dispose()

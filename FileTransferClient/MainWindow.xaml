@@ -1,0 +1,29 @@
+﻿<Window x:Class="FileTransferClient.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:FileTransferClient"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="250" Width="600">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="150"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="35"/>
+            <RowDefinition Height="27"/>
+            <RowDefinition Height="27"/>
+            <RowDefinition Height="27"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="27"/>
+        </Grid.RowDefinitions>
+        <Button Content="Connect" HorizontalAlignment="Stretch" Grid.Row="5" VerticalAlignment="Stretch" Click="Button_Click" Grid.ColumnSpan="2" />
+        <Label Content="Server" HorizontalAlignment="Stretch" Grid.Row="1" VerticalAlignment="Stretch"/>
+        <TextBox x:Name="tbEndpoint" Grid.Column="1" HorizontalAlignment="Stretch" Grid.Row="1" TextWrapping="Wrap" Text="127.0.0.1:9046" VerticalAlignment="Center"/>
+        <Button Grid.ColumnSpan="2" Content="Отправить файл" HorizontalAlignment="Stretch" Grid.Row="2" VerticalAlignment="Stretch" Click="Button_Click_1"/>
+        <Button Grid.ColumnSpan="2" Content="Отправить каталог" HorizontalAlignment="Stretch" Grid.Row="3" VerticalAlignment="Stretch" Click="Button_Click_2"/>
+
+    </Grid>
+</Window>

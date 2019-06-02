@@ -1,0 +1,33 @@
+﻿<Window x:Class="FileTransferServer.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:FileTransferServer"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="250" Width="600">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="35"/>
+            <RowDefinition Height="27"/>
+            <RowDefinition Height="27"/>
+            <RowDefinition Height="27"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="27"/>
+            <RowDefinition Height="27"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="170"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="70"/>
+        </Grid.ColumnDefinitions>        
+        <Label Content="Port" HorizontalAlignment="Stretch" Grid.Row="1" VerticalAlignment="Stretch"/>
+        <TextBox x:Name="tbPort" Grid.Column="1" HorizontalAlignment="Stretch" Grid.Row="1" TextWrapping="Wrap" Text="9046" VerticalAlignment="Center"/>
+        <Label Content="Folder" HorizontalAlignment="Stretch" Grid.Row="2" VerticalAlignment="Stretch"/>
+        <Button Content="View..." Grid.Column="2" HorizontalAlignment="Stretch" Grid.Row="2" VerticalAlignment="Stretch"/>
+        <TextBox Grid.Column="1" x:Name="tbFolder" HorizontalAlignment="Stretch" Grid.Row="2" TextWrapping="Wrap" Text="" VerticalAlignment="Center"/>
+        
+        <Button Content="Start" HorizontalAlignment="Stretch" Grid.Row="5" VerticalAlignment="Stretch" Grid.ColumnSpan="3" Click="Button_Click"/>
+        <Button Content="Stop" HorizontalAlignment="Stretch" Grid.Row="6" VerticalAlignment="Stretch" Grid.ColumnSpan="3" Click="Button_Click_1" />
+    </Grid>
+</Window>
