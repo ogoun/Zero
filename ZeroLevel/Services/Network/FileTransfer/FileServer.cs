@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using ZeroLevel.Models;
 using ZeroLevel.Network;
 using ZeroLevel.Services.Network.FileTransfer.Model;
 

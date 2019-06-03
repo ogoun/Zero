@@ -33,7 +33,7 @@ namespace ZeroLevel.Services.Network.FileTransfer
                 {
                     var fragment = new FileFrame
                     {
-                        UploadTaskId = _startInfo.FileUploadTaskId,
+                        UploadFileTaskId = _startInfo.UploadFileTaskId,
                         Offset = offset * CHUNK_SIZE,
                         Payload = new byte[bytesRead]
                     };
@@ -47,7 +47,7 @@ namespace ZeroLevel.Services.Network.FileTransfer
 
         public FileEndFrame GetCompleteInfo()
         {
-            return new FileEndFrame { FileUploadTaskId = _startInfo.FileUploadTaskId };
+            return new FileEndFrame { UploadFileTaskId = _startInfo.UploadFileTaskId };
         }
     }
 }

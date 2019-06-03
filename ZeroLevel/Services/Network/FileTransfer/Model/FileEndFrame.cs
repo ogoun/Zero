@@ -3,18 +3,19 @@
 namespace ZeroLevel.Services.Network.FileTransfer.Model
 {
     public sealed class FileEndFrame
-        : IBinarySerializable
+        : IBinarySerializable, IFileTransferInfo
     {
-        public int FileUploadTaskId;
+        public FileTransferInfoType TransferInfoType => FileTransferInfoType.End;
+        public long UploadFileTaskId { get; set; }
 
         public void Serialize(IBinaryWriter writer)
         {
-            writer.WriteInt32(this.FileUploadTaskId);
+            writer.WriteLong(this.UploadFileTaskId);
         }
 
         public void Deserialize(IBinaryReader reader)
         {
-            this.FileUploadTaskId = reader.ReadInt32();
+            this.UploadFileTaskId = reader.ReadLong();
         }
     }
 }
