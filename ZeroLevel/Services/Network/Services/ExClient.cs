@@ -71,6 +71,11 @@ namespace ZeroLevel.Network
             _router.RegisterInbox(DEFAULT_MESSAGE_INBOX, handler);
         }
 
+        public void RegisterInbox<Treq, Tresp>(string inbox, Func<Treq, long, IZBackward, Tresp> handler)
+        {
+            _router.RegisterInbox<Treq, Tresp>(inbox, handler);
+        }
+
         public InvokeResult Request<Tresp>(Action<Tresp> callback)
         {
             return _fe.Request<Tresp>(DEFAULT_REQUEST_INBOX, resp => callback(resp));

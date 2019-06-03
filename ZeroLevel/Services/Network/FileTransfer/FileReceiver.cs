@@ -45,8 +45,6 @@ namespace ZeroLevel.Services.Network.FileTransfer
         private readonly object _locker = new object();
         private long _cleanErrorsTaskId;
 
-        private readonly Dictionary<long, object> _incomingLocks = new Dictionary<long, object>();
-
         public FileReceiver(string path, string disk_prefix = "DRIVE_")
         {
             _disk_prefix = disk_prefix;
@@ -69,7 +67,7 @@ namespace ZeroLevel.Services.Network.FileTransfer
             }
         }
 
-        public void Incoming(FileStartFrame info, string clientFolderName)
+        public InvokeResult Incoming(FileStartFrame info, string clientFolderName)
         {
             try
             {
@@ -79,12 +77,8 @@ namespace ZeroLevel.Services.Network.FileTransfer
                     {
                         if (false == _incoming.ContainsKey(info.UploadFileTaskId))
                         {
-                            _incomingLocks.Add(info.UploadFileTaskId, new object());
-                            lock (_incomingLocks[info.UploadFileTaskId])
-                            {
-                                string path = BuildFilePath(clientFolderName, info.FilePath);
-                                _incoming.Add(info.UploadFileTaskId, new FileWriter(path));
-                            }
+                            string path = BuildFilePath(clientFolderName, info.FilePath);
+                            _incoming.Add(info.UploadFileTaskId, new FileWriter(path));
                         }
                     }
                 }
@@ -92,29 +86,31 @@ namespace ZeroLevel.Services.Network.FileTransfer
             catch (Exception ex)
             {
                 Log.Error("[FileReceiver]", ex);
+                return InvokeResult.Fault(ex.Message);
             }
+            return InvokeResult.Succeeding();
         }
 
-        public void Incoming(FileFrame chunk)
+        public InvokeResult Incoming(FileFrame chunk)
         {
             try
             {
                 FileWriter stream;
                 if (_incoming.TryGetValue(chunk.UploadFileTaskId, out stream))
                 {
-                    lock (_incomingLocks[chunk.UploadFileTaskId])
-                    {
-                        stream.Write(chunk.Offset, chunk.Payload);
-                    }
+                    stream.Write(chunk.Offset, chunk.Payload);
+                    return InvokeResult.Succeeding();
                 }
+                return InvokeResult.Fault("File not expected.");
             }
             catch (Exception ex)
             {
                 Log.Error("[FileReceiver]", ex);
+                return InvokeResult.Fault(ex.Message);
             }
         }
 
-        public void Incoming(FileEndFrame info)
+        public InvokeResult Incoming(FileEndFrame info)
         {
             try
             {
@@ -126,7 +122,9 @@ namespace ZeroLevel.Services.Network.FileTransfer
             catch (Exception ex)
             {
                 Log.Error("[FileReceiver]", ex);
+                return InvokeResult.Fault(ex.Message);
             }
+            return InvokeResult.Succeeding();
         }
 
         private void Remove(long uploadTaskId)

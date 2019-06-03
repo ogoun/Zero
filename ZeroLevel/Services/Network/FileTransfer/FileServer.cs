@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Threading;
 using ZeroLevel.Models;
 using ZeroLevel.Network;
 using ZeroLevel.Services.Network.FileTransfer.Model;
@@ -22,9 +23,9 @@ namespace ZeroLevel.Services.Network.FileTransfer
             _nameMapper = nameMapper ?? throw new Exception(nameof(nameMapper));
             _disposeService = disposeService;
 
-            _service.RegisterInbox<FileStartFrame>("__upload_file_start", (f, _, client) => Receiver.Incoming(f, nameMapper(client)));
-            _service.RegisterInbox<FileFrame>("__upload_file_frame", (f, _, __) => Receiver.Incoming(f));
-            _service.RegisterInbox<FileEndFrame>("__upload_file_complete", (f, _, __) => Receiver.Incoming(f));
+            _service.RegisterInbox<FileStartFrame, InvokeResult>("__upload_file_start", (f, _, client) => Receiver.Incoming(f, nameMapper(client)));
+            _service.RegisterInbox<FileFrame, InvokeResult>("__upload_file_frame", (f, _, __) => Receiver.Incoming(f));
+            _service.RegisterInbox<FileEndFrame, InvokeResult>("__upload_file_complete", (f, _, __) => Receiver.Incoming(f));
         }
 
         public void Dispose()
@@ -42,16 +43,54 @@ namespace ZeroLevel.Services.Network.FileTransfer
 
         internal override void ExecuteSendFile(FileReader reader, FileTransferTask task)
         {
+            
+            /*
             Log.Info($"Start upload file {reader.Path}");
             var startinfo = reader.GetStartInfo();
-            startinfo.FilePath = Path.GetFileName(startinfo.FilePath);
-            task.Client.SendBackward("__upload_file_start", startinfo);
-            foreach (var chunk in reader.Read())
+            using (var signal = new ManualResetEvent(false))
             {
-                task.Client.SendBackward("__upload_file_frame", chunk);
+                bool next = false;
+
+                if (false == task.Client.RequestBackward<FileStartFrame, InvokeResult>("__upload_file_start", startinfo,
+                    r =>
+                    {
+                        next = r.Success;
+                        signal.Set();
+                    }).Success)
+                {
+                    next = false;
+                    signal.Set();
+                }
+                signal.WaitOne(5000);
+                if (next)
+                {
+                    foreach (var chunk in reader.Read())
+                    {
+                        signal.Reset();
+                        if (task.Client.RequestBackward<FileFrame, InvokeResult>("__upload_file_frame", chunk, r => next = r.Success).Success == false)
+                        {
+                            next = false;
+                            signal.Set();
+                        }
+                        signal.WaitOne();
+                        if (!next)
+                        {
+                            break;
+                        }
+                    }
+                }
+                if (next)
+                {
+                    task.Client.RequestBackward<FileEndFrame, InvokeResult>("__upload_file_complete", reader.GetCompleteInfo(), r =>
+                    {
+                        if (r.Success == false)
+                        {
+                            Log.Warning($"Unsuccess send file. {r.Comment}");
+                        }
+                    });
+                }
             }
-            task.Client.SendBackward("__upload_file_complete", reader.GetCompleteInfo());
-            Log.Info($"Stop upload file {reader.Path}");
+            Log.Debug($"Stop upload file {reader.Path}");*/
         }
     }
 }

@@ -1,4 +1,6 @@
-﻿using System.Net;
+﻿using System;
+using System.Net;
+using ZeroLevel.Models;
 
 namespace ZeroLevel.Network
 {
