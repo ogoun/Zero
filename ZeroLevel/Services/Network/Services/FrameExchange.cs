@@ -31,6 +31,21 @@ namespace ZeroLevel.Network
             }
         }
 
+        public InvokeResult Send(string inbox)
+        {
+            try
+            {
+                var frame = FrameBuilder.BuildFrame(inbox);
+                _current.Send(frame);
+                return InvokeResult.Succeeding();
+            }
+            catch (Exception ex)
+            {
+                Log.SystemError(ex, "[FrameExchange] Fault send frame");
+                return InvokeResult.Fault(ex.Message);
+            }
+        }
+
         public InvokeResult Send(Frame frame)
         {
             try

@@ -110,5 +110,15 @@ namespace ZeroLevel.Network
         {
             return Send(inbox, obj);
         }
+
+        public InvokeResult Send()
+        {
+            return _fe.Send(DEFAULT_MESSAGE_INBOX);
+        }
+
+        public InvokeResult Send(string inbox)
+        {
+            return _fe.Send(inbox);
+        }
     }
 }

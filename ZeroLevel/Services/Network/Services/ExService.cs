@@ -96,6 +96,16 @@ namespace ZeroLevel.Network
             _router.RegisterInbox<Tresp>(DEFAULT_REQUEST_INBOX, handler);
         }
 
+        public void RegisterInbox(string inbox, Action<long, IZBackward> handler)
+        {
+            _router.RegisterInbox(inbox, handler);
+        }
+
+        public void RegisterInbox(Action<long, IZBackward> handler)
+        {
+            _router.RegisterInbox(DEFAULT_REQUEST_INBOX, handler);
+        }
+
         public override void Dispose()
         {
             _server.Dispose();

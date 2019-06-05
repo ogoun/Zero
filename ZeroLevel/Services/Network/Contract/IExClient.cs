@@ -15,6 +15,10 @@ namespace ZeroLevel.Network
 
         IPEndPoint Endpoint { get; }
 
+        InvokeResult Send();
+
+        InvokeResult Send(string inbox);
+
         InvokeResult Send<T>(T obj);
 
         InvokeResult Send<T>(string inbox, T obj);

@@ -45,8 +45,21 @@ namespace ZeroLevel.Network
             private Invoker _invoker;
             private Type _typeReq;
             private Type _typeResp;
+            private bool _noArguments = false;
 
-            public static MRInvoker Create<T>(string inbox, Action<T, long, IZBackward> handler)
+            public static MRInvoker Create(Action<long, IZBackward> handler)
+            {
+                return new MRInvoker
+                {
+                    _noArguments = true,
+                    _typeReq = null,
+                    _typeResp = null,
+                    _instance = handler.Target,
+                    _invoker = CreateCompiledExpression(handler)
+                };
+            }
+
+            public static MRInvoker Create<T>(Action<T, long, IZBackward> handler)
             {
                 return new MRInvoker
                 {
@@ -57,7 +70,7 @@ namespace ZeroLevel.Network
                 };
             }
 
-            public static MRInvoker Create<Treq, Tresp>(string inbox, Func<Treq, long, IZBackward, Tresp> handler)
+            public static MRInvoker Create<Treq, Tresp>(Func<Treq, long, IZBackward, Tresp> handler)
             {
                 return new MRInvoker
                 {
@@ -68,7 +81,7 @@ namespace ZeroLevel.Network
                 };
             }
 
-            public static MRInvoker Create<Tresp>(string inbox, Func<long, IZBackward, Tresp> handler)
+            public static MRInvoker Create<Tresp>(Func<long, IZBackward, Tresp> handler)
             {
                 return new MRInvoker
                 {
@@ -84,7 +97,14 @@ namespace ZeroLevel.Network
                 if (_typeResp == null)
                 {
                     var incoming = MessageSerializer.DeserializeCompatible(_typeReq, frame.Payload);
-                    this._invoker.Invoke(this._instance, new object[] { incoming, frame.FrameId, client });
+                    if (_noArguments)
+                    {
+                        this._invoker.Invoke(this._instance, new object[] { frame.FrameId, client });
+                    }
+                    else
+                    {
+                        this._invoker.Invoke(this._instance, new object[] { incoming, frame.FrameId, client });
+                    }
                 }
                 else if (_typeReq == null)
                 {
@@ -109,20 +129,29 @@ namespace ZeroLevel.Network
 
         #region Registration
 
+        public void RegisterInbox(string inbox, Action<long, IZBackward> handler)
+        {
+            if (false == _handlers.ContainsKey(inbox))
+            {
+                _handlers.Add(inbox, new List<MRInvoker>());
+            }
+            _handlers[inbox].Add(MRInvoker.Create(handler));
+        }
+
         public void RegisterInbox<T>(string inbox, Action<T, long, IZBackward> handler)
         {
             if (false == _handlers.ContainsKey(inbox))
             {
                 _handlers.Add(inbox, new List<MRInvoker>());
             }
-            _handlers[inbox].Add(MRInvoker.Create<T>(inbox, handler));
+            _handlers[inbox].Add(MRInvoker.Create<T>(handler));
         }
 
         public void RegisterInbox<Treq, Tresp>(string inbox, Func<Treq, long, IZBackward, Tresp> hanlder)
         {
             if (false == _requestors.ContainsKey(inbox))
             {
-                _requestors.Add(inbox, MRInvoker.Create<Treq, Tresp>(inbox, hanlder));
+                _requestors.Add(inbox, MRInvoker.Create<Treq, Tresp>(hanlder));
             }
             else
             {
@@ -134,7 +163,7 @@ namespace ZeroLevel.Network
         {
             if (false == _requestors.ContainsKey(inbox))
             {
-                _requestors.Add(inbox, MRInvoker.Create<Tresp>(inbox, hanlder));
+                _requestors.Add(inbox, MRInvoker.Create<Tresp>(hanlder));
             }
             else
             {
