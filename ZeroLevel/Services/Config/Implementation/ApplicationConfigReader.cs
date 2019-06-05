@@ -5,6 +5,8 @@
     {
         private readonly AppWebConfigReader _reader;
 
+        public bool ExistsAppConfigFile => _reader.ExistsAppConfigFile;
+
         internal ApplicationConfigReader()
         {
             _reader = new AppWebConfigReader();

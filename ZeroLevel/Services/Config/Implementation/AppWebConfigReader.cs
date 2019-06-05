@@ -10,6 +10,8 @@ namespace ZeroLevel.Services.Config.Implementation
     {
         private readonly string _configFilePath;
 
+        public bool ExistsAppConfigFile => string.IsNullOrWhiteSpace(_configFilePath) == false;
+
         internal AppWebConfigReader(string configFilePath = null)
         {
             if (configFilePath == null)

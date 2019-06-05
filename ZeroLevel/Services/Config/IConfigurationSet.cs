@@ -48,6 +48,8 @@ namespace ZeroLevel
         /// <param name="sectionName">Section name</param>
         IConfiguration CreateSection(string sectionName);
 
+        IConfiguration CreateSection(string sectionName, IConfiguration config);
+
         /// <summary>
         /// Get configuration section by name
         /// </summary>
@@ -87,6 +89,7 @@ namespace ZeroLevel
         /// </summary>
         bool UnfreezeSections();
 
+        void Merge(IConfigurationSet set);
         #endregion Methods
     }
 }

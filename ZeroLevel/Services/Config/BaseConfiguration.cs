@@ -274,6 +274,23 @@ namespace ZeroLevel.Services.Config
             return this;
         }
 
+        public IConfiguration Append(string key, IEnumerable<string> values)
+        {
+            if (false == _freezed)
+            {
+                key = GetKey(key);
+                if (false == _keyValues.ContainsKey(key))
+                {
+                    _keyValues.TryAdd(key, new List<string>());
+                }
+                foreach (var value in values)
+                {
+                    _keyValues[key].Add(value?.Trim() ?? null);
+                }
+            }
+            return this;
+        }
+
         /// <summary>
         /// Set unique value for key
         /// </summary>
@@ -434,5 +451,13 @@ namespace ZeroLevel.Services.Config
         }
 
         #endregion Binary Serializable
+
+        public void CopyTo(IConfiguration config)
+        {
+            foreach (var key in config.Keys)
+            {
+                this.Append(key, config[key]);
+            }
+        }
     }
 }

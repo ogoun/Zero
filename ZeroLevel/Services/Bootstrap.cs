@@ -39,10 +39,13 @@ namespace ZeroLevel
             return null;
         }
 
-        public static void Startup<T>(string[] args, Func<bool> preStartConfiguration = null, Func<bool> postStartConfiguration = null)
-            where T : IZeroService, new()
+        public static void Startup<T>(string[] args, 
+            Func<bool> preStartConfiguration = null, 
+            Func<bool> postStartConfiguration = null)
+            where T : IZeroService
         {
-            var service = Initialize<T>(args, preStartConfiguration, postStartConfiguration);
+            var service = Initialize<T>(args, Configuration.ReadSetFromApplicationConfig(), 
+                preStartConfiguration, postStartConfiguration);
             if (service != null)
             {
                 service.Start();
@@ -50,13 +53,31 @@ namespace ZeroLevel
             }
         }
 
-        private static IZeroService Initialize<T>(string[] args, Func<bool> preStartConfiguration = null, Func<bool> postStartConfiguration = null)
-            where T : IZeroService, new()
+        public static void Startup<T>(string[] args,
+            Func<IConfigurationSet> configuration,
+            Func<bool> preStartConfiguration = null,
+            Func<bool> postStartConfiguration = null)
+            where T : IZeroService
+        {
+            var service = Initialize<T>(args, configuration(), preStartConfiguration, postStartConfiguration);
+            if (service != null)
+            {
+                service.Start();
+                Shutdown(service);
+            }
+        }
+
+        private static IZeroService Initialize<T>(string[] args,
+            IConfigurationSet configurationSet,
+            Func<bool> preStartConfiguration = null, 
+            Func<bool> postStartConfiguration = null)
+            where T : IZeroService
         {
             IZeroService service = null;
-
-            Configuration.Save(Configuration.ReadFromApplicationConfig());
-            Log.CreateLoggingFromConfiguration(Configuration.Default);
+            IConfigurationSet config = Configuration.DefaultSet;
+            config.CreateSection("commandline", Configuration.ReadFromCommandLine(args));
+            config.Merge(configurationSet);
+            Log.CreateLoggingFromConfiguration(Configuration.DefaultSet);
             if (preStartConfiguration != null)
             {
                 try
@@ -75,7 +96,7 @@ namespace ZeroLevel
             }
             try
             {
-                service = new T();
+                service = Activator.CreateInstance<T>();
             }
             catch (Exception ex)
             {

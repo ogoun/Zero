@@ -96,28 +96,28 @@ namespace ZeroLevel.Services.Logging.Implementation
             return this;
         }
 
-        internal static TextFileLoggerOptions CreateOptionsBy(IConfiguration config, string logPrefix)
+        internal static TextFileLoggerOptions CreateOptionsBy(IConfiguration config, string path, string logPrefix)
         {
             if (config.Contains(logPrefix))
             {
                 var options = new TextFileLoggerOptions().
-                    SetFolderPath(config.First(logPrefix));
+                    SetFolderPath(path);
 
-                config.DoWithFirst<long>($"{logPrefix}.backlog", backlog =>
+                config.DoWithFirst<long>($"{logPrefix}backlog", backlog =>
                 {
                     if (backlog > 0)
                     {
                         Log.Backlog(backlog);
                     }
                 });
-                config.DoWithFirst<bool>($"{logPrefix}.archive", enable =>
+                config.DoWithFirst<bool>($"{logPrefix}archive", enable =>
                 {
                     if (enable)
                     {
                         options.EnableAutoArchiving();
                     }
                 });
-                config.DoWithFirst<int>($"{logPrefix}.sizeinkb", size =>
+                config.DoWithFirst<int>($"{logPrefix}sizeinkb", size =>
                 {
                     if (size >= 1)
                     {
@@ -125,7 +125,7 @@ namespace ZeroLevel.Services.Logging.Implementation
                     }
                 });
 
-                config.DoWithFirst<int>($"{logPrefix}.cleanolderdays", days =>
+                config.DoWithFirst<int>($"{logPrefix}cleanolderdays", days =>
                 {
                     if (days > 0)
                     {

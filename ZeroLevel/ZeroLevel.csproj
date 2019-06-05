@@ -6,7 +6,8 @@
     <Authors>ogoun</Authors>
     <Company>ogoun</Company>
     <AssemblyVersion>2.0.6.0</AssemblyVersion>
-    <PackageReleaseNotes>File client/server</PackageReleaseNotes>
+    <PackageReleaseNotes>Refactoring configuration and log
+File client/server (no stable)</PackageReleaseNotes>
     <PackageProjectUrl>https://github.com/ogoun/Zero/wiki</PackageProjectUrl>
     <Copyright>Copyright Ogoun 2019</Copyright>
     <PackageLicenseUrl>https://opensource.org/licenses/MIT</PackageLicenseUrl>

@@ -135,5 +135,7 @@ namespace ZeroLevel
         bool Unfreeze();
 
         #endregion Create, Clean, Delete
+
+        void CopyTo(IConfiguration config);
     }
 }

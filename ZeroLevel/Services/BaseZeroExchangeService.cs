@@ -1,5 +1,4 @@
-﻿using System;
-using ZeroLevel.Network;
+﻿using ZeroLevel.Network;
 
 namespace ZeroLevel.Services.Applications
 {
@@ -11,19 +10,25 @@ namespace ZeroLevel.Services.Applications
         public string Group { get; private set; }
         public string Type { get; private set; }
 
-        protected readonly IConfiguration _config;
+        protected readonly IConfigurationSet _configSet;
+        protected IConfiguration _config => _configSet?.Default;
 
         protected Exchange Exchange { get; }
 
-        protected BaseZeroExchangeService(IConfiguration configuration = null)
+        private BaseZeroExchangeService()
+        {
+
+        }
+
+        protected BaseZeroExchangeService(IConfigurationSet configuration = null)
             : base()
         {
-            _config = configuration ?? Configuration.Default;
-            base.Name = ReadName(_config);
-            this.Key = ReadKey(_config);
-            this.Version = ReadVersion(_config);
-            this.Group = ReadServiceGroup(_config);
-            this.Type = ReadServiceType(_config);
+            _configSet = configuration ?? Configuration.DefaultSet;
+            base.Name = ReadName();
+            this.Key = ReadKey();
+            this.Version = ReadVersion();
+            this.Group = ReadServiceGroup();
+            this.Type = ReadServiceType();
 
             var discovery = _config.First("discovery");
 
@@ -52,51 +57,62 @@ namespace ZeroLevel.Services.Applications
 
         #region Config
 
-        private string ReadName(IConfiguration configuration)
+        private string ReadName()
         {
-            if (_config.Contains("ServiceName"))
-                return _config.First("ServiceName");
-            if (_config.Contains("AppName"))
-                return _config.First("AppName");
-            return this.GetType().Name;
+            return FindInConfig<string>(new[] { "ServiceName", "AppName" }, string.Empty, "service")
+                ?? this.GetType().Name;
         }
 
-        private string ReadKey(IConfiguration configuration)
+        private string ReadKey()
         {
-            if (_config.Contains("ServiceKey"))
-                return _config.First("ServiceKey");
-            if (_config.Contains("AppKey"))
-                return _config.First("AppKey");
-            return null;
+            return FindInConfig<string>(new[] { "ServiceKey", "AppKey" }, string.Empty, "service");
         }
 
-        private string ReadVersion(IConfiguration configuration)
+        private string ReadVersion()
         {
-            if (_config.Contains("Version"))
-                return _config.First("Version");
-            if (_config.Contains("AppVersion"))
-                return _config.First("AppVersion");
-            return "1.0";
+            return FindInConfig<string>(new[] { "Version", "AppVersion" }, string.Empty, "service")
+                ?? "1.0";
         }
 
-        private string ReadServiceGroup(IConfiguration configuration)
+        private string ReadServiceGroup()
         {
-            if (_config.Contains("DiscoveryGroup"))
-                return _config.First("DiscoveryGroup");
-            if (_config.Contains("ServiceGroup"))
-                return _config.First("ServiceGroup");
-            return ExServiceInfo.DEFAULT_GROUP_NAME;
+            return FindInConfig<string>(new[] { "DiscoveryGroup", "ServiceGroup" }, string.Empty, "service")
+                ?? ExServiceInfo.DEFAULT_GROUP_NAME;
         }
 
-        private string ReadServiceType(IConfiguration configuration)
+        private string ReadServiceType()
         {
-            if (_config.Contains("DiscoveryType"))
-                return _config.First("DiscoveryType");
-            if (_config.Contains("ServiceType"))
-                return _config.First("ServiceType");
-            return ExServiceInfo.DEFAULT_TYPE_NAME;
+            return FindInConfig<string>(new[] { "DiscoveryType", "ServiceType" }, string.Empty, "service")
+                ?? ExServiceInfo.DEFAULT_TYPE_NAME;
         }
 
+        protected T FindInConfig<T>(string[] keys, params string[] sections)
+        {
+            foreach (var section in sections)
+            {
+                if (string.IsNullOrWhiteSpace(section))
+                {
+                    foreach (var key in keys)
+                    {
+                        if (_configSet.Default.Contains(key))
+                        {
+                            return _configSet.Default.First<T>(key);
+                        }
+                    }
+                }
+                else if (_configSet.ContainsSection(section))
+                {
+                    foreach (var key in keys)
+                    {
+                        if (_configSet[section].Contains(key))
+                        {
+                            return _configSet[section].First<T>(key);
+                        }
+                    }
+                }
+            }
+            return default(T);
+        }
         #endregion Config
 
         public string Endpoint { get; private set; }

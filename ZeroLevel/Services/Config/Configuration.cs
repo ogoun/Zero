@@ -44,7 +44,7 @@ namespace ZeroLevel
         public static IConfiguration Empty { get { return _empty; } }
         public static IConfigurationSet EmptySet { get { return _emptySet; } }
 
-        public static IConfiguration Default { get; private set; }
+        public static IConfiguration Default => DefaultSet?.Default;
         public static IConfigurationSet DefaultSet { get; private set; }
 
         public static void Save(string name, IConfiguration configuration)
@@ -54,13 +54,13 @@ namespace ZeroLevel
 
         public static void Save(IConfiguration configuration)
         {
-            if (Default == null)
+            if (DefaultSet == null)
             {
-                Default = configuration;
+                DefaultSet = Configuration.CreateSet(configuration);
             }
             else
             {
-                throw new Exception("Default configuration set already");
+                throw new Exception("Default configuration exists already");
             }
         }
 
@@ -123,7 +123,6 @@ namespace ZeroLevel
         #endregion Factory
 
         #region Read configuration
-
         /// <summary>
         /// Creating a configuration from the AppSettings section of the app.config or web.config file
         /// </summary>

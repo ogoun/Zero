@@ -93,6 +93,22 @@ namespace ZeroLevel.Services.Config
             throw new Exception("Sections change freezed");
         }
 
+        public IConfiguration CreateSection(string sectionName, IConfiguration config)
+        {
+            var key = GetKey(sectionName);
+            IConfiguration exists;
+            if (_sections.TryGetValue(key, out exists))
+            {
+                return exists;
+            }
+            else if (false == _sectionsFreezed)
+            {
+                _sections.TryAdd(key, config);
+                return _sections[key];
+            }
+            throw new Exception("Sections change freezed");
+        }
+
         public IConfiguration GetSection(string sectionName)
         {
             var key = GetKey(sectionName);
@@ -230,7 +246,16 @@ namespace ZeroLevel.Services.Config
                 _sections.TryAdd(key, reader.Read<BaseConfiguration>());
             }
         }
-
         #endregion Binary Serializable
+
+        public void Merge(IConfigurationSet set)
+        {
+            set.Default.CopyTo(this.Default);
+            foreach (var sectionName in set.SectionNames)
+            {
+                var section = this.CreateSection(sectionName);
+                set[sectionName].CopyTo(section);
+            }
+        }
     }
 }

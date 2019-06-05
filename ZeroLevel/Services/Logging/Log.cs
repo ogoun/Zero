@@ -190,42 +190,43 @@ namespace ZeroLevel
         #endregion Register loggers
 
         #region Settings
-
-        public static void CreateLoggingFromConfiguration()
+        public static void CreateLoggingFromConfiguration(IConfigurationSet configSet)
         {
-            CreateLoggingFromConfiguration(Configuration.ReadFromApplicationConfig());
-        }
-
-        public static void CreateLoggingFromConfiguration(IConfiguration config)
-        {
-            if (config.FirstOrDefault("console", false))
+            IConfiguration config;
+            bool log_section = false;
+            if (configSet.Default.Contains("log"))
             {
-                AddConsoleLogger(LogLevel.System | LogLevel.FullDebug);
+                config = configSet.Default;
             }
+            else if (configSet.ContainsSection("log"))
+            {
+                config = configSet["log"];
+                log_section = true;
+            }
+            else
+            {
+                return;
+            }
+            string logPath = null;
             if (config.Contains("log"))
             {
-                var options = TextFileLoggerOptions.CreateOptionsBy(config, "log");
+                logPath = config.First("log");
+            }
+            else if (log_section && config.Contains("path"))
+            {
+                logPath = config.First("path");
+            }
+            if (false == string.IsNullOrWhiteSpace(logPath))
+            {
+                var options = TextFileLoggerOptions.CreateOptionsBy(config, logPath, log_section ? string.Empty : "log.");
                 if (options != null)
                 {
                     AddTextFileLogger(options);
                 }
             }
-            var debug = string.Empty;
-            if (config.Contains("debug"))
+            if (config.FirstOrDefault("console", false))
             {
-                debug = "debug";
-            }
-            if (config.Contains("trace"))
-            {
-                debug = "trace";
-            }
-            if (false == string.IsNullOrWhiteSpace(debug))
-            {
-                var options = TextFileLoggerOptions.CreateOptionsBy(config, debug);
-                if (options != null)
-                {
-                    AddTextFileLogger(options, LogLevel.Debug);
-                }
+                AddConsoleLogger(LogLevel.System | LogLevel.FullDebug);
             }
         }
 
