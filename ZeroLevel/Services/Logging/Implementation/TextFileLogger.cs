@@ -98,43 +98,39 @@ namespace ZeroLevel.Services.Logging.Implementation
 
         internal static TextFileLoggerOptions CreateOptionsBy(IConfiguration config, string path, string logPrefix)
         {
-            if (config.Contains(logPrefix))
+            var options = new TextFileLoggerOptions().
+                SetFolderPath(path);
+
+            config.DoWithFirst<long>($"{logPrefix}backlog", backlog =>
             {
-                var options = new TextFileLoggerOptions().
-                    SetFolderPath(path);
+                if (backlog > 0)
+                {
+                    Log.Backlog(backlog);
+                }
+            });
+            config.DoWithFirst<bool>($"{logPrefix}archive", enable =>
+            {
+                if (enable)
+                {
+                    options.EnableAutoArchiving();
+                }
+            });
+            config.DoWithFirst<int>($"{logPrefix}sizeinkb", size =>
+            {
+                if (size >= 1)
+                {
+                    options.SetMaximumFileSizeInKb(size);
+                }
+            });
 
-                config.DoWithFirst<long>($"{logPrefix}backlog", backlog =>
+            config.DoWithFirst<int>($"{logPrefix}cleanolderdays", days =>
+            {
+                if (days > 0)
                 {
-                    if (backlog > 0)
-                    {
-                        Log.Backlog(backlog);
-                    }
-                });
-                config.DoWithFirst<bool>($"{logPrefix}archive", enable =>
-                {
-                    if (enable)
-                    {
-                        options.EnableAutoArchiving();
-                    }
-                });
-                config.DoWithFirst<int>($"{logPrefix}sizeinkb", size =>
-                {
-                    if (size >= 1)
-                    {
-                        options.SetMaximumFileSizeInKb(size);
-                    }
-                });
-
-                config.DoWithFirst<int>($"{logPrefix}cleanolderdays", days =>
-                {
-                    if (days > 0)
-                    {
-                        options.EnableAutoCleaning(TimeSpan.FromDays(days));
-                    }
-                });
-                return options;
-            }
-            return null;
+                    options.EnableAutoCleaning(TimeSpan.FromDays(days));
+                }
+            });
+            return options;
         }
     }
 

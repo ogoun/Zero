@@ -14,6 +14,7 @@ namespace ZeroLevel.Models
         #region Static
 
         private static readonly InvokeResult _successResultWitoutComment = new InvokeResult(true, String.Empty);
+        private static readonly InvokeResult _faultResultWitoutComment = new InvokeResult(false, String.Empty);
 
         #endregion Static
 
@@ -53,6 +54,8 @@ namespace ZeroLevel.Models
         /// Error when action invoking
         /// </summary>
         public static InvokeResult Fault(string comment) { return new InvokeResult(false, comment); }
+
+        public static InvokeResult Fault() { return _faultResultWitoutComment; }
 
         /// <summary>
         /// Successfully

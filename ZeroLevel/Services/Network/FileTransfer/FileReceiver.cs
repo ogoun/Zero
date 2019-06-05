@@ -13,6 +13,18 @@ namespace ZeroLevel.Services.Network.FileTransfer
         {
             private readonly FileStream _stream;
             internal DateTime _writeTime { get; private set; } = DateTime.UtcNow;
+            private bool _gotCompleteMessage = false;
+
+            public bool GotCompleteMessage() => _gotCompleteMessage = true;
+
+            public bool ReadyToRemove()
+            {
+                if (_gotCompleteMessage)
+                {
+                    return (DateTime.UtcNow - _writeTime).TotalSeconds > 15;
+                }
+                return false;
+            }
 
             public FileWriter(string path)
             {
@@ -59,7 +71,7 @@ namespace ZeroLevel.Services.Network.FileTransfer
             {
                 foreach (var pair in _incoming)
                 {
-                    if (pair.Value.IsTimeoutBy(TimeSpan.FromMinutes(3)))
+                    if (pair.Value.IsTimeoutBy(TimeSpan.FromMinutes(3)) || pair.Value.ReadyToRemove())
                     {
                         Remove(pair.Key);
                     }
@@ -116,7 +128,11 @@ namespace ZeroLevel.Services.Network.FileTransfer
             {
                 lock (_locker)
                 {
-                    Remove(info.UploadFileTaskId);
+                    FileWriter stream;
+                    if (_incoming.TryGetValue(info.UploadFileTaskId, out stream))
+                    {
+                        stream.GotCompleteMessage();
+                    }
                 }
             }
             catch (Exception ex)

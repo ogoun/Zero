@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
+using ZeroLevel.Models;
 using ZeroLevel.Services.Serialization;
 
 namespace ZeroLevel.Network
@@ -52,7 +53,7 @@ namespace ZeroLevel.Network
             _stream.BeginRead(_buffer, 0, DEFAULT_RECEIVE_BUFFER_SIZE, ReceiveAsyncCallback, null);
         }
 
-        public void SendBackward(Frame frame)
+        public InvokeResult SendBackward(Frame frame)
         {
             if (frame != null && Status == ZTransportStatus.Working && false == _send_queue.IsCompleted && false == _send_queue.IsAddingCompleted)
             {
@@ -60,6 +61,7 @@ namespace ZeroLevel.Network
                 try
                 {
                     _send_queue.Add(NetworkStreamFastObfuscator.PrepareData(data));
+                    return InvokeResult.Succeeding();
                 }
                 catch (ObjectDisposedException)
                 {
@@ -70,6 +72,30 @@ namespace ZeroLevel.Network
                     frame?.Release();
                 }
             }
+            return InvokeResult.Fault();
+        }
+
+        public InvokeResult SendBackward<T>(string inbox, T message)
+        {
+            var frame = FrameBuilder.BuildFrame<T>(message, inbox);
+            if (Status == ZTransportStatus.Working && false == _send_queue.IsCompleted && false == _send_queue.IsAddingCompleted)
+            {
+                var data = MessageSerializer.Serialize(frame);
+                try
+                {
+                    _send_queue.Add(NetworkStreamFastObfuscator.PrepareData(data));
+                    return InvokeResult.Succeeding();
+                }
+                catch (ObjectDisposedException)
+                {
+                    // Ignore
+                }
+                finally
+                {
+                    frame?.Release();
+                }
+            }
+            return InvokeResult.Fault();
         }
 
         private void SendFramesJob()
@@ -204,27 +230,6 @@ namespace ZeroLevel.Network
         {
             if (other == null) return false;
             return this.Endpoint.Compare(other.Endpoint) == 0;
-        }
-
-        public void SendBackward<T>(string inbox, T message)
-        {
-            var frame = FrameBuilder.BuildFrame<T>(message, inbox);
-            if (Status == ZTransportStatus.Working && false == _send_queue.IsCompleted && false == _send_queue.IsAddingCompleted)
-            {
-                var data = MessageSerializer.Serialize(frame);
-                try
-                {
-                    _send_queue.Add(NetworkStreamFastObfuscator.PrepareData(data));
-                }
-                catch (ObjectDisposedException)
-                {
-                    // Ignore
-                }
-                finally
-                {
-                    frame?.Release();
-                }
-            }
         }
     }
 }

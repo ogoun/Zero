@@ -1,5 +1,4 @@
-﻿using System;
-using System.Net;
+﻿using System.Net;
 using ZeroLevel.Models;
 
 namespace ZeroLevel.Network
@@ -8,7 +7,7 @@ namespace ZeroLevel.Network
     {
         IPEndPoint Endpoint { get; }
 
-        void SendBackward(Frame frame);
-        void SendBackward<T>(string inbox, T message);
+        InvokeResult SendBackward(Frame frame);
+        InvokeResult SendBackward<T>(string inbox, T message);
     }
 }

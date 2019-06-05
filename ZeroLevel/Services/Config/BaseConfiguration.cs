@@ -454,9 +454,9 @@ namespace ZeroLevel.Services.Config
 
         public void CopyTo(IConfiguration config)
         {
-            foreach (var key in config.Keys)
+            foreach (var key in this.Keys)
             {
-                this.Append(key, config[key]);
+                config.Append(key, this[key]);
             }
         }
     }

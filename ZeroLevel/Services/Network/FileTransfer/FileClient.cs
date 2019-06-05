@@ -23,9 +23,9 @@ namespace ZeroLevel.Services.Network.FileTransfer
             _nameMapper = nameMapper ?? throw new Exception(nameof(nameMapper));
             _disposeClient = disposeClient;
 
-            _client.RegisterInbox<FileStartFrame, InvokeResult>("__upload_file_start", (f, _, __) => Receiver.Incoming(f, nameMapper(_client)));
-            _client.RegisterInbox<FileFrame, InvokeResult>("__upload_file_frame", (f, _, __) => Receiver.Incoming(f));
-            _client.RegisterInbox<FileEndFrame, InvokeResult>("__upload_file_complete", (f, _, __) => Receiver.Incoming(f));
+            _client.RegisterInbox<FileStartFrame>("__upload_file_start", (f, _, __) => Receiver.Incoming(f, nameMapper(_client)));
+            _client.RegisterInbox<FileFrame>("__upload_file_frame", (f, _, __) => Receiver.Incoming(f));
+            _client.RegisterInbox<FileEndFrame>("__upload_file_complete", (f, _, __) => Receiver.Incoming(f));
         }
 
         public void Dispose()

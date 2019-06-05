@@ -1,6 +1,4 @@
 ﻿using System;
-using System.IO;
-using System.Threading;
 using ZeroLevel.Models;
 using ZeroLevel.Network;
 using ZeroLevel.Services.Network.FileTransfer.Model;
@@ -43,54 +41,21 @@ namespace ZeroLevel.Services.Network.FileTransfer
 
         internal override void ExecuteSendFile(FileReader reader, FileTransferTask task)
         {
-            
-            /*
             Log.Info($"Start upload file {reader.Path}");
             var startinfo = reader.GetStartInfo();
-            using (var signal = new ManualResetEvent(false))
+            if (false == task.Client.SendBackward<FileStartFrame>("__upload_file_start", startinfo).Success)
             {
-                bool next = false;
-
-                if (false == task.Client.RequestBackward<FileStartFrame, InvokeResult>("__upload_file_start", startinfo,
-                    r =>
-                    {
-                        next = r.Success;
-                        signal.Set();
-                    }).Success)
+                return;
+            }
+            foreach (var chunk in reader.Read())
+            {
+                if (task.Client.SendBackward<FileFrame>("__upload_file_frame", chunk).Success == false)
                 {
-                    next = false;
-                    signal.Set();
-                }
-                signal.WaitOne(5000);
-                if (next)
-                {
-                    foreach (var chunk in reader.Read())
-                    {
-                        signal.Reset();
-                        if (task.Client.RequestBackward<FileFrame, InvokeResult>("__upload_file_frame", chunk, r => next = r.Success).Success == false)
-                        {
-                            next = false;
-                            signal.Set();
-                        }
-                        signal.WaitOne();
-                        if (!next)
-                        {
-                            break;
-                        }
-                    }
-                }
-                if (next)
-                {
-                    task.Client.RequestBackward<FileEndFrame, InvokeResult>("__upload_file_complete", reader.GetCompleteInfo(), r =>
-                    {
-                        if (r.Success == false)
-                        {
-                            Log.Warning($"Unsuccess send file. {r.Comment}");
-                        }
-                    });
+                    return;
                 }
             }
-            Log.Debug($"Stop upload file {reader.Path}");*/
+            task.Client.SendBackward<FileEndFrame>("__upload_file_complete", reader.GetCompleteInfo());
+            Log.Debug($"Stop upload file {reader.Path}");
         }
     }
 }

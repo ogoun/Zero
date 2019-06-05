@@ -29,7 +29,7 @@ namespace ZeroLevel.Network
         /// <summary>
         /// The period of the request, after which it is considered unsuccessful
         /// </summary>
-        protected const long MAX_REQUEST_TIME_TICKS = 30000 * TimeSpan.TicksPerMillisecond;
+        internal const long MAX_REQUEST_TIME_TICKS = 30000 * TimeSpan.TicksPerMillisecond;
 
         public const int MAX_REQUEST_TIME_MS = 30000;
 

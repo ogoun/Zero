@@ -6,8 +6,7 @@ namespace TestApp
     {
         private static void Main(string[] args)
         {
-            Log.AddConsoleLogger();
-            Bootstrap.Startup<MyService>(args);
+            Bootstrap.Startup<MyService>(args, () => Configuration.ReadSetFromIniFile("config.ini"));
         }
     }
 }

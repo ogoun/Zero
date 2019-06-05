@@ -119,6 +119,10 @@ namespace ZeroLevel
         IConfiguration Append(string key, string value);
 
         /// <summary>
+        /// Append key and values list
+        /// </summary>
+        IConfiguration Append(string key, IEnumerable<string> values);
+        /// <summary>
         /// Set key with one value, if any values by key exists, they will be dropped
         /// </summary>
         IConfiguration SetUnique(string key, string value);

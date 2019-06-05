@@ -30,6 +30,7 @@ namespace ZeroLevel
             _emptySet = new BaseConfigurationSet();
             _empty.Freeze(true);
             _emptySet.FreezeConfiguration(true);
+            DefaultSet = Configuration.CreateSet();
         }
 
         #endregion Ctor

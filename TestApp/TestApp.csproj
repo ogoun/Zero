@@ -9,4 +9,10 @@
     <ProjectReference Include="..\ZeroLevel\ZeroLevel.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="config.ini">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
