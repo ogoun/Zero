@@ -14,9 +14,7 @@ namespace ZeroLevel
         /// <summary>
         /// Application folder path
         /// </summary>
-        public static string BaseDirectory =
-            Path.GetDirectoryName(Assembly.GetExecutingAssembly()?.CodeBase)?.
-            Replace("file:\\", string.Empty);
+        public static string BaseDirectory = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
 
         public static string AppLocation = Assembly.GetEntryAssembly()?.Location;
 
