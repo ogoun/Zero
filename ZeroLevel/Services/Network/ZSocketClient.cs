@@ -30,9 +30,7 @@ namespace ZeroLevel.Network
         #endregion Private
 
         public event EventHandler<Frame> OnServerMessage = (_, __) => { };
-
         public event Action OnConnect = () => { };
-
         public event Action OnDisconnect = () => { };
 
         public IPEndPoint Endpoint { get; }
@@ -58,8 +56,9 @@ namespace ZeroLevel.Network
             {
                 EnsureConnection();
             }
-            catch
+            catch(Exception ex)
             {
+                Log.SystemError(ex, "ZSocketClient.Heartbeat()->EnsureConnection()");
                 Broken();
                 return;
             }
@@ -70,7 +69,7 @@ namespace ZeroLevel.Network
             }
             catch (Exception ex)
             {
-                Log.SystemError(ex, "Fault ping reauest");
+                Log.SystemError(ex, "ZSocketClient.Heartbeat()->Request()");
             }
             var diff_request_ms = ((DateTime.UtcNow.Ticks - _last_rw_time) / TimeSpan.TicksPerMillisecond);
             if (diff_request_ms > (HEARTBEAT_UPDATE_PERIOD_MS * 2))
@@ -94,7 +93,7 @@ namespace ZeroLevel.Network
                 }
                 catch (Exception ex)
                 {
-                    Log.SystemError(ex, $"[ZClient] Fault handle response");
+                    Log.SystemError(ex, "ZSocketClient._parser_OnIncomingFrame()->_requests.Success(). Fault handle response");
                 }
             }
             else
@@ -112,7 +111,7 @@ namespace ZeroLevel.Network
                     }
                     catch (Exception ex)
                     {
-                        Log.SystemError(ex, $"[ZClient] Fault handle server message");
+                        Log.SystemError(ex, "ZSocketClient._parser_OnIncomingFrame()->OnServerMessage?.Invoke(). Fault handle server message");
                     }
                 }
             }

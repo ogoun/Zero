@@ -5,6 +5,11 @@ namespace ZeroLevel.Network
     public abstract class ZBaseNetwork
         : IDisposable
     {
+        static ZBaseNetwork()
+        {
+            MAX_FRAME_PAYLOAD_SIZE = Configuration.Default.FirstOrDefault<int>("MAX_FRAME_PAYLOAD_SIZE", DEFAULT_MAX_FRAME_PAYLOAD_SIZE);
+        }
+
         public const string DEFAULT_MESSAGE_INBOX = "__message_inbox__";
         public const string DEFAULT_REQUEST_INBOX = "__request_inbox__";
 
@@ -36,7 +41,8 @@ namespace ZeroLevel.Network
         /// <summary>
         /// Maximum size of data packet to transmit (serialized frame size)
         /// </summary>
-        public const int MAX_FRAME_PAYLOAD_SIZE = 1024 * 1024 * 32;
+        private const int DEFAULT_MAX_FRAME_PAYLOAD_SIZE = 1024 * 1024 * 32;
+        public readonly static int MAX_FRAME_PAYLOAD_SIZE;
 
         /// <summary>
         /// Starting byte of the data packet header
