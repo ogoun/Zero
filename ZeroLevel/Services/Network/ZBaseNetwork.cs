@@ -45,11 +45,6 @@ namespace ZeroLevel.Network
         public readonly static int MAX_FRAME_PAYLOAD_SIZE;
 
         /// <summary>
-        /// Starting byte of the data packet header
-        /// </summary>
-        public const byte PACKET_HEADER_START_BYTE = 181;
-
-        /// <summary>
         /// The size of the message queue to send
         /// </summary>
         public const int MAX_SEND_QUEUE_SIZE = 1024;

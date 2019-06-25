@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Runtime.Serialization;
 using System.Text;
-using System.Threading;
 using ZeroLevel.Services.Pools;
 using ZeroLevel.Services.Serialization;
 
@@ -22,7 +21,6 @@ namespace ZeroLevel.Network
             var frame = _pool.Allocate();
             frame.Inbox = null;
             frame.Payload = null;
-            frame.IsRequest = false;
             return frame;
         }
 
@@ -31,25 +29,14 @@ namespace ZeroLevel.Network
             _pool.Free(this);
         }
 
-        private static long _id_counter = 0;
-
-        internal static long GetMessageId() => Interlocked.Increment(ref _id_counter);
-
-        [DataMember]
-        public long FrameId { get; set; }
-
         [DataMember]
         public string Inbox { get; set; }
 
         [DataMember]
         public byte[] Payload { get; set; }
 
-        [DataMember]
-        public bool IsRequest { get; set; }
-
         public Frame()
         {
-            FrameId = GetMessageId();
         }
 
         public Frame(Frame other)
@@ -63,18 +50,14 @@ namespace ZeroLevel.Network
 
         public void Deserialize(IBinaryReader reader)
         {
-            this.FrameId = reader.ReadLong();
             this.Inbox = reader.ReadString();
             this.Payload = reader.ReadBytes();
-            this.IsRequest = reader.ReadBoolean();
         }
 
         public void Serialize(IBinaryWriter writer)
         {
-            writer.WriteLong(this.FrameId);
             writer.WriteString(this.Inbox);
             writer.WriteBytes(this.Payload);
-            writer.WriteBoolean(this.IsRequest);
         }
 
         public T Read<T>()
@@ -109,11 +92,6 @@ namespace ZeroLevel.Network
             this.Payload = Encoding.UTF32.GetBytes(data);
         }
 
-        public override int GetHashCode()
-        {
-            return this.FrameId.GetHashCode();
-        }
-
         public override bool Equals(object obj)
         {
             return this.Equals(obj as Frame);
@@ -126,8 +104,6 @@ namespace ZeroLevel.Network
                 return true;
             if (this.GetType() != other.GetType())
                 return false;
-            if (this.IsRequest != other.IsRequest) return false;
-            if (this.FrameId != other.FrameId) return false;
             if (string.Compare(this.Inbox, other.Inbox, true) != 0) return false;
             if (ArrayExtensions.UnsafeEquals(this.Payload, other.Payload) == false) return false;
             return true;
