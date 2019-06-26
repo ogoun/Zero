@@ -60,7 +60,7 @@ namespace ZeroLevel.Network
             return false;
         }
 
-        public bool Send<T>(string serviceKey, T data) => Send(serviceKey, ZBaseNetwork.DEFAULT_MESSAGE_INBOX, data);
+        public bool Send<T>(string serviceKey, T data) => Send(serviceKey, BaseSocket.DEFAULT_MESSAGE_INBOX, data);
 
         #endregion Balanced send
 
@@ -85,7 +85,7 @@ namespace ZeroLevel.Network
                               {
                                   return false;
                               }
-                              if (false == waiter.Wait(ZBaseNetwork.MAX_REQUEST_TIME_MS))
+                              if (false == waiter.Wait(BaseSocket.MAX_REQUEST_TIME_MS))
                               {
                                   return false;
                               }
@@ -128,7 +128,7 @@ namespace ZeroLevel.Network
                              {
                                  return false;
                              }
-                             if (false == waiter.Wait(ZBaseNetwork.MAX_REQUEST_TIME_MS))
+                             if (false == waiter.Wait(BaseSocket.MAX_REQUEST_TIME_MS))
                              {
                                  return false;
                              }
@@ -153,10 +153,10 @@ namespace ZeroLevel.Network
         }
 
         public Tresp Request<Treq, Tresp>(string serviceKey, Treq data) =>
-            Request<Treq, Tresp>(serviceKey, ZBaseNetwork.DEFAULT_REQUEST_INBOX, data);
+            Request<Treq, Tresp>(serviceKey, BaseSocket.DEFAULT_REQUEST_INBOX, data);
 
         public Tresp Request<Tresp>(string serviceKey) =>
-            Request<Tresp>(serviceKey, ZBaseNetwork.DEFAULT_REQUEST_INBOX);
+            Request<Tresp>(serviceKey, BaseSocket.DEFAULT_REQUEST_INBOX);
 
         #endregion Balanced request
 
@@ -181,7 +181,7 @@ namespace ZeroLevel.Network
                             {
                                 return false;
                             }
-                            if (false == waiter.Wait(ZBaseNetwork.MAX_REQUEST_TIME_MS))
+                            if (false == waiter.Wait(BaseSocket.MAX_REQUEST_TIME_MS))
                             {
                                 return false;
                             }
@@ -224,7 +224,7 @@ namespace ZeroLevel.Network
                             {
                                 return false;
                             }
-                            if (false == waiter.Wait(ZBaseNetwork.MAX_REQUEST_TIME_MS))
+                            if (false == waiter.Wait(BaseSocket.MAX_REQUEST_TIME_MS))
                             {
                                 return false;
                             }
@@ -249,10 +249,10 @@ namespace ZeroLevel.Network
         }
 
         public Tresp RequestDirect<Treq, Tresp>(string endpoint, string serviceKey, Treq data) =>
-            RequestDirect<Treq, Tresp>(endpoint, serviceKey, ZBaseNetwork.DEFAULT_REQUEST_INBOX, data);
+            RequestDirect<Treq, Tresp>(endpoint, serviceKey, BaseSocket.DEFAULT_REQUEST_INBOX, data);
 
         public Tresp RequestDirect<Tresp>(string endpoint, string serviceKey) =>
-            RequestDirect<Tresp>(endpoint, serviceKey, ZBaseNetwork.DEFAULT_REQUEST_INBOX);
+            RequestDirect<Tresp>(endpoint, serviceKey, BaseSocket.DEFAULT_REQUEST_INBOX);
 
         #endregion Direct request
 
@@ -299,7 +299,7 @@ namespace ZeroLevel.Network
         /// <param name="serviceKey">Service key</param>
         /// <param name="data">Message</param>
         /// <returns>true - on successful submission</returns>
-        public bool SendBroadcast<T>(string serviceKey, T data) => SendBroadcast(serviceKey, ZBaseNetwork.DEFAULT_MESSAGE_INBOX, data);
+        public bool SendBroadcast<T>(string serviceKey, T data) => SendBroadcast(serviceKey, BaseSocket.DEFAULT_MESSAGE_INBOX, data);
 
         /// <summary>
         /// Sending a message to all services of a specific type to the specified handler
@@ -343,7 +343,7 @@ namespace ZeroLevel.Network
         /// <param name="data">Message</param>
         /// <returns>true - on successful submission</returns>
         public bool SendBroadcastByType<T>(string serviceType, T data) =>
-            SendBroadcastByType(serviceType, ZBaseNetwork.DEFAULT_MESSAGE_INBOX, data);
+            SendBroadcastByType(serviceType, BaseSocket.DEFAULT_MESSAGE_INBOX, data);
 
         /// <summary>
         /// Sending a message to all services of a specific group to the specified handler
@@ -387,7 +387,7 @@ namespace ZeroLevel.Network
         /// <param name="data">Messsage</param>
         /// <returns>true - on successful submission</returns>
         public bool SendBroadcastByGroup<T>(string serviceGroup, T data) =>
-            SendBroadcastByGroup(serviceGroup, ZBaseNetwork.DEFAULT_MESSAGE_INBOX, data);
+            SendBroadcastByGroup(serviceGroup, BaseSocket.DEFAULT_MESSAGE_INBOX, data);
 
         /// <summary>
         /// Broadcast polling services by key
@@ -445,7 +445,7 @@ namespace ZeroLevel.Network
         /// <param name="responseHandler">Response handler</param>
         /// <returns>true - in case of successful mailing</returns>
         public IEnumerable<Tresp> RequestBroadcast<Treq, Tresp>(string serviceKey, Treq data) =>
-            RequestBroadcast<Treq, Tresp>(serviceKey, ZBaseNetwork.DEFAULT_REQUEST_INBOX, data);
+            RequestBroadcast<Treq, Tresp>(serviceKey, BaseSocket.DEFAULT_REQUEST_INBOX, data);
 
         /// <summary>
         /// Broadcast polling of services by key, without message of request, to default handler
@@ -455,7 +455,7 @@ namespace ZeroLevel.Network
         /// <param name="responseHandler">Response handler</param>
         /// <returns>true - in case of successful mailing</returns>
         public IEnumerable<Tresp> RequestBroadcast<Tresp>(string serviceKey) =>
-            RequestBroadcast<Tresp>(serviceKey, ZBaseNetwork.DEFAULT_REQUEST_INBOX);
+            RequestBroadcast<Tresp>(serviceKey, BaseSocket.DEFAULT_REQUEST_INBOX);
 
         /// <summary>
         /// Broadcast polling services by type of service
@@ -513,7 +513,7 @@ namespace ZeroLevel.Network
         /// <param name="responseHandler">Response handler</param>
         /// <returns>true - in case of successful mailing</returns>
         public IEnumerable<Tresp> RequestBroadcastByType<Treq, Tresp>(string serviceType, Treq data) =>
-            RequestBroadcastByType<Treq, Tresp>(serviceType, ZBaseNetwork.DEFAULT_REQUEST_INBOX, data);
+            RequestBroadcastByType<Treq, Tresp>(serviceType, BaseSocket.DEFAULT_REQUEST_INBOX, data);
 
         /// <summary>
         /// Broadcast polling services by type, without message request, in the default handler
@@ -523,7 +523,7 @@ namespace ZeroLevel.Network
         /// <param name="responseHandler">Response handler</param>
         /// <returns>true - in case of successful mailing</returns>
         public IEnumerable<Tresp> RequestBroadcastByType<Tresp>(string serviceType) =>
-            RequestBroadcastByType<Tresp>(serviceType, ZBaseNetwork.DEFAULT_REQUEST_INBOX);
+            RequestBroadcastByType<Tresp>(serviceType, BaseSocket.DEFAULT_REQUEST_INBOX);
 
         /// <summary>
         /// Broadcast polling services for a group of services
@@ -581,7 +581,7 @@ namespace ZeroLevel.Network
         /// <param name="responseHandler">Response handler</param>
         /// <returns>true - in case of successful mailing</returns>
         public IEnumerable<Tresp> RequestBroadcastByGroup<Treq, Tresp>(string serviceGroup, Treq data) =>
-            RequestBroadcastByGroup<Treq, Tresp>(serviceGroup, ZBaseNetwork.DEFAULT_REQUEST_INBOX, data);
+            RequestBroadcastByGroup<Treq, Tresp>(serviceGroup, BaseSocket.DEFAULT_REQUEST_INBOX, data);
 
         /// <summary>
         ///Broadcast polling services for a group of services, without sending a request, to the default handler
@@ -591,11 +591,11 @@ namespace ZeroLevel.Network
         /// <param name="responseHandler">Response handler</param>
         /// <returns>true - in case of successful mailing</returns>
         public IEnumerable<Tresp> RequestBroadcastByGroup<Tresp>(string serviceGroup) =>
-            RequestBroadcastByGroup<Tresp>(serviceGroup, ZBaseNetwork.DEFAULT_REQUEST_INBOX);
+            RequestBroadcastByGroup<Tresp>(serviceGroup, BaseSocket.DEFAULT_REQUEST_INBOX);
 
         #region Private
 
-        private IEnumerable<Tresp> _RequestBroadcast<Treq, Tresp>(List<IExClient> clients, string inbox, Treq data)
+        private IEnumerable<Tresp> _RequestBroadcast<Treq, Tresp>(List<NetworkNode> clients, string inbox, Treq data)
         {
             var response = new List<Tresp>();
             using (var waiter = new CountdownEvent(clients.Count))
@@ -613,17 +613,17 @@ namespace ZeroLevel.Network
                         }
                         catch (Exception ex)
                         {
-                            Log.SystemError(ex, $"[Exchange] Error direct request to service '{client.Endpoint}' in broadcast request. Inbox '{inbox}'");
+                            Log.SystemError(ex, $"[Exchange] Error direct request to service '{client.EndPoint}' in broadcast request. Inbox '{inbox}'");
                             waiter.Signal();
                         }
                     });
                 }
-                waiter.Wait(ZBaseNetwork.MAX_REQUEST_TIME_MS);
+                waiter.Wait(BaseSocket.MAX_REQUEST_TIME_MS);
             }
             return response;
         }
 
-        private IEnumerable<Tresp> _RequestBroadcast<Tresp>(List<IExClient> clients, string inbox)
+        private IEnumerable<Tresp> _RequestBroadcast<Tresp>(List<NetworkNode> clients, string inbox)
         {
             var response = new List<Tresp>();
             using (var waiter = new CountdownEvent(clients.Count))
@@ -641,12 +641,12 @@ namespace ZeroLevel.Network
                         }
                         catch (Exception ex)
                         {
-                            Log.SystemError(ex, $"[Exchange] Error direct request to service '{client.Endpoint}' in broadcast request. Inbox '{inbox}'");
+                            Log.SystemError(ex, $"[Exchange] Error direct request to service '{client.EndPoint}' in broadcast request. Inbox '{inbox}'");
                             waiter.Signal();
                         }
                     });
                 }
-                waiter.Wait(ZBaseNetwork.MAX_REQUEST_TIME_MS);
+                waiter.Wait(BaseSocket.MAX_REQUEST_TIME_MS);
             }
             return response;
         }

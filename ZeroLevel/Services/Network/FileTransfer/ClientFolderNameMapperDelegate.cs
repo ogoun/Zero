@@ -1,6 +1,4 @@
-﻿using ZeroLevel.Network;
-
-namespace ZeroLevel.Services.Network.FileTransfer
+﻿namespace ZeroLevel.Network.FileTransfer
 {
-    public delegate string ClientFolderNameMapper(IExClient client);
+    public delegate string ClientFolderNameMapper(ISocketClient client);
 }

@@ -1,4 +1,4 @@
-﻿namespace ZeroLevel.Services._Network
+﻿namespace ZeroLevel.Network
 {
     public enum FrameType
     {

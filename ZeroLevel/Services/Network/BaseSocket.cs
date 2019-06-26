@@ -2,18 +2,15 @@
 
 namespace ZeroLevel.Network
 {
-    public abstract class ZBaseNetwork
-        : IDisposable
+    public abstract class BaseSocket
     {
-        static ZBaseNetwork()
+        static BaseSocket()
         {
             MAX_FRAME_PAYLOAD_SIZE = Configuration.Default.FirstOrDefault<int>("MAX_FRAME_PAYLOAD_SIZE", DEFAULT_MAX_FRAME_PAYLOAD_SIZE);
         }
 
         public const string DEFAULT_MESSAGE_INBOX = "__message_inbox__";
         public const string DEFAULT_REQUEST_INBOX = "__request_inbox__";
-
-        protected const string DEFAULT_PING_INBOX = "__ping__";
         protected const string DEFAULT_REQUEST_ERROR_INBOX = "__request_error__";
 
         /// <summary>
@@ -29,7 +26,7 @@ namespace ZeroLevel.Network
         /// <summary>
         /// Connection check period
         /// </summary>
-        protected const int HEARTBEAT_UPDATE_PERIOD_MS = 7500;
+        protected const int MINIMUM_HEARTBEAT_UPDATE_PERIOD_MS = 7500;
 
         /// <summary>
         /// The period of the request, after which it is considered unsuccessful
@@ -49,10 +46,10 @@ namespace ZeroLevel.Network
         /// </summary>
         public const int MAX_SEND_QUEUE_SIZE = 1024;
 
-        protected void Broken() => Status = Status == ZTransportStatus.Disposed ? Status : ZTransportStatus.Broken;
-        protected void Disposed() => Status = ZTransportStatus.Disposed;
-        protected void Working() => Status = Status == ZTransportStatus.Disposed ? Status : ZTransportStatus.Working;
-        public ZTransportStatus Status { get; private set; } = ZTransportStatus.Initialized;
+        protected void Broken() => Status = Status == SocketClientStatus.Disposed ? Status : SocketClientStatus.Broken;
+        protected void Disposed() => Status = SocketClientStatus.Disposed;
+        protected void Working() => Status = Status == SocketClientStatus.Disposed ? Status : SocketClientStatus.Working;
+        public SocketClientStatus Status { get; private set; } = SocketClientStatus.Initialized;
 
         public abstract void Dispose();
     }

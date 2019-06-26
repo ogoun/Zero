@@ -128,7 +128,7 @@ namespace ZeroLevel.Network
         : IDiscoveryClient
     {
         private readonly DCRouter _router = new DCRouter();
-        private readonly IExClient _discoveryServerClient;
+        private readonly NetworkNode _discoveryServerClient;
 
         public DiscoveryClient(string endpoint)
         {

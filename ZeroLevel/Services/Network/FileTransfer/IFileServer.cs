@@ -1,11 +1,11 @@
 ﻿using System;
 using ZeroLevel.Network;
 
-namespace ZeroLevel.Services.Network.FileTransfer
+namespace ZeroLevel.Network.FileTransfer
 {
     public interface IFileServer
         : IDisposable
     {
-        void Send(IZBackward client, string fileName, Action<string> completeHandler = null, Action<string, string> errorHandler = null);
+        void Send(ISocketClient client, string fileName, Action<string> completeHandler = null, Action<string, string> errorHandler = null);
     }
 }

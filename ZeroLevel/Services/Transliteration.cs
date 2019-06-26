@@ -44,7 +44,10 @@ namespace ZeroLevel.Services
 
             foreach (KeyValuePair<string, string> key in tdict)
             {
-                output = output.Replace(key.Value, key.Key);
+                if (key.Value.Length > 0)
+                {
+                    output = output.Replace(key.Value, key.Key);
+                }
             }
             return output;
         }

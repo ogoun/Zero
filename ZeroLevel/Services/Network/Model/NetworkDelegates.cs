@@ -1,4 +1,4 @@
-﻿namespace ZeroLevel.Services._Network
+﻿namespace ZeroLevel.Network
 {
     public delegate void MessageHandler(ISocketClient client);
     public delegate void MessageHandler<T>(ISocketClient client, T message);

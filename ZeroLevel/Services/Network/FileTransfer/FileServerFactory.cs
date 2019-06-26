@@ -1,7 +1,7 @@
 ﻿using ZeroLevel.Network;
 using ZeroLevel.Services.FileSystem;
 
-namespace ZeroLevel.Services.Network.FileTransfer
+namespace ZeroLevel.Network.FileTransfer
 {
     public static class FileServerFactory
     {

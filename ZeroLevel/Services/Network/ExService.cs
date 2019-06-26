@@ -9,9 +9,9 @@ namespace ZeroLevel.Network
         private readonly ExRouter _router;
         private readonly IZObservableServer _server;
 
-        public event Action<IZBackward> OnConnect = c => { };
+        public event Action<ISocketClient> OnConnect = c => { };
 
-        public event Action<IZBackward> OnDisconnect = c => { };
+        public event Action<ISocketClient> OnDisconnect = c => { };
 
         public ExService(IZObservableServer server)
         {
@@ -23,12 +23,12 @@ namespace ZeroLevel.Network
             _server.OnDisconnect += _server_OnDisconnect;
         }
 
-        private void _server_OnDisconnect(IZBackward client)
+        private void _server_OnDisconnect(ISocketClient client)
         {
             this.OnDisconnect(client);
         }
 
-        private void _server_OnConnect(IZBackward client)
+        private void _server_OnConnect(ISocketClient client)
         {
             this.OnConnect(client);
         }
@@ -101,7 +101,7 @@ namespace ZeroLevel.Network
             _router.RegisterInbox(inbox, handler);
         }
 
-        public void RegisterInbox(Action<long, IZBackward> handler)
+        public void RegisterInbox(Action<long, ISocketClient> handler)
         {
             _router.RegisterInbox(DEFAULT_REQUEST_INBOX, handler);
         }

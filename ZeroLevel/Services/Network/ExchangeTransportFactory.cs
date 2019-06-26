@@ -5,7 +5,7 @@ namespace ZeroLevel.Network
 {
     public static class ExchangeTransportFactory
     {
-        private static readonly ConcurrentDictionary<string, IExClient> _clientInstances = new ConcurrentDictionary<string, IExClient>();
+        private static readonly ConcurrentDictionary<string, NetworkNode> _clientInstances = new ConcurrentDictionary<string, NetworkNode>();
 
         /// <summary>
         /// Creates a server to receive messages using the specified protocol
@@ -22,13 +22,13 @@ namespace ZeroLevel.Network
         /// <param name="protocol">Protocol</param>
         /// <param name="endpoint">Server endpoint</param>
         /// <returns>Client</returns>
-        public static IExClient GetClientWithCache(string endpoint)
+        public static NetworkNode GetClientWithCache(string endpoint)
         {
-            IExClient instance = null;
+            NetworkNode instance = null;
             if (_clientInstances.ContainsKey(endpoint))
             {
                 instance = _clientInstances[endpoint];
-                if (instance.Status == ZTransportStatus.Working)
+                if (instance.Status == SocketClientStatus.Working)
                 {
                     return instance;
                 }
@@ -41,9 +41,9 @@ namespace ZeroLevel.Network
             return instance;
         }
 
-        public static IExClient GetClient(string endpoint)
+        public static NetworkNode GetClient(string endpoint)
         {
-            return new ExClient(new ZSocketClient(NetUtils.CreateIPEndPoint(endpoint)));
+            return new NetworkNode(new SocketClient(NetUtils.CreateIPEndPoint(endpoint)));
         }
     }
 }

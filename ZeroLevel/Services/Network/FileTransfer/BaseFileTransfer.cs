@@ -2,11 +2,9 @@
 using System.Collections.Concurrent;
 using System.IO;
 using System.Threading;
-using ZeroLevel.Network;
-using ZeroLevel.Services.Network.FileTransfer.Model;
 using ZeroLevel.Services.Pools;
 
-namespace ZeroLevel.Services.Network.FileTransfer
+namespace ZeroLevel.Network.FileTransfer
 {
     public abstract class BaseFileTransfer
     {

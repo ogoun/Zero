@@ -1,7 +1,6 @@
 ﻿namespace ZeroLevel.Network
 {
-    public enum ZTransportStatus
-        : int
+    public enum SocketClientStatus
     {
         Initialized = 0,
         Working = 1,

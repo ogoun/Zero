@@ -1,6 +1,6 @@
 ﻿using ZeroLevel.Services.Serialization;
 
-namespace ZeroLevel.Services.Network.FileTransfer.Model
+namespace ZeroLevel.Network.FileTransfer
 {
     public sealed class FileFrame :
         IBinarySerializable, IFileTransferInfo

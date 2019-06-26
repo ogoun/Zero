@@ -1,9 +1,7 @@
 ﻿using System;
 using ZeroLevel.Models;
-using ZeroLevel.Network;
-using ZeroLevel.Services.Network.FileTransfer.Model;
 
-namespace ZeroLevel.Services.Network.FileTransfer
+namespace ZeroLevel.Network.FileTransfer
 {
     public sealed class FileServer
         : BaseFileTransfer, IFileServer
@@ -34,7 +32,7 @@ namespace ZeroLevel.Services.Network.FileTransfer
             }
         }
 
-        public void Send(IZBackward client, string fileName, Action<string> completeHandler = null, Action<string, string> errorHandler = null)
+        public void Send(ISocketClient client, string fileName, Action<string> completeHandler = null, Action<string, string> errorHandler = null)
         {
             PushTransferTask(fileName, completeHandler, errorHandler, client);
         }

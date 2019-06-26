@@ -1,7 +1,6 @@
-﻿using ZeroLevel.Network;
-using ZeroLevel.Services.FileSystem;
+﻿using ZeroLevel.Services.FileSystem;
 
-namespace ZeroLevel.Services.Network.FileTransfer
+namespace ZeroLevel.Network.FileTransfer
 {
     public static class FileClientFactory
     {
@@ -11,12 +10,12 @@ namespace ZeroLevel.Services.Network.FileTransfer
                 nameMapper ?? (c => FSUtils.FileNameCorrection($"{c.Endpoint.Address}_{c.Endpoint.Port}")), true);
         }
 
-        public static IFileClient Create(IExClient client, string baseFolder, ClientFolderNameMapper nameMapper = null)
+        public static IFileClient Create(NetworkNode client, string baseFolder, ClientFolderNameMapper nameMapper = null)
         {
             return CreateFileServerClient(client, baseFolder, nameMapper ?? (c => FSUtils.FileNameCorrection($"{c.Endpoint.Address}_{c.Endpoint.Port}")), false);
         }
 
-        private static IFileClient CreateFileServerClient(IExClient client, string baseFolder, ClientFolderNameMapper nameMapper, bool disposeClient)
+        private static IFileClient CreateFileServerClient(NetworkNode client, string baseFolder, ClientFolderNameMapper nameMapper, bool disposeClient)
         {
             return new FileClient(client, baseFolder, nameMapper, disposeClient);
         }

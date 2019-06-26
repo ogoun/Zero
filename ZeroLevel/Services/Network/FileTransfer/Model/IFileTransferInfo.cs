@@ -1,4 +1,4 @@
-﻿namespace ZeroLevel.Services.Network.FileTransfer.Model
+﻿namespace ZeroLevel.Network.FileTransfer
 {
     public enum FileTransferInfoType
     {

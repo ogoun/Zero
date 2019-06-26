@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ZeroLevel.Services.Network.FileTransfer
+namespace ZeroLevel.Network.FileTransfer
 {
     public interface IFileClient
         : IDisposable

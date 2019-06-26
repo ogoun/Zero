@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
-using ZeroLevel.Network;
-using ZeroLevel.Services._Network;
 
-namespace ZeroLevel._Network
+namespace ZeroLevel.Network
 {
     public sealed class FrameParser
     {
@@ -130,6 +128,7 @@ namespace ZeroLevel._Network
         }
 
         #endregion private models
+
         public event Action<FrameType, int, byte[]> OnIncoming;
 
         private readonly _Accum _accum = new _Accum();
@@ -187,7 +186,7 @@ namespace ZeroLevel._Network
                             position = _accum.WriteSize(part, position, length);
                             if (_accum.SizeFilled)
                             {
-                                if (_accum.Corrupted || _accum.Size < 1 || _accum.Size > ZBaseNetwork.MAX_FRAME_PAYLOAD_SIZE)
+                                if (_accum.Corrupted || _accum.Size < 1 || _accum.Size > BaseSocket.MAX_FRAME_PAYLOAD_SIZE)
                                 {
                                     _state = ParserState.WaitNew;
                                 }

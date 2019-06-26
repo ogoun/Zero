@@ -24,6 +24,22 @@ namespace ZeroLevel.Network
             return frame;
         }
 
+        public static Frame FromPool(string inbox)
+        {
+            var frame = _pool.Allocate();
+            frame.Inbox = inbox;
+            frame.Payload = null;
+            return frame;
+        }
+
+        public static Frame FromPool(string inbox, byte[] payload)
+        {
+            var frame = _pool.Allocate();
+            frame.Inbox = inbox;
+            frame.Payload = payload;
+            return frame;
+        }
+
         public void Release()
         {
             _pool.Free(this);
@@ -34,6 +50,8 @@ namespace ZeroLevel.Network
 
         [DataMember]
         public byte[] Payload { get; set; }
+
+        public bool IsRequest { get; set; }
 
         public Frame()
         {

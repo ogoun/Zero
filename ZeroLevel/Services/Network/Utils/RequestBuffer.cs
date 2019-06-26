@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using ZeroLevel.Network;
 using ZeroLevel.Services.Pools;
 
 namespace ZeroLevel.Network
@@ -11,13 +10,13 @@ namespace ZeroLevel.Network
         private Dictionary<long, RequestInfo> _requests = new Dictionary<long, RequestInfo>();
         private static ObjectPool<RequestInfo> _ri_pool = new ObjectPool<RequestInfo>(() => new RequestInfo());
 
-        public void RegisterForFrame(Frame frame, Action<Frame> callback, Action<string> fail = null)
+        public void RegisterForFrame(int identity, Action<Frame> callback, Action<string> fail = null)
         {
             var ri = _ri_pool.Allocate();
             lock (_reqeust_lock)
             {
                 ri.Reset(callback, fail);
-                _requests.Add(frame.FrameId, ri);
+                _requests.Add(identity, ri);
             }
         }
 
@@ -83,7 +82,7 @@ namespace ZeroLevel.Network
                 {
                     if (pair.Value.Sended == false) continue;
                     var diff = now_ticks - pair.Value.Timestamp;
-                    if (diff > ZBaseNetwork.MAX_REQUEST_TIME_TICKS)
+                    if (diff > BaseSocket.MAX_REQUEST_TIME_TICKS)
                     {
                         to_remove.Add(pair.Key);
                     }

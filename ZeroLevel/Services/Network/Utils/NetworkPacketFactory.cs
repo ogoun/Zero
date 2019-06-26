@@ -2,7 +2,7 @@
 using System.Runtime.CompilerServices;
 using System.Threading;
 
-namespace ZeroLevel.Services._Network
+namespace ZeroLevel.Network
 {
     public static class NetworkPacketFactory
     {

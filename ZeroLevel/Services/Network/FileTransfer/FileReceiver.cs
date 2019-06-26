@@ -2,9 +2,8 @@
 using System.Collections.Generic;
 using System.IO;
 using ZeroLevel.Models;
-using ZeroLevel.Services.Network.FileTransfer.Model;
 
-namespace ZeroLevel.Services.Network.FileTransfer
+namespace ZeroLevel.Network.FileTransfer
 {
     public class FileReceiver
     {

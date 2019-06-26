@@ -1,6 +1,6 @@
 ﻿using ZeroLevel.Network;
 
-namespace ZeroLevel.Services.Network.FileTransfer
+namespace ZeroLevel.Network.FileTransfer
 {
-    public delegate string ServerFolderNameMapperDelegate(IZBackward connection);
+    public delegate string ServerFolderNameMapperDelegate(ISocketClient connection);
 }
