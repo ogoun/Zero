@@ -40,12 +40,13 @@ namespace ZeroLevel.Network
 
         public SocketClient(IPEndPoint ep, IRouter router)
         {
-            _router = router;
+            _router = router;            
             Endpoint = ep;
             _parser.OnIncoming += _parser_OnIncoming;
             _sendThread = new Thread(SendFramesJob);
             _sendThread.IsBackground = true;
             _sendThread.Start();
+            EnsureConnection();
         }
 
         public SocketClient(Socket socket, IRouter router)
@@ -53,11 +54,14 @@ namespace ZeroLevel.Network
             _router = router;
             _socket_freezed = true;
             _clientSocket = socket;
+            _stream = new NetworkStream(_clientSocket, true);
             Endpoint = (IPEndPoint)_clientSocket.RemoteEndPoint;
             _parser.OnIncoming += _parser_OnIncoming;
             _sendThread = new Thread(SendFramesJob);
             _sendThread.IsBackground = true;
-            _sendThread.Start();
+            _sendThread.Start();            
+            _stream.BeginRead(_buffer, 0, DEFAULT_RECEIVE_BUFFER_SIZE, ReceiveAsyncCallback, null);
+            Working();
         }
 
         #region API
@@ -66,7 +70,7 @@ namespace ZeroLevel.Network
         public event Action<ISocketClient, byte[], int> OnIncomingData = (_, __, ___) => { };
         public IPEndPoint Endpoint { get; }
 
-        public void Request(Frame frame, Action<Frame> callback, Action<string> fail = null)
+        public void Request(Frame frame, Action<byte[]> callback, Action<string> fail = null)
         {
             if (frame == null) throw new ArgumentNullException(nameof(frame));
             if (frame != null && false == _send_queue.IsAddingCompleted)
@@ -169,7 +173,7 @@ namespace ZeroLevel.Network
                         }
                         break;
                     case FrameType.Response:
-                        _requests.Success(identity, MessageSerializer.Deserialize<Frame>(data));
+                        _requests.Success(identity, data);
                         break;
                 }
                 OnIncomingData(this, data, identity);

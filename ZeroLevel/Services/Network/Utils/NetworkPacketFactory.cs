@@ -22,7 +22,7 @@ namespace ZeroLevel.Network
             var packet = new byte[data.Length + 6];
             packet[0] = MAGIC;
             Array.Copy(BitConverter.GetBytes(data.Length), 0, packet, 1, 4);
-            packet[5] = (byte)(packet[0] ^ packet[1] ^ packet[2] ^ packet[3] ^ packet[4]);
+            packet[5] = (byte)(MAGIC ^ packet[1] ^ packet[2] ^ packet[3] ^ packet[4]);
             HashData(data, packet[5]);
             Array.Copy(data, 0, packet, 6, data.Length);
             return packet;
@@ -32,17 +32,18 @@ namespace ZeroLevel.Network
         {
             var packet = new byte[data.Length + 6 + 4];
             packet[0] = (MAGIC | MAGIC_REQUEST);
-            Array.Copy(BitConverter.GetBytes(data.Length), 0, packet, 1, 4);
-            packet[5] = (byte)(packet[0] ^ packet[1] ^ packet[2] ^ packet[3] ^ packet[4]);
+            Array.Copy(BitConverter.GetBytes(data.Length), 0, packet, 1, 4);            
 
             requestId = Interlocked.Increment(ref _current_request_id);
             var id = BitConverter.GetBytes(requestId);
-            packet[6] = id[0];
-            packet[7] = id[1];
-            packet[8] = id[2];
-            packet[9] = id[3];
+            packet[5] = id[0];
+            packet[6] = id[1];
+            packet[7] = id[2];
+            packet[8] = id[3];
 
-            HashData(data, packet[5]);
+            packet[9] = (byte)(MAGIC ^ packet[1] ^ packet[2] ^ packet[3] ^ packet[4]);
+
+            HashData(data, packet[9]);
             Array.Copy(data, 0, packet, 10, data.Length);
             return packet;
         }
@@ -51,16 +52,18 @@ namespace ZeroLevel.Network
         {
             var packet = new byte[data.Length + 6 + 4];
             packet[0] = (MAGIC | MAGIC_RESPONSE);
-            Array.Copy(BitConverter.GetBytes(data.Length), 0, packet, 1, 4);
-            packet[5] = (byte)(packet[0] ^ packet[1] ^ packet[2] ^ packet[3] ^ packet[4]);
+            Array.Copy(BitConverter.GetBytes(data.Length), 0, packet, 1, 4);            
 
             var id = BitConverter.GetBytes(requestId);
-            packet[6] = id[0];
-            packet[7] = id[1];
-            packet[8] = id[2];
-            packet[9] = id[3];
+            packet[5] = id[0];
+            packet[6] = id[1];
+            packet[7] = id[2];
+            packet[8] = id[3];
 
-            HashData(data, packet[5]);
+
+            packet[9] = (byte)(MAGIC ^ packet[1] ^ packet[2] ^ packet[3] ^ packet[4]);
+
+            HashData(data, packet[9]);
             Array.Copy(data, 0, packet, 10, data.Length);
             return packet;
         }

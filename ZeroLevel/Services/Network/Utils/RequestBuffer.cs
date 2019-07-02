@@ -10,7 +10,7 @@ namespace ZeroLevel.Network
         private Dictionary<long, RequestInfo> _requests = new Dictionary<long, RequestInfo>();
         private static ObjectPool<RequestInfo> _ri_pool = new ObjectPool<RequestInfo>(() => new RequestInfo());
 
-        public void RegisterForFrame(int identity, Action<Frame> callback, Action<string> fail = null)
+        public void RegisterForFrame(int identity, Action<byte[]> callback, Action<string> fail = null)
         {
             var ri = _ri_pool.Allocate();
             lock (_reqeust_lock)
@@ -38,7 +38,7 @@ namespace ZeroLevel.Network
             }
         }
 
-        public void Success(long frameId, Frame frame)
+        public void Success(long frameId, byte[] data)
         {
             RequestInfo ri = null;
             lock (_reqeust_lock)
@@ -51,7 +51,7 @@ namespace ZeroLevel.Network
             }
             if (ri != null)
             {
-                ri.Success(frame);
+                ri.Success(data);
                 _ri_pool.Free(ri);
             }
         }

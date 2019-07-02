@@ -105,7 +105,7 @@ namespace ZeroLevel.Network
                     }
                     else
                     {
-                        this._invoker.Invoke(this._instance, new object[] { incoming, client });
+                        this._invoker.Invoke(this._instance, new object[] { client, incoming });
                     }
                 }
                 else if (_typeReq == null)
@@ -115,7 +115,7 @@ namespace ZeroLevel.Network
                 else
                 {
                     var incoming = (_typeReq == typeof(byte[])) ? data : MessageSerializer.DeserializeCompatible(_typeReq, data);
-                    return this._invoker.Invoke(this._instance, new object[] { incoming, client });
+                    return this._invoker.Invoke(this._instance, new object[] { client, incoming });
                 }
                 return null;
             }

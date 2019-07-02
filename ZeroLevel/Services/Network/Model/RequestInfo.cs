@@ -4,14 +4,14 @@ namespace ZeroLevel.Network
 {
     internal sealed class RequestInfo
     {
-        private Action<Frame> _handler;
+        private Action<byte[]> _handler;
         private Action<string> _failHandler;
         private long _timestamp;
         public long Timestamp { get { return _timestamp; } }
         private bool _sended;
         public bool Sended { get { return _sended; } }
 
-        public void Reset(Action<Frame> handler, Action<string> failHandler)
+        public void Reset(Action<byte[]> handler, Action<string> failHandler)
         {
             _sended = false;
             _handler = handler;
@@ -24,10 +24,9 @@ namespace ZeroLevel.Network
             _timestamp = DateTime.UtcNow.Ticks;
         }
 
-        public void Success(Frame frame)
+        public void Success(byte[] data)
         {
-            _handler(frame);
-            frame?.Release();
+            _handler(data);
         }
 
         public void Fail(string reasonPhrase)

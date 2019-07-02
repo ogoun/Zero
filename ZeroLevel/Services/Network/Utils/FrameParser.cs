@@ -48,6 +48,7 @@ namespace ZeroLevel.Network
             }
 
             private byte[] _size_buf = new byte[4];
+            private byte[] _id_buf = new byte[4];
             private int offset;
 
             public int WriteSize(byte[] buf, int start, int length)
@@ -74,11 +75,11 @@ namespace ZeroLevel.Network
             {
                 for (; offset < 4 && start < length; offset++, start++)
                 {
-                    _size_buf[offset] = buf[start];
+                    _id_buf[offset] = buf[start];
                 }
                 if (offset == 4)
                 {
-                    Identity = BitConverter.ToInt32(_size_buf, 0);
+                    Identity = BitConverter.ToInt32(_id_buf, 0);
                     IdentityFilled = true;
                     offset = 0;
                 }

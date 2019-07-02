@@ -66,7 +66,7 @@ namespace ZeroLevel.Network
         {
             try
             {
-                _client.Request(Frame.FromPool(inbox), f => callback(f.Payload));
+                _client.Request(Frame.FromPool(inbox), f => callback(f));
             }
             catch (Exception ex)
             {
@@ -80,7 +80,7 @@ namespace ZeroLevel.Network
         {
             try
             {
-                _client.Request(Frame.FromPool(inbox, data), f => callback(f.Payload));
+                _client.Request(Frame.FromPool(inbox, data), f => callback(f));
             }
             catch (Exception ex)
             {
@@ -94,7 +94,7 @@ namespace ZeroLevel.Network
         {
             try
             {
-                _client.Request(Frame.FromPool(inbox), f => callback(MessageSerializer.DeserializeCompatible<Tresponse>(f.Payload)));
+                _client.Request(Frame.FromPool(inbox), f => callback(MessageSerializer.DeserializeCompatible<Tresponse>(f)));
             }
             catch (Exception ex)
             {
@@ -109,7 +109,7 @@ namespace ZeroLevel.Network
             try
             {
                 _client.Request(Frame.FromPool(inbox, MessageSerializer.SerializeCompatible<Trequest>(request)), 
-                    f => callback(MessageSerializer.DeserializeCompatible<Tresponse>(f.Payload)));
+                    f => callback(MessageSerializer.DeserializeCompatible<Tresponse>(f)));
             }
             catch (Exception ex)
             {

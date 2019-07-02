@@ -17,7 +17,7 @@ namespace ZeroLevel.Network
         void ForceConnect();
         void UseKeepAlive(TimeSpan period);
         void Send(Frame data);
-        void Request(Frame data, Action<Frame> callback, Action<string> fail = null);
+        void Request(Frame data, Action<byte[]> callback, Action<string> fail = null);
         void Response(byte[] data, int identity);
     }
 }

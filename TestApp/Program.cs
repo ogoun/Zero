@@ -15,7 +15,9 @@ namespace TestApp
                 .Run();
 
             var router = se.Service.UseHost(8800);
-            router.RegisterInbox<string, string>("upper", (c, s) => s.ToUpperInvariant());            
+            router.RegisterInbox<string, string>("upper", (c, s) => s.ToUpperInvariant());
+
+            
 
             se.WaitWhileStatus(ZeroServiceStatus.Running)
             .Stop();
