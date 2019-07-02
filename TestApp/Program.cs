@@ -15,10 +15,7 @@ namespace TestApp
                 .Run();
 
             var router = se.Service.UseHost(8800);
-            router.RegisterInbox<string, string>("upper", (c, s) => s.ToUpperInvariant());
-
-            var client = se.Service.ConnectToService(new IPEndPoint(IPAddress.Loopback, 8800));
-            client.Request<string, string>("upper", "hello", s => Console.WriteLine(s));
+            router.RegisterInbox<string, string>("upper", (c, s) => s.ToUpperInvariant());            
 
             se.WaitWhileStatus(ZeroServiceStatus.Running)
             .Stop();

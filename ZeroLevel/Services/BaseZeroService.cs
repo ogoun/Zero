@@ -137,7 +137,7 @@ namespace ZeroLevel.Services.Applications
         {
             if (_state == ZeroServiceStatus.Running)
             {
-                return GetServer(new IPEndPoint(NetUtils.GetNonLoopbackAddress(), NetUtils.GetFreeTcpPort()), new Router()).Router;
+                return GetServer(new IPEndPoint(IPAddress.Any, NetUtils.GetFreeTcpPort()), new Router()).Router;
             }
             return _null_router;
         }
@@ -146,7 +146,7 @@ namespace ZeroLevel.Services.Applications
         {
             if (_state == ZeroServiceStatus.Running)
             {
-                return GetServer(new IPEndPoint(NetUtils.GetNonLoopbackAddress(), port), new Router()).Router;
+                return GetServer(new IPEndPoint(IPAddress.Any, port), new Router()).Router;
             }
             return _null_router;
         }
