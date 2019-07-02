@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace ZeroLevel.Network
 {
+    /*
     /// <summary>
     /// Provides data exchange between services
     /// </summary>
@@ -28,12 +29,12 @@ namespace ZeroLevel.Network
         /// <summary>
         ///  Registration service
         /// </summary>
-        public IExService RegisterService(IExchangeService service)
+        public IExchangeService RegisterService(IExchangeService service)
         {
             return _host.RegisterService(service);
         }
 
-        public IExService RegisterService(ExServiceInfo service)
+        public IExchangeService RegisterService(ExServiceInfo service)
         {
             return _host.RegisterService(service);
         }
@@ -595,7 +596,7 @@ namespace ZeroLevel.Network
 
         #region Private
 
-        private IEnumerable<Tresp> _RequestBroadcast<Treq, Tresp>(List<NetworkNode> clients, string inbox, Treq data)
+        private IEnumerable<Tresp> _RequestBroadcast<Treq, Tresp>(List<ExClient> clients, string inbox, Treq data)
         {
             var response = new List<Tresp>();
             using (var waiter = new CountdownEvent(clients.Count))
@@ -623,7 +624,7 @@ namespace ZeroLevel.Network
             return response;
         }
 
-        private IEnumerable<Tresp> _RequestBroadcast<Tresp>(List<NetworkNode> clients, string inbox)
+        private IEnumerable<Tresp> _RequestBroadcast<Tresp>(List<ExClient> clients, string inbox)
         {
             var response = new List<Tresp>();
             using (var waiter = new CountdownEvent(clients.Count))
@@ -660,4 +661,5 @@ namespace ZeroLevel.Network
             this._host.Dispose();
         }
     }
+    */
 }

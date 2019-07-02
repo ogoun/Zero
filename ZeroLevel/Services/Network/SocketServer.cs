@@ -12,11 +12,12 @@ namespace ZeroLevel.Network
     {
         private Socket _serverSocket;
         private ReaderWriterLockSlim _connection_set_lock = new ReaderWriterLockSlim();
-        private Dictionary<IPEndPoint, NetworkNode> _connections = new Dictionary<IPEndPoint, NetworkNode>();
+        private Dictionary<IPEndPoint, ExClient> _connections = new Dictionary<IPEndPoint, ExClient>();
 
+        private readonly IRouter _router;
         public IPEndPoint LocalEndpoint { get; }
         public event Action<ISocketClient> OnDisconnect = _ => { };
-        public event Action<ISocketClient> OnConnect = _ => { };
+        public event Action<ExClient> OnConnect = _ => { };
         public IEnumerable<IPEndPoint> ConnectionList
         {
             get
@@ -41,7 +42,7 @@ namespace ZeroLevel.Network
             catch
             { }
         }
-        private void ConnectEventRise(ISocketClient client)
+        private void ConnectEventRise(ExClient client)
         {
             try
             {
@@ -51,8 +52,11 @@ namespace ZeroLevel.Network
             { }
         }
 
-        public SocketServer(IPEndPoint endpoint)
+        public IRouter Router { get { return _router; } }
+
+        public SocketServer(IPEndPoint endpoint, IRouter router)
         {
+            _router = router;
             LocalEndpoint = endpoint;
             _serverSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             _serverSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive, true);
@@ -72,11 +76,11 @@ namespace ZeroLevel.Network
                     _serverSocket.BeginAccept(BeginAcceptCallback, null);
                     _connection_set_lock.EnterWriteLock();
 
-                    var connection = new SocketClient(client_socket);
+                    var connection = new SocketClient(client_socket, _router);
                     connection.OnDisconnect += Connection_OnDisconnect;
-                    _connections[connection.Endpoint] = new NetworkNode(connection);
+                    _connections[connection.Endpoint] = new ExClient(connection);
 
-                    ConnectEventRise(connection);
+                    ConnectEventRise(_connections[connection.Endpoint]);
                 }
                 catch (Exception ex)
                 {

@@ -1,12 +1,87 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Reflection;
 
 namespace ZeroLevel
 {
     public static class Bootstrap
     {
+        public interface IServiceExecution
+        {
+            IServiceExecution Run();
+            IServiceExecution WaitForStatus(ZeroServiceStatus status);
+            IServiceExecution WaitForStatus(ZeroServiceStatus status, TimeSpan period);
+            IServiceExecution WaitWhileStatus(ZeroServiceStatus status);
+            IServiceExecution WaitWhileStatus(ZeroServiceStatus status, TimeSpan period);
+            IServiceExecution Stop();
+            IZeroService Service { get; }
+            ZeroServiceStatus Status { get; }
+        }
+
+        public class BootstrapFluent
+            : IServiceExecution
+        {
+            private readonly IZeroService _service;
+            public IZeroService Service { get { return _service; } }
+
+            public BootstrapFluent(IZeroService service)
+            {
+                _service = service;
+            }
+
+            public BootstrapFluent UseDiscovery() { _service?.UseDiscovery(); return this; }
+            public BootstrapFluent UseDiscovery(string url) { _service?.UseDiscovery(url); return this; }
+            public BootstrapFluent UseDiscovery(IPEndPoint endpoint) { _service?.UseDiscovery(endpoint); return this; }
+
+           /* public BootstrapFluent UseHost() { _service?.UseHost(); return this; }
+            public BootstrapFluent UseHost(int port) { _service?.UseHost(port); return this; }
+            public BootstrapFluent UseHost(IPEndPoint endpoint) { _service?.UseHost(endpoint); return this; }
+
+            public BootstrapFluent ConnectToService(string url) { _service.ConnectToService(url); return this; }
+            public BootstrapFluent ConnectToService(IPEndPoint endpoint) { _service.ConnectToService(endpoint); return this; }
+            */
+            public BootstrapFluent ReadServiceInfo() { _service?.ReadServiceInfo(); return this; }
+            public BootstrapFluent ReadServiceInfo(IConfigurationSet config) { _service?.ReadServiceInfo(config); return this; }
+
+            public ZeroServiceStatus Status { get { return _service.Status; } }
+            public IServiceExecution Run() { _service.Start(); return this; }
+            public IServiceExecution Stop()
+            {
+                try
+                {
+                    _service?.Stop();
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex, $"[Bootstrap] Service {_service?.Name} dispose error");
+                }
+                return this;
+            }
+
+            public IServiceExecution WaitForStatus(ZeroServiceStatus status)
+            {
+                _service.WaitForStatus(status);
+                return this;
+            }
+            public IServiceExecution WaitForStatus(ZeroServiceStatus status, TimeSpan period)
+            {
+                _service.WaitForStatus(status, period);
+                return this;
+            }
+            public IServiceExecution WaitWhileStatus(ZeroServiceStatus status)
+            {
+                _service.WaitWhileStatus(status);
+                return this;
+            }
+            public IServiceExecution WaitWhileStatus(ZeroServiceStatus status, TimeSpan period)
+            {
+                _service.WaitWhileStatus(status, period);
+                return this;
+            }
+        }
+
         static Bootstrap()
         {
             // Tricks for minimize config changes for dependency resolve
@@ -22,10 +97,6 @@ namespace ZeroLevel
                 {
                     return Assembly.LoadFile(Path.Combine(Configuration.BaseDirectory, "Newtonsoft.Json.dll"));
                 }
-                else if (args.Name.Equals("Microsoft.Owin", StringComparison.Ordinal))
-                {
-                    return Assembly.LoadFile(Path.Combine(Configuration.BaseDirectory, "Microsoft.Owin.dll"));
-                }
                 var candidates = Directory.GetFiles(Path.Combine(Configuration.BaseDirectory), args.Name, SearchOption.TopDirectoryOnly);
                 if (candidates != null && candidates.Any())
                 {
@@ -39,37 +110,29 @@ namespace ZeroLevel
             return null;
         }
 
-        public static void Startup<T>(string[] args, 
-            Func<bool> preStartConfiguration = null, 
+        public static BootstrapFluent Startup<T>(string[] args,
+            Func<bool> preStartConfiguration = null,
             Func<bool> postStartConfiguration = null)
             where T : IZeroService
         {
-            var service = Initialize<T>(args, Configuration.ReadSetFromApplicationConfig(), 
+            var service = Initialize<T>(args, Configuration.ReadSetFromApplicationConfig(),
                 preStartConfiguration, postStartConfiguration);
-            if (service != null)
-            {
-                service.Start();
-                Shutdown(service);
-            }
+            return new BootstrapFluent(service);
         }
 
-        public static void Startup<T>(string[] args,
+        public static BootstrapFluent Startup<T>(string[] args,
             Func<IConfigurationSet> configuration,
             Func<bool> preStartConfiguration = null,
             Func<bool> postStartConfiguration = null)
             where T : IZeroService
         {
             var service = Initialize<T>(args, configuration(), preStartConfiguration, postStartConfiguration);
-            if (service != null)
-            {
-                service.Start();
-                Shutdown(service);
-            }
+            return new BootstrapFluent(service);
         }
 
         private static IZeroService Initialize<T>(string[] args,
             IConfigurationSet configurationSet,
-            Func<bool> preStartConfiguration = null, 
+            Func<bool> preStartConfiguration = null,
             Func<bool> postStartConfiguration = null)
             where T : IZeroService
         {
@@ -121,12 +184,11 @@ namespace ZeroLevel
             return service;
         }
 
-        private static void Shutdown(IZeroService service)
+        private static void Shutdown()
         {
             try { Sheduller.Dispose(); } catch (Exception ex) { Log.Error(ex, "[Bootstrap] Dispose default sheduller error"); }
             try { Log.Dispose(); } catch (Exception ex) { Log.Error(ex, "[Bootstrap] Dispose log error"); }
             try { Injector.Default.Dispose(); Injector.Dispose(); } catch (Exception ex) { Log.Error(ex, "[Bootstrap] Dispose DI containers error"); }
-            try { (service as IDisposable)?.Dispose(); } catch (Exception ex) { Log.Error(ex, $"[Bootstrap] Service {service?.Name} dispose error"); }
         }
     }
 }

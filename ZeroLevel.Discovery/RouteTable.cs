@@ -90,6 +90,7 @@ namespace ZeroLevel.Discovery
         }
 
         #endregion Snapshot
+
         private void Heartbeat(long taskid)
         {
             try
@@ -148,7 +149,7 @@ namespace ZeroLevel.Discovery
             Save();
         }
 
-        public InvokeResult Append(ExServiceInfo serviceInfo, IZBackward client)
+        public InvokeResult Append(ExServiceInfo serviceInfo, ISocketClient client)
         {
             InvokeResult result = null;
             var endpoint = $"{client.Endpoint.Address}:{serviceInfo.Port}";

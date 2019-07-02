@@ -6,12 +6,12 @@ namespace ZeroLevel.Network.FileTransfer
     public sealed class FileServer
         : BaseFileTransfer, IFileServer
     {
-        private readonly IExService _service;
+        private readonly IRouter _service;
         private readonly string _baseFolder;
         private readonly ServerFolderNameMapperDelegate _nameMapper;
         private readonly bool _disposeService;
 
-        internal FileServer(IExService service, string baseFolder, ServerFolderNameMapperDelegate nameMapper, bool disposeService)
+        internal FileServer(IRouter service, string baseFolder, ServerFolderNameMapperDelegate nameMapper, bool disposeService)
             : base(baseFolder)
         {
             _service = service ?? throw new Exception(nameof(service));
@@ -19,20 +19,12 @@ namespace ZeroLevel.Network.FileTransfer
             _nameMapper = nameMapper ?? throw new Exception(nameof(nameMapper));
             _disposeService = disposeService;
 
-            _service.RegisterInbox<FileStartFrame, InvokeResult>("__upload_file_start", (f, _, client) => Receiver.Incoming(f, nameMapper(client)));
-            _service.RegisterInbox<FileFrame, InvokeResult>("__upload_file_frame", (f, _, __) => Receiver.Incoming(f));
-            _service.RegisterInbox<FileEndFrame, InvokeResult>("__upload_file_complete", (f, _, __) => Receiver.Incoming(f));
+            _service.RegisterInbox<FileStartFrame, InvokeResult>("__upload_file_start", (client, f) => Receiver.Incoming(f, nameMapper(client)));
+            _service.RegisterInbox<FileFrame, InvokeResult>("__upload_file_frame", (client, f) => Receiver.Incoming(f));
+            _service.RegisterInbox<FileEndFrame, InvokeResult>("__upload_file_complete", (client, f) => Receiver.Incoming(f));
         }
 
-        public void Dispose()
-        {
-            if (_disposeService)
-            {
-                _service?.Dispose();
-            }
-        }
-
-        public void Send(ISocketClient client, string fileName, Action<string> completeHandler = null, Action<string, string> errorHandler = null)
+        public void Send(ExClient client, string fileName, Action<string> completeHandler = null, Action<string, string> errorHandler = null)
         {
             PushTransferTask(fileName, completeHandler, errorHandler, client);
         }
@@ -41,18 +33,18 @@ namespace ZeroLevel.Network.FileTransfer
         {
             Log.Info($"Start upload file {reader.Path}");
             var startinfo = reader.GetStartInfo();
-            if (false == task.Client.SendBackward<FileStartFrame>("__upload_file_start", startinfo).Success)
+            if (false == task.Client.Send<FileStartFrame>("__upload_file_start", startinfo).Success)
             {
                 return;
             }
             foreach (var chunk in reader.Read())
             {
-                if (task.Client.SendBackward<FileFrame>("__upload_file_frame", chunk).Success == false)
+                if (task.Client.Send<FileFrame>("__upload_file_frame", chunk).Success == false)
                 {
                     return;
                 }
             }
-            task.Client.SendBackward<FileEndFrame>("__upload_file_complete", reader.GetCompleteInfo());
+            task.Client.Send<FileEndFrame>("__upload_file_complete", reader.GetCompleteInfo());
             Log.Debug($"Stop upload file {reader.Path}");
         }
     }

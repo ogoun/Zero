@@ -3,10 +3,11 @@
 namespace ZeroLevel
 {
     [Flags]
-    public enum ZeroServiceState : int
+    public enum ZeroServiceStatus : int
     {
         Initialized = 0,
-        Started = 1,
-        Stopped = 2
+        Running = 1,
+        Stopped = 2,
+        Disposed = 6
     }
 }

@@ -7,6 +7,7 @@ using System.Reflection;
 
 namespace ZeroLevel.Network
 {
+    /*
     public sealed class ExServiceHost
         : IDisposable
     {
@@ -512,4 +513,5 @@ namespace ZeroLevel.Network
             }
         }
     }
+    */
 }

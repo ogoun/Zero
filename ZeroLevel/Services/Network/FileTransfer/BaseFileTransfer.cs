@@ -27,7 +27,7 @@ namespace ZeroLevel.Network.FileTransfer
             _currentFileTransfers = 0;*/
         }
 
-        protected void PushTransferTask(string filePath, Action<string> completeHandler = null, Action<string, string> errorHandler = null, IZBackward client = null)
+        protected void PushTransferTask(string filePath, Action<string> completeHandler = null, Action<string, string> errorHandler = null, ExClient client = null)
         {
             if (string.IsNullOrWhiteSpace(filePath))
             {

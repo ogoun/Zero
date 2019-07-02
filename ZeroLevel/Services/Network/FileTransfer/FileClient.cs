@@ -7,12 +7,12 @@ namespace ZeroLevel.Network.FileTransfer
     public sealed class FileClient
         : BaseFileTransfer, IFileClient
     {
-        private readonly NetworkNode _client;
+        private readonly ExClient _client;
         private readonly string _baseFolder;
         private readonly ClientFolderNameMapper _nameMapper;
         private readonly bool _disposeClient;
 
-        internal FileClient(NetworkNode client, string baseFolder, ClientFolderNameMapper nameMapper, bool disposeClient)
+        internal FileClient(ExClient client, string baseFolder, ClientFolderNameMapper nameMapper, bool disposeClient)
             : base(baseFolder)
         {
             _client = client ?? throw new Exception(nameof(client));
@@ -20,9 +20,9 @@ namespace ZeroLevel.Network.FileTransfer
             _nameMapper = nameMapper ?? throw new Exception(nameof(nameMapper));
             _disposeClient = disposeClient;
 
-            _client.RegisterInbox<FileStartFrame>("__upload_file_start", (c, f) => Receiver.Incoming(f, nameMapper(c)));
-            _client.RegisterInbox<FileFrame>("__upload_file_frame", (c, f) => Receiver.Incoming(f));
-            _client.RegisterInbox<FileEndFrame>("__upload_file_complete", (c, f) => Receiver.Incoming(f));
+            _client.Router.RegisterInbox<FileStartFrame>("__upload_file_start", (c, f) => Receiver.Incoming(f, nameMapper(c)));
+            _client.Router.RegisterInbox<FileFrame>("__upload_file_frame", (c, f) => Receiver.Incoming(f));
+            _client.Router.RegisterInbox<FileEndFrame>("__upload_file_complete", (c, f) => Receiver.Incoming(f));
         }
 
         public void Dispose()

@@ -266,4 +266,19 @@ namespace ZeroLevel.Network
         }
         #endregion
     }
+
+    internal sealed class NullRouter
+        : IRouter
+    {
+        public void HandleMessage(Frame frame, ISocketClient client) { }
+        public byte[] HandleRequest(Frame frame, ISocketClient client) { return null; }
+        public void RegisterInbox(string inbox, MessageHandler handler) { }
+        public void RegisterInbox<T>(string inbox, MessageHandler<T> handler) { }
+        public void RegisterInbox(MessageHandler handler) { }
+        public void RegisterInbox<T>(MessageHandler<T> handler) { }
+        public void RegisterInbox<Tresponse>(string inbox, RequestHandler<Tresponse> handler) { }
+        public void RegisterInbox<Trequest, Tresponse>(string inbox, RequestHandler<Trequest, Tresponse> handler) { }
+        public void RegisterInbox<Tresponse>(RequestHandler<Tresponse> handler) { }
+        public void RegisterInbox<Trequest, Tresponse>(RequestHandler<Trequest, Tresponse> handler) { }
+    }
 }

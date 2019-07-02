@@ -7,6 +7,6 @@ namespace ZeroLevel.Network.FileTransfer
         public string FilePath;
         public Action<string> CompletedHandler;
         public Action<string, string> ErrorHandler;
-        public ISocketClient Client;
+        public ExClient Client;
     }
 }

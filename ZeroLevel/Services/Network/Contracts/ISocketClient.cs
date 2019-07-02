@@ -12,6 +12,8 @@ namespace ZeroLevel.Network
         IPEndPoint Endpoint { get; }
         SocketClientStatus Status { get; }
 
+        IRouter Router { get; }
+
         void ForceConnect();
         void UseKeepAlive(TimeSpan period);
         void Send(Frame data);

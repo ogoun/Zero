@@ -7,6 +7,11 @@ namespace TestApp
     public class MyService
         : BaseZeroService
     {
+        public MyService()
+            :base()
+        {
+        }
+
         protected override void StartAction()
         {
             Log.Info("Started");

@@ -12,6 +12,7 @@ namespace ZeroLevel.Network
     {
         #region Private
 
+        private readonly IRouter _router;
         private Socket _clientSocket;
         private NetworkStream _stream;
         private FrameParser _parser = new FrameParser();
@@ -33,10 +34,13 @@ namespace ZeroLevel.Network
         }
         #endregion Private
 
+        public IRouter Router { get { return _router; } }
+
         public bool IsEmptySendQueue { get { return _send_queue.Count == 0; } }
 
-        public SocketClient(IPEndPoint ep)
+        public SocketClient(IPEndPoint ep, IRouter router)
         {
+            _router = router;
             Endpoint = ep;
             _parser.OnIncoming += _parser_OnIncoming;
             _sendThread = new Thread(SendFramesJob);
@@ -44,8 +48,9 @@ namespace ZeroLevel.Network
             _sendThread.Start();
         }
 
-        public SocketClient(Socket socket)
+        public SocketClient(Socket socket, IRouter router)
         {
+            _router = router;
             _socket_freezed = true;
             _clientSocket = socket;
             Endpoint = (IPEndPoint)_clientSocket.RemoteEndPoint;
@@ -151,16 +156,23 @@ namespace ZeroLevel.Network
                 switch (type)
                 {
                     case FrameType.KeepAlive:
-                        _last_rw_time = DateTime.UtcNow.Ticks;
-                        break;
+                        // Nothing
+                        return;
                     case FrameType.Message:
+                        _router?.HandleMessage(MessageSerializer.Deserialize<Frame>(data), this);
+                        break;
                     case FrameType.Request:
-                        OnIncomingData(this, data, identity);
+                        var response = _router?.HandleRequest(MessageSerializer.Deserialize<Frame>(data), this);
+                        if (response != null)
+                        {
+                            this.Response(response, identity);
+                        }
                         break;
                     case FrameType.Response:
                         _requests.Success(identity, MessageSerializer.Deserialize<Frame>(data));
                         break;
                 }
+                OnIncomingData(this, data, identity);
             }
             catch (Exception ex)
             {
@@ -227,7 +239,7 @@ namespace ZeroLevel.Network
                 {
                     if (false == TryConnect())
                     {
-                        throw new ObjectDisposedException("No connection");
+                        throw new Exception("No connection");
                     }
                 }
             }
