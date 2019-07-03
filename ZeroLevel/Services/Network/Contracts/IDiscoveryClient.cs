@@ -1,10 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace ZeroLevel.Network
 {
     public interface IDiscoveryClient
+        : IDisposable
     {
-        bool Register(ExServiceInfo info);
+        bool Register(ZeroServiceInfo info);
 
         IEnumerable<ServiceEndpointInfo> GetServiceEndpoints(string serviceKey);
 

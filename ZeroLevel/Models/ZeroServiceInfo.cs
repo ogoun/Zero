@@ -2,15 +2,18 @@
 using System.Runtime.Serialization;
 using ZeroLevel.Services.Serialization;
 
-namespace ZeroLevel.Network
+namespace ZeroLevel
 {
     [Serializable]
     [DataContract]
-    public sealed class ExServiceInfo :
-       IEquatable<ExServiceInfo>, IBinarySerializable
+    public sealed class ZeroServiceInfo :
+       IEquatable<ZeroServiceInfo>, IBinarySerializable
     {
         public const string DEFAULT_GROUP_NAME = "__service_default_group__";
         public const string DEFAULT_TYPE_NAME = "__service_default_type__";
+
+        [DataMember]
+        public string Name { get; set; }
 
         /// <summary>
         /// Service key, must be unique within the business functionality.
@@ -41,11 +44,12 @@ namespace ZeroLevel.Network
         [DataMember]
         public int Port { get; set; }
 
-        public bool Equals(ExServiceInfo other)
+        public bool Equals(ZeroServiceInfo other)
         {
             if (other == null) return false;
             if (object.ReferenceEquals(this, other)) return true;
             if (this.Port != other.Port) return false;
+            if (string.Compare(this.Name, other.Name, true) != 0) return false;
             if (string.Compare(this.ServiceKey, other.ServiceKey, true) != 0) return false;
             if (string.Compare(this.ServiceGroup, other.ServiceGroup, true) != 0) return false;
             if (string.Compare(this.ServiceType, other.ServiceType, true) != 0) return false;
@@ -55,7 +59,7 @@ namespace ZeroLevel.Network
 
         public override bool Equals(object obj)
         {
-            return base.Equals(obj);
+            return this.Equals(obj as ZeroServiceInfo);
         }
 
         public override int GetHashCode()
@@ -66,6 +70,7 @@ namespace ZeroLevel.Network
         public void Serialize(IBinaryWriter writer)
         {
             writer.WriteInt32(this.Port);
+            writer.WriteString(this.Name);
             writer.WriteString(this.ServiceKey);
             writer.WriteString(this.ServiceGroup);
             writer.WriteString(this.ServiceType);
@@ -75,6 +80,7 @@ namespace ZeroLevel.Network
         public void Deserialize(IBinaryReader reader)
         {
             this.Port = reader.ReadInt32();
+            this.Name = reader.ReadString();
             this.ServiceKey = reader.ReadString();
             this.ServiceGroup = reader.ReadString();
             this.ServiceType = reader.ReadString();
@@ -83,7 +89,7 @@ namespace ZeroLevel.Network
 
         public override string ToString()
         {
-            return $"{ServiceKey} ({Version})";
+            return $"{ServiceKey } ({Version})";
         }
     }
 }

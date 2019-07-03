@@ -10,7 +10,8 @@ namespace ZeroLevel.Network
     public class DiscoveryClient
         : IDiscoveryClient
     {
-        private sealed class DCRouter
+        private sealed class DCRouter:
+            IDisposable
         {
             private ReaderWriterLockSlim _lock = new ReaderWriterLockSlim();
             private IEnumerable<ServiceEndpointInfo> _empty = Enumerable.Empty<ServiceEndpointInfo>();
@@ -124,14 +125,19 @@ namespace ZeroLevel.Network
                 }
                 return _empty;
             }
+
+            public void Dispose()
+            {
+                _lock.Dispose();
+            }
         }
 
         private readonly DCRouter _router = new DCRouter();
         private readonly ExClient _discoveryServerClient;
 
-        public DiscoveryClient(ISocketClient client)
+        public DiscoveryClient(ExClient client)
         {
-            _discoveryServerClient = new ExClient(client);
+            _discoveryServerClient = client;
             UpdateServiceListInfo();
             Sheduller.RemindEvery(TimeSpan.FromSeconds(30), UpdateServiceListInfo);
         }
@@ -160,7 +166,7 @@ namespace ZeroLevel.Network
             }
         }
 
-        public bool Register(ExServiceInfo info)
+        public bool Register(ZeroServiceInfo info)
         {
             _discoveryServerClient.ForceConnect();
             if (_discoveryServerClient.Status == SocketClientStatus.Working)
@@ -168,7 +174,7 @@ namespace ZeroLevel.Network
                 bool result = false;
                 try
                 {
-                    _discoveryServerClient.Request<ExServiceInfo, InvokeResult>("register", info, r =>
+                    _discoveryServerClient.Request<ZeroServiceInfo, InvokeResult>("register", info, r =>
                     {
                         result = r.Success;
                         if (!result)
@@ -194,5 +200,11 @@ namespace ZeroLevel.Network
         public IEnumerable<ServiceEndpointInfo> GetServiceEndpointsByGroup(string serviceGroup) => _router.GetServiceEndpointsByGroup(serviceGroup);
         public IEnumerable<ServiceEndpointInfo> GetServiceEndpointsByType(string serviceType) => _router.GetServiceEndpointsByType(serviceType);
         public ServiceEndpointInfo GetService(string serviceKey, string endpoint) => _router.GetService(serviceKey, endpoint);
+
+        public void Dispose()
+        {
+            _router.Dispose();
+            _discoveryServerClient.Dispose();
+        }
     }
 }

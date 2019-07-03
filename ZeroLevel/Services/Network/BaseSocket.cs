@@ -11,6 +11,7 @@ namespace ZeroLevel.Network
 
         public const string DEFAULT_MESSAGE_INBOX = "__message_inbox__";
         public const string DEFAULT_REQUEST_INBOX = "__request_inbox__";
+        public const string DEFAULT_REQUEST_WITHOUT_ARGS_INBOX = "__request_no_args_inbox__";
         protected const string DEFAULT_REQUEST_ERROR_INBOX = "__request_error__";
 
         /// <summary>

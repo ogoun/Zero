@@ -155,5 +155,45 @@ namespace ZeroLevel.Services.Serialization
                 return PrimitiveTypeSerializer.Deserialize(reader, type);
             }
         }
+
+        public static T Copy<T>(T value)
+            where T : IBinarySerializable
+        {
+            using (var writer = new MemoryStreamWriter())
+            {
+                value.Serialize(writer);
+                using (var reader = new MemoryStreamReader(writer.Complete()))
+                {
+                    var direct = (IBinarySerializable)Activator.CreateInstance<T>();
+                    direct.Deserialize(reader);
+                    return (T)direct;
+                }
+            }
+        }
+
+        public static T CopyCompatible<T>(T value)
+        {
+            if (typeof(IBinarySerializable).IsAssignableFrom(typeof(T)))
+            {
+                using (var writer = new MemoryStreamWriter())
+                {
+                    ((IBinarySerializable)value).Serialize(writer);
+                    using (var reader = new MemoryStreamReader(writer.Complete()))
+                    {
+                        var direct = (IBinarySerializable)Activator.CreateInstance<T>();
+                        direct.Deserialize(reader);
+                        return (T)direct;
+                    }
+                }
+            }
+            using (var writer = new MemoryStreamWriter())
+            {
+                PrimitiveTypeSerializer.Serialize<T>(writer, value);
+                using (var reader = new MemoryStreamReader(writer.Complete()))
+                {
+                    return PrimitiveTypeSerializer.Deserialize<T>(reader);
+                }
+            }
+        }
     }
 }
