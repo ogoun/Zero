@@ -179,45 +179,49 @@ namespace ZeroLevel.Network
         #endregion Invokation
 
         #region Message handlers registration
-        public void RegisterInbox(string inbox, MessageHandler handler)
+        public IServer RegisterInbox(string inbox, MessageHandler handler)
         {
             if (false == _handlers.ContainsKey(inbox))
             {
                 _handlers.Add(inbox, new List<MRInvoker>());
             }
             _handlers[inbox].Add(MRInvoker.Create(handler));
+            return this;
         }
 
-        public void RegisterInbox<T>(string inbox, MessageHandler<T> handler)
+        public IServer RegisterInbox<T>(string inbox, MessageHandler<T> handler)
         {
             if (false == _handlers.ContainsKey(inbox))
             {
                 _handlers.Add(inbox, new List<MRInvoker>());
             }
             _handlers[inbox].Add(MRInvoker.Create<T>(handler));
+            return this;
         }
 
-        public void RegisterInbox(MessageHandler handler)
+        public IServer RegisterInbox(MessageHandler handler)
         {
             if (false == _handlers.ContainsKey(BaseSocket.DEFAULT_MESSAGE_INBOX))
             {
                 _handlers.Add(BaseSocket.DEFAULT_MESSAGE_INBOX, new List<MRInvoker>());
             }
             _handlers[BaseSocket.DEFAULT_MESSAGE_INBOX].Add(MRInvoker.Create(handler));
+            return this;
         }
 
-        public void RegisterInbox<T>(MessageHandler<T> handler)
+        public IServer RegisterInbox<T>(MessageHandler<T> handler)
         {
             if (false == _handlers.ContainsKey(BaseSocket.DEFAULT_MESSAGE_INBOX))
             {
                 _handlers.Add(BaseSocket.DEFAULT_MESSAGE_INBOX, new List<MRInvoker>());
             }
             _handlers[BaseSocket.DEFAULT_MESSAGE_INBOX].Add(MRInvoker.Create<T>(handler));
+            return this;
         }
         #endregion 
 
         #region Request handlers registration
-        public void RegisterInbox<Tresponse>(string inbox, RequestHandler<Tresponse> handler)
+        public IServer RegisterInbox<Tresponse>(string inbox, RequestHandler<Tresponse> handler)
         {
             if (false == _requestors.ContainsKey(inbox))
             {
@@ -227,9 +231,10 @@ namespace ZeroLevel.Network
             {
                 throw new Exception($"[SocketExchangeServer] Inbox {inbox} already exists");
             }
+            return this;
         }
 
-        public void RegisterInbox<Trequest, Tresponse>(string inbox, RequestHandler<Trequest, Tresponse> handler)
+        public IServer RegisterInbox<Trequest, Tresponse>(string inbox, RequestHandler<Trequest, Tresponse> handler)
         {
             if (false == _requestors.ContainsKey(inbox))
             {
@@ -239,9 +244,10 @@ namespace ZeroLevel.Network
             {
                 throw new Exception($"[SocketExchangeServer] Inbox {inbox} already exists");
             }
+            return this;
         }
 
-        public void RegisterInbox<Tresponse>(RequestHandler<Tresponse> handler)
+        public IServer RegisterInbox<Tresponse>(RequestHandler<Tresponse> handler)
         {
             if (false == _requestors.ContainsKey(BaseSocket.DEFAULT_REQUEST_INBOX))
             {
@@ -251,9 +257,10 @@ namespace ZeroLevel.Network
             {
                 throw new Exception($"[SocketExchangeServer] Inbox {BaseSocket.DEFAULT_REQUEST_INBOX} already exists");
             }
+            return this;
         }
 
-        public void RegisterInbox<Trequest, Tresponse>(RequestHandler<Trequest, Tresponse> handler)
+        public IServer RegisterInbox<Trequest, Tresponse>(RequestHandler<Trequest, Tresponse> handler)
         {
             if (false == _requestors.ContainsKey(BaseSocket.DEFAULT_REQUEST_INBOX))
             {
@@ -263,6 +270,7 @@ namespace ZeroLevel.Network
             {
                 throw new Exception($"[SocketExchangeServer] Inbox {BaseSocket.DEFAULT_REQUEST_INBOX} already exists");
             }
+            return this;
         }
         #endregion
     }
@@ -272,13 +280,13 @@ namespace ZeroLevel.Network
     {
         public void HandleMessage(Frame frame, ISocketClient client) { }
         public byte[] HandleRequest(Frame frame, ISocketClient client) { return null; }
-        public void RegisterInbox(string inbox, MessageHandler handler) { }
-        public void RegisterInbox<T>(string inbox, MessageHandler<T> handler) { }
-        public void RegisterInbox(MessageHandler handler) { }
-        public void RegisterInbox<T>(MessageHandler<T> handler) { }
-        public void RegisterInbox<Tresponse>(string inbox, RequestHandler<Tresponse> handler) { }
-        public void RegisterInbox<Trequest, Tresponse>(string inbox, RequestHandler<Trequest, Tresponse> handler) { }
-        public void RegisterInbox<Tresponse>(RequestHandler<Tresponse> handler) { }
-        public void RegisterInbox<Trequest, Tresponse>(RequestHandler<Trequest, Tresponse> handler) { }
+        public IServer RegisterInbox(string inbox, MessageHandler handler) { return this; }
+        public IServer RegisterInbox<T>(string inbox, MessageHandler<T> handler) { return this; }
+        public IServer RegisterInbox(MessageHandler handler) { return this; }
+        public IServer RegisterInbox<T>(MessageHandler<T> handler) { return this; }
+        public IServer RegisterInbox<Tresponse>(string inbox, RequestHandler<Tresponse> handler) { return this; }
+        public IServer RegisterInbox<Trequest, Tresponse>(string inbox, RequestHandler<Trequest, Tresponse> handler) { return this; }
+        public IServer RegisterInbox<Tresponse>(RequestHandler<Tresponse> handler) { return this; }
+        public IServer RegisterInbox<Trequest, Tresponse>(RequestHandler<Trequest, Tresponse> handler) { return this; }
     }
 }

@@ -119,23 +119,36 @@ namespace ZeroLevel.Services.Applications
 
         public void UseDiscovery()
         {
-            var discovery = Configuration.Default.First("discovery");
-            _discoveryClient = new DiscoveryClient(GetClient(NetUtils.CreateIPEndPoint(discovery), _null_router, false));
+            if (_state == ZeroServiceStatus.Running ||
+               _state == ZeroServiceStatus.Initialized)
+            {
+                var discovery = Configuration.Default.First("discovery");
+                _discoveryClient = new DiscoveryClient(GetClient(NetUtils.CreateIPEndPoint(discovery), _null_router, false));
+            }
         }
 
         public void UseDiscovery(string endpoint)
         {
-            _discoveryClient = new DiscoveryClient(GetClient(NetUtils.CreateIPEndPoint(endpoint), _null_router, false));
+            if (_state == ZeroServiceStatus.Running ||
+               _state == ZeroServiceStatus.Initialized)
+            {
+                _discoveryClient = new DiscoveryClient(GetClient(NetUtils.CreateIPEndPoint(endpoint), _null_router, false));
+            }
         }
 
         public void UseDiscovery(IPEndPoint endpoint)
         {
-            _discoveryClient = new DiscoveryClient(GetClient(endpoint, _null_router, false));
+            if (_state == ZeroServiceStatus.Running ||
+               _state == ZeroServiceStatus.Initialized)
+            {
+                _discoveryClient = new DiscoveryClient(GetClient(endpoint, _null_router, false));
+            }
         }
 
         public IRouter UseHost()
         {
-            if (_state == ZeroServiceStatus.Running)
+            if (_state == ZeroServiceStatus.Running ||
+                _state == ZeroServiceStatus.Initialized)
             {
                 return GetServer(new IPEndPoint(IPAddress.Any, NetUtils.GetFreeTcpPort()), new Router()).Router;
             }
@@ -144,7 +157,8 @@ namespace ZeroLevel.Services.Applications
 
         public IRouter UseHost(int port)
         {
-            if (_state == ZeroServiceStatus.Running)
+            if (_state == ZeroServiceStatus.Running ||
+                _state == ZeroServiceStatus.Initialized)
             {
                 return GetServer(new IPEndPoint(IPAddress.Any, port), new Router()).Router;
             }
@@ -153,7 +167,8 @@ namespace ZeroLevel.Services.Applications
 
         public IRouter UseHost(IPEndPoint endpoint)
         {
-            if (_state == ZeroServiceStatus.Running)
+            if (_state == ZeroServiceStatus.Running ||
+                _state == ZeroServiceStatus.Initialized)
             {
                 return GetServer(endpoint, new Router()).Router;
             }
@@ -169,7 +184,25 @@ namespace ZeroLevel.Services.Applications
             return null;
         }
 
+        public ExClient ConnectToService(string alias, string endpoint)
+        {
+            if (_state == ZeroServiceStatus.Running)
+            {
+                return new ExClient(GetClient(NetUtils.CreateIPEndPoint(endpoint), new Router(), true));
+            }
+            return null;
+        }
+
         public ExClient ConnectToService(IPEndPoint endpoint)
+        {
+            if (_state == ZeroServiceStatus.Running)
+            {
+                return new ExClient(GetClient(endpoint, new Router(), true));
+            }
+            return null;
+        }
+
+        public ExClient ConnectToService(string alias, IPEndPoint endpoint)
         {
             if (_state == ZeroServiceStatus.Running)
             {

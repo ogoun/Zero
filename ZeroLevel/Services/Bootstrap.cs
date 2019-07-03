@@ -35,13 +35,6 @@ namespace ZeroLevel
             public BootstrapFluent UseDiscovery(string url) { _service?.UseDiscovery(url); return this; }
             public BootstrapFluent UseDiscovery(IPEndPoint endpoint) { _service?.UseDiscovery(endpoint); return this; }
 
-           /* public BootstrapFluent UseHost() { _service?.UseHost(); return this; }
-            public BootstrapFluent UseHost(int port) { _service?.UseHost(port); return this; }
-            public BootstrapFluent UseHost(IPEndPoint endpoint) { _service?.UseHost(endpoint); return this; }
-
-            public BootstrapFluent ConnectToService(string url) { _service.ConnectToService(url); return this; }
-            public BootstrapFluent ConnectToService(IPEndPoint endpoint) { _service.ConnectToService(endpoint); return this; }
-            */
             public BootstrapFluent ReadServiceInfo() { _service?.ReadServiceInfo(); return this; }
             public BootstrapFluent ReadServiceInfo(IConfigurationSet config) { _service?.ReadServiceInfo(config); return this; }
 
@@ -184,7 +177,7 @@ namespace ZeroLevel
             return service;
         }
 
-        private static void Shutdown()
+        public static void Shutdown()
         {
             try { Sheduller.Dispose(); } catch (Exception ex) { Log.Error(ex, "[Bootstrap] Dispose default sheduller error"); }
             try { Log.Dispose(); } catch (Exception ex) { Log.Error(ex, "[Bootstrap] Dispose log error"); }
