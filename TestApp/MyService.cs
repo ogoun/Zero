@@ -22,15 +22,18 @@ namespace TestApp
             AutoregisterInboxes(UseHost(8800));
             ReadServiceInfo();
 
-            UseHost(8801).RegisterInbox<ZeroServiceInfo>("metainfo", (c) => this.ServiceInfo);
+            UseHost(8801).RegisterInbox<ZeroServiceInfo>("metainfo", (c) =>
+            {
+                Log.Info("Reqeust for metainfo");
+                return this.ServiceInfo;
+            });
 
             StoreConnection("mytest", new IPEndPoint(IPAddress.Loopback, 8800));
             StoreConnection("mymeta", new IPEndPoint(IPAddress.Loopback, 8801));
-            
-            var client = ConnectToService("mytest");
 
-            Sheduller.RemindEvery(TimeSpan.FromSeconds(5), () =>
+            Sheduller.RemindEvery(TimeSpan.FromSeconds(1), () =>
             {
+                var client = ConnectToService("mytest");
                 client.Send("pum");
                 client.Send<string>(BaseSocket.DEFAULT_MESSAGE_INBOX, "'This is message'");
                 client.Request<DateTime, string>("d2s", DateTime.Now, s => Log.Info($"Response: {s}"));
@@ -41,9 +44,10 @@ namespace TestApp
                 client.Request<string>(BaseSocket.DEFAULT_REQUEST_WITHOUT_ARGS_INBOX, s => Log.Info($"Response ip: {s}"));
             });
 
-            Sheduller.RemindEvery(TimeSpan.FromSeconds(15), () =>
+            Sheduller.RemindEvery(TimeSpan.FromSeconds(3), () =>
             {
-                ConnectToService("mymeta").Request<ZeroServiceInfo>("metainfo", info => 
+                var client = ConnectToService("mymeta");
+                client.Request<ZeroServiceInfo>("metainfo", info =>
                 {
                     var si = new StringBuilder();
                     si.AppendLine(info.Name);

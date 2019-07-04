@@ -1,6 +1,6 @@
 ﻿using Microsoft.Win32;
 using System.Windows;
-using ZeroLevel.Services.Network.FileTransfer;
+using ZeroLevel.Network.FileTransfer;
 
 namespace FileTransferClient
 {

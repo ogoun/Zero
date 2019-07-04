@@ -1,6 +1,6 @@
 ﻿using System.IO;
 using System.Windows;
-using ZeroLevel.Services.Network.FileTransfer;
+using ZeroLevel.Network.FileTransfer;
 
 namespace FileTransferServer
 {
@@ -39,7 +39,6 @@ namespace FileTransferServer
 
         private void Button_Click_1(object sender, RoutedEventArgs e)
         {
-            _server?.Dispose();
             _server = null;
         }
     }

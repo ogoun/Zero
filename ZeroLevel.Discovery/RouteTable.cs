@@ -149,7 +149,7 @@ namespace ZeroLevel.Discovery
             Save();
         }
 
-        public InvokeResult Append(ExServiceInfo serviceInfo, ISocketClient client)
+        public InvokeResult Append(ZeroServiceInfo serviceInfo, ISocketClient client)
         {
             InvokeResult result = null;
             var endpoint = $"{client.Endpoint.Address}:{serviceInfo.Port}";

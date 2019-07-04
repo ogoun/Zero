@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Linq;
-using System.Linq.Expressions;
 using System.Net;
-using System.Reflection;
 using ZeroLevel.Models;
-using ZeroLevel.Services.Invokation;
 using ZeroLevel.Services.Serialization;
 
 namespace ZeroLevel.Network
@@ -43,6 +39,20 @@ namespace ZeroLevel.Network
             try
             {
                 _client.Send(Frame.FromPool(inbox, data));
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "[NetworkNode.Send]");
+                return InvokeResult.Fault(ex.Message);
+            }
+            return InvokeResult.Succeeding();
+        }
+
+        public InvokeResult Send<T>(T message)
+        {
+            try
+            {
+                _client.Send(Frame.FromPool(BaseSocket.DEFAULT_MESSAGE_INBOX, MessageSerializer.SerializeCompatible<T>(message)));
             }
             catch (Exception ex)
             {
@@ -108,11 +118,40 @@ namespace ZeroLevel.Network
             return InvokeResult.Succeeding();
         }
 
+        public InvokeResult Request<Tresponse>(Action<Tresponse> callback)
+        {
+            try
+            {
+                _client.Request(Frame.FromPool(BaseSocket.DEFAULT_REQUEST_INBOX), f => callback(MessageSerializer.DeserializeCompatible<Tresponse>(f)));
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "[NetworkNode.Request]");
+                return InvokeResult.Fault(ex.Message);
+            }
+            return InvokeResult.Succeeding();
+        }
+
         public InvokeResult Request<Trequest, Tresponse>(string inbox, Trequest request, Action<Tresponse> callback)
         {
             try
             {
                 _client.Request(Frame.FromPool(inbox, MessageSerializer.SerializeCompatible<Trequest>(request)),
+                    f => callback(MessageSerializer.DeserializeCompatible<Tresponse>(f)));
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "[NetworkNode.Request]");
+                return InvokeResult.Fault(ex.Message);
+            }
+            return InvokeResult.Succeeding();
+        }
+
+        public InvokeResult Request<Trequest, Tresponse>(Trequest request, Action<Tresponse> callback)
+        {
+            try
+            {
+                _client.Request(Frame.FromPool(BaseSocket.DEFAULT_REQUEST_WITHOUT_ARGS_INBOX, MessageSerializer.SerializeCompatible<Trequest>(request)),
                     f => callback(MessageSerializer.DeserializeCompatible<Tresponse>(f)));
             }
             catch (Exception ex)

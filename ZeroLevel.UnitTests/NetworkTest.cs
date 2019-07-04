@@ -1,18 +1,19 @@
 ﻿using System;
 using System.Threading;
 using Xunit;
-using ZeroLevel.Network;
+using ZeroLevel.Services.Applications;
 
 namespace ZeroLevel.UnitTests
 {
     public class NetworkTest
+        : BaseZeroService
     {
         [Fact]
         public void ClientServerTest()
         {
             // Arrange
-            var server = ExchangeTransportFactory.GetServer(8181);
-            var client = ExchangeTransportFactory.GetClient("127.0.0.1:8181");
+            var server = UseHost(8181);
+            var client = ConnectToService("127.0.0.1:8181");
 
             bool got_message_no_request = false;
             bool got_message_with_request = false;
@@ -21,10 +22,10 @@ namespace ZeroLevel.UnitTests
 
             using (var signal = new ManualResetEvent(false))
             {
-                server.RegisterInbox("empty", (_, __) => { signal.Set(); got_message_no_request = true; });
-                server.RegisterInbox<string>((_, __, ___) => { signal.Set(); got_message_with_request = true; });
-                server.RegisterInbox<string>("get_response", (_, __) => { return "Hello"; });
-                server.RegisterInbox<int, string>("convert", (num, _, __) => { return num.ToString(); });
+                server.RegisterInbox("empty", (_) => { signal.Set(); got_message_no_request = true; });
+                server.RegisterInbox<string>((_, ___) => { signal.Set(); got_message_with_request = true; });
+                server.RegisterInbox<string>("get_response", (_) => "Hello");
+                server.RegisterInbox<int, string>("convert", (__, num) => num.ToString());
 
                 // Act
                 signal.Reset();
@@ -51,6 +52,16 @@ namespace ZeroLevel.UnitTests
             Assert.True(got_message_with_request, "No signal for default inbox");
             Assert.True(got_response_message_no_request, "No response without request");
             Assert.True(got_response_message_with_request, "No response with request");
+        }
+
+        protected override void StartAction()
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override void StopAction()
+        {
+            throw new NotImplementedException();
         }
     }
 }

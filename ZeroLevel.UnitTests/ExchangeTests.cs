@@ -2,17 +2,18 @@
 using System.Net;
 using System.Threading;
 using Xunit;
-using ZeroLevel.Network;
+using ZeroLevel.Services.Applications;
 
 namespace ZeroLevel.NetworkUnitTests
 {
     public class ExchangeTests
+        : BaseZeroService
     {
         [Fact]
         public void HandleMessageTest()
         {
             // Arrange
-            var info = new ExServiceInfo
+            var info = new ZeroServiceInfo
             {
                 ServiceGroup = "MyServiceGroup",
                 ServiceKey = "MyServiceKey",
@@ -20,18 +21,18 @@ namespace ZeroLevel.NetworkUnitTests
                 Version = "1.1.1.1"
             };
             var locker = new ManualResetEvent(false);
-            var server = ExchangeTransportFactory.GetServer(6666);
-            ExServiceInfo received = null;
+            var server = UseHost(6666);
+            ZeroServiceInfo received = null;
 
-            server.RegisterInbox<ExServiceInfo>("register", (i, _, __) =>
+            server.RegisterInbox<ZeroServiceInfo>("register", (c, i) =>
             {
                 received = i;
                 locker.Set();
             });
 
             // Act
-            var client = ExchangeTransportFactory.GetClient(IPAddress.Loopback.ToString() + ":6666");
-            var ir = client.Send<ExServiceInfo>("register", info);
+            var client = ConnectToService(IPAddress.Loopback.ToString() + ":6666");
+            var ir = client.Send<ZeroServiceInfo>("register", info);
 
             locker.WaitOne(1000);
 
@@ -42,21 +43,20 @@ namespace ZeroLevel.NetworkUnitTests
             // Dispose
             locker.Dispose();
             client.Dispose();
-            server.Dispose();
         }
 
         [Fact]
         public void RequestMessageTest()
         {
             // Arrange
-            var info1 = new ExServiceInfo
+            var info1 = new ZeroServiceInfo
             {
                 ServiceGroup = "MyServiceGroup",
                 ServiceKey = "MyServiceKey",
                 ServiceType = "MyServiceType",
                 Version = "1.1.1.1"
             };
-            var info2 = new ExServiceInfo
+            var info2 = new ZeroServiceInfo
             {
                 ServiceGroup = "MyServiceGroup",
                 ServiceKey = "MyServiceKey2",
@@ -64,14 +64,14 @@ namespace ZeroLevel.NetworkUnitTests
                 Version = "1.1.0.1"
             };
             var locker = new ManualResetEvent(false);
-            var server = ExchangeTransportFactory.GetServer(6666);
-            IEnumerable<ExServiceInfo> received = null;
+            var server = UseHost(6667);
+            IEnumerable<ZeroServiceInfo> received = null;
 
-            server.RegisterInbox<IEnumerable<ExServiceInfo>>("services", (_, __) => new[] { info1, info2 });
+            server.RegisterInbox<IEnumerable<ZeroServiceInfo>>("services", (_) => new[] { info1, info2 });
 
             // Act
-            var client = ExchangeTransportFactory.GetClient(IPAddress.Loopback.ToString() + ":6666");
-            var ir = client.Request<IEnumerable<ExServiceInfo>>("services", response =>
+            var client = ConnectToService(IPAddress.Loopback.ToString() + ":6667");
+            var ir = client.Request<IEnumerable<ZeroServiceInfo>>("services", response =>
             {
                 received = response;
                 locker.Set();
@@ -86,7 +86,14 @@ namespace ZeroLevel.NetworkUnitTests
             // Dispose
             locker.Dispose();
             client.Dispose();
-            server.Dispose();
+        }
+
+        protected override void StartAction()
+        {
+        }
+
+        protected override void StopAction()
+        {
         }
     }
 }

@@ -14,17 +14,13 @@ namespace ZeroLevel.Network.FileTransfer
         private ObjectPool<FileTransferTask> _taskPool = new ObjectPool<FileTransferTask>(() => new FileTransferTask(), 100);
         private BlockingCollection<FileTransferTask> _tasks = new BlockingCollection<FileTransferTask>();
         private readonly Thread _uploadFileThread;
-        /*private int _maxParallelFileTransfer;
-        private int _currentFileTransfers;*/
 
-        internal BaseFileTransfer(string baseFolder/*,  int maxParallelFileTransfer = 6*/)
+        internal BaseFileTransfer(string baseFolder)
         {
             _receiver = new FileReceiver(baseFolder);
             _uploadFileThread = new Thread(UploadFileProcessing);
             _uploadFileThread.IsBackground = true;
             _uploadFileThread.Start();
-            /*_maxParallelFileTransfer = maxParallelFileTransfer;
-            _currentFileTransfers = 0;*/
         }
 
         protected void PushTransferTask(string filePath, Action<string> completeHandler = null, Action<string, string> errorHandler = null, ExClient client = null)
