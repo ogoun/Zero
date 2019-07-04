@@ -17,6 +17,6 @@ namespace ZeroLevel.SqlServer
         void ExecuteNonResult(IEnumerable<ZSqlCommand> commands);
         int ExecuteNonResult(string query);
         int ExecuteNonResult(string query, DbParameter[] par);
-        void LazySelect(string query, DbParameter[] par, Func<DbDataReader, bool> readHandler);
+        void LazySelect(string query, DbParameter[] par, Func<DbDataReader, bool> readHandler, int timeout);
     }
 }

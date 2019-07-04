@@ -186,7 +186,7 @@ namespace ZeroLevel.SqlServer
         #endregion
 
         #region LazySelect
-        public void LazySelect(string query, DbParameter[] par, Func<DbDataReader, bool> readHandler)
+        public void LazySelect(string query, DbParameter[] par, Func<DbDataReader, bool> readHandler, int timeout = Timeout)
         {
             using (var connection = _factory.CreateConnection())
             {
