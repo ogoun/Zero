@@ -130,6 +130,8 @@ namespace ZeroLevel.Network
 
         private readonly ConcurrentDictionary<string, _RoundRobinCollection<T>> _aliases = new ConcurrentDictionary<string, _RoundRobinCollection<T>>();
 
+        public bool Contains(string alias) => _aliases.ContainsKey(alias);
+
         public void Set(string alias, T address)
         {
             if (_aliases.ContainsKey(alias) == false)
@@ -141,7 +143,6 @@ namespace ZeroLevel.Network
             }
             else
             {
-                _aliases[alias].Clear();
                 _aliases[alias].Add(address);
             }
         }
@@ -158,7 +159,6 @@ namespace ZeroLevel.Network
             }
             else
             {
-                _aliases[alias].Clear();
                 foreach (var address in addresses)
                     _aliases[alias].Add(address);
             }

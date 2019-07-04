@@ -94,11 +94,6 @@ namespace ZeroLevel.Network
             }
         }
 
-        private void Connection_OnIncomingData(ISocketClient client, byte[] data, int identity)
-        {
-            throw new NotImplementedException();
-        }
-
         private void Connection_OnDisconnect(ISocketClient client)
         {
             client.OnDisconnect -= Connection_OnDisconnect;

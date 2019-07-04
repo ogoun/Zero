@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Net;
+using System.Text;
 using ZeroLevel;
 using ZeroLevel.Network;
 using ZeroLevel.Services.Applications;
@@ -19,7 +20,14 @@ namespace TestApp
             Log.Info("Started");
 
             AutoregisterInboxes(UseHost(8800));
-            var client = ConnectToService(new IPEndPoint(IPAddress.Loopback, 8800));
+            ReadServiceInfo();
+
+            UseHost(8801).RegisterInbox<ZeroServiceInfo>("metainfo", (c) => this.ServiceInfo);
+
+            StoreConnection("mytest", new IPEndPoint(IPAddress.Loopback, 8800));
+            StoreConnection("mymeta", new IPEndPoint(IPAddress.Loopback, 8801));
+            
+            var client = ConnectToService("mytest");
 
             Sheduller.RemindEvery(TimeSpan.FromSeconds(5), () =>
             {
@@ -31,6 +39,19 @@ namespace TestApp
                         s => Log.Info($"Response: {s}"));
                 client.Request<string>("now", s => Log.Info($"Response date: {s}"));
                 client.Request<string>(BaseSocket.DEFAULT_REQUEST_WITHOUT_ARGS_INBOX, s => Log.Info($"Response ip: {s}"));
+            });
+
+            Sheduller.RemindEvery(TimeSpan.FromSeconds(15), () =>
+            {
+                ConnectToService("mymeta").Request<ZeroServiceInfo>("metainfo", info => 
+                {
+                    var si = new StringBuilder();
+                    si.AppendLine(info.Name);
+                    si.AppendLine(info.ServiceKey);
+                    si.AppendLine(info.Version);
+
+                    Log.Info("Service info:\r\n{0}", si.ToString());
+                });
             });
         }
 

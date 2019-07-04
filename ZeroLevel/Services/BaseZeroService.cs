@@ -15,6 +15,8 @@ namespace ZeroLevel.Services.Applications
     {
         private readonly ZeroServiceInfo _serviceInfo = new ZeroServiceInfo();
 
+        public ZeroServiceInfo ServiceInfo => _serviceInfo;
+
         public string Name { get { return _serviceInfo.Name; } private set { _serviceInfo.Name = value; } }
         public string Key { get { return _serviceInfo.ServiceKey; } private set { _serviceInfo.ServiceKey = value; } }
         public string Version { get { return _serviceInfo.Version; } private set { _serviceInfo.Version = value; } }
@@ -171,7 +173,7 @@ namespace ZeroLevel.Services.Applications
                     _discoveryClient = null;
                 }
                 var discovery = Configuration.Default.First("discovery");
-                _discoveryClient = new DiscoveryClient(GetClient(NetUtils.CreateIPEndPoint(discovery), _null_router, false));
+                _discoveryClient = new DiscoveryClient(GetClient(NetUtils.CreateIPEndPoint(discovery), false, _null_router));
                 RestartDiscoveryTasks();
             }
         }
@@ -186,7 +188,7 @@ namespace ZeroLevel.Services.Applications
                     _discoveryClient.Dispose();
                     _discoveryClient = null;
                 }
-                _discoveryClient = new DiscoveryClient(GetClient(NetUtils.CreateIPEndPoint(endpoint), _null_router, false));
+                _discoveryClient = new DiscoveryClient(GetClient(NetUtils.CreateIPEndPoint(endpoint), false, _null_router));
                 RestartDiscoveryTasks();
             }
         }
@@ -201,7 +203,7 @@ namespace ZeroLevel.Services.Applications
                     _discoveryClient.Dispose();
                     _discoveryClient = null;
                 }
-                _discoveryClient = new DiscoveryClient(GetClient(endpoint, _null_router, false));
+                _discoveryClient = new DiscoveryClient(GetClient(endpoint, false, _null_router));
                 RestartDiscoveryTasks();
             }
         }
@@ -241,7 +243,11 @@ namespace ZeroLevel.Services.Applications
             if (_state == ZeroServiceStatus.Running
                 || _state == ZeroServiceStatus.Initialized)
             {
-                return GetClient(NetUtils.CreateIPEndPoint(endpoint), new Router(), true);
+                if (_aliases.Contains(endpoint))
+                {
+                    return GetClient(_aliases.GetAddress(endpoint), true);
+                }
+                return GetClient(NetUtils.CreateIPEndPoint(endpoint), true);
             }
             return null;
         }
@@ -251,7 +257,7 @@ namespace ZeroLevel.Services.Applications
             if (_state == ZeroServiceStatus.Running
                 || _state == ZeroServiceStatus.Initialized)
             {
-                return GetClient(endpoint, new Router(), true);
+                return GetClient(endpoint, true);
             }
             return null;
         }
@@ -519,7 +525,7 @@ namespace ZeroLevel.Services.Applications
 
         #region Utils       
 
-        private ExClient GetClient(IPEndPoint endpoint, IRouter router, bool use_cachee)
+        private ExClient GetClient(IPEndPoint endpoint, bool use_cachee, IRouter router = null)
         {
             if (use_cachee)
             {
@@ -536,11 +542,11 @@ namespace ZeroLevel.Services.Applications
                     instance.Dispose();
                     instance = null;
                 }
-                instance = new ExClient(new SocketClient(endpoint, router));
+                instance = new ExClient(new SocketClient(endpoint, router ?? new Router()));
                 _clientInstances[key] = instance;
                 return instance;
             }
-            return new ExClient(new SocketClient(endpoint, router));
+            return new ExClient(new SocketClient(endpoint, router ?? new Router()));
         }
 
         private SocketServer GetServer(IPEndPoint endpoint, IRouter router)
