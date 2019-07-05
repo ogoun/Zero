@@ -21,7 +21,7 @@ namespace ZeroLevel.Discovery
             Injector.Default.Register<RouteTable>(routeTable);
             var socketPort = Configuration.Default.First<int>("socketport");
             _exInbox = UseHost(socketPort);
-            _exInbox.RegisterInbox<IEnumerable<ServiceEndpointsInfo>>("services", (_, __) => routeTable.Get());
+            _exInbox.RegisterInbox<IEnumerable<ServiceEndpointsInfo>>("services", (_) => routeTable.Get());
             _exInbox.RegisterInbox<ZeroServiceInfo, InvokeResult>("register", (client, info) => routeTable.Append(info, client));
         }
 

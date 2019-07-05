@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Reflection;
+using ZeroLevel.Services.Logging;
 
 namespace ZeroLevel
 {
@@ -37,6 +38,8 @@ namespace ZeroLevel
 
             public BootstrapFluent ReadServiceInfo() { _service?.ReadServiceInfo(); return this; }
             public BootstrapFluent ReadServiceInfo(IConfigurationSet config) { _service?.ReadServiceInfo(config); return this; }
+
+            public BootstrapFluent EnableConsoleLog(LogLevel level = LogLevel.FullStandart) { Log.AddConsoleLogger(level); return this; }
 
             public ZeroServiceStatus Status { get { return _service.Status; } }
             public IServiceExecution Run() { _service.Start(); return this; }

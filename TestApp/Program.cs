@@ -1,6 +1,4 @@
-﻿using System;
-using System.Net;
-using ZeroLevel;
+﻿using ZeroLevel;
 
 namespace TestApp
 {
@@ -8,10 +6,10 @@ namespace TestApp
     {
         private static void Main(string[] args)
         {
-            Bootstrap.Startup<MyService>(args,
+            Bootstrap.Startup<MyService>(args,                
                 () => Configuration.ReadSetFromIniFile("config.ini"))
-                //.ReadServiceInfo()
-                //.UseDiscovery()
+                .EnableConsoleLog(ZeroLevel.Services.Logging.LogLevel.System | ZeroLevel.Services.Logging.LogLevel.FullDebug)
+                .UseDiscovery()
                 .Run()
                 .WaitWhileStatus(ZeroServiceStatus.Running)
                 .Stop();

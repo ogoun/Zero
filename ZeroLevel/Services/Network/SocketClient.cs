@@ -40,7 +40,7 @@ namespace ZeroLevel.Network
 
         public SocketClient(IPEndPoint ep, IRouter router)
         {
-            _router = router;            
+            _router = router;
             Endpoint = ep;
             _parser.OnIncoming += _parser_OnIncoming;
             _sendThread = new Thread(SendFramesJob);
@@ -59,9 +59,9 @@ namespace ZeroLevel.Network
             _parser.OnIncoming += _parser_OnIncoming;
             _sendThread = new Thread(SendFramesJob);
             _sendThread.IsBackground = true;
-            _sendThread.Start();            
-            _stream.BeginRead(_buffer, 0, DEFAULT_RECEIVE_BUFFER_SIZE, ReceiveAsyncCallback, null);
+            _sendThread.Start();
             Working();
+            _stream.BeginRead(_buffer, 0, DEFAULT_RECEIVE_BUFFER_SIZE, ReceiveAsyncCallback, null);
         }
 
         #region API
@@ -295,7 +295,8 @@ namespace ZeroLevel.Network
                     _parser.Push(_buffer, count);
                     _last_rw_time = DateTime.UtcNow.Ticks;
                 }
-                if (Status == SocketClientStatus.Working)
+                if (Status == SocketClientStatus.Working
+                    || Status == SocketClientStatus.Initialized)
                 {
                     _stream.BeginRead(_buffer, 0, DEFAULT_RECEIVE_BUFFER_SIZE, ReceiveAsyncCallback, null);
                 }
