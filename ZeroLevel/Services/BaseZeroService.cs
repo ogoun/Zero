@@ -141,6 +141,7 @@ namespace ZeroLevel.Services.Applications
             {
                 Sheduller.Remove(_register_in_discovery_table_task);
             }
+            RegisterServicesInDiscovery();
             _update_discovery_table_task = Sheduller.RemindEvery(_update_discovery_table_period, RegisterServicesInDiscovery);
             _register_in_discovery_table_task = Sheduller.RemindEvery(_register_in_discovery_table_period, () => { });
         }
@@ -418,7 +419,7 @@ namespace ZeroLevel.Services.Applications
 
 
         public void StoreConnection(string endpoint)
-        {
+        { 
             if (_state == ZeroServiceStatus.Running ||
                 _state == ZeroServiceStatus.Initialized)
             {
