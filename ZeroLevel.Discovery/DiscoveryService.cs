@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using ZeroLevel.Models;
+﻿using ZeroLevel.Models;
 using ZeroLevel.Network;
 using ZeroLevel.Services.Applications;
 
@@ -19,9 +18,9 @@ namespace ZeroLevel.Discovery
         {
             var routeTable = new RouteTable();
             Injector.Default.Register<RouteTable>(routeTable);
-            var socketPort = Configuration.Default.First<int>("socketport");
-            _exInbox = UseHost(socketPort);
-            _exInbox.RegisterInbox<IEnumerable<ServiceEndpointsInfo>>("services", (_) => routeTable.Get());
+            var servicePort = Configuration.Default.First<int>("port");
+            _exInbox = UseHost(servicePort);
+            _exInbox.RegisterInbox("services", (_) => routeTable.Get());
             _exInbox.RegisterInbox<ZeroServiceInfo, InvokeResult>("register", (client, info) => routeTable.Append(info, client));
         }
 

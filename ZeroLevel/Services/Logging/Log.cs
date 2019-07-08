@@ -156,10 +156,15 @@ namespace ZeroLevel
         #endregion Delegate logger
 
         #region Console
+        private static bool _console_log_enabled = false;
 
         public static void AddConsoleLogger(LogLevel level = LogLevel.Standart)
         {
-            AddLogger(new ConsoleLogger(), level);
+            if (_console_log_enabled == false)
+            {
+                AddLogger(new ConsoleLogger(), level);
+                _console_log_enabled = true;
+            }
         }
 
         #endregion Console
