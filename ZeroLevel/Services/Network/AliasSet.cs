@@ -130,54 +130,96 @@ namespace ZeroLevel.Network
 
         private readonly ConcurrentDictionary<string, _RoundRobinCollection<T>> _aliases = new ConcurrentDictionary<string, _RoundRobinCollection<T>>();
 
-        public bool Contains(string alias) => _aliases.ContainsKey(alias);
+        public bool Contains(string key) => _aliases.ContainsKey(key);
 
-        public void Set(string alias, T address)
+        public void Append(string key, T address)
         {
-            if (_aliases.ContainsKey(alias) == false)
+            if (_aliases.ContainsKey(key) == false)
             {
-                if (_aliases.TryAdd(alias, new _RoundRobinCollection<T>()))
+                if (_aliases.TryAdd(key, new _RoundRobinCollection<T>()))
                 {
-                    _aliases[alias].Add(address);
+                    _aliases[key].Add(address);
                 }
             }
             else
             {
-                _aliases[alias].Add(address);
+                _aliases[key].Add(address);
             }
         }
 
-        public void Set(string alias, IEnumerable<T> addresses)
+        public void Append(string key, IEnumerable<T> addresses)
         {
-            if (_aliases.ContainsKey(alias) == false)
+            if (_aliases.ContainsKey(key) == false)
             {
-                if (_aliases.TryAdd(alias, new _RoundRobinCollection<T>()))
+                if (_aliases.TryAdd(key, new _RoundRobinCollection<T>()))
                 {
                     foreach (var address in addresses)
-                        _aliases[alias].Add(address);
+                    {
+                        _aliases[key].Add(address);
+                    }
                 }
             }
             else
             {
                 foreach (var address in addresses)
-                    _aliases[alias].Add(address);
+                {
+                    _aliases[key].Add(address);
+                }
             }
         }
 
-        public T GetAddress(string alias)
+        public void Update(string key, T address)
         {
-            if (_aliases.ContainsKey(alias) && _aliases[alias].MoveNext())
+            if (_aliases.ContainsKey(key) == false)
             {
-                return _aliases[alias].Current;
+                if (_aliases.TryAdd(key, new _RoundRobinCollection<T>()))
+                {
+                    _aliases[key].Add(address);
+                }
+            }
+            else
+            {
+                _aliases[key].Clear();
+                _aliases[key].Add(address);
+            }
+        }
+
+        public void Update(string key, IEnumerable<T> addresses)
+        {
+            if (_aliases.ContainsKey(key) == false)
+            {
+                if (_aliases.TryAdd(key, new _RoundRobinCollection<T>()))
+                {
+                    foreach (var address in addresses)
+                    {
+                        _aliases[key].Add(address);
+                    }
+                }
+            }
+            else
+            {
+                _aliases[key].Clear();
+                foreach (var address in addresses)
+                {
+                    _aliases[key].Add(address);
+                }
+            }
+        }
+
+        public T Get(string key)
+        {
+            if (_aliases.ContainsKey(key) && _aliases[key].MoveNext())
+            {
+                return _aliases[key].Current;
             }
             return default(T);
         }
 
-        public IEnumerable<T> GetAddresses(string alias)
+        public IEnumerable<T> GetAll(string key)
         {
-            if (_aliases.ContainsKey(alias) && _aliases[alias].MoveNext())
+            if (_aliases.ContainsKey(key) && _aliases[key].MoveNext())
             {
-                return _aliases[alias].GetCurrentSeq();
+                return _aliases[key].GetCurrentSeq();
             }
             return Enumerable.Empty<T>();
         }

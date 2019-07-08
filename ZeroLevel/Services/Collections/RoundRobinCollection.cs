@@ -23,13 +23,26 @@ namespace ZeroLevel.Services.Collections
 
         public int Count { get { return _collection.Count; } }
 
+        public RoundRobinCollection() { }
+        public RoundRobinCollection(IEnumerable<T> items)
+        {
+            if (items != null && items.Any())
+            {
+                _collection.AddRange(items);
+                _index = 0;
+            }
+        }
+
         public void Add(T item)
         {
             _lock.EnterWriteLock();
             try
             {
-                _collection.Add(item);
-                if (_index == -1) _index = 0;
+                if (!_collection.Contains(item))
+                {
+                    _collection.Add(item);
+                    if (_index == -1) _index = 0;
+                }
             }
             finally
             {
@@ -121,7 +134,23 @@ namespace ZeroLevel.Services.Collections
 
         public IEnumerable<T> Find(Func<T, bool> selector)
         {
-            return _collection.Where(selector);
+            _lock.EnterReadLock();
+            try
+            {
+                var arr = new List<T>(_collection.Count);
+                for (int i = _index; i < _collection.Count; i++)
+                {
+                    if (selector(_collection[i]))
+                    {
+                        arr.Add(_collection[i]);
+                    }
+                }
+                return arr;
+            }
+            finally
+            {
+                _lock.ExitReadLock();
+            }
         }
 
         public void Clear()

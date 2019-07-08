@@ -1,12 +1,10 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Net;
 using System.Reflection;
 using System.Threading;
 using ZeroLevel.Network;
-using ZeroLevel.Services.Serialization;
 
 namespace ZeroLevel.Services.Applications
 {
@@ -121,61 +119,15 @@ namespace ZeroLevel.Services.Applications
         #endregion Config
 
         #region Network
-        private static readonly IRouter _null_router = new NullRouter();
-        private IDiscoveryClient _discoveryClient = null; // Feature расширить до нескольких discovery
-        private long _update_discovery_table_task = -1;
-        private long _register_in_discovery_table_task = -1;
-        private readonly AliasSet<IPEndPoint> _aliases = new AliasSet<IPEndPoint>();
-        private static TimeSpan _update_discovery_table_period = TimeSpan.FromSeconds(15);
-        private static TimeSpan _register_in_discovery_table_period = TimeSpan.FromSeconds(15);
-        private static readonly ConcurrentDictionary<string, ExClient> _clientInstances = new ConcurrentDictionary<string, ExClient>();
-        private readonly ConcurrentDictionary<string, SocketServer> _serverInstances = new ConcurrentDictionary<string, SocketServer>();
-
-        private void RestartDiscoveryTasks()
-        {
-            if (_update_discovery_table_task != -1)
-            {
-                Sheduller.Remove(_update_discovery_table_task);
-            }
-            if (_register_in_discovery_table_task != -1)
-            {
-                Sheduller.Remove(_register_in_discovery_table_task);
-            }
-            RegisterServicesInDiscovery();
-            _update_discovery_table_task = Sheduller.RemindEvery(_update_discovery_table_period, RegisterServicesInDiscovery);
-            _register_in_discovery_table_task = Sheduller.RemindEvery(_register_in_discovery_table_period, () => { });
-        }
-
-        private void RegisterServicesInDiscovery()
-        {
-            var services = _serverInstances.
-                Values.
-                Select(s =>
-                {
-                    var info = MessageSerializer.Copy(this._serviceInfo);
-                    info.Port = s.LocalEndpoint.Port;
-                    return info;
-                }).
-                ToList();
-            foreach (var service in services)
-            {
-                _discoveryClient.Register(service);
-            }
-        }
+        private readonly Exchange _exhange = new Exchange();
+        
 
         public void UseDiscovery()
         {
             if (_state == ZeroServiceStatus.Running
                || _state == ZeroServiceStatus.Initialized)
             {
-                if (_discoveryClient != null)
-                {
-                    _discoveryClient.Dispose();
-                    _discoveryClient = null;
-                }
-                var discovery = Configuration.Default.First("discovery");
-                _discoveryClient = new DiscoveryClient(GetClient(NetUtils.CreateIPEndPoint(discovery), false, _null_router));
-                RestartDiscoveryTasks();
+                _exhange.UseDiscovery();
             }
         }
 
@@ -184,13 +136,7 @@ namespace ZeroLevel.Services.Applications
             if (_state == ZeroServiceStatus.Running
                || _state == ZeroServiceStatus.Initialized)
             {
-                if (_discoveryClient != null)
-                {
-                    _discoveryClient.Dispose();
-                    _discoveryClient = null;
-                }
-                _discoveryClient = new DiscoveryClient(GetClient(NetUtils.CreateIPEndPoint(endpoint), false, _null_router));
-                RestartDiscoveryTasks();
+                _exhange.UseDiscovery(endpoint);
             }
         }
 
@@ -199,13 +145,7 @@ namespace ZeroLevel.Services.Applications
             if (_state == ZeroServiceStatus.Running
                || _state == ZeroServiceStatus.Initialized)
             {
-                if (_discoveryClient != null)
-                {
-                    _discoveryClient.Dispose();
-                    _discoveryClient = null;
-                }
-                _discoveryClient = new DiscoveryClient(GetClient(endpoint, false, _null_router));
-                RestartDiscoveryTasks();
+                _exhange.UseDiscovery(endpoint);
             }
         }
 
@@ -214,9 +154,9 @@ namespace ZeroLevel.Services.Applications
             if (_state == ZeroServiceStatus.Running
                 || _state == ZeroServiceStatus.Initialized)
             {
-                return GetServer(new IPEndPoint(IPAddress.Any, NetUtils.GetFreeTcpPort()), new Router()).Router;
+                return _exhange.UseHost();
             }
-            return _null_router;
+            return BaseSocket.NullRouter;
         }
 
         public IRouter UseHost(int port)
@@ -224,9 +164,9 @@ namespace ZeroLevel.Services.Applications
             if (_state == ZeroServiceStatus.Running
                 || _state == ZeroServiceStatus.Initialized)
             {
-                return GetServer(new IPEndPoint(IPAddress.Any, port), new Router()).Router;
+                return _exhange.UseHost(port);
             }
-            return _null_router;
+            return BaseSocket.NullRouter;
         }
 
         public IRouter UseHost(IPEndPoint endpoint)
@@ -234,9 +174,9 @@ namespace ZeroLevel.Services.Applications
             if (_state == ZeroServiceStatus.Running
                 || _state == ZeroServiceStatus.Initialized)
             {
-                return GetServer(endpoint, new Router()).Router;
+                return _exhange.UseHost(endpoint);
             }
-            return _null_router;
+            return BaseSocket.NullRouter;
         }
 
         public ExClient ConnectToService(string endpoint)
@@ -246,7 +186,7 @@ namespace ZeroLevel.Services.Applications
             {
                 if (_aliases.Contains(endpoint))
                 {
-                    return GetClient(_aliases.GetAddress(endpoint), true);
+                    return GetClient(_aliases.Get(endpoint), true);
                 }
                 return GetClient(NetUtils.CreateIPEndPoint(endpoint), true);
             }
@@ -417,39 +357,6 @@ namespace ZeroLevel.Services.Applications
         }
         #endregion
 
-
-        public void StoreConnection(string endpoint)
-        { 
-            if (_state == ZeroServiceStatus.Running ||
-                _state == ZeroServiceStatus.Initialized)
-            {
-                _aliases.Set(endpoint, NetUtils.CreateIPEndPoint(endpoint));
-            }
-        }
-        public void StoreConnection(string alias, string endpoint)
-        {
-            if (_state == ZeroServiceStatus.Running ||
-                _state == ZeroServiceStatus.Initialized)
-            {
-                _aliases.Set(alias, NetUtils.CreateIPEndPoint(endpoint));
-            }
-        }
-        public void StoreConnection(IPEndPoint endpoint)
-        {
-            if (_state == ZeroServiceStatus.Running ||
-                _state == ZeroServiceStatus.Initialized)
-            {
-                _aliases.Set($"{endpoint.Address}:{endpoint.Port}", endpoint);
-            }
-        }
-        public void StoreConnection(string alias, IPEndPoint endpoint)
-        {
-            if (_state == ZeroServiceStatus.Running ||
-                _state == ZeroServiceStatus.Initialized)
-            {
-                _aliases.Set(alias, endpoint);
-            }
-        }
         #endregion
 
         #region Service control
@@ -524,85 +431,12 @@ namespace ZeroLevel.Services.Applications
         }
         #endregion
 
-        #region Utils       
-
-        private ExClient GetClient(IPEndPoint endpoint, bool use_cachee, IRouter router = null)
-        {
-            if (use_cachee)
-            {
-                string key = $"{endpoint.Address}:{endpoint.Port}";
-                ExClient instance = null;
-                if (_clientInstances.ContainsKey(key))
-                {
-                    instance = _clientInstances[key];
-                    if (instance.Status == SocketClientStatus.Working)
-                    {
-                        return instance;
-                    }
-                    _clientInstances.TryRemove(key, out instance);
-                    instance.Dispose();
-                    instance = null;
-                }
-                instance = new ExClient(new SocketClient(endpoint, router ?? new Router()));
-                _clientInstances[key] = instance;
-                return instance;
-            }
-            return new ExClient(new SocketClient(endpoint, router ?? new Router()));
-        }
-
-        private SocketServer GetServer(IPEndPoint endpoint, IRouter router)
-        {
-            string key = $"{endpoint.Address}:{endpoint.Port}";
-            if (_serverInstances.ContainsKey(key))
-            {
-                return _serverInstances[key];
-            }
-            var instance = new SocketServer(endpoint, router);
-            _serverInstances[key] = instance;
-            return instance;
-        }
-
-        #endregion
-
         public void Dispose()
         {
             if (_state != ZeroServiceStatus.Disposed)
             {
                 _state = ZeroServiceStatus.Disposed;
-
-                if (_update_discovery_table_task != -1)
-                {
-                    Sheduller.Remove(_update_discovery_table_task);
-                }
-
-                if (_register_in_discovery_table_task != -1)
-                {
-                    Sheduller.Remove(_register_in_discovery_table_task);
-                }
-
-                foreach (var client in _clientInstances)
-                {
-                    try
-                    {
-                        client.Value.Dispose();
-                    }
-                    catch (Exception ex)
-                    {
-                        Log.Error(ex, $"[BaseZeroService`{Name ?? string.Empty}.Dispose()] Dispose SocketClient to endpoint {client.Key}");
-                    }
-                }
-
-                foreach (var server in _serverInstances)
-                {
-                    try
-                    {
-                        server.Value.Dispose();
-                    }
-                    catch (Exception ex)
-                    {
-                        Log.Error(ex, $"[BaseZeroService`{Name ?? string.Empty}.Dispose()] Dispose SocketServer with endpoint {server.Key}");
-                    }
-                }
+                _exhange.Dispose();
             }
         }
     }

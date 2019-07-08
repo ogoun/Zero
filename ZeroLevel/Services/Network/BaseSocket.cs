@@ -9,6 +9,8 @@ namespace ZeroLevel.Network
             MAX_FRAME_PAYLOAD_SIZE = Configuration.Default.FirstOrDefault<int>("MAX_FRAME_PAYLOAD_SIZE", DEFAULT_MAX_FRAME_PAYLOAD_SIZE);
         }
 
+        public static readonly IRouter NullRouter = new NullRouter();
+
         public const string DEFAULT_MESSAGE_INBOX = "__message_inbox__";
         public const string DEFAULT_REQUEST_INBOX = "__request_inbox__";
         public const string DEFAULT_REQUEST_WITHOUT_ARGS_INBOX = "__request_no_args_inbox__";

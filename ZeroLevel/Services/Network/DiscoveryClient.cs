@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading;
 using ZeroLevel.Models;
 using ZeroLevel.Services.Collections;
@@ -17,9 +18,9 @@ namespace ZeroLevel.Network
             private IEnumerable<ServiceEndpointInfo> _empty = Enumerable.Empty<ServiceEndpointInfo>();
             private List<ServiceEndpointInfo> _services = new List<ServiceEndpointInfo>();
 
-            private Dictionary<string, RoundRobinOverCollection<ServiceEndpointInfo>> _tableByKey;
-            private Dictionary<string, RoundRobinOverCollection<ServiceEndpointInfo>> _tableByGroups;
-            private Dictionary<string, RoundRobinOverCollection<ServiceEndpointInfo>> _tableByTypes;
+            private Dictionary<string, RoundRobinCollection<ServiceEndpointInfo>> _tableByKey;
+            private Dictionary<string, RoundRobinCollection<ServiceEndpointInfo>> _tableByGroups;
+            private Dictionary<string, RoundRobinCollection<ServiceEndpointInfo>> _tableByTypes;
 
             internal void Update(IEnumerable<ServiceEndpointsInfo> records)
             {
@@ -40,9 +41,9 @@ namespace ZeroLevel.Network
                 try
                 {
                     _services = services;
-                    _tableByKey = _services.GroupBy(r => r.Key).ToDictionary(g => g.Key, g => new RoundRobinOverCollection<ServiceEndpointInfo>(g));
-                    _tableByTypes = _services.GroupBy(r => r.Type).ToDictionary(g => g.Key, g => new RoundRobinOverCollection<ServiceEndpointInfo>(g));
-                    _tableByGroups = _services.GroupBy(r => r.Group).ToDictionary(g => g.Key, g => new RoundRobinOverCollection<ServiceEndpointInfo>(g));
+                    _tableByKey = _services.GroupBy(r => r.Key).ToDictionary(g => g.Key, g => new RoundRobinCollection<ServiceEndpointInfo>(g));
+                    _tableByTypes = _services.GroupBy(r => r.Type).ToDictionary(g => g.Key, g => new RoundRobinCollection<ServiceEndpointInfo>(g));
+                    _tableByGroups = _services.GroupBy(r => r.Group).ToDictionary(g => g.Key, g => new RoundRobinCollection<ServiceEndpointInfo>(g));
                 }
                 catch (Exception ex)
                 {
@@ -60,7 +61,7 @@ namespace ZeroLevel.Network
                 _lock.EnterReadLock();
                 try
                 {
-                    if (_tableByKey.ContainsKey(key) && !_tableByKey[key].IsEmpty)
+                    if (_tableByKey.ContainsKey(key) && _tableByKey[key].Count > 0)
                     {
                         return _tableByKey[key].Find(s => s.Endpoint.Equals(endpoint, StringComparison.OrdinalIgnoreCase)).FirstOrDefault();
                     }
@@ -78,9 +79,9 @@ namespace ZeroLevel.Network
                 _lock.EnterReadLock();
                 try
                 {
-                    if (_tableByKey.ContainsKey(key) && !_tableByKey[key].IsEmpty)
+                    if (_tableByKey.ContainsKey(key) && _tableByKey[key].Count > 0)
                     {
-                        return _tableByKey[key].GenerateSeq();
+                        return _tableByKey[key].GetCurrentSeq();
                     }
                 }
                 finally
@@ -96,9 +97,9 @@ namespace ZeroLevel.Network
                 _lock.EnterReadLock();
                 try
                 {
-                    if (_tableByGroups.ContainsKey(group) && !_tableByGroups[group].IsEmpty)
+                    if (_tableByGroups.ContainsKey(group) && _tableByGroups[group].Count > 0)
                     {
-                        return _tableByGroups[group].GenerateSeq();
+                        return _tableByGroups[group].GetCurrentSeq();
                     }
                 }
                 finally
@@ -114,9 +115,9 @@ namespace ZeroLevel.Network
                 _lock.EnterReadLock();
                 try
                 {
-                    if (_tableByTypes.ContainsKey(type) && !_tableByTypes[type].IsEmpty)
+                    if (_tableByTypes.ContainsKey(type) && _tableByTypes[type].Count > 0)
                     {
-                        return _tableByTypes[type].GenerateSeq();
+                        return _tableByTypes[type].GetCurrentSeq();
                     }
                 }
                 finally

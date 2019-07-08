@@ -1,296 +1,56 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
+using ZeroLevel.Models;
+using ZeroLevel.Services.Serialization;
 
 namespace ZeroLevel.Network
 {
-    /*
     /// <summary>
     /// Provides data exchange between services
     /// </summary>
     public sealed class Exchange :
+        IClientSet,
         IDisposable
     {
-        private readonly IDiscoveryClient _discoveryClient;
-        private readonly ExServiceHost _host;
+        private IDiscoveryClient _discoveryClient = null; // Feature расширить до нескольких discovery        
+        private readonly ServiceRouteStorage _aliases = new ServiceRouteStorage();
+        private readonly ExClientServerCachee _cachee = new ExClientServerCachee();
 
         #region Ctor
 
-        public Exchange(IDiscoveryClient discoveryClient)
+        public Exchange()
         {
-            this._discoveryClient = discoveryClient ?? throw new ArgumentNullException(nameof(discoveryClient));
-            this._host = new ExServiceHost(this._discoveryClient);
         }
 
         #endregion Ctor
 
-        /// <summary>
-        ///  Registration service
-        /// </summary>
-        public IExchangeService RegisterService(IExchangeService service)
-        {
-            return _host.RegisterService(service);
-        }
-
-        public IExchangeService RegisterService(ExServiceInfo service)
-        {
-            return _host.RegisterService(service);
-        }
-
-        #region Balanced send
+        #region IMultiClient      
 
         /// <summary>
         /// Sending a message to the service
         /// </summary>
-        /// <param name="serviceKey">Service key</param>
+        /// <param name="alias">Service key or url</param>
+        /// <param name="data">Message</param>
+        /// <returns></returns>
+        public bool Send<T>(string alias, T data)
+        {
+            return CallService(alias, (transport) => transport.Send<T>(BaseSocket.DEFAULT_MESSAGE_INBOX, data).Success);
+        }
+
+        /// <summary>
+        /// Sending a message to the service
+        /// </summary>
+        /// <param name="alias">Service key or url</param>
         /// <param name="inbox">Inbox name</param>
         /// <param name="data">Message</param>
         /// <returns></returns>
-        public bool Send<T>(string serviceKey, string inbox, T data)
+        public bool Send<T>(string alias, string inbox, T data)
         {
-            try
-            {
-                return _host.CallService(serviceKey, (endpoint, transport) => transport.Send<T>(inbox, data).Success);
-            }
-            catch (Exception ex)
-            {
-                Log.SystemError(ex, $"[Exchange] Error send data in service '{serviceKey}'. Inbox '{inbox}'");
-            }
-            return false;
-        }
-
-        public bool Send<T>(string serviceKey, T data) => Send(serviceKey, BaseSocket.DEFAULT_MESSAGE_INBOX, data);
-
-        #endregion Balanced send
-
-        #region Balanced request
-
-        public Tresp Request<Treq, Tresp>(string serviceKey, string inbox, Treq data)
-        {
-            Tresp response = default(Tresp);
-            try
-            {
-                if (false == _host.CallService(serviceKey, (endpoint, transport) =>
-                  {
-                      try
-                      {
-                          using (var waiter = new ManualResetEventSlim(false))
-                          {
-                              if (false == transport.Request<Treq, Tresp>(inbox, data, resp =>
-                               {
-                                   response = resp;
-                                   waiter.Set();
-                               }).Success)
-                              {
-                                  return false;
-                              }
-                              if (false == waiter.Wait(BaseSocket.MAX_REQUEST_TIME_MS))
-                              {
-                                  return false;
-                              }
-                          }
-                          return true;
-                      }
-                      catch (Exception ex)
-                      {
-                          Log.SystemError(ex, $"[Exchange] Error request to service '{serviceKey}'. Inbox '{inbox}'");
-                      }
-                      return false;
-                  }))
-                {
-                    Log.SystemWarning($"[Exchange] No responce on request. Service key '{serviceKey}'. Inbox '{inbox}'");
-                }
-            }
-            catch (Exception ex)
-            {
-                Log.SystemError(ex, $"[Exchange] Error request to service '{serviceKey}'. Inbox '{inbox}'");
-            }
-            return response;
-        }
-
-        public Tresp Request<Tresp>(string serviceKey, string inbox)
-        {
-            Tresp response = default(Tresp);
-            try
-            {
-                if (false == _host.CallService(serviceKey, (endpoint, transport) =>
-                 {
-                     try
-                     {
-                         using (var waiter = new ManualResetEventSlim(false))
-                         {
-                             if (false == transport.Request<Tresp>(inbox, resp =>
-                              {
-                                  response = resp;
-                                  waiter.Set();
-                              }).Success)
-                             {
-                                 return false;
-                             }
-                             if (false == waiter.Wait(BaseSocket.MAX_REQUEST_TIME_MS))
-                             {
-                                 return false;
-                             }
-                         }
-                         return true;
-                     }
-                     catch (Exception ex)
-                     {
-                         Log.SystemError(ex, $"[Exchange] Error request to service '{serviceKey}'. Inbox '{inbox}'");
-                     }
-                     return false;
-                 }))
-                {
-                    Log.SystemWarning($"[Exchange] No responce on request. Service key '{serviceKey}'. Inbox '{inbox}'");
-                }
-            }
-            catch (Exception ex)
-            {
-                Log.SystemError(ex, $"[Exchange] Error request to service '{serviceKey}'. Inbox '{inbox}'");
-            }
-            return response;
-        }
-
-        public Tresp Request<Treq, Tresp>(string serviceKey, Treq data) =>
-            Request<Treq, Tresp>(serviceKey, BaseSocket.DEFAULT_REQUEST_INBOX, data);
-
-        public Tresp Request<Tresp>(string serviceKey) =>
-            Request<Tresp>(serviceKey, BaseSocket.DEFAULT_REQUEST_INBOX);
-
-        #endregion Balanced request
-
-        #region Direct request
-
-        public Tresp RequestDirect<Treq, Tresp>(string endpoint, string serviceKey, string inbox, Treq data)
-        {
-            Tresp response = default(Tresp);
-            try
-            {
-                if (false == _host.CallServiceDirect(endpoint, serviceKey, (transport) =>
-                {
-                    try
-                    {
-                        using (var waiter = new ManualResetEventSlim(false))
-                        {
-                            if (false == transport.Request<Treq, Tresp>(inbox, data, resp =>
-                             {
-                                 response = resp;
-                                 waiter.Set();
-                             }).Success)
-                            {
-                                return false;
-                            }
-                            if (false == waiter.Wait(BaseSocket.MAX_REQUEST_TIME_MS))
-                            {
-                                return false;
-                            }
-                        }
-                        return true;
-                    }
-                    catch (Exception ex)
-                    {
-                        Log.SystemError(ex, $"[Exchange] Error direct request to '{endpoint}'. Service key '{serviceKey}'. Inbox '{inbox}'");
-                    }
-                    return false;
-                }))
-                {
-                    Log.SystemWarning($"[Exchange] No responce on direct request to '{endpoint}'. Service key '{serviceKey}'. Inbox '{inbox}'");
-                }
-            }
-            catch (Exception ex)
-            {
-                Log.SystemError(ex, $"[Exchange] Error direct request to '{endpoint}'. Service key '{serviceKey}'. Inbox '{inbox}'");
-            }
-            return response;
-        }
-
-        public Tresp RequestDirect<Tresp>(string endpoint, string serviceKey, string inbox)
-        {
-            Tresp response = default(Tresp);
-            try
-            {
-                if (false == _host.CallServiceDirect(endpoint, serviceKey, (transport) =>
-                {
-                    try
-                    {
-                        using (var waiter = new ManualResetEventSlim(false))
-                        {
-                            if (false == transport.Request<Tresp>(inbox, resp =>
-                            {
-                                response = resp;
-                                waiter.Set();
-                            }).Success)
-                            {
-                                return false;
-                            }
-                            if (false == waiter.Wait(BaseSocket.MAX_REQUEST_TIME_MS))
-                            {
-                                return false;
-                            }
-                        }
-                        return true;
-                    }
-                    catch (Exception ex)
-                    {
-                        Log.SystemError(ex, $"[Exchange] Error direct request to '{endpoint}'. Service key '{serviceKey}'. Inbox '{inbox}'");
-                    }
-                    return false;
-                }))
-                {
-                    Log.SystemWarning($"[Exchange] No responce on direct request to '{endpoint}'. Service key '{serviceKey}'. Inbox '{inbox}'");
-                }
-            }
-            catch (Exception ex)
-            {
-                Log.SystemError(ex, $"[Exchange] Error direct request to service '{serviceKey}'. Inbox '{inbox}'");
-            }
-            return response;
-        }
-
-        public Tresp RequestDirect<Treq, Tresp>(string endpoint, string serviceKey, Treq data) =>
-            RequestDirect<Treq, Tresp>(endpoint, serviceKey, BaseSocket.DEFAULT_REQUEST_INBOX, data);
-
-        public Tresp RequestDirect<Tresp>(string endpoint, string serviceKey) =>
-            RequestDirect<Tresp>(endpoint, serviceKey, BaseSocket.DEFAULT_REQUEST_INBOX);
-
-        #endregion Direct request
-
-        #region Broadcast
-
-        /// <summary>
-        /// Sending a message to all services with the specified key to the specified handler
-        /// </summary>
-        /// <typeparam name="T">Message type</typeparam>
-        /// <param name="serviceKey">Service key</param>
-        /// <param name="inbox">Inbox name</param>
-        /// <param name="data">Message</param>
-        /// <returns>true - on successful submission</returns>
-        public bool SendBroadcast<T>(string serviceKey, string inbox, T data)
-        {
-            try
-            {
-                foreach (var client in _host.GetClientEnumerator(serviceKey))
-                {
-                    Task.Run(() =>
-                    {
-                        try
-                        {
-                            client.Send(inbox, data);
-                        }
-                        catch (Exception ex)
-                        {
-                            Log.SystemError(ex, $"[Exchange] Error broadcast send data to services '{serviceKey}'. Inbox '{inbox}'");
-                        }
-                    });
-                }
-            }
-            catch (Exception ex)
-            {
-                Log.SystemError(ex, $"[Exchange] Error broadcast send data in service '{serviceKey}'. Inbox '{inbox}'");
-            }
-            return false;
+            return CallService(alias, (transport) => transport.Send<T>(inbox, data).Success);
         }
 
         /// <summary>
@@ -303,18 +63,18 @@ namespace ZeroLevel.Network
         public bool SendBroadcast<T>(string serviceKey, T data) => SendBroadcast(serviceKey, BaseSocket.DEFAULT_MESSAGE_INBOX, data);
 
         /// <summary>
-        /// Sending a message to all services of a specific type to the specified handler
+        /// Sending a message to all services with the specified key to the specified handler
         /// </summary>
         /// <typeparam name="T">Message type</typeparam>
-        /// <param name="serviceType">Service type</param>
+        /// <param name="alias">Service key</param>
         /// <param name="inbox">Inbox name</param>
         /// <param name="data">Message</param>
         /// <returns>true - on successful submission</returns>
-        public bool SendBroadcastByType<T>(string serviceType, string inbox, T data)
+        public bool SendBroadcast<T>(string alias, string inbox, T data)
         {
             try
             {
-                foreach (var client in _host.GetClientEnumeratorByType(serviceType))
+                foreach (var client in GetClientEnumerator(alias))
                 {
                     Task.Run(() =>
                     {
@@ -324,14 +84,48 @@ namespace ZeroLevel.Network
                         }
                         catch (Exception ex)
                         {
-                            Log.SystemError(ex, $"[Exchange] Error broadcast send data to services with type '{serviceType}'. Inbox '{inbox}'");
+                            Log.SystemError(ex, $"[Exchange.SendBroadcast] Error broadcast send data to services '{alias}'. Inbox '{inbox}'");
                         }
                     });
                 }
             }
             catch (Exception ex)
             {
-                Log.SystemError(ex, $"[Exchange] Error broadcast send data to services with type '{serviceType}'. Inbox '{inbox}'");
+                Log.SystemError(ex, $"[Exchange.SendBroadcast] Error broadcast send data in service '{alias}'. Inbox '{inbox}'");
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Sending a message to all services of a specific type to the specified handler
+        /// </summary>
+        /// <typeparam name="T">Message type</typeparam>
+        /// <param name="type">Service type</param>
+        /// <param name="inbox">Inbox name</param>
+        /// <param name="data">Message</param>
+        /// <returns>true - on successful submission</returns>
+        public bool SendBroadcastByType<T>(string type, string inbox, T data)
+        {
+            try
+            {
+                foreach (var client in GetClientEnumeratorByType(type))
+                {
+                    Task.Run(() =>
+                    {
+                        try
+                        {
+                            client.Send(inbox, data);
+                        }
+                        catch (Exception ex)
+                        {
+                            Log.SystemError(ex, $"[Exchange.SendBroadcastByType] Error broadcast send data to services with type '{type}'. Inbox '{inbox}'");
+                        }
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.SystemError(ex, $"[Exchange.SendBroadcastByType] Error broadcast send data to services with type '{type}'. Inbox '{inbox}'");
             }
             return false;
         }
@@ -340,25 +134,25 @@ namespace ZeroLevel.Network
         /// Sending a message to all services of a particular type, to the default handler
         /// </summary>
         /// <typeparam name="T">Message type</typeparam>
-        /// <param name="serviceType">Service type</param>
+        /// <param name="type">Service type</param>
         /// <param name="data">Message</param>
         /// <returns>true - on successful submission</returns>
-        public bool SendBroadcastByType<T>(string serviceType, T data) =>
-            SendBroadcastByType(serviceType, BaseSocket.DEFAULT_MESSAGE_INBOX, data);
+        public bool SendBroadcastByType<T>(string type, T data) =>
+            SendBroadcastByType(type, BaseSocket.DEFAULT_MESSAGE_INBOX, data);
 
         /// <summary>
         /// Sending a message to all services of a specific group to the specified handler
         /// </summary>
         /// <typeparam name="T">Message type</typeparam>
-        /// <param name="serviceGroup">Service group</param>
+        /// <param name="group">Service group</param>
         /// <param name="inbox">Inbox name</param>
         /// <param name="data">Message</param>
         /// <returns>true - on successful submission</returns>
-        public bool SendBroadcastByGroup<T>(string serviceGroup, string inbox, T data)
+        public bool SendBroadcastByGroup<T>(string group, string inbox, T data)
         {
             try
             {
-                foreach (var client in _host.GetClientEnumeratorByGroup(serviceGroup))
+                foreach (var client in GetClientEnumeratorByGroup(group))
                 {
                     Task.Run(() =>
                     {
@@ -368,14 +162,14 @@ namespace ZeroLevel.Network
                         }
                         catch (Exception ex)
                         {
-                            Log.SystemError(ex, $"[Exchange] Error broadcast send data to services with type '{serviceGroup}'. Inbox '{inbox}'");
+                            Log.SystemError(ex, $"[Exchange.SendBroadcastByGroup] Error broadcast send data to services with type '{group}'. Inbox '{inbox}'");
                         }
                     });
                 }
             }
             catch (Exception ex)
             {
-                Log.SystemError(ex, $"[Exchange] Error broadcast send data to services with type '{serviceGroup}'. Inbox '{inbox}'");
+                Log.SystemError(ex, $"[Exchange.SendBroadcastByGroup] Error broadcast send data to services with type '{group}'. Inbox '{inbox}'");
             }
             return false;
         }
@@ -390,73 +184,224 @@ namespace ZeroLevel.Network
         public bool SendBroadcastByGroup<T>(string serviceGroup, T data) =>
             SendBroadcastByGroup(serviceGroup, BaseSocket.DEFAULT_MESSAGE_INBOX, data);
 
-        /// <summary>
-        /// Broadcast polling services by key
-        /// </summary>
-        /// <typeparam name="Treq">Request message type</typeparam>
-        /// <typeparam name="Tresp">Response message type</typeparam>
-        /// <param name="serviceKey">Service key</param>
-        /// <param name="inbox">Inbox name</param>
-        /// <param name="data">Request message</param>
-        /// <param name="responseHandler">Response handler</param>
-        /// <returns>true - in case of successful mailing</returns>
-        public IEnumerable<Tresp> RequestBroadcast<Treq, Tresp>(string serviceKey, string inbox, Treq data)
+        public bool Request<Tresponse>(string alias, Action<Tresponse> callback) =>
+            Request(alias, BaseSocket.DEFAULT_REQUEST_WITHOUT_ARGS_INBOX, callback);
+
+        public bool Request<Tresponse>(string alias, string inbox, Action<Tresponse> callback)
         {
+            bool success = false;
+            Tresponse response = default(Tresponse);
             try
             {
-                var clients = _host.GetClientEnumerator(serviceKey).ToList();
-                return _RequestBroadcast<Treq, Tresp>(clients, inbox, data);
+                if (false == CallService(alias, (transport) =>
+                {
+                    try
+                    {
+                        using (var waiter = new ManualResetEventSlim(false))
+                        {
+                            if (false == transport.Request<Tresponse>(inbox, resp =>
+                            {
+                                response = resp;
+                                success = true;
+                                waiter.Set();
+                            }).Success)
+                            {
+                                return false;
+                            }
+                            if (false == waiter.Wait(BaseSocket.MAX_REQUEST_TIME_MS))
+                            {
+                                return false;
+                            }
+                        }
+                        return true;
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.SystemError(ex, $"[Exchange.Request] Error request to service '{alias}'. Inbox '{inbox}'");
+                    }
+                    return false;
+                }))
+                {
+                    Log.SystemWarning($"[Exchange.Request] No responce on request. Service key '{alias}'. Inbox '{inbox}'");
+                }
             }
             catch (Exception ex)
             {
-                Log.SystemError(ex, $"[Exchange] Error broadcast request to service '{serviceKey}'. Inbox '{inbox}'");
+                Log.SystemError(ex, $"[Exchange.Request] Error request to service '{alias}'. Inbox '{inbox}'");
             }
-            return Enumerable.Empty<Tresp>();
+            callback(response);
+            return success;
         }
 
-        /// <summary>
-        /// Broadcast polling services by key, without message request
-        /// </summary>
-        /// <typeparam name="Tresp">Response message type</typeparam>
-        /// <param name="serviceKey">Service key</param>
-        /// <param name="inbox">Inbox name</param>
-        /// <param name="responseHandler">Response handler</param>
-        /// <returns>true - in case of successful mailing</returns>
-        public IEnumerable<Tresp> RequestBroadcast<Tresp>(string serviceKey, string inbox)
+        public bool Request<Trequest, Tresponse>(string alias, Trequest request, Action<Tresponse> callback)
+            => Request(alias, BaseSocket.DEFAULT_REQUEST_INBOX, callback);
+
+        public bool Request<Trequest, Tresponse>(string alias, string inbox, Trequest request, Action<Tresponse> callback)
         {
+            bool success = false;
+            Tresponse response = default(Tresponse);
             try
             {
-                var clients = _host.GetClientEnumerator(serviceKey).ToList();
-                return _RequestBroadcast<Tresp>(clients, inbox);
+                if (false == CallService(alias, (transport) =>
+                {
+                    try
+                    {
+                        using (var waiter = new ManualResetEventSlim(false))
+                        {
+                            if (false == transport.Request<Trequest, Tresponse>(inbox, request, resp =>
+                            {
+                                response = resp;
+                                success = true;
+                                waiter.Set();
+                            }).Success)
+                            {
+                                return false;
+                            }
+                            if (false == waiter.Wait(BaseSocket.MAX_REQUEST_TIME_MS))
+                            {
+                                return false;
+                            }
+                        }
+                        return true;
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.SystemError(ex, $"[Exchange.Request] Error request to service '{alias}'. Inbox '{inbox}'");
+                    }
+                    return false;
+                }))
+                {
+                    Log.SystemWarning($"[Exchange.Request] No responce on request. Service key '{alias}'. Inbox '{inbox}'");
+                }
             }
             catch (Exception ex)
             {
-                Log.SystemError(ex, $"[Exchange] Error broadcast request to service '{serviceKey}'. Inbox '{inbox}'");
+                Log.SystemError(ex, $"[Exchange.Request] Error request to service '{alias}'. Inbox '{inbox}'");
             }
-            return Enumerable.Empty<Tresp>();
+            callback(response);
+            return success;
         }
-
-        /// <summary>
-        /// Broadcast polling services by key, to default handler
-        /// </summary>
-        /// <typeparam name="Treq">Request message type</typeparam>
-        /// <typeparam name="Tresp">Response message type</typeparam>
-        /// <param name="serviceKey">Service key</param>
-        /// <param name="data">Request message</param>
-        /// <param name="responseHandler">Response handler</param>
-        /// <returns>true - in case of successful mailing</returns>
-        public IEnumerable<Tresp> RequestBroadcast<Treq, Tresp>(string serviceKey, Treq data) =>
-            RequestBroadcast<Treq, Tresp>(serviceKey, BaseSocket.DEFAULT_REQUEST_INBOX, data);
 
         /// <summary>
         /// Broadcast polling of services by key, without message of request, to default handler
         /// </summary>
-        /// <typeparam name="Tresp">Response message type</typeparam>
-        /// <param name="serviceKey">Service key</param>
+        /// <typeparam name="Tresponse">Response message type</typeparam>
+        /// <param name="alias">Service key</param>
+        /// <param name="callback">Response handler</param>
+        /// <returns>true - in case of successful mailing</returns>
+        public bool RequestBroadcast<Tresponse>(string alias, Action<IEnumerable<Tresponse>> callback) =>
+            RequestBroadcast(alias, BaseSocket.DEFAULT_REQUEST_WITHOUT_ARGS_INBOX, callback);
+
+        /// <summary>
+        /// Broadcast polling services by key
+        /// </summary>
+        /// <typeparam name="Tresponse">Response message type</typeparam>
+        /// <param name="alias">Service key</param>
+        /// <param name="inbox">Inbox name</param>
+        /// <param name="data">Request message</param>
         /// <param name="responseHandler">Response handler</param>
         /// <returns>true - in case of successful mailing</returns>
-        public IEnumerable<Tresp> RequestBroadcast<Tresp>(string serviceKey) =>
-            RequestBroadcast<Tresp>(serviceKey, BaseSocket.DEFAULT_REQUEST_INBOX);
+        public bool RequestBroadcast<Tresponse>(string alias, string inbox, Action<IEnumerable<Tresponse>> callback)
+        {
+            try
+            {
+                var clients = GetClientEnumerator(alias).ToList();
+                callback(_RequestBroadcast<Tresponse>(clients, inbox));
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Log.SystemError(ex, $"[Exchange.RequestBroadcast] Error broadcast request to service '{alias}'. Inbox '{inbox}'");
+            }
+            return false;
+        }
+
+        public bool RequestBroadcast<Trequest, Tresponse>(string alias, Trequest data, Action<IEnumerable<Tresponse>> callback)
+            => RequestBroadcast(alias, BaseSocket.DEFAULT_REQUEST_INBOX, data, callback);
+
+        public bool RequestBroadcast<Trequest, Tresponse>(string alias, string inbox, Trequest data
+            , Action<IEnumerable<Tresponse>> callback)
+        {
+            try
+            {
+                var clients = GetClientEnumerator(alias).ToList();
+                callback(_RequestBroadcast<Trequest, Tresponse>(clients, inbox, data));
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Log.SystemError(ex, $"[Exchange.RequestBroadcast] Error broadcast request to service '{alias}'. Inbox '{inbox}'");
+            }
+            return false;
+        }
+
+        public bool RequestBroadcastByGroup<Tresponse>(string serviceGroup, Action<IEnumerable<Tresponse>> callback)
+            => RequestBroadcastByGroup(serviceGroup, BaseSocket.DEFAULT_REQUEST_INBOX, callback);
+
+        public bool RequestBroadcastByGroup<Tresponse>(string serviceGroup, string inbox, Action<IEnumerable<Tresponse>> callback)
+        {
+            try
+            {
+                var clients = GetClientEnumeratorByGroup(serviceGroup).ToList();
+                callback(_RequestBroadcast<Tresponse>(clients, inbox));
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Log.SystemError(ex, $"[Exchange] Error broadcast request to service by group '{serviceGroup}'. Inbox '{inbox}'");
+            }
+            return false;
+        }
+
+        public bool RequestBroadcastByGroup<Trequest, Tresponse>(string serviceGroup, Trequest data, Action<IEnumerable<Tresponse>> callback)
+            => RequestBroadcastByGroup(serviceGroup, BaseSocket.DEFAULT_REQUEST_INBOX, data, callback);
+
+        public bool RequestBroadcastByGroup<Trequest, Tresponse>(string serviceGroup, string inbox, Trequest data
+            , Action<IEnumerable<Tresponse>> callback)
+        {
+            try
+            {
+                var clients = GetClientEnumeratorByGroup(serviceGroup).ToList();
+                callback(_RequestBroadcast<Trequest, Tresponse>(clients, inbox, data));
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Log.SystemError(ex, $"[Exchange] Error broadcast request to service by group '{serviceGroup}'. Inbox '{inbox}'");
+            }
+            return false;
+        }
+
+        public bool RequestBroadcastByType<Tresponse>(string serviceType, Action<IEnumerable<Tresponse>> callback)
+            => RequestBroadcastByType(serviceType, BaseSocket.DEFAULT_REQUEST_WITHOUT_ARGS_INBOX, callback);
+
+        public bool RequestBroadcastByType<Tresponse>(string serviceType, string inbox, Action<IEnumerable<Tresponse>> callback)
+        {
+            try
+            {
+                var clients = GetClientEnumeratorByType(serviceType).ToList();
+                callback(_RequestBroadcast<Tresponse>(clients, inbox));
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Log.SystemError(ex, $"[Exchange] Error broadcast request to service by type '{serviceType}'. Inbox '{inbox}'");
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Broadcast polling services by type of service, to default handler
+        /// </summary>
+        /// <typeparam name="Treq">Request message type</typeparam>
+        /// <typeparam name="Tresp">Response message type</typeparam>
+        /// <param name="serviceType">Service type</param>
+        /// <param name="data">Request message</param>
+        /// <param name="callback">Response handler</param>
+        /// <returns>true - in case of successful mailing</returns>
+        public bool RequestBroadcastByType<Trequest, Tresponse>(string serviceType, Trequest data
+            , Action<IEnumerable<Tresponse>> callback) =>
+        RequestBroadcastByType(serviceType, BaseSocket.DEFAULT_REQUEST_INBOX, data, callback);
 
         /// <summary>
         /// Broadcast polling services by type of service
@@ -466,135 +411,287 @@ namespace ZeroLevel.Network
         /// <param name="serviceType">Service type</param>
         /// <param name="inbox">Inbox name</param>
         /// <param name="data">Request message</param>
-        /// <param name="responseHandler">Response handler</param>
+        /// <param name="callback">Response handler</param>
         /// <returns>true - in case of successful mailing</returns>
-        public IEnumerable<Tresp> RequestBroadcastByType<Treq, Tresp>(string serviceType, string inbox, Treq data)
+        public bool RequestBroadcastByType<Trequest, Tresponse>(string serviceType, string inbox, Trequest data
+            , Action<IEnumerable<Tresponse>> callback)
         {
             try
             {
-                var clients = _host.GetClientEnumeratorByType(serviceType).ToList();
-                return _RequestBroadcast<Treq, Tresp>(clients, inbox, data);
+                var clients = GetClientEnumeratorByType(serviceType).ToList();
+                callback(_RequestBroadcast<Trequest, Tresponse>(clients, inbox, data));
+                return true;
             }
             catch (Exception ex)
             {
                 Log.SystemError(ex, $"[Exchange] Error broadcast request to service by type '{serviceType}'. Inbox '{inbox}'");
             }
-            return Enumerable.Empty<Tresp>();
+            return false;
         }
+        #endregion
 
-        /// <summary>
-        /// Broadcast polling of services by type of service, without a request message
-        /// </summary>
-        /// <typeparam name="Tresp">Response message type</typeparam>
-        /// <param name="serviceType">Service type</param>
-        /// <param name="inbox">Inbox name</param>
-        /// <param name="responseHandler">Response handler</param>
-        /// <returns>true - in case of successful mailing</returns>
-        public IEnumerable<Tresp> RequestBroadcastByType<Tresp>(string serviceType, string inbox)
+        #region Discovery
+        private long _update_discovery_table_task = -1;
+        private long _register_in_discovery_table_task = -1;
+        private static TimeSpan _update_discovery_table_period = TimeSpan.FromSeconds(15);
+        private static TimeSpan _register_in_discovery_table_period = TimeSpan.FromSeconds(15);
+
+        public void UseDiscovery()
         {
-            try
+            if (_discoveryClient != null)
             {
-                var clients = _host.GetClientEnumeratorByType(serviceType).ToList();
-                return _RequestBroadcast<Tresp>(clients, inbox);
+                _discoveryClient.Dispose();
+                _discoveryClient = null;
             }
-            catch (Exception ex)
-            {
-                Log.SystemError(ex, $"[Exchange] Error broadcast request to service by type '{serviceType}'. Inbox '{inbox}'");
-            }
-            return Enumerable.Empty<Tresp>();
+            var discovery = Configuration.Default.First("discovery");
+            _discoveryClient = new DiscoveryClient(_cachee.GetClient(NetUtils.CreateIPEndPoint(discovery), false, BaseSocket.NullRouter));
+            RestartDiscoveryTasks();
         }
 
-        /// <summary>
-        /// Broadcast polling services by type of service, in the default handler
-        /// </summary>
-        /// <typeparam name="Treq">Request message type</typeparam>
-        /// <typeparam name="Tresp">Response message type</typeparam>
-        /// <param name="serviceType">Service type</param>
-        /// <param name="data">Request message</param>
-        /// <param name="responseHandler">Response handler</param>
-        /// <returns>true - in case of successful mailing</returns>
-        public IEnumerable<Tresp> RequestBroadcastByType<Treq, Tresp>(string serviceType, Treq data) =>
-            RequestBroadcastByType<Treq, Tresp>(serviceType, BaseSocket.DEFAULT_REQUEST_INBOX, data);
-
-        /// <summary>
-        /// Broadcast polling services by type, without message request, in the default handler
-        /// </summary>
-        /// <typeparam name="Tresp">Response message type</typeparam>
-        /// <param name="serviceType">Service type</param>
-        /// <param name="responseHandler">Response handler</param>
-        /// <returns>true - in case of successful mailing</returns>
-        public IEnumerable<Tresp> RequestBroadcastByType<Tresp>(string serviceType) =>
-            RequestBroadcastByType<Tresp>(serviceType, BaseSocket.DEFAULT_REQUEST_INBOX);
-
-        /// <summary>
-        /// Broadcast polling services for a group of services
-        /// </summary>
-        /// <typeparam name="Treq">Request message type</typeparam>
-        /// <typeparam name="Tresp">Response message type</typeparam>
-        /// <param name="serviceGroup">Service group</param>
-        /// <param name="inbox">Inbox name</param>
-        /// <param name="data">Request message</param>
-        /// <param name="responseHandler">Response handler</param>
-        /// <returns>true - in case of successful mailing</returns>
-        public IEnumerable<Tresp> RequestBroadcastByGroup<Treq, Tresp>(string serviceGroup, string inbox, Treq data)
+        public void UseDiscovery(string endpoint)
         {
-            try
+            if (_discoveryClient != null)
             {
-                var clients = _host.GetClientEnumeratorByGroup(serviceGroup).ToList();
-                return _RequestBroadcast<Treq, Tresp>(clients, inbox, data);
+                _discoveryClient.Dispose();
+                _discoveryClient = null;
             }
-            catch (Exception ex)
-            {
-                Log.SystemError(ex, $"[Exchange] Error broadcast request to service by type '{serviceGroup}'. Inbox '{inbox}'");
-            }
-            return Enumerable.Empty<Tresp>();
+            _discoveryClient = new DiscoveryClient(_cachee.GetClient(NetUtils.CreateIPEndPoint(endpoint), false, BaseSocket.NullRouter));
+            RestartDiscoveryTasks();
         }
 
-        /// <summary>
-        /// Broadcast polling services for a group of services, without prompting
-        /// </summary>
-        /// <typeparam name="Tresp">Response message type</typeparam>
-        /// <param name="serviceGroup">Service group</param>
-        /// <param name="inbox">Inbox name</param>
-        /// <param name="responseHandler">Response handler</param>
-        /// <returns>true - in case of successful mailing</returns>
-        public IEnumerable<Tresp> RequestBroadcastByGroup<Tresp>(string serviceGroup, string inbox)
+        public void UseDiscovery(IPEndPoint endpoint)
         {
-            try
+            if (_discoveryClient != null)
             {
-                var clients = _host.GetClientEnumeratorByGroup(serviceGroup).ToList();
-                return _RequestBroadcast<Tresp>(clients, inbox);
+                _discoveryClient.Dispose();
+                _discoveryClient = null;
             }
-            catch (Exception ex)
-            {
-                Log.SystemError(ex, $"[Exchange] Error broadcast request to service by type '{serviceGroup}'. Inbox '{inbox}'");
-            }
-            return Enumerable.Empty<Tresp>();
+            _discoveryClient = new DiscoveryClient(_cachee.GetClient(endpoint, false, BaseSocket.NullRouter));
+            RestartDiscoveryTasks();
         }
 
-        /// <summary>
-        /// Broadcast polling services by service group to default handler
-        /// </summary>
-        /// <typeparam name="Treq">Request message type</typeparam>
-        /// <typeparam name="Tresp">Response message type</typeparam>
-        /// <param name="serviceGroup">Service group</param>
-        /// <param name="data">Request message</param>
-        /// <param name="responseHandler">Response handler</param>
-        /// <returns>true - in case of successful mailing</returns>
-        public IEnumerable<Tresp> RequestBroadcastByGroup<Treq, Tresp>(string serviceGroup, Treq data) =>
-            RequestBroadcastByGroup<Treq, Tresp>(serviceGroup, BaseSocket.DEFAULT_REQUEST_INBOX, data);
+        private void RestartDiscoveryTasks()
+        {
+            if (_update_discovery_table_task != -1)
+            {
+                Sheduller.Remove(_update_discovery_table_task);
+            }
+            if (_register_in_discovery_table_task != -1)
+            {
+                Sheduller.Remove(_register_in_discovery_table_task);
+            }
+            RegisterServicesInDiscovery();
+            _update_discovery_table_task = Sheduller.RemindEvery(_update_discovery_table_period, RegisterServicesInDiscovery);
+            _register_in_discovery_table_task = Sheduller.RemindEvery(_register_in_discovery_table_period, () => { });
+        }
 
-        /// <summary>
-        ///Broadcast polling services for a group of services, without sending a request, to the default handler
-        /// </summary>
-        /// <typeparam name="Tresp">Response message type</typeparam>
-        /// <param name="serviceGroup">Service group</param>
-        /// <param name="responseHandler">Response handler</param>
-        /// <returns>true - in case of successful mailing</returns>
-        public IEnumerable<Tresp> RequestBroadcastByGroup<Tresp>(string serviceGroup) =>
-            RequestBroadcastByGroup<Tresp>(serviceGroup, BaseSocket.DEFAULT_REQUEST_INBOX);
+        private void RegisterServicesInDiscovery()
+        {
+            var services = _serverInstances.
+                Values.
+                Select(s =>
+                {
+                    var info = MessageSerializer.Copy(this._serviceInfo);
+                    info.Port = s.LocalEndpoint.Port;
+                    return info;
+                }).
+                ToList();
+            foreach (var service in services)
+            {
+                _discoveryClient.Register(service);
+            }
+        }
+        #endregion
+
+        #region Host service
+        public IRouter UseHost()
+        {
+            return _cachee.GetServer(new IPEndPoint(IPAddress.Any, NetUtils.GetFreeTcpPort()), new Router()).Router;
+        }
+
+        public IRouter UseHost(int port)
+        {
+            return _cachee.GetServer(new IPEndPoint(IPAddress.Any, port), new Router()).Router;
+        }
+
+        public IRouter UseHost(IPEndPoint endpoint)
+        {
+            return _cachee.GetServer(endpoint, new Router()).Router;
+        }
+        #endregion
 
         #region Private
+        internal IEnumerable<ExClient> GetClientEnumerator(string serviceKey)
+        {
+            InvokeResult<IEnumerable<IPEndPoint>> candidates;
+            try
+            {
+                candidates = _aliases.GetAll(serviceKey);
+            }
+            catch (Exception ex)
+            {
+                Log.SystemError(ex, $"[Exchange.GetClientEnumerator] Error when trying get endpoints for service key '{serviceKey}'");
+                candidates = null;
+            }
+            if (candidates != null && candidates.Success && candidates.Value.Any())
+            {
+                foreach (var endpoint in candidates.Value)
+                {
+                    ExClient transport;
+                    try
+                    {
+                        transport = _cachee.GetClient(endpoint, true);
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.SystemError(ex, $"[Exchange.GetClientEnumerator] Can't get transport for endpoint '{endpoint}'");
+                        continue;
+                    }
+                    yield return transport;
+                }
+            }
+            else
+            {
+                Log.Debug($"[Exchange.GetClientEnumerator] Not found endpoints for service key '{serviceKey}'");
+            }
+        }
+
+        internal IEnumerable<ExClient> GetClientEnumeratorByType(string serviceType)
+        {
+            InvokeResult<IEnumerable<IPEndPoint>> candidates;
+            try
+            {
+                candidates = _aliases.GetAllByType(serviceType);
+            }
+            catch (Exception ex)
+            {
+                Log.SystemError(ex, $"[Exchange.GetClientEnumeratorByType] Error when trying get endpoints for service type '{serviceType}'");
+                candidates = null;
+            }
+            if (candidates != null && candidates.Success && candidates.Value.Any())
+            {
+                foreach (var endpoint in candidates.Value)
+                {
+                    ExClient transport;
+                    try
+                    {
+                        transport = _cachee.GetClient(endpoint, true);
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.SystemError(ex, $"[Exchange.GetClientEnumeratorByType] Can't get transport for endpoint '{endpoint}'");
+                        continue;
+                    }
+                    yield return transport;
+                }
+            }
+            else
+            {
+                Log.Debug($"[Exchange.GetClientEnumeratorByType] Not found endpoints for service type '{serviceType}'");
+            }
+        }
+
+        internal IEnumerable<ExClient> GetClientEnumeratorByGroup(string serviceGroup)
+        {
+            InvokeResult<IEnumerable<IPEndPoint>> candidates;
+            try
+            {
+                candidates = _aliases.GetAllByGroup(serviceGroup);
+            }
+            catch (Exception ex)
+            {
+                Log.SystemError(ex, $"[Exchange.GetClientEnumeratorByGroup] Error when trying get endpoints for service group '{serviceGroup}'");
+                candidates = null;
+            }
+            if (candidates != null && candidates.Success && candidates.Value.Any())
+            {
+                foreach (var service in candidates.Value)
+                {
+                    ExClient transport;
+                    try
+                    {
+                        transport = _cachee.GetClient(service, true);
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.SystemError(ex, $"[Exchange.GetClientEnumeratorByGroup] Can't get transport for endpoint '{service}'");
+                        continue;
+                    }
+                    yield return transport;
+                }
+            }
+            else
+            {
+                Log.Debug($"[Exchange.GetClientEnumeratorByGroup] Not found endpoints for service group '{serviceGroup}'");
+            }
+        }
+        /// <summary>
+        /// Call service with round-robin balancing
+        /// </summary>
+        /// <param name="serviceKey">Service key</param>
+        /// <param name="callHandler">Service call code</param>
+        /// <returns>true - service called succesfully</returns>
+        internal bool CallService(string serviceKey, Func<ExClient, bool> callHandler)
+        {
+            InvokeResult<IEnumerable<IPEndPoint>> candidates;
+            try
+            {
+                candidates = _aliases.GetAll(serviceKey);
+            }
+            catch (Exception ex)
+            {
+                Log.SystemError(ex, $"[Exchange.CallService] Error when trying get endpoints for service key '{serviceKey}'");
+                return false;
+            }
+            if (candidates == null || !candidates.Success || candidates.Value.Any() == false)
+            {
+                Log.Debug($"[Exchange.CallService] Not found endpoints for service key '{serviceKey}'");
+                return false;
+            }
+            var success = false;
+            foreach (var endpoint in candidates.Value)
+            {
+                ExClient transport;
+                try
+                {
+                    transport = _cachee.GetClient(endpoint, true);
+                }
+                catch (Exception ex)
+                {
+                    Log.SystemError(ex, $"[Exchange.CallService] Can't get transport for service '{serviceKey}'");
+                    continue;
+                }
+                try
+                {
+                    success = callHandler(transport);
+                }
+                catch (Exception ex)
+                {
+                    Log.SystemError(ex, $"[Exchange.CallService] Error send/request data in service '{serviceKey}'. Endpoint '{endpoint}'");
+                    success = false;
+                }
+                if (success)
+                {
+                    break;
+                }
+            }
+            return success;
+        }
+
+        internal InvokeResult CallServiceDirect(string endpoint, Func<ExClient, InvokeResult> callHandler)
+        {
+            ExClient transport;
+            try
+            {
+                transport = _cachee.GetClient(NetUtils.CreateIPEndPoint(endpoint), true);
+            }
+            catch (Exception ex)
+            {
+                Log.SystemError(ex, $"[Exchange.CallServiceDirect] Can't get transport for endpoint '{endpoint}'");
+                return InvokeResult.Fault(ex.Message);
+            }
+            return callHandler(transport);
+        }
 
         private IEnumerable<Tresp> _RequestBroadcast<Treq, Tresp>(List<ExClient> clients, string inbox, Treq data)
         {
@@ -614,7 +711,7 @@ namespace ZeroLevel.Network
                         }
                         catch (Exception ex)
                         {
-                            Log.SystemError(ex, $"[Exchange] Error direct request to service '{client.EndPoint}' in broadcast request. Inbox '{inbox}'");
+                            Log.SystemError(ex, $"[ExClientSet._RequestBroadcast] Error direct request to service '{client.EndPoint}' in broadcast request. Inbox '{inbox}'");
                             waiter.Signal();
                         }
                     });
@@ -642,7 +739,7 @@ namespace ZeroLevel.Network
                         }
                         catch (Exception ex)
                         {
-                            Log.SystemError(ex, $"[Exchange] Error direct request to service '{client.EndPoint}' in broadcast request. Inbox '{inbox}'");
+                            Log.SystemError(ex, $"[ExClientSet._RequestBroadcast] Error direct request to service '{client.EndPoint}' in broadcast request. Inbox '{inbox}'");
                             waiter.Signal();
                         }
                     });
@@ -651,15 +748,19 @@ namespace ZeroLevel.Network
             }
             return response;
         }
-
-        #endregion Private
-
-        #endregion Broadcast
+        #endregion
 
         public void Dispose()
         {
-            this._host.Dispose();
+            if (_update_discovery_table_task != -1)
+            {
+                Sheduller.Remove(_update_discovery_table_task);
+            }
+            if (_register_in_discovery_table_task != -1)
+            {
+                Sheduller.Remove(_register_in_discovery_table_task);
+            }
+            _cachee.Dispose();
         }
     }
-    */
 }
