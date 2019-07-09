@@ -9,33 +9,17 @@ using ZeroLevel.Services.Serialization;
 
 namespace ZeroLevel.Network
 {
-    public interface IExchange
-        : IClientSet, IDisposable
-    {
-        void UseDiscovery();
-        void UseDiscovery(string endpoint);
-        void UseDiscovery(IPEndPoint endpoint);
-
-        IRouter UseHost();
-        IRouter UseHost(int port);
-        IRouter UseHost(IPEndPoint endpoint);
-
-        IServiceRoutesStorage RoutesStorage { get; }
-
-        ExClient GetConnection(string alias);
-        ExClient GetConnection(IPEndPoint endpoint);
-    }
-
     /// <summary>
     /// Provides data exchange between services
     /// </summary>
     internal sealed class Exchange :
         IExchange
     {
-        private readonly ServiceRouteStorage _aliases = new ServiceRouteStorage();
+        private readonly ServiceRouteStorage _dicovery_aliases = new ServiceRouteStorage();
+        private readonly ServiceRouteStorage _user_aliases = new ServiceRouteStorage();
         private readonly ExClientServerCachee _cachee = new ExClientServerCachee();
 
-        public IServiceRoutesStorage RoutesStorage => _aliases;
+        public IServiceRoutesStorage RoutesStorage => _user_aliases;
         private readonly IZeroService _owner;
 
         #region Ctor        
@@ -325,8 +309,11 @@ namespace ZeroLevel.Network
             try
             {
                 var clients = GetClientEnumerator(alias).ToList();
-                callback(_RequestBroadcast<Tresponse>(clients, inbox));
-                return true;
+                if (clients.Count > 0)
+                {
+                    callback(_RequestBroadcast<Tresponse>(clients, inbox));
+                    return true;
+                }
             }
             catch (Exception ex)
             {
@@ -344,8 +331,11 @@ namespace ZeroLevel.Network
             try
             {
                 var clients = GetClientEnumerator(alias).ToList();
-                callback(_RequestBroadcast<Trequest, Tresponse>(clients, inbox, data));
-                return true;
+                if (clients.Count > 0)
+                {
+                    callback(_RequestBroadcast<Trequest, Tresponse>(clients, inbox, data));
+                    return true;
+                }
             }
             catch (Exception ex)
             {
@@ -362,8 +352,11 @@ namespace ZeroLevel.Network
             try
             {
                 var clients = GetClientEnumeratorByGroup(serviceGroup).ToList();
-                callback(_RequestBroadcast<Tresponse>(clients, inbox));
-                return true;
+                if (clients.Count > 0)
+                {
+                    callback(_RequestBroadcast<Tresponse>(clients, inbox));
+                    return true;
+                }
             }
             catch (Exception ex)
             {
@@ -381,8 +374,11 @@ namespace ZeroLevel.Network
             try
             {
                 var clients = GetClientEnumeratorByGroup(serviceGroup).ToList();
-                callback(_RequestBroadcast<Trequest, Tresponse>(clients, inbox, data));
-                return true;
+                if (clients.Count > 0)
+                {
+                    callback(_RequestBroadcast<Trequest, Tresponse>(clients, inbox, data));
+                    return true;
+                }
             }
             catch (Exception ex)
             {
@@ -399,8 +395,11 @@ namespace ZeroLevel.Network
             try
             {
                 var clients = GetClientEnumeratorByType(serviceType).ToList();
-                callback(_RequestBroadcast<Tresponse>(clients, inbox));
-                return true;
+                if (clients.Count > 0)
+                {
+                    callback(_RequestBroadcast<Tresponse>(clients, inbox));
+                    return true;
+                }
             }
             catch (Exception ex)
             {
@@ -438,8 +437,11 @@ namespace ZeroLevel.Network
             try
             {
                 var clients = GetClientEnumeratorByType(serviceType).ToList();
-                callback(_RequestBroadcast<Trequest, Tresponse>(clients, inbox, data));
-                return true;
+                if (clients.Count > 0)
+                {
+                    callback(_RequestBroadcast<Trequest, Tresponse>(clients, inbox, data));
+                    return true;
+                }
             }
             catch (Exception ex)
             {
@@ -460,7 +462,7 @@ namespace ZeroLevel.Network
             try
             {
                 var discoveryEndpoint = Configuration.Default.First("discovery");
-                _aliases.Set(BaseSocket.DISCOVERY_ALIAS, NetUtils.CreateIPEndPoint(discoveryEndpoint));
+                _user_aliases.Set(BaseSocket.DISCOVERY_ALIAS, NetUtils.CreateIPEndPoint(discoveryEndpoint));
                 RestartDiscoveryTasks();
             }
             catch (Exception ex)
@@ -473,7 +475,7 @@ namespace ZeroLevel.Network
         {
             try
             {
-                _aliases.Set(BaseSocket.DISCOVERY_ALIAS, NetUtils.CreateIPEndPoint(discoveryEndpoint));
+                _user_aliases.Set(BaseSocket.DISCOVERY_ALIAS, NetUtils.CreateIPEndPoint(discoveryEndpoint));
                 RestartDiscoveryTasks();
             }
             catch (Exception ex)
@@ -486,7 +488,7 @@ namespace ZeroLevel.Network
         {
             try
             {
-                _aliases.Set(BaseSocket.DISCOVERY_ALIAS, discoveryEndpoint);
+                _user_aliases.Set(BaseSocket.DISCOVERY_ALIAS, discoveryEndpoint);
                 RestartDiscoveryTasks();
             }
             catch (Exception ex)
@@ -511,7 +513,7 @@ namespace ZeroLevel.Network
 
         private void RegisterServicesInDiscovery()
         {
-            var discovery_endpoint = _aliases.Get(BaseSocket.DISCOVERY_ALIAS);
+            var discovery_endpoint = _user_aliases.Get(BaseSocket.DISCOVERY_ALIAS);
             if (discovery_endpoint.Success)
             {
                 var discoveryClient = _cachee.GetClient(discovery_endpoint.Value, true);
@@ -542,7 +544,7 @@ namespace ZeroLevel.Network
 
         private void UpdateServiceListFromDiscovery()
         {
-            var discovery_endpoint = _aliases.Get(BaseSocket.DISCOVERY_ALIAS);
+            var discovery_endpoint = _user_aliases.Get(BaseSocket.DISCOVERY_ALIAS);
             if (discovery_endpoint.Success)
             {
                 var discoveryClient = _cachee.GetClient(discovery_endpoint.Value, true);
@@ -556,25 +558,34 @@ namespace ZeroLevel.Network
                             return;
                         }
                         var endpoints = new HashSet<IPEndPoint>();
-                        foreach (var service in records)
+                        _dicovery_aliases.BeginUpdate();
+                        try
                         {
-                            endpoints.Clear();
-                            foreach (var ep in service.Endpoints)
+                            foreach (var service in records)
                             {
-                                try
+                                endpoints.Clear();
+                                foreach (var ep in service.Endpoints)
                                 {
-                                    var endpoint = NetUtils.CreateIPEndPoint(ep);
-                                    endpoints.Add(endpoint);
+                                    try
+                                    {
+                                        var endpoint = NetUtils.CreateIPEndPoint(ep);
+                                        endpoints.Add(endpoint);
+                                    }
+                                    catch
+                                    {
+                                        Log.SystemWarning($"[Exchange.UpdateServiceListFromDiscovery] Can't parse address {ep} as IPEndPoint");
+                                    }
                                 }
-                                catch
-                                {
-                                    Log.SystemWarning($"[Exchange.UpdateServiceListFromDiscovery] Can't parse address {ep} as IPEndPoint");
-                                }
+                                _dicovery_aliases.Set(service.ServiceKey,
+                                    service.ServiceType,
+                                    service.ServiceGroup,
+                                    endpoints);
                             }
-                            _aliases.Set(service.ServiceKey,
-                                service.ServiceType,
-                                service.ServiceGroup,
-                                endpoints);
+                            _dicovery_aliases.Commit();
+                        }
+                        catch
+                        {
+                            _dicovery_aliases.Rollback();
                         }
                     });
                     if (!ir.Success)
@@ -592,19 +603,30 @@ namespace ZeroLevel.Network
 
         public ExClient GetConnection(string alias)
         {
-            var address = _aliases.Get(alias);
-            if (address.Success)
+            if (_update_discovery_table_task != -1)
             {
-                return _cachee.GetClient(address.Value, true);
+                var address = _dicovery_aliases.Get(alias);
+                if (address.Success)
+                {
+                    return _cachee.GetClient(address.Value, true);
+                }
             }
-            try
+            else
             {
-                var endpoint = NetUtils.CreateIPEndPoint(alias);
-                return _cachee.GetClient(endpoint, true);
-            }
-            catch (Exception ex)
-            {
-                Log.SystemError(ex, "[Exchange.GetConnection]");
+                var address = _user_aliases.Get(alias);
+                if (address.Success)
+                {
+                    return _cachee.GetClient(address.Value, true);
+                }
+                try
+                {
+                    var endpoint = NetUtils.CreateIPEndPoint(alias);
+                    return _cachee.GetClient(endpoint, true);
+                }
+                catch (Exception ex)
+                {
+                    Log.SystemError(ex, "[Exchange.GetConnection]");
+                }
             }
             return null;
         }
@@ -640,21 +662,111 @@ namespace ZeroLevel.Network
         #endregion
 
         #region Private
+        private IEnumerable<IPEndPoint> GetAllAddresses(string serviceKey)
+        {
+            if (_update_discovery_table_task != -1)
+            {
+                var dr = _dicovery_aliases.GetAll(serviceKey);
+                var ur = _user_aliases.GetAll(serviceKey);
+                if (dr.Success && ur.Success)
+                {
+                    return Enumerable.Union<IPEndPoint>(dr.Value, ur.Value);
+                }
+                else if (dr.Success)
+                {
+                    return dr.Value;
+                }
+                else if (ur.Success)
+                {
+                    return ur.Value;
+                }
+            }
+            else
+            {
+                var result = _user_aliases.GetAll(serviceKey);
+                if (result.Success)
+                {
+                    return result.Value;
+                }
+            }
+            return null;
+        }
+
+        private IEnumerable<IPEndPoint> GetAllAddressesByType(string serviceType)
+        {
+            if (_update_discovery_table_task != -1)
+            {
+                var dr = _dicovery_aliases.GetAllByType(serviceType);
+                var ur = _user_aliases.GetAllByType(serviceType);
+                if (dr.Success && ur.Success)
+                {
+                    return Enumerable.Union<IPEndPoint>(dr.Value, ur.Value);
+                }
+                else if (dr.Success)
+                {
+                    return dr.Value;
+                }
+                else if (ur.Success)
+                {
+                    return ur.Value;
+                }
+            }
+            else
+            {
+                var result = _user_aliases.GetAllByType(serviceType);
+                if (result.Success)
+                {
+                    return result.Value;
+                }
+            }
+            return null;
+        }
+
+        private IEnumerable<IPEndPoint> GetAllAddressesByGroup(string serviceGroup)
+        {
+            if (_update_discovery_table_task != -1)
+            {
+                var dr = _dicovery_aliases.GetAllByGroup(serviceGroup);
+                var ur = _user_aliases.GetAllByGroup(serviceGroup);
+                if (dr.Success && ur.Success)
+                {
+                    return Enumerable.Union<IPEndPoint>(dr.Value, ur.Value);
+                }
+                else if (dr.Success)
+                {
+                    return dr.Value;
+                }
+                else if (ur.Success)
+                {
+                    return ur.Value;
+                }
+            }
+            else
+            {
+                var result = _user_aliases.GetAllByGroup(serviceGroup);
+                if (result.Success)
+                {
+                    return result.Value;
+                }
+            }
+            return null;
+        }
+
         private IEnumerable<ExClient> GetClientEnumerator(string serviceKey)
         {
-            InvokeResult<IEnumerable<IPEndPoint>> candidates;
+            IEnumerable<IPEndPoint> candidates;
             try
             {
-                candidates = _aliases.GetAll(serviceKey);
+                candidates = GetAllAddresses(serviceKey);
             }
             catch (Exception ex)
             {
                 Log.SystemError(ex, $"[Exchange.GetClientEnumerator] Error when trying get endpoints for service key '{serviceKey}'");
                 candidates = null;
             }
-            if (candidates != null && candidates.Success && candidates.Value.Any())
+            if (candidates != null && candidates.Any())
             {
-                foreach (var endpoint in candidates.Value)
+                foreach (var endpoint in candidates)
                 {
                     ExClient transport;
                     try
@@ -677,19 +789,19 @@ namespace ZeroLevel.Network
 
         private IEnumerable<ExClient> GetClientEnumeratorByType(string serviceType)
         {
-            InvokeResult<IEnumerable<IPEndPoint>> candidates;
+            IEnumerable<IPEndPoint> candidates;
             try
             {
-                candidates = _aliases.GetAllByType(serviceType);
+                candidates = GetAllAddressesByType(serviceType);
             }
             catch (Exception ex)
             {
                 Log.SystemError(ex, $"[Exchange.GetClientEnumeratorByType] Error when trying get endpoints for service type '{serviceType}'");
                 candidates = null;
             }
-            if (candidates != null && candidates.Success && candidates.Value.Any())
+            if (candidates != null && candidates.Any())
             {
-                foreach (var endpoint in candidates.Value)
+                foreach (var endpoint in candidates)
                 {
                     ExClient transport;
                     try
@@ -712,19 +824,19 @@ namespace ZeroLevel.Network
 
         private IEnumerable<ExClient> GetClientEnumeratorByGroup(string serviceGroup)
         {
-            InvokeResult<IEnumerable<IPEndPoint>> candidates;
+            IEnumerable<IPEndPoint> candidates;
             try
             {
-                candidates = _aliases.GetAllByGroup(serviceGroup);
+                candidates = GetAllAddressesByGroup(serviceGroup);
             }
             catch (Exception ex)
             {
                 Log.SystemError(ex, $"[Exchange.GetClientEnumeratorByGroup] Error when trying get endpoints for service group '{serviceGroup}'");
                 candidates = null;
             }
-            if (candidates != null && candidates.Success && candidates.Value.Any())
+            if (candidates != null && candidates.Any())
             {
-                foreach (var service in candidates.Value)
+                foreach (var service in candidates)
                 {
                     ExClient transport;
                     try
@@ -752,23 +864,23 @@ namespace ZeroLevel.Network
         /// <returns>true - service called succesfully</returns>
         private bool CallService(string serviceKey, Func<ExClient, bool> callHandler)
         {
-            InvokeResult<IEnumerable<IPEndPoint>> candidates;
+            IEnumerable<IPEndPoint> candidates;
             try
             {
-                candidates = _aliases.GetAll(serviceKey);
+                candidates = GetAllAddresses(serviceKey);
             }
             catch (Exception ex)
             {
                 Log.SystemError(ex, $"[Exchange.CallService] Error when trying get endpoints for service key '{serviceKey}'");
                 return false;
             }
-            if (candidates == null || !candidates.Success || candidates.Value.Any() == false)
+            if (candidates == null || candidates.Any() == false)
             {
                 Log.Debug($"[Exchange.CallService] Not found endpoints for service key '{serviceKey}'");
                 return false;
             }
             var success = false;
-            foreach (var endpoint in candidates.Value)
+            foreach (var endpoint in candidates)
             {
                 ExClient transport;
                 try

@@ -36,10 +36,18 @@ namespace ZeroLevel.Network
 
         public void Set(IPEndPoint endpoint)
         {
+            var key = $"{endpoint.Address}:{endpoint.Port}";
+
+            if (_in_transaction == 1)
+            {
+                TransAppendByKeys(key, endpoint);
+                _tran_endpoints[endpoint] = new string[] { key, null, null };
+                return;
+            }
+
             _lock.EnterWriteLock();
             try
             {
-                var key = $"{endpoint.Address}:{endpoint.Port}";
                 if (_endpoints.ContainsKey(endpoint))
                 {
                     if (_tableByKey.ContainsKey(key))
@@ -67,6 +75,15 @@ namespace ZeroLevel.Network
 
         public void Set(string key, IPEndPoint endpoint)
         {
+            key = key.ToUpperInvariant();
+
+            if (_in_transaction == 1)
+            {
+                TransAppendByKeys(key, endpoint);
+                _tran_endpoints[endpoint] = new string[] { key, null, null };
+                return;
+            }
+
             _lock.EnterWriteLock();
             try
             {
@@ -83,7 +100,7 @@ namespace ZeroLevel.Network
                     RemoveLocked(endpoint);
                 }
                 AppendByKeys(key, endpoint);
-                _endpoints.Add(endpoint, new string[3] { key.ToUpperInvariant(), null, null });
+                _endpoints.Add(endpoint, new string[3] { key, null, null });
             }
             finally
             {
@@ -93,6 +110,17 @@ namespace ZeroLevel.Network
 
         public void Set(string key, IEnumerable<IPEndPoint> endpoints)
         {
+            key = key.ToUpperInvariant();
+            if (_in_transaction == 1)
+            {
+                foreach (var endpoint in endpoints)
+                {
+                    TransAppendByKeys(key, endpoint);
+                    _tran_endpoints[endpoint] = new string[] { key, null, null };
+                }
+                return;
+            }
+
             _lock.EnterWriteLock();
             try
             {
@@ -122,22 +150,44 @@ namespace ZeroLevel.Network
 
         public void Set(string key, string type, string group, IPEndPoint endpoint)
         {
+            if (key == null)
+            {
+                key = $"{endpoint.Address}:{endpoint.Port}";
+            }
+            else
+            {
+                key = key.ToUpperInvariant();
+            }
+            type = type.ToUpperInvariant();
+            group = group.ToUpperInvariant();
+
+            if (_in_transaction == 1)
+            {
+                TransAppendByKeys(key, endpoint);
+                if (type != null)
+                {
+                    TransAppendByType(type, endpoint);
+                }
+                if (group != null)
+                {
+                    TransAppendByGroup(group, endpoint);
+                }
+                _tran_endpoints[endpoint] = new string[] { key, type, group };
+                return;
+            }
+
             _lock.EnterWriteLock();
             try
             {
                 RemoveLocked(endpoint);
-                if (key == null)
-                {
-                    key = $"{endpoint.Address}:{endpoint.Port}";
-                }
                 AppendByKeys(key, endpoint);
                 if (type != null)
                 {
-                    AppendByType(key, endpoint);
+                    AppendByType(type, endpoint);
                 }
                 if (group != null)
                 {
-                    AppendByGroup(key, endpoint);
+                    AppendByGroup(group, endpoint);
                 }
                 _endpoints.Add(endpoint, new string[3] { key.ToUpperInvariant(), type.ToUpperInvariant(), group.ToUpperInvariant() });
             }
@@ -149,6 +199,28 @@ namespace ZeroLevel.Network
 
         public void Set(string key, string type, string group, IEnumerable<IPEndPoint> endpoints)
         {
+            if (_in_transaction == 1)
+            {
+                key = key.ToUpperInvariant();
+                type = type.ToUpperInvariant();
+                group = group.ToUpperInvariant();
+
+                foreach (var endpoint in endpoints)
+                {
+                    TransAppendByKeys(key, endpoint);
+                    if (type != null)
+                    {
+                        TransAppendByType(type, endpoint);
+                    }
+                    if (group != null)
+                    {
+                        TransAppendByGroup(group, endpoint);
+                    }
+                    _tran_endpoints[endpoint] = new string[] { key, type, group };
+                }
+                return;
+            }
+
             foreach (var ep in endpoints)
             {
                 RemoveLocked(ep);
@@ -235,15 +307,15 @@ namespace ZeroLevel.Network
         #region Private
         private void AppendByKeys(string key, IPEndPoint endpoint)
         {
-            Append(key.ToUpperInvariant(), endpoint, _tableByKey);
+            Append(key, endpoint, _tableByKey);
         }
         private void AppendByType(string type, IPEndPoint endpoint)
         {
-            Append(type.ToUpperInvariant(), endpoint, _tableByTypes);
+            Append(type, endpoint, _tableByTypes);
         }
         private void AppendByGroup(string group, IPEndPoint endpoint)
         {
-            Append(group.ToUpperInvariant(), endpoint, _tableByGroups);
+            Append(group, endpoint, _tableByGroups);
         }
         private void Append(string key, IPEndPoint value, Dictionary<string, RoundRobinCollection<IPEndPoint>> dict)
         {
@@ -264,6 +336,92 @@ namespace ZeroLevel.Network
                 if (refs[2] != null && _tableByGroups.ContainsKey(refs[2])) _tableByGroups[refs[2]].Remove(endpoint);
                 _endpoints.Remove(endpoint);
             }
+        }
+        #endregion
+
+        #region Transactional
+        private Dictionary<string, List<IPEndPoint>> _tran_tableByKey
+            = new Dictionary<string, List<IPEndPoint>>();
+
+        private Dictionary<string, List<IPEndPoint>> _tran_tableByGroups
+            = new Dictionary<string, List<IPEndPoint>>();
+
+        private Dictionary<string, List<IPEndPoint>> _tran_tableByTypes
+            = new Dictionary<string, List<IPEndPoint>>();
+
+        private Dictionary<IPEndPoint, string[]> _tran_endpoints
+            = new Dictionary<IPEndPoint, string[]>();
+
+        private int _in_transaction = 0;
+
+        internal void BeginUpdate()
+        {
+            if (Interlocked.Exchange(ref _in_transaction, 1) == 0)
+            {
+                _tran_endpoints.Clear();
+                _tran_tableByKey.Clear();
+                _tran_tableByGroups.Clear();
+                _tran_tableByTypes.Clear();
+            }
+            else
+            {
+                throw new System.Exception("Transaction started already");
+            }
+        }
+
+        internal void Commit()
+        {
+            if (Interlocked.Exchange(ref _in_transaction, 0) == 1)
+            {
+                _lock.EnterWriteLock();
+                try
+                {
+                    _endpoints = _tran_endpoints.Select(pair => pair).ToDictionary(p => p.Key, p => p.Value);
+                    _tableByGroups = _tran_tableByGroups.Select(pair => pair).ToDictionary(p => p.Key, p => new RoundRobinCollection<IPEndPoint>(p.Value));
+                    _tableByKey = _tran_tableByKey.Select(pair => pair).ToDictionary(p => p.Key, p => new RoundRobinCollection<IPEndPoint>(p.Value));
+                    _tableByTypes = _tran_tableByTypes.Select(pair => pair).ToDictionary(p => p.Key, p => new RoundRobinCollection<IPEndPoint>(p.Value));
+                }
+                finally
+                {
+                    _lock.ExitWriteLock();
+                }
+                _tran_endpoints.Clear();
+                _tran_tableByKey.Clear();
+                _tran_tableByGroups.Clear();
+                _tran_tableByTypes.Clear();
+            }
+        }
+
+        internal void Rollback()
+        {
+            if (Interlocked.Exchange(ref _in_transaction, 0) == 1)
+            {
+                _tran_endpoints.Clear();
+                _tran_tableByKey.Clear();
+                _tran_tableByGroups.Clear();
+                _tran_tableByTypes.Clear();
+            }
+        }
+
+        private void TransAppendByKeys(string key, IPEndPoint endpoint)
+        {
+            TransAppend(key.ToUpperInvariant(), endpoint, _tran_tableByKey);
+        }
+        private void TransAppendByType(string type, IPEndPoint endpoint)
+        {
+            TransAppend(type.ToUpperInvariant(), endpoint, _tran_tableByTypes);
+        }
+        private void TransAppendByGroup(string group, IPEndPoint endpoint)
+        {
+            TransAppend(group.ToUpperInvariant(), endpoint, _tran_tableByGroups);
+        }
+        private void TransAppend(string key, IPEndPoint value, Dictionary<string, List<IPEndPoint>> dict)
+        {
+            if (!dict.ContainsKey(key))
+            {
+                dict.Add(key, new List<IPEndPoint>());
+            }
+            dict[key].Add(value);
         }
         #endregion
     }
