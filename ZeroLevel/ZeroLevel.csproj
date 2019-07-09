@@ -5,16 +5,17 @@
     <Description>Infrastructure layer library</Description>
     <Authors>ogoun</Authors>
     <Company>ogoun</Company>
-    <AssemblyVersion>2.0.9.0</AssemblyVersion>
-    <PackageReleaseNotes>Append transliteration ru-latin
-Fix .net core bug https://github.com/dotnet/project-system/issues/589</PackageReleaseNotes>
+    <AssemblyVersion>3.0.0.0</AssemblyVersion>
+    <PackageReleaseNotes>New bootstrap concept
+New network layer
+No backwards compatibility with previous version</PackageReleaseNotes>
     <PackageProjectUrl>https://github.com/ogoun/Zero/wiki</PackageProjectUrl>
     <Copyright>Copyright Ogoun 2019</Copyright>
     <PackageLicenseUrl>https://opensource.org/licenses/MIT</PackageLicenseUrl>
     <PackageIconUrl>https://raw.githubusercontent.com/ogoun/Zero/master/zero.png</PackageIconUrl>
     <RepositoryUrl>https://github.com/ogoun/Zero</RepositoryUrl>
     <RepositoryType>GitHub</RepositoryType>
-    <Version>2.0.9</Version>
+    <Version>3.0.0</Version>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
