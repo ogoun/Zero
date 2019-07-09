@@ -9,21 +9,41 @@ using ZeroLevel.Services.Serialization;
 
 namespace ZeroLevel.Network
 {
+    public interface IExchange
+        : IClientSet, IDisposable
+    {
+        void UseDiscovery();
+        void UseDiscovery(string endpoint);
+        void UseDiscovery(IPEndPoint endpoint);
+
+        IRouter UseHost();
+        IRouter UseHost(int port);
+        IRouter UseHost(IPEndPoint endpoint);
+
+        IServiceRoutesStorage RoutesStorage { get; }
+
+        ExClient GetConnection(string alias);
+        ExClient GetConnection(IPEndPoint endpoint);
+    }
+
     /// <summary>
     /// Provides data exchange between services
     /// </summary>
-    public sealed class Exchange :
-        IClientSet,
-        IDisposable
+    internal sealed class Exchange :
+        IExchange
     {
         private IDiscoveryClient _discoveryClient = null; // Feature расширить до нескольких discovery        
         private readonly ServiceRouteStorage _aliases = new ServiceRouteStorage();
         private readonly ExClientServerCachee _cachee = new ExClientServerCachee();
 
-        #region Ctor
+        public IServiceRoutesStorage RoutesStorage => _aliases;
+        private readonly IZeroService _owner;
 
-        public Exchange()
+        #region Ctor        
+
+        public Exchange(IZeroService owner)
         {
+            _owner = owner;
         }
 
         #endregion Ctor
@@ -482,16 +502,15 @@ namespace ZeroLevel.Network
             }
             RegisterServicesInDiscovery();
             _update_discovery_table_task = Sheduller.RemindEvery(_update_discovery_table_period, RegisterServicesInDiscovery);
-            _register_in_discovery_table_task = Sheduller.RemindEvery(_register_in_discovery_table_period, () => { });
+            _register_in_discovery_table_task = Sheduller.RemindEvery(_register_in_discovery_table_period, UpdateServiceListFromDiscovery);
         }
 
         private void RegisterServicesInDiscovery()
         {
-            var services = _serverInstances.
-                Values.
+            var services = _cachee.ServerList.
                 Select(s =>
                 {
-                    var info = MessageSerializer.Copy(this._serviceInfo);
+                    var info = MessageSerializer.Copy(_owner.ServiceInfo);
                     info.Port = s.LocalEndpoint.Port;
                     return info;
                 }).
@@ -501,7 +520,44 @@ namespace ZeroLevel.Network
                 _discoveryClient.Register(service);
             }
         }
+
+        private void UpdateServiceListFromDiscovery()
+        {
+            
+        }
         #endregion
+
+        public ExClient GetConnection(string alias)
+        {
+            var address = _aliases.Get(alias);
+            if (address.Success)
+            {
+                return _cachee.GetClient(address.Value, true);
+            }
+            try
+            {
+                var endpoint = NetUtils.CreateIPEndPoint(alias);
+                return _cachee.GetClient(endpoint, true);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "[Exchange.GetConnection]");
+            }
+            return null;
+        }
+
+        public ExClient GetConnection(IPEndPoint endpoint)
+        {
+            try
+            {
+                return _cachee.GetClient(endpoint, true);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "[Exchange.GetConnection]");
+            }
+            return null;
+        }
 
         #region Host service
         public IRouter UseHost()
@@ -521,7 +577,7 @@ namespace ZeroLevel.Network
         #endregion
 
         #region Private
-        internal IEnumerable<ExClient> GetClientEnumerator(string serviceKey)
+        private IEnumerable<ExClient> GetClientEnumerator(string serviceKey)
         {
             InvokeResult<IEnumerable<IPEndPoint>> candidates;
             try
@@ -556,7 +612,7 @@ namespace ZeroLevel.Network
             }
         }
 
-        internal IEnumerable<ExClient> GetClientEnumeratorByType(string serviceType)
+        private IEnumerable<ExClient> GetClientEnumeratorByType(string serviceType)
         {
             InvokeResult<IEnumerable<IPEndPoint>> candidates;
             try
@@ -591,7 +647,7 @@ namespace ZeroLevel.Network
             }
         }
 
-        internal IEnumerable<ExClient> GetClientEnumeratorByGroup(string serviceGroup)
+        private IEnumerable<ExClient> GetClientEnumeratorByGroup(string serviceGroup)
         {
             InvokeResult<IEnumerable<IPEndPoint>> candidates;
             try
@@ -631,7 +687,7 @@ namespace ZeroLevel.Network
         /// <param name="serviceKey">Service key</param>
         /// <param name="callHandler">Service call code</param>
         /// <returns>true - service called succesfully</returns>
-        internal bool CallService(string serviceKey, Func<ExClient, bool> callHandler)
+        private bool CallService(string serviceKey, Func<ExClient, bool> callHandler)
         {
             InvokeResult<IEnumerable<IPEndPoint>> candidates;
             try
@@ -678,7 +734,7 @@ namespace ZeroLevel.Network
             return success;
         }
 
-        internal InvokeResult CallServiceDirect(string endpoint, Func<ExClient, InvokeResult> callHandler)
+        private InvokeResult CallServiceDirect(string endpoint, Func<ExClient, InvokeResult> callHandler)
         {
             ExClient transport;
             try

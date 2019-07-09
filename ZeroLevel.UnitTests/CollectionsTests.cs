@@ -44,18 +44,23 @@ namespace ZeroLevel.CollectionUnitTests
         {
             var arr = new int[] { 1, 2, 3 };
             // Arrange
-            var collection = new RoundRobinOverCollection<int>(arr);
+            var collection = new RoundRobinCollection<int>(arr);
             var iter1 = new int[] { 1, 2, 3 };
             var iter2 = new int[] { 2, 3, 1 };
             var iter3 = new int[] { 3, 1, 2 };
             // Act
             // Assert
-            Assert.True(CollectionComparsionExtensions.OrderingEquals(collection.GenerateSeq().ToArray(), iter1));
-            Assert.True(CollectionComparsionExtensions.OrderingEquals(collection.GenerateSeq().ToArray(), iter2));
-            Assert.True(CollectionComparsionExtensions.OrderingEquals(collection.GenerateSeq().ToArray(), iter3));
-            Assert.True(CollectionComparsionExtensions.OrderingEquals(collection.GenerateSeq().ToArray(), iter1));
-            Assert.True(CollectionComparsionExtensions.OrderingEquals(collection.GenerateSeq().ToArray(), iter2));
-            Assert.True(CollectionComparsionExtensions.OrderingEquals(collection.GenerateSeq().ToArray(), iter3));
+            Assert.True(CollectionComparsionExtensions.OrderingEquals(collection.GetCurrentSeq().ToArray(), iter1));
+            collection.MoveNext();
+            Assert.True(CollectionComparsionExtensions.OrderingEquals(collection.GetCurrentSeq().ToArray(), iter2));
+            collection.MoveNext();
+            Assert.True(CollectionComparsionExtensions.OrderingEquals(collection.GetCurrentSeq().ToArray(), iter3));
+            collection.MoveNext();
+            Assert.True(CollectionComparsionExtensions.OrderingEquals(collection.GetCurrentSeq().ToArray(), iter1));
+            collection.MoveNext();
+            Assert.True(CollectionComparsionExtensions.OrderingEquals(collection.GetCurrentSeq().ToArray(), iter2));
+            collection.MoveNext();
+            Assert.True(CollectionComparsionExtensions.OrderingEquals(collection.GetCurrentSeq().ToArray(), iter3));
         }
 
         [Fact]

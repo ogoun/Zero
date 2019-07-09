@@ -13,6 +13,8 @@ namespace ZeroLevel.Network
         private readonly ConcurrentDictionary<string, SocketServer> _serverInstances = new ConcurrentDictionary<string, SocketServer>();
         private HashSet<string> _clients = new HashSet<string>();
 
+        internal IEnumerable<SocketServer> ServerList => _serverInstances.Values;
+
         public ExClient GetClient(IPEndPoint endpoint, bool use_cachee, IRouter router = null)
         {
             if (use_cachee)

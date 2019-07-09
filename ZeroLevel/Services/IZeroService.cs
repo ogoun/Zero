@@ -13,6 +13,8 @@ namespace ZeroLevel
         string Group { get; }
         string Type { get; }
 
+        ZeroServiceInfo ServiceInfo { get; }
+
         void UseDiscovery();
         void UseDiscovery(string url);
         void UseDiscovery(IPEndPoint endpoint);
@@ -20,9 +22,6 @@ namespace ZeroLevel
         IRouter UseHost();
         IRouter UseHost(int port);
         IRouter UseHost(IPEndPoint endpoint);
-
-        ExClient ConnectToService(string url);
-        ExClient ConnectToService(IPEndPoint endpoint);
 
         void ReadServiceInfo();
         void ReadServiceInfo(IConfigurationSet config);

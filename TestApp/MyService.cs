@@ -18,23 +18,22 @@ namespace TestApp
         protected override void StartAction()
         {
             Log.Info("Started");
-
-            AutoregisterInboxes(UseHost(8800));
             ReadServiceInfo();
 
+            AutoregisterInboxes(UseHost(8800));
             UseHost(8801).RegisterInbox<ZeroServiceInfo>("metainfo", (c) =>
             {
                 Log.Info("Reqeust for metainfo");
                 return this.ServiceInfo;
             });
 
-            StoreConnection("mytest", new IPEndPoint(IPAddress.Loopback, 8800));
-            StoreConnection("mymeta", new IPEndPoint(IPAddress.Loopback, 8801));
+            Exchange.RoutesStorage.Set("mytest", new IPEndPoint(IPAddress.Loopback, 8800));
+            Exchange.RoutesStorage.Set("mymeta", new IPEndPoint(IPAddress.Loopback, 8801));
 
-            int count = 0;
-            Sheduller.RemindWhile(TimeSpan.FromSeconds(1), () =>
+
+            Sheduller.RemindEvery(TimeSpan.FromSeconds(1), () =>
             {
-                var client = ConnectToService("mytest");
+                var client = Exchange.GetConnection("mytest");
                 client.Send("pum");
                 client.Send<string>(BaseSocket.DEFAULT_MESSAGE_INBOX, "'This is message'");
                 client.Request<DateTime, string>("d2s", DateTime.Now, s => Log.Info($"Response: {s}"));
@@ -43,14 +42,11 @@ namespace TestApp
                         s => Log.Info($"Response: {s}"));
                 client.Request<string>("now", s => Log.Info($"Response date: {s}"));
                 client.Request<string>(BaseSocket.DEFAULT_REQUEST_WITHOUT_ARGS_INBOX, s => Log.Info($"Response ip: {s}"));
-                count++;
-                return count > 3;
             });
-            
+
             Sheduller.RemindEvery(TimeSpan.FromSeconds(3), () =>
-            {                
-                var client = ConnectToService("mymeta");
-                client.Request<ZeroServiceInfo>("metainfo", info =>
+            {
+                Exchange.Request<ZeroServiceInfo>("mymeta", "metainfo", info =>
                 {
                     var si = new StringBuilder();
                     si.AppendLine(info.Name);

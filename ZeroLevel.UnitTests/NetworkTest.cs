@@ -13,7 +13,7 @@ namespace ZeroLevel.UnitTests
         {
             // Arrange
             var server = UseHost(8181);
-            var client = ConnectToService("127.0.0.1:8181");
+            var client = Exchange.GetConnection("127.0.0.1:8181");
 
             bool got_message_no_request = false;
             bool got_message_with_request = false;

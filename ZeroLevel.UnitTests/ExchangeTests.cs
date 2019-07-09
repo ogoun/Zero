@@ -31,7 +31,7 @@ namespace ZeroLevel.NetworkUnitTests
             });
 
             // Act
-            var client = ConnectToService(IPAddress.Loopback.ToString() + ":6666");
+            var client = Exchange.GetConnection(IPAddress.Loopback.ToString() + ":6666");
             var ir = client.Send<ZeroServiceInfo>("register", info);
 
             locker.WaitOne(1000);
@@ -70,7 +70,7 @@ namespace ZeroLevel.NetworkUnitTests
             server.RegisterInbox<IEnumerable<ZeroServiceInfo>>("services", (_) => new[] { info1, info2 });
 
             // Act
-            var client = ConnectToService(IPAddress.Loopback.ToString() + ":6667");
+            var client = Exchange.GetConnection(IPAddress.Loopback.ToString() + ":6667");
             var ir = client.Request<IEnumerable<ZeroServiceInfo>>("services", response =>
             {
                 received = response;

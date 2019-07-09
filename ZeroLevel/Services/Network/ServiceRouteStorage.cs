@@ -7,7 +7,7 @@ using ZeroLevel.Services.Collections;
 
 namespace ZeroLevel.Network
 {
-    /*
+     /*
     One IPEndpoint binded with one service.
     Service can have one key, one type, one group.
     Therefore IPEndpoint can be binded with one key, one type and one group.
@@ -18,6 +18,7 @@ namespace ZeroLevel.Network
     */
 
     public sealed class ServiceRouteStorage
+        : IServiceRoutesStorage
     {
         private readonly ReaderWriterLockSlim _lock = new ReaderWriterLockSlim();
 

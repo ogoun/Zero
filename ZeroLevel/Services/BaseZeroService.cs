@@ -12,7 +12,8 @@ namespace ZeroLevel.Services.Applications
         : IZeroService
     {
         private readonly ZeroServiceInfo _serviceInfo = new ZeroServiceInfo();
-
+        private readonly IExchange _exhange;
+        protected IExchange Exchange => _exhange;
         public ZeroServiceInfo ServiceInfo => _serviceInfo;
 
         public string Name { get { return _serviceInfo.Name; } private set { _serviceInfo.Name = value; } }
@@ -27,11 +28,13 @@ namespace ZeroLevel.Services.Applications
         protected BaseZeroService()
         {
             Name = GetType().Name;
+            _exhange = new Exchange(this);
         }
 
         protected BaseZeroService(string name)
         {
             Name = name;
+            _exhange = new Exchange(this);
         }
 
         protected abstract void StartAction();
@@ -118,9 +121,7 @@ namespace ZeroLevel.Services.Applications
         }
         #endregion Config
 
-        #region Network
-        private readonly Exchange _exhange = new Exchange();
-        
+        #region Network       
 
         public void UseDiscovery()
         {
@@ -177,30 +178,6 @@ namespace ZeroLevel.Services.Applications
                 return _exhange.UseHost(endpoint);
             }
             return BaseSocket.NullRouter;
-        }
-
-        public ExClient ConnectToService(string endpoint)
-        {
-            if (_state == ZeroServiceStatus.Running
-                || _state == ZeroServiceStatus.Initialized)
-            {
-                if (_aliases.Contains(endpoint))
-                {
-                    return GetClient(_aliases.Get(endpoint), true);
-                }
-                return GetClient(NetUtils.CreateIPEndPoint(endpoint), true);
-            }
-            return null;
-        }
-
-        public ExClient ConnectToService(IPEndPoint endpoint)
-        {
-            if (_state == ZeroServiceStatus.Running
-                || _state == ZeroServiceStatus.Initialized)
-            {
-                return GetClient(endpoint, true);
-            }
-            return null;
         }
 
         #region Autoregistration inboxes
