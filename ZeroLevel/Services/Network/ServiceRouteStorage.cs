@@ -7,15 +7,15 @@ using ZeroLevel.Services.Collections;
 
 namespace ZeroLevel.Network
 {
-     /*
-    One IPEndpoint binded with one service.
-    Service can have one key, one type, one group.
-    Therefore IPEndpoint can be binded with one key, one type and one group.
+    /*
+   One IPEndpoint binded with one service.
+   Service can have one key, one type, one group.
+   Therefore IPEndpoint can be binded with one key, one type and one group.
 
-    One key can refer to many IPEndPoints.
-    One type can refer to many IPEndPoints.
-    One group can refer to many IPEndPoints.
-    */
+   One key can refer to many IPEndPoints.
+   One type can refer to many IPEndPoints.
+   One group can refer to many IPEndPoints.
+   */
 
     public sealed class ServiceRouteStorage
         : IServiceRoutesStorage
@@ -46,7 +46,7 @@ namespace ZeroLevel.Network
                     {
                         return;
                     }
-                    Remove(endpoint);
+                    RemoveLocked(endpoint);
                 }
                 AppendByKeys(key, endpoint);
                 _endpoints.Add(endpoint, new string[3] { $"{endpoint.Address}:{endpoint.Port}", null, null });
@@ -80,10 +80,10 @@ namespace ZeroLevel.Network
                     {
                         return;
                     }
-                    Remove(endpoint);
+                    RemoveLocked(endpoint);
                 }
                 AppendByKeys(key, endpoint);
-                _endpoints.Add(endpoint, new string[3] { key, null, null });
+                _endpoints.Add(endpoint, new string[3] { key.ToUpperInvariant(), null, null });
             }
             finally
             {
@@ -105,12 +105,12 @@ namespace ZeroLevel.Network
                     var drop = _tableByKey[key].Source.ToArray();
                     for (int i = 0; i < drop.Length; i++)
                     {
-                        Remove(drop[i]);
+                        RemoveLocked(drop[i]);
                     }
                 }
                 foreach (var ep in endpoints)
                 {
-                    _endpoints.Add(ep, new string[3] { key, null, null });
+                    _endpoints.Add(ep, new string[3] { key.ToUpperInvariant(), null, null });
                     AppendByKeys(key, ep);
                 }
             }
@@ -125,7 +125,7 @@ namespace ZeroLevel.Network
             _lock.EnterWriteLock();
             try
             {
-                Remove(endpoint);
+                RemoveLocked(endpoint);
                 if (key == null)
                 {
                     key = $"{endpoint.Address}:{endpoint.Port}";
@@ -139,7 +139,7 @@ namespace ZeroLevel.Network
                 {
                     AppendByGroup(key, endpoint);
                 }
-                _endpoints.Add(endpoint, new string[3] { key, null, null });
+                _endpoints.Add(endpoint, new string[3] { key.ToUpperInvariant(), type.ToUpperInvariant(), group.ToUpperInvariant() });
             }
             finally
             {
@@ -149,14 +149,19 @@ namespace ZeroLevel.Network
 
         public void Set(string key, string type, string group, IEnumerable<IPEndPoint> endpoints)
         {
+            foreach (var ep in endpoints)
+            {
+                RemoveLocked(ep);
+                Set(key, type, group, ep);
+            }
+        }
+
+        public void Remove(IPEndPoint endpoint)
+        {
             _lock.EnterWriteLock();
             try
             {
-                foreach (var ep in endpoints)
-                {
-                    Remove(ep);
-                    Set(key, type, group, ep);
-                }
+                RemoveLocked(endpoint);
             }
             finally
             {
@@ -167,6 +172,7 @@ namespace ZeroLevel.Network
         #region GET
         public InvokeResult<IPEndPoint> Get(string key)
         {
+            key = key.ToUpperInvariant();
             if (_tableByKey.ContainsKey(key))
             {
                 if (_tableByKey[key].MoveNext())
@@ -176,6 +182,7 @@ namespace ZeroLevel.Network
         }
         public InvokeResult<IEnumerable<IPEndPoint>> GetAll(string key)
         {
+            key = key.ToUpperInvariant();
             if (_tableByKey.ContainsKey(key))
             {
                 if (_tableByKey[key].MoveNext())
@@ -185,6 +192,7 @@ namespace ZeroLevel.Network
         }
         public InvokeResult<IPEndPoint> GetByType(string type)
         {
+            type = type.ToUpperInvariant();
             if (_tableByTypes.ContainsKey(type))
             {
                 if (_tableByTypes[type].MoveNext())
@@ -194,6 +202,7 @@ namespace ZeroLevel.Network
         }
         public InvokeResult<IEnumerable<IPEndPoint>> GetAllByType(string type)
         {
+            type = type.ToUpperInvariant();
             if (_tableByTypes.ContainsKey(type))
             {
                 if (_tableByTypes[type].MoveNext())
@@ -203,6 +212,7 @@ namespace ZeroLevel.Network
         }
         public InvokeResult<IPEndPoint> GetByGroup(string group)
         {
+            group = group.ToUpperInvariant();
             if (_tableByGroups.ContainsKey(group))
             {
                 if (_tableByGroups[group].MoveNext())
@@ -212,6 +222,7 @@ namespace ZeroLevel.Network
         }
         public InvokeResult<IEnumerable<IPEndPoint>> GetAllByGroup(string group)
         {
+            group = group.ToUpperInvariant();
             if (_tableByGroups.ContainsKey(group))
             {
                 if (_tableByGroups[group].MoveNext())
@@ -224,15 +235,15 @@ namespace ZeroLevel.Network
         #region Private
         private void AppendByKeys(string key, IPEndPoint endpoint)
         {
-            Append(key, endpoint, _tableByKey);
+            Append(key.ToUpperInvariant(), endpoint, _tableByKey);
         }
         private void AppendByType(string type, IPEndPoint endpoint)
         {
-            Append(type, endpoint, _tableByTypes);
+            Append(type.ToUpperInvariant(), endpoint, _tableByTypes);
         }
         private void AppendByGroup(string group, IPEndPoint endpoint)
         {
-            Append(group, endpoint, _tableByGroups);
+            Append(group.ToUpperInvariant(), endpoint, _tableByGroups);
         }
         private void Append(string key, IPEndPoint value, Dictionary<string, RoundRobinCollection<IPEndPoint>> dict)
         {
@@ -243,13 +254,16 @@ namespace ZeroLevel.Network
             dict[key].Add(value);
         }
 
-        private void Remove(IPEndPoint endpoint)
+        private void RemoveLocked(IPEndPoint endpoint)
         {
-            var refs = _endpoints[endpoint];
-            if (refs[0] != null && _tableByKey.ContainsKey(refs[0])) _tableByKey[refs[0]].Remove(endpoint);
-            if (refs[1] != null && _tableByTypes.ContainsKey(refs[1])) _tableByTypes[refs[1]].Remove(endpoint);
-            if (refs[2] != null && _tableByGroups.ContainsKey(refs[2])) _tableByGroups[refs[2]].Remove(endpoint);
-            _endpoints.Remove(endpoint);
+            if (_endpoints.ContainsKey(endpoint))
+            {
+                var refs = _endpoints[endpoint];
+                if (refs[0] != null && _tableByKey.ContainsKey(refs[0])) _tableByKey[refs[0]].Remove(endpoint);
+                if (refs[1] != null && _tableByTypes.ContainsKey(refs[1])) _tableByTypes[refs[1]].Remove(endpoint);
+                if (refs[2] != null && _tableByGroups.ContainsKey(refs[2])) _tableByGroups[refs[2]].Remove(endpoint);
+                _endpoints.Remove(endpoint);
+            }
         }
         #endregion
     }

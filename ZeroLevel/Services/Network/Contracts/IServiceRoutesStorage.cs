@@ -13,6 +13,8 @@ namespace ZeroLevel.Network
         void Set(string key, string type, string group, IPEndPoint endpoint);
         void Set(string key, string type, string group, IEnumerable<IPEndPoint> endpoints);
 
+        void Remove(IPEndPoint endpoint);
+
         InvokeResult<IPEndPoint> Get(string key);
         InvokeResult<IEnumerable<IPEndPoint>> GetAll(string key);
         InvokeResult<IPEndPoint> GetByType(string type);

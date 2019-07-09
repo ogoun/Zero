@@ -376,7 +376,7 @@ namespace ZeroLevel.Services.Applications
             var start = DateTime.UtcNow;
             while (this.Status != status)
             {
-                Thread.Sleep(150);
+                Thread.Sleep(1500);
             }
         }
 
@@ -385,7 +385,7 @@ namespace ZeroLevel.Services.Applications
             var start = DateTime.UtcNow;
             while (this.Status != status && (DateTime.UtcNow - start) < period)
             {
-                Thread.Sleep(150);
+                Thread.Sleep(1500);
             }
         }
 
@@ -394,7 +394,7 @@ namespace ZeroLevel.Services.Applications
             var start = DateTime.UtcNow;
             while (this.Status == status)
             {
-                Thread.Sleep(150);
+                Thread.Sleep(1500);
             }
         }
 
@@ -403,7 +403,7 @@ namespace ZeroLevel.Services.Applications
             var start = DateTime.UtcNow;
             while (this.Status == status && (DateTime.UtcNow - start) < period)
             {
-                Thread.Sleep(150);
+                Thread.Sleep(1500);
             }
         }
         #endregion

@@ -32,7 +32,6 @@ namespace ZeroLevel.Network
     internal sealed class Exchange :
         IExchange
     {
-        private IDiscoveryClient _discoveryClient = null; // Feature расширить до нескольких discovery        
         private readonly ServiceRouteStorage _aliases = new ServiceRouteStorage();
         private readonly ExClientServerCachee _cachee = new ExClientServerCachee();
 
@@ -44,8 +43,8 @@ namespace ZeroLevel.Network
         public Exchange(IZeroService owner)
         {
             _owner = owner;
+            _cachee.OnBrokenConnection += _cachee_OnBrokenConnection;
         }
-
         #endregion Ctor
 
         #region IMultiClient      
@@ -458,36 +457,42 @@ namespace ZeroLevel.Network
 
         public void UseDiscovery()
         {
-            if (_discoveryClient != null)
+            try
             {
-                _discoveryClient.Dispose();
-                _discoveryClient = null;
+                var discoveryEndpoint = Configuration.Default.First("discovery");
+                _aliases.Set(BaseSocket.DISCOVERY_ALIAS, NetUtils.CreateIPEndPoint(discoveryEndpoint));
+                RestartDiscoveryTasks();
             }
-            var discovery = Configuration.Default.First("discovery");
-            _discoveryClient = new DiscoveryClient(_cachee.GetClient(NetUtils.CreateIPEndPoint(discovery), false, BaseSocket.NullRouter));
-            RestartDiscoveryTasks();
+            catch (Exception ex)
+            {
+                Log.Error(ex, "[Exchange.UseDiscovery]");
+            }
         }
 
-        public void UseDiscovery(string endpoint)
+        public void UseDiscovery(string discoveryEndpoint)
         {
-            if (_discoveryClient != null)
+            try
             {
-                _discoveryClient.Dispose();
-                _discoveryClient = null;
+                _aliases.Set(BaseSocket.DISCOVERY_ALIAS, NetUtils.CreateIPEndPoint(discoveryEndpoint));
+                RestartDiscoveryTasks();
             }
-            _discoveryClient = new DiscoveryClient(_cachee.GetClient(NetUtils.CreateIPEndPoint(endpoint), false, BaseSocket.NullRouter));
-            RestartDiscoveryTasks();
+            catch (Exception ex)
+            {
+                Log.Error(ex, "[Exchange.UseDiscovery]");
+            }
         }
 
-        public void UseDiscovery(IPEndPoint endpoint)
+        public void UseDiscovery(IPEndPoint discoveryEndpoint)
         {
-            if (_discoveryClient != null)
+            try
             {
-                _discoveryClient.Dispose();
-                _discoveryClient = null;
+                _aliases.Set(BaseSocket.DISCOVERY_ALIAS, discoveryEndpoint);
+                RestartDiscoveryTasks();
             }
-            _discoveryClient = new DiscoveryClient(_cachee.GetClient(endpoint, false, BaseSocket.NullRouter));
-            RestartDiscoveryTasks();
+            catch (Exception ex)
+            {
+                Log.Error(ex, "[Exchange.UseDiscovery]");
+            }
         }
 
         private void RestartDiscoveryTasks()
@@ -500,30 +505,88 @@ namespace ZeroLevel.Network
             {
                 Sheduller.Remove(_register_in_discovery_table_task);
             }
-            RegisterServicesInDiscovery();
-            _update_discovery_table_task = Sheduller.RemindEvery(_update_discovery_table_period, RegisterServicesInDiscovery);
-            _register_in_discovery_table_task = Sheduller.RemindEvery(_register_in_discovery_table_period, UpdateServiceListFromDiscovery);
+            _register_in_discovery_table_task = Sheduller.RemindEvery(TimeSpan.FromMilliseconds(500), _update_discovery_table_period, RegisterServicesInDiscovery);
+            _update_discovery_table_task = Sheduller.RemindEvery(TimeSpan.FromMilliseconds(750), _register_in_discovery_table_period, UpdateServiceListFromDiscovery);
         }
 
         private void RegisterServicesInDiscovery()
         {
-            var services = _cachee.ServerList.
-                Select(s =>
-                {
-                    var info = MessageSerializer.Copy(_owner.ServiceInfo);
-                    info.Port = s.LocalEndpoint.Port;
-                    return info;
-                }).
-                ToList();
-            foreach (var service in services)
+            var discovery_endpoint = _aliases.Get(BaseSocket.DISCOVERY_ALIAS);
+            if (discovery_endpoint.Success)
             {
-                _discoveryClient.Register(service);
+                var discoveryClient = _cachee.GetClient(discovery_endpoint.Value, true);
+                var services = _cachee.ServerList.
+                    Select(s =>
+                    {
+                        var info = MessageSerializer.Copy(_owner.ServiceInfo);
+                        info.Port = s.LocalEndpoint.Port;
+                        return info;
+                    }).
+                    ToList();
+                foreach (var service in services)
+                {
+                    var request = discoveryClient.Request<ZeroServiceInfo, InvokeResult>("register", service, r =>
+                    {
+                        if (!r.Success)
+                        {
+                            Log.SystemWarning($"[Exchange.RegisterServicesInDiscovery] Register canceled. {r.Comment}");
+                        }
+                    });
+                    if (request.Success == false)
+                    {
+                        Log.SystemWarning($"[Exchange.RegisterServicesInDiscovery] Register canceled.{request.Comment}");
+                    }
+                }
             }
         }
 
         private void UpdateServiceListFromDiscovery()
         {
-            
+            var discovery_endpoint = _aliases.Get(BaseSocket.DISCOVERY_ALIAS);
+            if (discovery_endpoint.Success)
+            {
+                var discoveryClient = _cachee.GetClient(discovery_endpoint.Value, true);
+                try
+                {
+                    var ir = discoveryClient.Request<IEnumerable<ServiceEndpointsInfo>>("services", records =>
+                    {
+                        if (records == null)
+                        {
+                            Log.SystemWarning("[Exchange.UpdateServiceListFromDiscovery] UpdateServiceListInfo. Discrovery response is empty");
+                            return;
+                        }
+                        var endpoints = new HashSet<IPEndPoint>();
+                        foreach (var service in records)
+                        {
+                            endpoints.Clear();
+                            foreach (var ep in service.Endpoints)
+                            {
+                                try
+                                {
+                                    var endpoint = NetUtils.CreateIPEndPoint(ep);
+                                    endpoints.Add(endpoint);
+                                }
+                                catch
+                                {
+                                    Log.SystemWarning($"[Exchange.UpdateServiceListFromDiscovery] Can't parse address {ep} as IPEndPoint");
+                                }
+                            }
+                            _aliases.Set(service.ServiceKey,
+                                service.ServiceType,
+                                service.ServiceGroup,
+                                endpoints);
+                        }
+                    });
+                    if (!ir.Success)
+                    {
+                        Log.SystemWarning($"[Exchange.UpdateServiceListFromDiscovery] Error request to inbox 'services'. {ir.Comment}");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Log.SystemError(ex, "[Exchange.UpdateServiceListFromDiscovery] Discovery service response is absent");
+                }
+            }
         }
         #endregion
 
@@ -541,7 +604,7 @@ namespace ZeroLevel.Network
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "[Exchange.GetConnection]");
+                Log.SystemError(ex, "[Exchange.GetConnection]");
             }
             return null;
         }
@@ -554,7 +617,7 @@ namespace ZeroLevel.Network
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "[Exchange.GetConnection]");
+                Log.SystemError(ex, "[Exchange.GetConnection]");
             }
             return null;
         }
@@ -734,21 +797,6 @@ namespace ZeroLevel.Network
             return success;
         }
 
-        private InvokeResult CallServiceDirect(string endpoint, Func<ExClient, InvokeResult> callHandler)
-        {
-            ExClient transport;
-            try
-            {
-                transport = _cachee.GetClient(NetUtils.CreateIPEndPoint(endpoint), true);
-            }
-            catch (Exception ex)
-            {
-                Log.SystemError(ex, $"[Exchange.CallServiceDirect] Can't get transport for endpoint '{endpoint}'");
-                return InvokeResult.Fault(ex.Message);
-            }
-            return callHandler(transport);
-        }
-
         private IEnumerable<Tresp> _RequestBroadcast<Treq, Tresp>(List<ExClient> clients, string inbox, Treq data)
         {
             var response = new List<Tresp>();
@@ -803,6 +851,11 @@ namespace ZeroLevel.Network
                 waiter.Wait(BaseSocket.MAX_REQUEST_TIME_MS);
             }
             return response;
+        }
+
+        private void _cachee_OnBrokenConnection(IPEndPoint endpoint)
+        {
+            //_aliases.Remove(endpoint); ??? no need
         }
         #endregion
 

@@ -21,19 +21,19 @@ namespace TestApp
             ReadServiceInfo();
 
             AutoregisterInboxes(UseHost(8800));
-            UseHost(8801).RegisterInbox<ZeroServiceInfo>("metainfo", (c) =>
+
+            /*UseHost(8801).RegisterInbox<ZeroServiceInfo>("metainfo", (c) =>
             {
                 Log.Info("Reqeust for metainfo");
                 return this.ServiceInfo;
-            });
+            });*/
 
-            Exchange.RoutesStorage.Set("mytest", new IPEndPoint(IPAddress.Loopback, 8800));
-            Exchange.RoutesStorage.Set("mymeta", new IPEndPoint(IPAddress.Loopback, 8801));
-
+            //Exchange.RoutesStorage.Set("mytest", new IPEndPoint(IPAddress.Loopback, 8800));
+            //Exchange.RoutesStorage.Set("mymeta", new IPEndPoint(IPAddress.Loopback, 8801));
 
             Sheduller.RemindEvery(TimeSpan.FromSeconds(1), () =>
             {
-                var client = Exchange.GetConnection("mytest");
+                var client = Exchange.GetConnection("test.app");
                 client.Send("pum");
                 client.Send<string>(BaseSocket.DEFAULT_MESSAGE_INBOX, "'This is message'");
                 client.Request<DateTime, string>("d2s", DateTime.Now, s => Log.Info($"Response: {s}"));
@@ -44,9 +44,9 @@ namespace TestApp
                 client.Request<string>(BaseSocket.DEFAULT_REQUEST_WITHOUT_ARGS_INBOX, s => Log.Info($"Response ip: {s}"));
             });
 
-            Sheduller.RemindEvery(TimeSpan.FromSeconds(3), () =>
+            /*Sheduller.RemindEvery(TimeSpan.FromSeconds(3), () =>
             {
-                Exchange.Request<ZeroServiceInfo>("mymeta", "metainfo", info =>
+                Exchange.Request<ZeroServiceInfo>("test.app", "metainfo", info =>
                 {
                     var si = new StringBuilder();
                     si.AppendLine(info.Name);
@@ -55,7 +55,7 @@ namespace TestApp
 
                     Log.Info("Service info:\r\n{0}", si.ToString());
                 });
-            });
+            });*/
         }
 
         [ExchangeHandler("pum")]

@@ -11,6 +11,8 @@ namespace ZeroLevel.Network
 
         public static readonly IRouter NullRouter = new NullRouter();
 
+        public const string DISCOVERY_ALIAS = "__discovery__";
+
         public const string DEFAULT_MESSAGE_INBOX = "__message_inbox__";
         public const string DEFAULT_REQUEST_INBOX = "__request_inbox__";
         public const string DEFAULT_REQUEST_WITHOUT_ARGS_INBOX = "__request_no_args_inbox__";
