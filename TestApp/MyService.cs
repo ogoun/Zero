@@ -1,6 +1,5 @@
 ﻿using System;
-using System.Net;
-using System.Text;
+using System.Threading;
 using ZeroLevel;
 using ZeroLevel.Network;
 using ZeroLevel.Services.Applications;
@@ -20,17 +19,31 @@ namespace TestApp
             Log.Info("Started");
             ReadServiceInfo();
 
-            AutoregisterInboxes(UseHost(8800));
+            AutoregisterInboxes(UseHost());
 
-            /*UseHost(8801).RegisterInbox<ZeroServiceInfo>("metainfo", (c) =>
+            int counter = 0;
+            Sheduller.RemindEvery(TimeSpan.FromSeconds(1), () =>
             {
-                Log.Info("Reqeust for metainfo");
-                return this.ServiceInfo;
-            });*/
+                Log.Info($"RPS: {counter}");
+                Interlocked.Exchange(ref counter, 0);
+            });
+            for (int i = 0; i < int.MaxValue; i++)
+            {
+                try
+                {
+                    Exchange.GetConnection("test.app").Request<int>("counter", s =>
+                    {
+                        Interlocked.Add(ref counter, s);
+                    });
+                }
+                catch
+                {
+                    Thread.Sleep(300);
+                }
+            }
 
-            //Exchange.RoutesStorage.Set("mytest", new IPEndPoint(IPAddress.Loopback, 8800));
-            //Exchange.RoutesStorage.Set("mymeta", new IPEndPoint(IPAddress.Loopback, 8801));
 
+            /*
             Sheduller.RemindEvery(TimeSpan.FromSeconds(1), () =>
             {
                 var client = Exchange.GetConnection("test.app");
@@ -43,7 +56,7 @@ namespace TestApp
                 client.Request<string>("now", s => Log.Info($"Response date: {s}"));
                 client.Request<string>(BaseSocket.DEFAULT_REQUEST_WITHOUT_ARGS_INBOX, s => Log.Info($"Response ip: {s}"));
             });
-
+            */
             /*Sheduller.RemindEvery(TimeSpan.FromSeconds(3), () =>
             {
                 Exchange.Request<ZeroServiceInfo>("test.app", "metainfo", info =>
@@ -58,45 +71,10 @@ namespace TestApp
             });*/
         }
 
-        [ExchangeHandler("pum")]
-        public void MessageHandler(ISocketClient client)
+        [ExchangeReplierWithoutArg("counter")]
+        public int GetCounter(ISocketClient client)
         {
-            Log.Info("Called message handler without arguments");
-        }
-
-        [ExchangeMainHandler]
-        public void MessageHandler(ISocketClient client, string message)
-        {
-            Log.Info($"Called message handler (DEFAULT INBOX) with argument: {message}");
-        }
-
-        [ExchangeReplier("d2s")]
-        public string date2str(ISocketClient client, DateTime date)
-        {
-            Log.Info($"Called reqeust handler with argument: {date}");
-            return date.ToLongDateString();
-        }
-
-        [ExchangeMainReplier]
-        public string ip2str(ISocketClient client, IPEndPoint ip)
-        {
-            Log.Info($"Called reqeust handler (DEFAULT INBOX) with argument: {ip.Address}:{ip.Port}");
-            return $"{ip.Address}:{ip.Port}";
-        }
-
-
-        [ExchangeReplierWithoutArg("now")]
-        public string GetTime(ISocketClient client)
-        {
-            Log.Info("Called reqeust handler without arguments");
-            return DateTime.Now.ToShortDateString();
-        }
-
-        [ExchangeMainReplierWithoutArg]
-        public string GetMyIP(ISocketClient client)
-        {
-            Log.Info("Called reqeust handler (DEFAULT INBOX) without argument");
-            return NetUtils.GetNonLoopbackAddress().ToString();
+            return 1;
         }
 
         protected override void StopAction()

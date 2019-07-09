@@ -61,6 +61,7 @@ namespace ZeroLevel.Network
             _sendThread.IsBackground = true;
             _sendThread.Start();
             Working();
+
             _stream.BeginRead(_buffer, 0, DEFAULT_RECEIVE_BUFFER_SIZE, ReceiveAsyncCallback, null);
         }
 
@@ -294,6 +295,11 @@ namespace ZeroLevel.Network
                 {
                     _parser.Push(_buffer, count);
                     _last_rw_time = DateTime.UtcNow.Ticks;
+                }
+                else
+                {
+                    // TODO!!!!!
+                    Thread.Sleep(1);
                 }
                 if (Status == SocketClientStatus.Working
                     || Status == SocketClientStatus.Initialized)
