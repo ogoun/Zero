@@ -127,6 +127,7 @@ namespace ZeroLevel.Discovery
                         foreach (var ep in pair.Value)
                         {
                             _table[pair.Key].Endpoints.Remove(ep);
+                            Log.Debug($"Removed address {ep}");
                         }
                     }
                     var badKeys = _table.Where(f => f.Value.Endpoints.Count == 0)
@@ -135,6 +136,7 @@ namespace ZeroLevel.Discovery
                     foreach (var badKey in badKeys)
                     {
                         _table.Remove(badKey);
+                        Log.Debug($"Removed service {badKey}");
                     }
                 }
                 finally

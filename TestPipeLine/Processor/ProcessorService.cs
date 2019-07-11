@@ -13,6 +13,12 @@ namespace Processor
         {
             ReadServiceInfo();
             AutoregisterInboxes(UseHost());
+
+            Sheduller.RemindEvery(TimeSpan.FromSeconds(1), () =>
+            {
+                Console.SetCursorPosition(0, 0);
+                Console.WriteLine(_proceed);
+            });
         }
 
         protected override void StopAction()

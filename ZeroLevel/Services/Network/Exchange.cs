@@ -27,7 +27,6 @@ namespace ZeroLevel.Network
         public Exchange(IZeroService owner)
         {
             _owner = owner;
-            _cachee.OnBrokenConnection += _cachee_OnBrokenConnection;
         }
         #endregion Ctor
 
@@ -920,7 +919,7 @@ namespace ZeroLevel.Network
                     {
                         try
                         {
-                            if (false == client.Request<Treq, Tresp>(inbox, data, resp => { waiter.Signal(); response.Add(resp); }).Success)
+                            if (false == client.Request<Treq, Tresp>(inbox, data, resp => { response.Add(resp); waiter.Signal(); }).Success)
                             {
                                 waiter.Signal();
                             }
@@ -948,7 +947,7 @@ namespace ZeroLevel.Network
                     {
                         try
                         {
-                            if (false == client.Request<Tresp>(inbox, resp => { waiter.Signal(); response.Add(resp); }).Success)
+                            if (false == client.Request<Tresp>(inbox, resp => { response.Add(resp); waiter.Signal(); }).Success)
                             {
                                 waiter.Signal();
                             }
@@ -963,11 +962,6 @@ namespace ZeroLevel.Network
                 waiter.Wait(BaseSocket.MAX_REQUEST_TIME_MS);
             }
             return response;
-        }
-
-        private void _cachee_OnBrokenConnection(IPEndPoint endpoint)
-        {
-            //_aliases.Remove(endpoint); ??? no need
         }
         #endregion
 

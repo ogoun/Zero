@@ -42,7 +42,11 @@ namespace ZeroLevel
             public BootstrapFluent EnableConsoleLog(LogLevel level = LogLevel.FullStandart) { Log.AddConsoleLogger(level); return this; }
 
             public ZeroServiceStatus Status { get { return _service.Status; } }
-            public IServiceExecution Run() { _service.Start(); return this; }
+            public IServiceExecution Run()
+            {
+                _service.Start();
+                return this;
+            }
             public IServiceExecution Stop()
             {
                 try

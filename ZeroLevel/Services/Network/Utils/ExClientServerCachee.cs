@@ -8,16 +8,6 @@ namespace ZeroLevel.Network
     internal sealed class ExClientServerCachee
         : IDisposable
     {
-        internal event Action<IPEndPoint> OnBrokenConnection;
-        private void RiseBrokenConnectionEvent(IPEndPoint endpoint)
-        {
-            var e = OnBrokenConnection;
-            if (e != null)
-            {
-                e.Invoke(endpoint);
-            }
-        }
-
         private static readonly ConcurrentDictionary<string, ExClient> _clientInstances = new ConcurrentDictionary<string, ExClient>();
 
         private readonly ConcurrentDictionary<string, SocketServer> _serverInstances = new ConcurrentDictionary<string, SocketServer>();
@@ -44,12 +34,8 @@ namespace ZeroLevel.Network
                 }
                 instance = new ExClient(new SocketClient(endpoint, router ?? new Router()));
                 instance.ForceConnect();
-                if (instance.Status != SocketClientStatus.Initialized &&
-                    instance.Status != SocketClientStatus.Working)
-                {
-                    OnBrokenConnection(endpoint);
-                }
-                else
+                if (instance.Status == SocketClientStatus.Initialized
+                    ||instance.Status == SocketClientStatus.Working)
                 {
                     _clientInstances[key] = instance;
                     return instance;
@@ -58,12 +44,8 @@ namespace ZeroLevel.Network
             else
             {
                 var instance = new ExClient(new SocketClient(endpoint, router ?? new Router()));
-                if (instance.Status != SocketClientStatus.Initialized &&
-                   instance.Status != SocketClientStatus.Working)
-                {
-                    OnBrokenConnection(endpoint);
-                }
-                else
+                if (instance.Status == SocketClientStatus.Initialized
+                   || instance.Status == SocketClientStatus.Working)
                 {
                     return instance;
                 }

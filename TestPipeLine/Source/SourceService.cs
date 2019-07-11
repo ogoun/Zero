@@ -14,7 +14,7 @@ namespace Source
             ReadServiceInfo();
             AutoregisterInboxes(UseHost());
 
-            Sheduller.RemindEvery(TimeSpan.FromMilliseconds(10), () =>
+            Sheduller.RemindEvery(TimeSpan.FromMilliseconds(100), () =>
             {
                 if (Exchange.Send("test.processor", "handle", Environment.TickCount))
                 {

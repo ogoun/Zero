@@ -343,13 +343,14 @@ namespace ZeroLevel.Services.Applications
             {
                 try
                 {
-                    StartAction();
                     _state = ZeroServiceStatus.Running;
+                    StartAction();                    
                     Log.Debug($"[{Name}] Service started");
                 }
                 catch (Exception ex)
                 {
                     Log.Fatal(ex, $"[{Name}] Failed to start service");
+                    Stop();
                 }
             }
         }

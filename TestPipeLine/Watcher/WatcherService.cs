@@ -22,6 +22,11 @@ namespace Watcher
 
                 var success = Exchange.RequestBroadcastByGroup<ZeroServiceInfo>("Test", "meta", records =>
                 {
+                    if (records.Any() == false)
+                    {
+                        Log.Info("No services");
+                    }
+
                     foreach (var record in records.OrderBy(r=>r.Name))
                     {
                         sb.Append(record.Name);
