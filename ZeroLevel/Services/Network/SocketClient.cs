@@ -66,25 +66,24 @@ namespace ZeroLevel.Network
         }
 
         #region API
-        public event Action<ISocketClient> OnConnect = (s) => { };
-        public event Action<ISocketClient> OnDisconnect = (s) => { };
+        public event Action<ISocketClient> OnConnect = (_) => { };
+        public event Action<ISocketClient> OnDisconnect = (_) => { };
         public event Action<ISocketClient, byte[], int> OnIncomingData = (_, __, ___) => { };
         public IPEndPoint Endpoint { get; }
 
         public void Request(Frame frame, Action<byte[]> callback, Action<string> fail = null)
         {
             if (frame == null) throw new ArgumentNullException(nameof(frame));
-            if (frame != null && false == _send_queue.IsAddingCompleted)
+            if (frame != null && !_send_queue.IsAddingCompleted)
             {
                 while (_send_queue.Count >= MAX_SEND_QUEUE_SIZE)
                 {
                     Thread.Sleep(50);
                 }
-                int id;
                 var sendInfo = new SendInfo
                 {
                     isRequest = true,
-                    data = NetworkPacketFactory.Reqeust(MessageSerializer.Serialize(frame), out id)
+                    data = NetworkPacketFactory.Reqeust(MessageSerializer.Serialize(frame), out int id)
                 };
                 sendInfo.identity = id;
                 _requests.RegisterForFrame(id, callback, fail);
@@ -101,7 +100,7 @@ namespace ZeroLevel.Network
         public void Send(Frame frame)
         {
             if (frame == null) throw new ArgumentNullException(nameof(frame));
-            if (frame != null && false == _send_queue.IsAddingCompleted)
+            if (frame != null && !_send_queue.IsAddingCompleted)
             {
                 while (_send_queue.Count >= MAX_SEND_QUEUE_SIZE)
                 {
@@ -120,7 +119,7 @@ namespace ZeroLevel.Network
         public void Response(byte[] data, int identity)
         {
             if (data == null) throw new ArgumentNullException(nameof(data));
-            if (false == _send_queue.IsAddingCompleted)
+            if (!_send_queue.IsAddingCompleted)
             {
                 while (_send_queue.Count >= MAX_SEND_QUEUE_SIZE)
                 {
@@ -219,7 +218,7 @@ namespace ZeroLevel.Network
             }
             catch (Exception ex)
             {
-                Log.SystemError(ex, $"[SocketClient.TryConnect] Connection fault");
+                Log.SystemError(ex, "[SocketClient.TryConnect] Connection fault");
                 Broken();
                 return false;
             }
@@ -260,6 +259,7 @@ namespace ZeroLevel.Network
             {
                 Log.SystemError(ex, "[SocketClient.Heartbeat.EnsureConnection]");
                 Broken();
+                OnDisconnect(this);
                 return;
             }
             _requests.TestForTimeouts();

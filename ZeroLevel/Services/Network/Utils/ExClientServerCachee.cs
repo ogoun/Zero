@@ -11,7 +11,6 @@ namespace ZeroLevel.Network
         private static readonly ConcurrentDictionary<string, ExClient> _clientInstances = new ConcurrentDictionary<string, ExClient>();
 
         private readonly ConcurrentDictionary<string, SocketServer> _serverInstances = new ConcurrentDictionary<string, SocketServer>();
-        private HashSet<string> _clients = new HashSet<string>();
 
         internal IEnumerable<SocketServer> ServerList => _serverInstances.Values;
 
@@ -35,9 +34,11 @@ namespace ZeroLevel.Network
                 instance = new ExClient(new SocketClient(endpoint, router ?? new Router()));
                 instance.ForceConnect();
                 if (instance.Status == SocketClientStatus.Initialized
-                    ||instance.Status == SocketClientStatus.Working)
+                    || instance.Status == SocketClientStatus.Working)
                 {
                     _clientInstances[key] = instance;
+                    instance.Socket.OnDisconnect += Socket_OnDisconnect;
+                    instance.Socket.UseKeepAlive(TimeSpan.FromMilliseconds(BaseSocket.MINIMUM_HEARTBEAT_UPDATE_PERIOD_MS));
                     return instance;
                 }
             }
@@ -51,6 +52,18 @@ namespace ZeroLevel.Network
                 }
             }
             return null;
+        }
+
+        private void Socket_OnDisconnect(ISocketClient socket)
+        {
+            socket.OnDisconnect -= Socket_OnDisconnect;
+
+            ExClient removed;
+            string key = $"{socket.Endpoint.Address}:{socket.Endpoint.Port}";
+            if (_clientInstances.TryRemove(key, out removed))
+            {
+                removed.Dispose();
+            }
         }
 
         public SocketServer GetServer(IPEndPoint endpoint, IRouter router)
@@ -68,7 +81,8 @@ namespace ZeroLevel.Network
         public void Dispose()
         {
             ExClient removed;
-            foreach (var client in _clients)
+            var clients = new HashSet<string>(_clientInstances.Keys);
+            foreach (var client in clients)
             {
                 try
                 {
@@ -82,7 +96,6 @@ namespace ZeroLevel.Network
                     Log.Error(ex, $"[ExClientServerCachee.Dispose()] Dispose SocketClient to endpoint {client}");
                 }
             }
-            _clients.Clear();
             foreach (var server in _serverInstances)
             {
                 try

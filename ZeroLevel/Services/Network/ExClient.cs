@@ -15,6 +15,7 @@ namespace ZeroLevel.Network
         public IPEndPoint EndPoint => _client?.Endpoint;
         public SocketClientStatus Status => _client.Status;
         public IRouter Router => _client.Router;
+        public ISocketClient Socket => _client;
 
         public ExClient(ISocketClient client)
         {

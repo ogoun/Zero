@@ -19,5 +19,9 @@
         IServer RegisterInbox<Tresponse>(RequestHandler<Tresponse> handler);
         IServer RegisterInbox<Trequest, Tresponse>(RequestHandler<Trequest, Tresponse> handler);
         #endregion
+
+        bool ContainsInbox(string inbox);
+        bool ContainsHandlerInbox(string inbox);
+        bool ContainsRequestorInbox(string inbox);
     }
 }

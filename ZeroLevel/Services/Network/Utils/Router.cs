@@ -178,6 +178,21 @@ namespace ZeroLevel.Network
 
         #endregion Invokation
 
+        public bool ContainsInbox(string inbox)
+        {
+            return _handlers.ContainsKey(inbox) || _requestors.ContainsKey(inbox);
+        }
+
+        public bool ContainsHandlerInbox(string inbox)
+        {
+            return _handlers.ContainsKey(inbox);
+        }
+
+        public bool ContainsRequestorInbox(string inbox)
+        {
+            return _requestors.ContainsKey(inbox);
+        }
+
         #region Message handlers registration
         public IServer RegisterInbox(string inbox, MessageHandler handler)
         {
@@ -288,5 +303,8 @@ namespace ZeroLevel.Network
         public IServer RegisterInbox<Trequest, Tresponse>(string inbox, RequestHandler<Trequest, Tresponse> handler) { return this; }
         public IServer RegisterInbox<Tresponse>(RequestHandler<Tresponse> handler) { return this; }
         public IServer RegisterInbox<Trequest, Tresponse>(RequestHandler<Trequest, Tresponse> handler) { return this; }
+        public bool ContainsInbox(string inbox) => false;
+        public bool ContainsHandlerInbox(string inbox) => false;
+        public bool ContainsRequestorInbox(string inbox) => false;
     }
 }

@@ -1,5 +1,8 @@
 ﻿using Microsoft.Win32;
+using System;
 using System.Windows;
+using ZeroLevel;
+using ZeroLevel.Network;
 using ZeroLevel.Network.FileTransfer;
 
 namespace FileTransferClient
@@ -9,16 +12,22 @@ namespace FileTransferClient
     /// </summary>
     public partial class MainWindow : Window
     {
-        private IFileClient client;
+        private FileSender _client;
+        private IExchange _exchange;
 
         public MainWindow()
         {
             InitializeComponent();
+            _exchange = Bootstrap.CreateExchange();
+            _client = new FileSender();
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            client = FileClientFactory.Create(tbEndpoint.Text, System.IO.Path.Combine(ZeroLevel.Configuration.BaseDirectory, "INCOMING"));
+            if (false == _client.Connected(_exchange.GetConnection(tbEndpoint.Text), TimeSpan.FromMilliseconds(300)))
+            {
+                MessageBox.Show("No connection");
+            }
         }
 
         private void Button_Click_1(object sender, RoutedEventArgs e)
@@ -26,7 +35,7 @@ namespace FileTransferClient
             var ofd = new OpenFileDialog();
             if (ofd.ShowDialog() == true)
             {
-                client.Send(ofd.FileName);
+                _client.Send(_exchange.GetConnection(tbEndpoint.Text), ofd.FileName);
             }
         }
 

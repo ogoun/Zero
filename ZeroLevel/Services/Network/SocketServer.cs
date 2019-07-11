@@ -18,6 +18,7 @@ namespace ZeroLevel.Network
         public IPEndPoint LocalEndpoint { get; }
         public event Action<ISocketClient> OnDisconnect = _ => { };
         public event Action<ExClient> OnConnect = _ => { };
+
         public IEnumerable<IPEndPoint> ConnectionList
         {
             get
@@ -33,6 +34,7 @@ namespace ZeroLevel.Network
                 }
             }
         }
+
         private void DisconnectEventRise(ISocketClient client)
         {
             try
@@ -42,6 +44,7 @@ namespace ZeroLevel.Network
             catch
             { }
         }
+
         private void ConnectEventRise(ExClient client)
         {
             try
@@ -112,7 +115,18 @@ namespace ZeroLevel.Network
 
         public override void Dispose()
         {
-
+            try
+            {
+                foreach (var c in _connections)
+                {
+                    c.Value.Dispose();
+                }
+                _connections.Clear();
+            }
+            catch (Exception ex)
+            {
+                Log.SystemError(ex, "[SocketServer.Dispose]");
+            }
         }
     }
 }

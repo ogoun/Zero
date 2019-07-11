@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Reflection;
+using ZeroLevel.Network;
 using ZeroLevel.Services.Logging;
 
 namespace ZeroLevel
@@ -183,6 +184,8 @@ namespace ZeroLevel
             }
             return service;
         }
+
+        public static IExchange CreateExchange() => new Exchange(null);
 
         public static void Shutdown()
         {

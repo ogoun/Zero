@@ -26,12 +26,12 @@ namespace ZeroLevel.Network
         /// <summary>
         /// If during the specified period there was no network activity, send a ping-request
         /// </summary>
-        protected const long HEARTBEAT_PING_PERIOD_TICKS = 1500 * TimeSpan.TicksPerMillisecond;
+        internal const long HEARTBEAT_PING_PERIOD_TICKS = 1500 * TimeSpan.TicksPerMillisecond;
 
         /// <summary>
         /// Connection check period
         /// </summary>
-        protected const int MINIMUM_HEARTBEAT_UPDATE_PERIOD_MS = 7500;
+        internal const int MINIMUM_HEARTBEAT_UPDATE_PERIOD_MS = 7500;
 
         /// <summary>
         /// The period of the request, after which it is considered unsuccessful

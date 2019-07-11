@@ -1,5 +1,7 @@
 ﻿using System.IO;
 using System.Windows;
+using ZeroLevel;
+using ZeroLevel.Network;
 using ZeroLevel.Network.FileTransfer;
 
 namespace FileTransferServer
@@ -12,9 +14,11 @@ namespace FileTransferServer
         public MainWindow()
         {
             InitializeComponent();
+            _exchange = Bootstrap.CreateExchange();
         }
 
-        private IFileServer _server;
+        private FileReceiver _server;
+        private IExchange _exchange;
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
@@ -33,13 +37,12 @@ namespace FileTransferServer
                 MessageBox.Show("Incorrect parameters");
                 return;
             }
-
-            _server = FileServerFactory.Create(port, tbFolder.Text);
+            var router = _exchange.UseHost(port);
+            _server = new FileReceiver(router, tbFolder.Text, c => $"{c.Endpoint.Address}{c.Endpoint.Port}");
         }
 
         private void Button_Click_1(object sender, RoutedEventArgs e)
         {
-            _server = null;
         }
     }
 }
