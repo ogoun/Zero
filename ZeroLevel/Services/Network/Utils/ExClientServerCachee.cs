@@ -9,6 +9,7 @@ namespace ZeroLevel.Network
         : IDisposable
     {
         private static readonly ConcurrentDictionary<string, ExClient> _clientInstances = new ConcurrentDictionary<string, ExClient>();
+        private static readonly ConcurrentDictionary<string, object> _clientLocks = new ConcurrentDictionary<string, object>();
 
         private readonly ConcurrentDictionary<string, SocketServer> _serverInstances = new ConcurrentDictionary<string, SocketServer>();
 
@@ -19,26 +20,40 @@ namespace ZeroLevel.Network
             if (use_cachee)
             {
                 string key = $"{endpoint.Address}:{endpoint.Port}";
-                ExClient instance = null;
-                if (_clientInstances.ContainsKey(key))
+                if (false == _clientLocks.ContainsKey(key))
                 {
-                    instance = _clientInstances[key];
-                    if (instance.Status == SocketClientStatus.Working)
-                    {
-                        return instance;
-                    }
-                    _clientInstances.TryRemove(key, out instance);
-                    instance.Dispose();
-                    instance = null;
+                    _clientLocks.TryAdd(key, new object());
                 }
-                instance = new ExClient(new SocketClient(endpoint, router ?? new Router()));
-                instance.ForceConnect();
-                if (instance.Status == SocketClientStatus.Initialized
-                    || instance.Status == SocketClientStatus.Working)
+                lock (_clientLocks[key])
                 {
-                    _clientInstances[key] = instance;                    
-                    instance.Socket.UseKeepAlive(TimeSpan.FromMilliseconds(BaseSocket.MINIMUM_HEARTBEAT_UPDATE_PERIOD_MS));
-                    return instance;
+                    try
+                    {
+                        ExClient instance = null;
+                        if (_clientInstances.ContainsKey(key))
+                        {
+                            instance = _clientInstances[key];
+                            if (instance.Status == SocketClientStatus.Working)
+                            {
+                                return instance;
+                            }
+                            _clientInstances.TryRemove(key, out instance);
+                            instance.Dispose();
+                            instance = null;
+                        }
+                        instance = new ExClient(new SocketClient(endpoint, router ?? new Router()));
+                        instance.ForceConnect();
+                        if (instance.Status == SocketClientStatus.Initialized
+                            || instance.Status == SocketClientStatus.Working)
+                        {
+                            _clientInstances[key] = instance;
+                            instance.Socket.UseKeepAlive(TimeSpan.FromMilliseconds(BaseSocket.MINIMUM_HEARTBEAT_UPDATE_PERIOD_MS));
+                            return instance;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.SystemError(ex, $"[ExClientServerCachee.GetClient] Can't create ExClient for {key}");
+                    }
                 }
             }
             else

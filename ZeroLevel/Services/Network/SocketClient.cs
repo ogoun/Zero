@@ -21,7 +21,7 @@ namespace ZeroLevel.Network
         private long _last_rw_time = DateTime.UtcNow.Ticks;
         private readonly byte[] _buffer = new byte[DEFAULT_RECEIVE_BUFFER_SIZE];
         private readonly object _reconnection_lock = new object();
-        private readonly BlockingCollection<SendInfo> _send_queue = new BlockingCollection<SendInfo>();
+        private BlockingCollection<SendInfo> _send_queue = new BlockingCollection<SendInfo>();
         private readonly RequestBuffer _requests = new RequestBuffer();
         private int _current_heartbeat_period_in_ms = 0;
         private bool _socket_freezed = false; // используется для связи сервер-клиент, запрещает пересоздание сокета
@@ -318,10 +318,11 @@ namespace ZeroLevel.Network
                 OnDisconnect(this);
             }
         }
-
+        /*
         private void SendFramesJob()
         {
             SendInfo frame;
+            int unsuccess = 0;
             while (Status != SocketClientStatus.Disposed)
             {
                 if (_send_queue.IsCompleted)
@@ -340,6 +341,16 @@ namespace ZeroLevel.Network
                         Log.SystemError(ex, "[SocketClient.SendFramesJob] Send next frame fault");
                     }
                     if (Status == SocketClientStatus.Disposed) return;
+                    if (Status == SocketClientStatus.Broken)
+                    {
+                        unsuccess++;
+                        if (unsuccess > 30) unsuccess = 30;
+                    }
+                    if (Status == SocketClientStatus.Working)
+                    {
+                        unsuccess = 0;
+                    }
+                    Thread.Sleep(unsuccess * 100);
                     continue;
                 }
                 try
@@ -355,6 +366,70 @@ namespace ZeroLevel.Network
                 catch (Exception ex)
                 {
                     Log.SystemError(ex, $"[SocketClient.SendFramesJob] Backward send error.");
+                    Broken();
+                    OnDisconnect(this);
+                }
+            }
+        }
+        */
+        private void SendFramesJob()
+        {
+            SendInfo frame = default(SendInfo);
+            int unsuccess = 0;
+            while (Status != SocketClientStatus.Disposed)
+            {
+                if (_send_queue.IsCompleted)
+                {
+                    return;
+                }
+                try
+                {
+                    frame = _send_queue.Take();
+                }
+                catch (Exception ex)
+                {
+                    Log.SystemError(ex, "[SocketClient.SendFramesJob] send_queue.Take");
+                    _send_queue.Dispose();
+                    _send_queue = new BlockingCollection<SendInfo>();
+                    continue;
+                }
+                while (_stream.CanWrite == false || Status != SocketClientStatus.Working)
+                {
+                    try
+                    {
+                        EnsureConnection();
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.SystemError(ex, "[SocketClient.SendFramesJob] Send next frame fault");
+                    }
+                    if (Status == SocketClientStatus.Disposed)
+                    {
+                        return;
+                    }
+                    if (Status == SocketClientStatus.Broken)
+                    {
+                        unsuccess++;
+                        if (unsuccess > 30) unsuccess = 30;
+                    }
+                    if (Status == SocketClientStatus.Working)
+                    {
+                        unsuccess = 0;
+                    }
+                    Thread.Sleep(unsuccess * 128);
+                }
+                try
+                {
+                    if (frame.isRequest)
+                    {
+                        _requests.StartSend(frame.identity);
+                    }
+                    _stream.Write(frame.data, 0, frame.data.Length);
+                    _last_rw_time = DateTime.UtcNow.Ticks;
+                }
+                catch (Exception ex)
+                {
+                    Log.SystemError(ex, $"[SocketClient.SendFramesJob] _stream.Write");
                     Broken();
                     OnDisconnect(this);
                 }

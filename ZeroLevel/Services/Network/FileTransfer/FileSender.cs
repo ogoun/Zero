@@ -27,6 +27,7 @@ namespace ZeroLevel.Network.FileTransfer
 
         public void Send(ExClient client, string fileName, Action<string> completeHandler = null, Action<string, string> errorHandler = null)
         {
+            if (client == null) return;
             PushTransferTask(client, fileName, completeHandler, errorHandler);
         }
 

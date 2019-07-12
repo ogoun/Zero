@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net;
 using System.Threading;
 using ZeroLevel;
 using ZeroLevel.Network;
@@ -16,6 +17,7 @@ namespace TestApp
 
         protected override void StartAction()
         {
+            
             Log.Info("Started");
             ReadServiceInfo();
 
@@ -31,16 +33,15 @@ namespace TestApp
             {
                 try
                 {
-                    Exchange.GetConnection("test.app").Request<int>("counter", s =>
-                    {
-                        Interlocked.Add(ref counter, s);
-                    });
+                    Exchange.GetConnection("test.app")?.Request<int>("counter", s => Interlocked.Add(ref counter, s));
                 }
                 catch
                 {
                     Thread.Sleep(300);
                 }
             }
+            
+
 
 
             /*

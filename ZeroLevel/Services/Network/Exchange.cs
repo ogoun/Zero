@@ -516,26 +516,29 @@ namespace ZeroLevel.Network
             if (discovery_endpoint.Success)
             {
                 var discoveryClient = _cachee.GetClient(discovery_endpoint.Value, true);
-                var services = _cachee.ServerList.
-                    Select(s =>
-                    {
-                        var info = MessageSerializer.Copy(_owner.ServiceInfo);
-                        info.Port = s.LocalEndpoint.Port;
-                        return info;
-                    }).
-                    ToList();
-                foreach (var service in services)
+                if (discoveryClient != null)
                 {
-                    var request = discoveryClient.Request<ZeroServiceInfo, InvokeResult>("register", service, r =>
-                    {
-                        if (!r.Success)
+                    var services = _cachee.ServerList.
+                        Select(s =>
                         {
-                            Log.SystemWarning($"[Exchange.RegisterServicesInDiscovery] Register canceled. {r.Comment}");
-                        }
-                    });
-                    if (request.Success == false)
+                            var info = MessageSerializer.Copy(_owner.ServiceInfo);
+                            info.Port = s.LocalEndpoint.Port;
+                            return info;
+                        }).
+                        ToList();
+                    foreach (var service in services)
                     {
-                        Log.SystemWarning($"[Exchange.RegisterServicesInDiscovery] Register canceled.{request.Comment}");
+                        var request = discoveryClient.Request<ZeroServiceInfo, InvokeResult>("register", service, r =>
+                        {
+                            if (!r.Success)
+                            {
+                                Log.SystemWarning($"[Exchange.RegisterServicesInDiscovery] Register canceled. {r.Comment}");
+                            }
+                        });
+                        if (request.Success == false)
+                        {
+                            Log.SystemWarning($"[Exchange.RegisterServicesInDiscovery] Register canceled.{request.Comment}");
+                        }
                     }
                 }
             }
@@ -547,54 +550,57 @@ namespace ZeroLevel.Network
             if (discovery_endpoint.Success)
             {
                 var discoveryClient = _cachee.GetClient(discovery_endpoint.Value, true);
-                try
+                if (discoveryClient != null)
                 {
-                    var ir = discoveryClient.Request<IEnumerable<ServiceEndpointsInfo>>("services", records =>
+                    try
                     {
-                        if (records == null)
+                        var ir = discoveryClient.Request<IEnumerable<ServiceEndpointsInfo>>("services", records =>
                         {
-                            Log.SystemWarning("[Exchange.UpdateServiceListFromDiscovery] UpdateServiceListInfo. Discrovery response is empty");
-                            return;
-                        }
-                        var endpoints = new HashSet<IPEndPoint>();
-                        _dicovery_aliases.BeginUpdate();
-                        try
-                        {
-                            foreach (var service in records)
+                            if (records == null)
                             {
-                                endpoints.Clear();
-                                foreach (var ep in service.Endpoints)
-                                {
-                                    try
-                                    {
-                                        var endpoint = NetUtils.CreateIPEndPoint(ep);
-                                        endpoints.Add(endpoint);
-                                    }
-                                    catch
-                                    {
-                                        Log.SystemWarning($"[Exchange.UpdateServiceListFromDiscovery] Can't parse address {ep} as IPEndPoint");
-                                    }
-                                }
-                                _dicovery_aliases.Set(service.ServiceKey,
-                                    service.ServiceType,
-                                    service.ServiceGroup,
-                                    endpoints);
+                                Log.SystemWarning("[Exchange.UpdateServiceListFromDiscovery] UpdateServiceListInfo. Discrovery response is empty");
+                                return;
                             }
-                            _dicovery_aliases.Commit();
-                        }
-                        catch
+                            var endpoints = new HashSet<IPEndPoint>();
+                            _dicovery_aliases.BeginUpdate();
+                            try
+                            {
+                                foreach (var service in records)
+                                {
+                                    endpoints.Clear();
+                                    foreach (var ep in service.Endpoints)
+                                    {
+                                        try
+                                        {
+                                            var endpoint = NetUtils.CreateIPEndPoint(ep);
+                                            endpoints.Add(endpoint);
+                                        }
+                                        catch
+                                        {
+                                            Log.SystemWarning($"[Exchange.UpdateServiceListFromDiscovery] Can't parse address {ep} as IPEndPoint");
+                                        }
+                                    }
+                                    _dicovery_aliases.Set(service.ServiceKey,
+                                        service.ServiceType,
+                                        service.ServiceGroup,
+                                        endpoints);
+                                }
+                                _dicovery_aliases.Commit();
+                            }
+                            catch
+                            {
+                                _dicovery_aliases.Rollback();
+                            }
+                        });
+                        if (!ir.Success)
                         {
-                            _dicovery_aliases.Rollback();
+                            Log.SystemWarning($"[Exchange.UpdateServiceListFromDiscovery] Error request to inbox 'services'. {ir.Comment}");
                         }
-                    });
-                    if (!ir.Success)
-                    {
-                        Log.SystemWarning($"[Exchange.UpdateServiceListFromDiscovery] Error request to inbox 'services'. {ir.Comment}");
                     }
-                }
-                catch (Exception ex)
-                {
-                    Log.SystemError(ex, "[Exchange.UpdateServiceListFromDiscovery] Discovery service response is absent");
+                    catch (Exception ex)
+                    {
+                        Log.SystemError(ex, "[Exchange.UpdateServiceListFromDiscovery] Discovery service response is absent");
+                    }
                 }
             }
         }
@@ -777,6 +783,7 @@ namespace ZeroLevel.Network
                         Log.SystemError(ex, $"[Exchange.GetClientEnumerator] Can't get transport for endpoint '{endpoint}'");
                         continue;
                     }
+                    if (transport == null) continue;
                     yield return transport;
                 }
             }
@@ -812,6 +819,7 @@ namespace ZeroLevel.Network
                         Log.SystemError(ex, $"[Exchange.GetClientEnumeratorByType] Can't get transport for endpoint '{endpoint}'");
                         continue;
                     }
+                    if (transport == null) continue;
                     yield return transport;
                 }
             }
@@ -847,6 +855,7 @@ namespace ZeroLevel.Network
                         Log.SystemError(ex, $"[Exchange.GetClientEnumeratorByGroup] Can't get transport for endpoint '{service}'");
                         continue;
                     }
+                    if (transport == null) continue;
                     yield return transport;
                 }
             }
@@ -891,6 +900,7 @@ namespace ZeroLevel.Network
                     Log.SystemError(ex, $"[Exchange.CallService] Can't get transport for service '{serviceKey}'");
                     continue;
                 }
+                if (transport == null) continue;
                 try
                 {
                     success = callHandler(transport);
