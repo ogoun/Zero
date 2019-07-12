@@ -66,6 +66,18 @@ namespace ZeroLevel.Services.Serialization
             return ReadBuffer(length);
         }
 
+        public short ReadShort()
+        {
+            var buffer = ReadBuffer(2);
+            return BitConverter.ToInt16(buffer, 0);
+        }
+
+        public ushort ReadUShort()
+        {
+            var buffer = ReadBuffer(2);
+            return BitConverter.ToUInt16(buffer, 0);
+        }
+
         /// <summary>
         /// Read 32-bit integer (4 bytes)
         /// </summary>
@@ -73,6 +85,12 @@ namespace ZeroLevel.Services.Serialization
         {
             var buffer = ReadBuffer(4);
             return BitConverter.ToInt32(buffer, 0);
+        }
+
+        public UInt32 ReadUInt32()
+        {
+            var buffer = ReadBuffer(4);
+            return BitConverter.ToUInt32(buffer, 0);
         }
 
         public decimal ReadDecimal()
@@ -91,6 +109,12 @@ namespace ZeroLevel.Services.Serialization
         {
             var buffer = ReadBuffer(8);
             return BitConverter.ToInt64(buffer, 0);
+        }
+
+        public UInt64 ReadULong()
+        {
+            var buffer = ReadBuffer(8);
+            return BitConverter.ToUInt64(buffer, 0);
         }
 
         public TimeSpan ReadTimeSpan()

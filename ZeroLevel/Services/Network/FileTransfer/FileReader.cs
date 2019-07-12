@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using ZeroLevel.Services.HashFunctions;
 
 namespace ZeroLevel.Network.FileTransfer
 {
@@ -37,6 +38,10 @@ namespace ZeroLevel.Network.FileTransfer
                         Payload = new byte[bytesRead]
                     };
                     Array.Copy(buffer, 0, fragment.Payload, 0, bytesRead);
+                    var hash = Murmur3.ComputeHash(fragment.Payload);
+                    fragment.ChecksumL = BitConverter.ToUInt64(hash, 0);
+                    fragment.ChecksumH = BitConverter.ToUInt64(hash, 8);
+
                     offset = offset + 1;
                     yield return fragment;
                 }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using ZeroLevel.Models;
+using ZeroLevel.Services.HashFunctions;
 
 namespace ZeroLevel.Network.FileTransfer
 {
@@ -108,6 +109,16 @@ namespace ZeroLevel.Network.FileTransfer
                 _FileWriter stream;
                 if (_incoming.TryGetValue(chunk.UploadFileTaskId, out stream))
                 {
+
+                    var hash = Murmur3.ComputeHash(chunk.Payload);
+                    var checksumL = BitConverter.ToUInt64(hash, 0);
+                    var checksumH = BitConverter.ToUInt64(hash, 8);
+
+                    if (chunk.ChecksumH != checksumH
+                        || chunk.ChecksumL != checksumL)
+                        return InvokeResult.Fault("Checksum incorrect");
+
+
                     stream.Write(chunk.Offset, chunk.Payload);
                     return InvokeResult.Succeeding();
                 }

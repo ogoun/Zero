@@ -65,7 +65,25 @@ namespace ZeroLevel.Services.Serialization
         /// <summary>
         /// Record a 32-bit integer (4 bytes)
         /// </summary>
+        public void WriteShort(short number)
+        {
+            _stream.Write(BitConverter.GetBytes(number), 0, 2);
+        }
+
+        public void WriteUShort(ushort number)
+        {
+            _stream.Write(BitConverter.GetBytes(number), 0, 2);
+        }
+
+        /// <summary>
+        /// Record a 32-bit integer (4 bytes)
+        /// </summary>
         public void WriteInt32(Int32 number)
+        {
+            _stream.Write(BitConverter.GetBytes(number), 0, 4);
+        }
+
+        public void WriteUInt32(UInt32 number)
         {
             _stream.Write(BitConverter.GetBytes(number), 0, 4);
         }
@@ -74,6 +92,11 @@ namespace ZeroLevel.Services.Serialization
         /// Record an integer 64-bit number (8 bytes)
         /// </summary>
         public void WriteLong(Int64 number)
+        {
+            _stream.Write(BitConverter.GetBytes(number), 0, 8);
+        }
+
+        public void WriteULong(UInt64 number)
         {
             _stream.Write(BitConverter.GetBytes(number), 0, 8);
         }

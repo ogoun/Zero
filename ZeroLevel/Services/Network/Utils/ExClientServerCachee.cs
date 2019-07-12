@@ -36,8 +36,7 @@ namespace ZeroLevel.Network
                 if (instance.Status == SocketClientStatus.Initialized
                     || instance.Status == SocketClientStatus.Working)
                 {
-                    _clientInstances[key] = instance;
-                    instance.Socket.OnDisconnect += Socket_OnDisconnect;
+                    _clientInstances[key] = instance;                    
                     instance.Socket.UseKeepAlive(TimeSpan.FromMilliseconds(BaseSocket.MINIMUM_HEARTBEAT_UPDATE_PERIOD_MS));
                     return instance;
                 }
@@ -52,18 +51,6 @@ namespace ZeroLevel.Network
                 }
             }
             return null;
-        }
-
-        private void Socket_OnDisconnect(ISocketClient socket)
-        {
-            socket.OnDisconnect -= Socket_OnDisconnect;
-
-            ExClient removed;
-            string key = $"{socket.Endpoint.Address}:{socket.Endpoint.Port}";
-            if (_clientInstances.TryRemove(key, out removed))
-            {
-                removed.Dispose();
-            }
         }
 
         public SocketServer GetServer(IPEndPoint endpoint, IRouter router)

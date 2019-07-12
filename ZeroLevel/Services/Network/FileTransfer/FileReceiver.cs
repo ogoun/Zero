@@ -1,4 +1,5 @@
 ﻿using System;
+using ZeroLevel.Models;
 
 namespace ZeroLevel.Network.FileTransfer
 {
@@ -16,15 +17,18 @@ namespace ZeroLevel.Network.FileTransfer
 
             if (false == router.ContainsRequestorInbox("__file_transfer_start_transfer__"))
             {
-                router.RegisterInbox<FileStartFrame>("__file_transfer_start_transfer__", (c, f) => _receiver.Incoming(f, nameMapper(c)));
+                router.RegisterInbox<FileStartFrame, InvokeResult>("__file_transfer_start_transfer__",
+                    (c, f) => _receiver.Incoming(f, nameMapper(c)));
             }
             if (false == router.ContainsRequestorInbox("__file_transfer_frame__"))
             {
-                router.RegisterInbox<FileFrame>("__file_transfer_frame__", (_, f) => _receiver.Incoming(f));
+                router.RegisterInbox<FileFrame, InvokeResult>("__file_transfer_frame__", 
+                    (_, f) => _receiver.Incoming(f));
             }
             if (false == router.ContainsRequestorInbox("__file_transfer_complete_transfer__"))
             {
-                router.RegisterInbox<FileEndFrame>("__file_transfer_complete_transfer__", (_, f) => _receiver.Incoming(f));
+                router.RegisterInbox<FileEndFrame, InvokeResult>("__file_transfer_complete_transfer__", 
+                    (_, f) => _receiver.Incoming(f));
             }
             if (false == router.ContainsRequestorInbox("__file_transfer_ping__"))
             {

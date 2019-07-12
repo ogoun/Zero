@@ -14,13 +14,21 @@ namespace ZeroLevel.Services.Serialization
 
         void WriteBytes(byte[] val);
 
+        void WriteShort(short number);
+
+        void WriteUShort(ushort number);
+
         void WriteDouble(double val);
 
         void WriteFloat(float val);
 
         void WriteInt32(Int32 number);
 
+        void WriteUInt32(UInt32 number);
+
         void WriteLong(Int64 number);
+
+        void WriteULong(UInt64 number);
 
         void WriteString(string line);
 

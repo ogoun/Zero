@@ -82,7 +82,7 @@ namespace ZeroLevel.Network
                     var connection = new SocketClient(client_socket, _router);
                     connection.OnDisconnect += Connection_OnDisconnect;
                     _connections[connection.Endpoint] = new ExClient(connection);
-
+                    connection.UseKeepAlive(TimeSpan.FromMilliseconds(BaseSocket.MINIMUM_HEARTBEAT_UPDATE_PERIOD_MS));
                     ConnectEventRise(_connections[connection.Endpoint]);
                 }
                 catch (Exception ex)

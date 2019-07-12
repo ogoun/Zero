@@ -16,9 +16,17 @@ namespace ZeroLevel.Services.Serialization
 
         float ReadFloat();
 
+        short ReadShort();
+
+        ushort ReadUShort();
+
         Int32 ReadInt32();
 
+        UInt32 ReadUInt32();
+
         Int64 ReadLong();
+
+        UInt64 ReadULong();
 
         string ReadString();
 

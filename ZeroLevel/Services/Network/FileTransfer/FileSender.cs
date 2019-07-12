@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.IO;
 using System.Threading;
+using ZeroLevel.Models;
 using ZeroLevel.Services.Pools;
 
 namespace ZeroLevel.Network.FileTransfer
@@ -11,6 +12,11 @@ namespace ZeroLevel.Network.FileTransfer
         private BlockingCollection<FileTransferTask> _tasks = new BlockingCollection<FileTransferTask>();
         private ObjectPool<FileTransferTask> _taskPool = new ObjectPool<FileTransferTask>(() => new FileTransferTask(), 100);
         private readonly Thread _uploadFileThread;
+        private bool _resendWhenServerError = false;
+        private bool _resendWhenClientError = false;
+
+        public void ResendWhenServerError(bool resend = true) => _resendWhenServerError = resend;
+        public void ResendWhenClientError(bool resend = true) => _resendWhenClientError = resend;
 
         public FileSender()
         {
@@ -78,23 +84,44 @@ namespace ZeroLevel.Network.FileTransfer
             return connected;
         }
 
+        private static bool Send<T>(ExClient client, string inbox, T frame,
+            bool resendWhenConnectionError, bool resendWhenServerError)
+        {
+            bool sended = false;
+            var handle = new Action<InvokeResult>(ir =>
+            {
+                if (ir.Success == false && resendWhenServerError)
+                {
+                    Send<T>(client, inbox, frame, resendWhenConnectionError, false);
+                }
+            });
+            sended = client.Request<T, InvokeResult>(inbox, frame, handle).Success;
+            if (sended == false && resendWhenConnectionError)
+            {
+                sended = client.Request<T, InvokeResult>(inbox, frame, handle).Success;
+            }
+            return sended;
+        }
+
         internal void ExecuteSendFile(FileReader reader, FileTransferTask task)
         {
             Log.Info($"Start upload file {reader.Path}");
             var startinfo = reader.GetStartInfo();
-            if (false == task.Client.Send<FileStartFrame>("__file_transfer_start_transfer__", startinfo).Success)
+
+            if (!Send(task.Client, "__file_transfer_start_transfer__", startinfo, _resendWhenClientError, _resendWhenServerError))
             {
+                Log.Debug($"Upload file {reader.Path} interrupted");
                 return;
             }
             foreach (var chunk in reader.Read())
             {
-                if (task.Client.Send<FileFrame>("__file_transfer_frame__", chunk).Success == false)
+                if (!Send(task.Client, "__file_transfer_frame__", chunk, _resendWhenClientError, _resendWhenServerError))
                 {
+                    Log.Debug($"Upload file {reader.Path} interrupted");
                     return;
                 }
             }
-            task.Client.Send<FileEndFrame>("__file_transfer_complete_transfer__", reader.GetCompleteInfo());
-            Log.Debug($"Stop upload file {reader.Path}");
+            Send(task.Client, "__file_transfer_complete_transfer__", reader.GetCompleteInfo(), _resendWhenClientError, _resendWhenServerError);
         }
     }
 }
