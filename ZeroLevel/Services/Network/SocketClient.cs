@@ -393,7 +393,7 @@ namespace ZeroLevel.Network
                     _send_queue = new BlockingCollection<SendInfo>();
                     continue;
                 }
-                while (_stream.CanWrite == false || Status != SocketClientStatus.Working)
+                while (_stream?.CanWrite == false || Status != SocketClientStatus.Working)
                 {
                     try
                     {

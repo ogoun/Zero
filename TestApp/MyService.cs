@@ -29,7 +29,7 @@ namespace TestApp
                 Log.Info($"RPS: {counter}");
                 Interlocked.Exchange(ref counter, 0);
             });
-            for (int i = 0; i < int.MaxValue; i++)
+            while(true)
             {
                 try
                 {

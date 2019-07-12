@@ -8,6 +8,11 @@ namespace ZeroLevel.Network
     internal sealed class ExClientServerCachee
         : IDisposable
     {
+        static ExClientServerCachee()
+        {
+            Sheduller.RemindEvery(TimeSpan.FromSeconds(30), () => { Log.Info(string.Join("\r\n", _clientInstances.Keys)); });
+        }
+
         private static readonly ConcurrentDictionary<string, ExClient> _clientInstances = new ConcurrentDictionary<string, ExClient>();
         private static readonly ConcurrentDictionary<string, object> _clientLocks = new ConcurrentDictionary<string, object>();
 
