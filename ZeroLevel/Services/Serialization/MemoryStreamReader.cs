@@ -344,6 +344,62 @@ namespace ZeroLevel.Services.Serialization
             return collection;
         }
 
+        public List<UInt64> ReadUInt64Collection()
+        {
+            int count = ReadInt32();
+            var collection = new List<UInt64>(count);
+            if (count > 0)
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    collection.Add(ReadULong());
+                }
+            }
+            return collection;
+        }
+
+        public List<UInt32> ReadUInt32Collection()
+        {
+            int count = ReadInt32();
+            var collection = new List<UInt32>(count);
+            if (count > 0)
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    collection.Add(ReadUInt32());
+                }
+            }
+            return collection;
+        }
+
+        public List<short> ReadShortCollection()
+        {
+            int count = ReadInt32();
+            var collection = new List<short>(count);
+            if (count > 0)
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    collection.Add(ReadShort());
+                }
+            }
+            return collection;
+        }
+
+        public List<ushort> ReadUShortCollection()
+        {
+            int count = ReadInt32();
+            var collection = new List<ushort>(count);
+            if (count > 0)
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    collection.Add(ReadUShort());
+                }
+            }
+            return collection;
+        }
+
         public List<float> ReadFloatCollection()
         {
             int count = ReadInt32();

@@ -652,17 +652,17 @@ namespace ZeroLevel.Network
         #region Host service
         public IRouter UseHost()
         {
-            return _cachee.GetServer(new IPEndPoint(IPAddress.Any, NetUtils.GetFreeTcpPort()), new Router()).Router;
+            return _cachee.GetServer(new IPEndPoint(IPAddress.Any, NetUtils.GetFreeTcpPort()), new Router());
         }
 
         public IRouter UseHost(int port)
         {
-            return _cachee.GetServer(new IPEndPoint(IPAddress.Any, port), new Router()).Router;
+            return _cachee.GetServer(new IPEndPoint(IPAddress.Any, port), new Router());
         }
 
         public IRouter UseHost(IPEndPoint endpoint)
         {
-            return _cachee.GetServer(endpoint, new Router()).Router;
+            return _cachee.GetServer(endpoint, new Router());
         }
         #endregion
 

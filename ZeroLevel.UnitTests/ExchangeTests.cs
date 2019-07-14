@@ -67,11 +67,16 @@ namespace ZeroLevel.NetworkUnitTests
             var server = UseHost(6667);
             IEnumerable<ZeroServiceInfo> received = null;
 
+            server.OnConnect += c => 
+            {
+                Log.Info(c.Status.ToString());
+            };
+
             server.RegisterInbox<IEnumerable<ZeroServiceInfo>>("services", (_) => new[] { info1, info2 });
 
             // Act
             var client = Exchange.GetConnection(IPAddress.Loopback.ToString() + ":6667");
-            var ir = client.Request<IEnumerable<ZeroServiceInfo>>("services", response =>
+            var ir = client.Request<IEnumerable<ZeroServiceInfo>>("services", (response) =>
             {
                 received = response;
                 locker.Set();

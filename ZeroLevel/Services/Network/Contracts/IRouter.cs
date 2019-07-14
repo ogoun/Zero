@@ -1,4 +1,6 @@
-﻿namespace ZeroLevel.Network
+﻿using System;
+
+namespace ZeroLevel.Network
 {
     public interface IRouter
         : IServer

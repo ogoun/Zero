@@ -147,6 +147,37 @@ namespace ZeroLevel.Serialization
         }
 
         [Fact]
+        public void SerializeUInt32()
+        {
+            MakePrimitiveTest<UInt32>(-0);
+            MakePrimitiveTest<UInt32>(0);
+            MakePrimitiveTest<UInt32>(10);
+            MakePrimitiveTest<UInt32>(UInt32.MinValue);
+            MakePrimitiveTest<UInt32>(UInt32.MaxValue);
+        }
+
+        [Fact]
+        public void SerializeShort()
+        {
+            MakePrimitiveTest<short>(-0);
+            MakePrimitiveTest<short>(0);
+            MakePrimitiveTest<short>(-10);
+            MakePrimitiveTest<short>(10);
+            MakePrimitiveTest<short>(short.MinValue);
+            MakePrimitiveTest<short>(short.MaxValue);
+        }
+
+        [Fact]
+        public void SerializeUShort()
+        {
+            MakePrimitiveTest<ushort>(-0);
+            MakePrimitiveTest<ushort>(0);
+            MakePrimitiveTest<ushort>(10);
+            MakePrimitiveTest<ushort>(ushort.MinValue);
+            MakePrimitiveTest<ushort>(ushort.MaxValue);
+        }
+
+        [Fact]
         public void SerializeInt64()
         {
             MakePrimitiveTest<Int64>(-0);
@@ -157,6 +188,18 @@ namespace ZeroLevel.Serialization
             MakePrimitiveTest<Int64>(Int64.MaxValue);
             MakePrimitiveTest<Int64>(Int64.MinValue / 2);
             MakePrimitiveTest<Int64>(Int64.MaxValue / 2);
+        }
+
+        [Fact]
+        public void SerializeUInt64()
+        {
+            MakePrimitiveTest<UInt64>(-0);
+            MakePrimitiveTest<UInt64>(0);
+            MakePrimitiveTest<UInt64>(10);
+            MakePrimitiveTest<UInt64>(UInt64.MinValue);
+            MakePrimitiveTest<UInt64>(UInt64.MaxValue);
+            MakePrimitiveTest<UInt64>(UInt64.MinValue / 2);
+            MakePrimitiveTest<UInt64>(UInt64.MaxValue / 2);
         }
 
         [Fact]

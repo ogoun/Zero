@@ -1,4 +1,6 @@
-﻿namespace ZeroLevel.Network
+﻿using System;
+
+namespace ZeroLevel.Network
 {
     public interface IServer
     {
@@ -23,5 +25,8 @@
         bool ContainsInbox(string inbox);
         bool ContainsHandlerInbox(string inbox);
         bool ContainsRequestorInbox(string inbox);
+
+        event Action<ISocketClient> OnDisconnect;
+        event Action<ExClient> OnConnect;
     }
 }

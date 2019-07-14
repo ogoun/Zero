@@ -78,6 +78,14 @@ namespace ZeroLevel.Services.Serialization
 
         List<IPEndPoint> ReadIPEndPointCollection();
 
+        List<UInt64> ReadUInt64Collection();
+
+        List<UInt32> ReadUInt32Collection();
+
+        List<short> ReadShortCollection();
+
+        List<ushort> ReadUShortCollection();
+
         #endregion Extensions
     }
 }

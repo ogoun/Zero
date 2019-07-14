@@ -59,6 +59,14 @@ namespace ZeroLevel.Services.Serialization
 
         void WriteCollection(IEnumerable<Int32> collection);
 
+        void WriteCollection(IEnumerable<UInt64> collection);
+
+        void WriteCollection(IEnumerable<UInt32> collection);
+
+        void WriteCollection(IEnumerable<short> collection);
+
+        void WriteCollection(IEnumerable<ushort> collection);
+
         void WriteCollection(IEnumerable<Double> collection);
 
         void WriteCollection(IEnumerable<Decimal> collection);

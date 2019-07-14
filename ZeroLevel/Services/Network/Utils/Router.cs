@@ -8,9 +8,12 @@ using ZeroLevel.Services.Serialization;
 
 namespace ZeroLevel.Network
 {
-    public class Router
+    internal sealed class Router
         : IRouter
     {
+        public event Action<ISocketClient> OnDisconnect = _ => { };
+        public event Action<ExClient> OnConnect = _ => { };
+
         #region Routing
 
         private sealed class MRInvoker
@@ -293,6 +296,8 @@ namespace ZeroLevel.Network
     internal sealed class NullRouter
         : IRouter
     {
+        public event Action<ISocketClient> OnDisconnect = _ => { };
+        public event Action<ExClient> OnConnect = _ => { };
         public void HandleMessage(Frame frame, ISocketClient client) { }
         public byte[] HandleRequest(Frame frame, ISocketClient client) { return null; }
         public IServer RegisterInbox(string inbox, MessageHandler handler) { return this; }

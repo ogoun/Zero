@@ -7,8 +7,8 @@ using System.Threading;
 
 namespace ZeroLevel.Network
 {
-    public class SocketServer
-        : BaseSocket
+    internal sealed class SocketServer
+        :  BaseSocket, IRouter
     {
         private Socket _serverSocket;
         private ReaderWriterLockSlim _connection_set_lock = new ReaderWriterLockSlim();
@@ -54,8 +54,6 @@ namespace ZeroLevel.Network
             catch
             { }
         }
-
-        public IRouter Router { get { return _router; } }
 
         public SocketServer(IPEndPoint endpoint, IRouter router)
         {
@@ -128,5 +126,23 @@ namespace ZeroLevel.Network
                 Log.SystemError(ex, "[SocketServer.Dispose]");
             }
         }
+
+        #region IRouter
+        public void HandleMessage(Frame frame, ISocketClient client) => _router.HandleMessage(frame, client);
+        public byte[] HandleRequest(Frame frame, ISocketClient client) => _router.HandleRequest(frame, client);
+        public IServer RegisterInbox(string inbox, MessageHandler handler) => _router.RegisterInbox(inbox, handler);
+        public IServer RegisterInbox(MessageHandler handler) => _router.RegisterInbox(handler);
+
+        public IServer RegisterInbox<T>(string inbox, MessageHandler<T> handler) => _router.RegisterInbox<T>(inbox, handler);
+        public IServer RegisterInbox<T>(MessageHandler<T> handler) => _router.RegisterInbox<T>(handler);
+        public IServer RegisterInbox<Tresponse>(string inbox, RequestHandler<Tresponse> handler) => _router.RegisterInbox<Tresponse>(inbox, handler);
+        public IServer RegisterInbox<Trequest, Tresponse>(string inbox, RequestHandler<Trequest, Tresponse> handler) => _router.RegisterInbox<Trequest, Tresponse>(inbox, handler);
+        public IServer RegisterInbox<Tresponse>(RequestHandler<Tresponse> handler) => _router.RegisterInbox<Tresponse>(handler);
+        public IServer RegisterInbox<Trequest, Tresponse>(RequestHandler<Trequest, Tresponse> handler) => _router.RegisterInbox<Trequest, Tresponse>(handler);
+
+        public bool ContainsInbox(string inbox) => _router.ContainsInbox(inbox);
+        public bool ContainsHandlerInbox(string inbox) => _router.ContainsHandlerInbox(inbox);
+        public bool ContainsRequestorInbox(string inbox) => _router.ContainsRequestorInbox(inbox);
+        #endregion
     }
 }

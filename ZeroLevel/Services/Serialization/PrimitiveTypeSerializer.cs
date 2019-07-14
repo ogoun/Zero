@@ -53,9 +53,13 @@ namespace ZeroLevel.Services.Serialization
             _cachee.Add(typeof(Byte), Create<Byte>());
             _cachee.Add(typeof(Byte[]), Create<Byte[]>());
             _cachee.Add(typeof(Int32), Create<Int32>());
+            _cachee.Add(typeof(UInt32), Create<UInt32>());
             _cachee.Add(typeof(Int64), Create<Int64>());
+            _cachee.Add(typeof(UInt64), Create<UInt64>());
             _cachee.Add(typeof(Double), Create<Double>());
             _cachee.Add(typeof(float), Create<float>());
+            _cachee.Add(typeof(short), Create<short>());
+            _cachee.Add(typeof(ushort), Create<ushort>());
             _cachee.Add(typeof(Decimal), Create<Decimal>());
             _cachee.Add(typeof(DateTime), Create<DateTime>());
             _cachee.Add(typeof(Guid), Create<Guid>());
@@ -68,9 +72,13 @@ namespace ZeroLevel.Services.Serialization
             _cachee.Add(typeof(IEnumerable<Byte>), Create<IEnumerable<Byte>>());
             _cachee.Add(typeof(IEnumerable<Byte[]>), Create<IEnumerable<Byte[]>>());
             _cachee.Add(typeof(IEnumerable<Int32>), Create<IEnumerable<Int32>>());
+            _cachee.Add(typeof(IEnumerable<UInt32>), Create<IEnumerable<UInt32>>());
             _cachee.Add(typeof(IEnumerable<Int64>), Create<IEnumerable<Int64>>());
+            _cachee.Add(typeof(IEnumerable<UInt64>), Create<IEnumerable<UInt64>>());
             _cachee.Add(typeof(IEnumerable<Double>), Create<IEnumerable<Double>>());
             _cachee.Add(typeof(IEnumerable<float>), Create<IEnumerable<float>>());
+            _cachee.Add(typeof(IEnumerable<short>), Create<IEnumerable<short>>());
+            _cachee.Add(typeof(IEnumerable<ushort>), Create<IEnumerable<ushort>>());
             _cachee.Add(typeof(IEnumerable<Decimal>), Create<IEnumerable<Decimal>>());
             _cachee.Add(typeof(IEnumerable<DateTime>), Create<IEnumerable<DateTime>>());
             _cachee.Add(typeof(IEnumerable<Guid>), Create<IEnumerable<Guid>>());
@@ -83,9 +91,13 @@ namespace ZeroLevel.Services.Serialization
             _enumTypesCachee.Add(typeof(Byte), typeof(IEnumerable<Byte>));
             _enumTypesCachee.Add(typeof(Byte[]), typeof(IEnumerable<Byte[]>));
             _enumTypesCachee.Add(typeof(Int32), typeof(IEnumerable<Int32>));
+            _enumTypesCachee.Add(typeof(UInt32), typeof(IEnumerable<UInt32>));
             _enumTypesCachee.Add(typeof(Int64), typeof(IEnumerable<Int64>));
+            _enumTypesCachee.Add(typeof(UInt64), typeof(IEnumerable<UInt64>));
             _enumTypesCachee.Add(typeof(Double), typeof(IEnumerable<Double>));
             _enumTypesCachee.Add(typeof(float), typeof(IEnumerable<float>));
+            _enumTypesCachee.Add(typeof(short), typeof(IEnumerable<short>));
+            _enumTypesCachee.Add(typeof(ushort), typeof(IEnumerable<ushort>));
             _enumTypesCachee.Add(typeof(Decimal), typeof(IEnumerable<Decimal>));
             _enumTypesCachee.Add(typeof(DateTime), typeof(IEnumerable<DateTime>));
             _enumTypesCachee.Add(typeof(Guid), typeof(IEnumerable<Guid>));
@@ -103,6 +115,11 @@ namespace ZeroLevel.Services.Serialization
             {
                 wrapper.ReadId = wrapper.Invoker.Configure(typeof(MemoryStreamReader), "ReadInt32").First();
                 wrapper.WriteId = wrapper.Invoker.Configure(typeof(MemoryStreamWriter), "WriteInt32").First();
+            }
+            else if (type == typeof(UInt32))
+            {
+                wrapper.ReadId = wrapper.Invoker.Configure(typeof(MemoryStreamReader), "ReadUInt32").First();
+                wrapper.WriteId = wrapper.Invoker.Configure(typeof(MemoryStreamWriter), "WriteUInt32").First();
             }
             else if (type == typeof(Boolean))
             {
@@ -139,6 +156,16 @@ namespace ZeroLevel.Services.Serialization
                 wrapper.ReadId = wrapper.Invoker.Configure(typeof(MemoryStreamReader), "ReadFloat").First();
                 wrapper.WriteId = wrapper.Invoker.Configure(typeof(MemoryStreamWriter), "WriteFloat").First();
             }
+            else if (type == typeof(Int16))
+            {
+                wrapper.ReadId = wrapper.Invoker.Configure(typeof(MemoryStreamReader), "ReadShort").First();
+                wrapper.WriteId = wrapper.Invoker.Configure(typeof(MemoryStreamWriter), "WriteShort").First();
+            }
+            else if (type == typeof(UInt16))
+            {
+                wrapper.ReadId = wrapper.Invoker.Configure(typeof(MemoryStreamReader), "ReadUShort").First();
+                wrapper.WriteId = wrapper.Invoker.Configure(typeof(MemoryStreamWriter), "WriteUShort").First();
+            }
             else if (type == typeof(Guid))
             {
                 wrapper.ReadId = wrapper.Invoker.Configure(typeof(MemoryStreamReader), "ReadGuid").First();
@@ -159,6 +186,11 @@ namespace ZeroLevel.Services.Serialization
                 wrapper.ReadId = wrapper.Invoker.Configure(typeof(MemoryStreamReader), "ReadLong").First();
                 wrapper.WriteId = wrapper.Invoker.Configure(typeof(MemoryStreamWriter), "WriteLong").First();
             }
+            else if (type == typeof(UInt64))
+            {
+                wrapper.ReadId = wrapper.Invoker.Configure(typeof(MemoryStreamReader), "ReadULong").First();
+                wrapper.WriteId = wrapper.Invoker.Configure(typeof(MemoryStreamWriter), "WriteULong").First();
+            }
             else if (type == typeof(String))
             {
                 wrapper.ReadId = wrapper.Invoker.Configure(typeof(MemoryStreamReader), "ReadString").First();
@@ -175,6 +207,11 @@ namespace ZeroLevel.Services.Serialization
             else if (type == typeof(IEnumerable<Int32>))
             {
                 wrapper.ReadId = wrapper.Invoker.Configure(typeof(MemoryStreamReader), "ReadInt32Collection").First();
+                wrapper.WriteId = wrapper.Invoker.Configure(typeof(MemoryStreamWriter), CreatePredicate<Tw>()).First();
+            }
+            else if (type == typeof(IEnumerable<UInt32>))
+            {
+                wrapper.ReadId = wrapper.Invoker.Configure(typeof(MemoryStreamReader), "ReadUInt32Collection").First();
                 wrapper.WriteId = wrapper.Invoker.Configure(typeof(MemoryStreamWriter), CreatePredicate<Tw>()).First();
             }
             else if (type == typeof(IEnumerable<Boolean>))
@@ -225,6 +262,21 @@ namespace ZeroLevel.Services.Serialization
             else if (type == typeof(IEnumerable<Int64>))
             {
                 wrapper.ReadId = wrapper.Invoker.Configure(typeof(MemoryStreamReader), "ReadInt64Collection").First();
+                wrapper.WriteId = wrapper.Invoker.Configure(typeof(MemoryStreamWriter), CreatePredicate<Tw>()).First();
+            }
+            else if (type == typeof(IEnumerable<UInt64>))
+            {
+                wrapper.ReadId = wrapper.Invoker.Configure(typeof(MemoryStreamReader), "ReadUInt64Collection").First();
+                wrapper.WriteId = wrapper.Invoker.Configure(typeof(MemoryStreamWriter), CreatePredicate<Tw>()).First();
+            }
+            else if (type == typeof(IEnumerable<Int16>))
+            {
+                wrapper.ReadId = wrapper.Invoker.Configure(typeof(MemoryStreamReader), "ReadShortCollection").First();
+                wrapper.WriteId = wrapper.Invoker.Configure(typeof(MemoryStreamWriter), CreatePredicate<Tw>()).First();
+            }
+            else if (type == typeof(IEnumerable<UInt16>))
+            {
+                wrapper.ReadId = wrapper.Invoker.Configure(typeof(MemoryStreamReader), "ReadUShortCollection").First();
                 wrapper.WriteId = wrapper.Invoker.Configure(typeof(MemoryStreamWriter), CreatePredicate<Tw>()).First();
             }
             else if (type == typeof(IEnumerable<String>))

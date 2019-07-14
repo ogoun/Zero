@@ -275,6 +275,54 @@ namespace ZeroLevel.Services.Serialization
             }
         }
 
+        public void WriteCollection(IEnumerable<UInt64> collection)
+        {
+            WriteInt32(collection?.Count() ?? 0);
+            if (collection != null)
+            {
+                foreach (var item in collection)
+                {
+                    WriteULong(item);
+                }
+            }
+        }
+
+        public void WriteCollection(IEnumerable<UInt32> collection)
+        {
+            WriteInt32(collection?.Count() ?? 0);
+            if (collection != null)
+            {
+                foreach (var item in collection)
+                {
+                    WriteUInt32(item);
+                }
+            }
+        }
+
+        public void WriteCollection(IEnumerable<short> collection)
+        {
+            WriteInt32(collection?.Count() ?? 0);
+            if (collection != null)
+            {
+                foreach (var item in collection)
+                {
+                    WriteShort(item);
+                }
+            }
+        }
+
+        public void WriteCollection(IEnumerable<ushort> collection)
+        {
+            WriteInt32(collection?.Count() ?? 0);
+            if (collection != null)
+            {
+                foreach (var item in collection)
+                {
+                    WriteUShort(item);
+                }
+            }
+        }
+
         public void WriteCollection(IEnumerable<Int64> collection)
         {
             WriteInt32(collection?.Count() ?? 0);
