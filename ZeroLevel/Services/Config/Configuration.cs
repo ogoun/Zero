@@ -59,7 +59,7 @@ namespace ZeroLevel
             }
             else
             {
-                throw new Exception("Default configuration exists already");
+                DefaultSet.Merge(Configuration.CreateSet(configuration));
             }
         }
 
@@ -76,7 +76,7 @@ namespace ZeroLevel
             }
             else
             {
-                throw new Exception("Default configurationset set already");
+                DefaultSet.Merge(configuration);
             }
         }
 

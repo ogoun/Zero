@@ -19,7 +19,7 @@ namespace TestApp
         {
             Log.Info("Started");
             ReadServiceInfo();
-            var host = UseHost();
+            var host = UseHost(8800);
             AutoregisterInboxes(host);
             host.OnConnect += Host_OnConnect;
             host.OnDisconnect += Host_OnDisconnect;
@@ -31,7 +31,7 @@ namespace TestApp
                 Interlocked.Exchange(ref counter, 0);
             });
 
-            //Exchange.RoutesStorage.Set("test.app", new IPEndPoint(IPAddress.Loopback, 8800));
+            Exchange.RoutesStorage.Set("test.app", new IPEndPoint(IPAddress.Loopback, 8800));
 
             while (true)
             {

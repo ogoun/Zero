@@ -6,10 +6,11 @@ namespace TestApp
     {
         private static void Main(string[] args)
         {
+            Configuration.Save(Configuration.ReadFromApplicationConfig());
             Bootstrap.Startup<MyService>(args,                
                 () => Configuration.ReadSetFromIniFile("config.ini"))
                 .EnableConsoleLog(ZeroLevel.Services.Logging.LogLevel.System | ZeroLevel.Services.Logging.LogLevel.FullDebug)
-                .UseDiscovery()
+                //.UseDiscovery()
                 .Run()
                 .WaitWhileStatus(ZeroServiceStatus.Running)
                 .Stop();
