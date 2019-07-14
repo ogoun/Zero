@@ -5,7 +5,7 @@
     <Description>Infrastructure layer library</Description>
     <Authors>ogoun</Authors>
     <Company>ogoun</Company>
-    <AssemblyVersion>3.0.0.2</AssemblyVersion>
+    <AssemblyVersion>3.0.0.3</AssemblyVersion>
     <PackageReleaseNotes>Fix file transfer
 Expand serialization types</PackageReleaseNotes>
     <PackageProjectUrl>https://github.com/ogoun/Zero/wiki</PackageProjectUrl>
@@ -14,8 +14,8 @@ Expand serialization types</PackageReleaseNotes>
     <PackageIconUrl>https://raw.githubusercontent.com/ogoun/Zero/master/zero.png</PackageIconUrl>
     <RepositoryUrl>https://github.com/ogoun/Zero</RepositoryUrl>
     <RepositoryType>GitHub</RepositoryType>
-    <Version>3.0.2</Version>
-    <FileVersion>3.0.0.2</FileVersion>
+    <Version>3.0.3</Version>
+    <FileVersion>3.0.0.3</FileVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

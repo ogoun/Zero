@@ -11,8 +11,8 @@ namespace ZeroLevel.Network
     internal sealed class Router
         : IRouter
     {
-        public event Action<ISocketClient> OnDisconnect = _ => { };
-        public event Action<ExClient> OnConnect = _ => { };
+        public event Action<ISocketClient> OnDisconnect = _ => { }; // must be never rised
+        public event Action<ExClient> OnConnect = _ => { }; // must be never rised
 
         #region Routing
 
