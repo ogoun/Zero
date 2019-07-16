@@ -178,7 +178,9 @@ namespace ZeroLevel.Services.FileSystem
                 }
             }
             if (Directory.Exists(targetFolder) == false)
+            {
                 Directory.CreateDirectory(targetFolder);
+            }
             var tmpZip = Path.Combine(Configuration.BaseDirectory, "temp", Path.GetRandomFileName());
             var tmp = Directory.CreateDirectory(tmpZip);
             var zipFile = Path.Combine(tmp.FullName, "zip.zip");
@@ -239,8 +241,9 @@ namespace ZeroLevel.Services.FileSystem
                         deleted = true;
                     }
                 }
-                catch
+                catch(Exception ex)
                 {
+                    Log.SystemError(ex, $"[FSUtils.RemoveFolder] Fault remove folder {path}");
                     try_counter++;
                     Thread.Sleep(fault_timeout_period);
                 }
