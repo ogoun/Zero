@@ -46,6 +46,14 @@ namespace ZeroLevel.Services.Serialization
         }
 
         /// <summary>
+        /// Write char (2 bytes)
+        /// </summary>
+        public void WriteChar(char val)
+        {
+            _stream.Write(BitConverter.GetBytes(val), 0, 2);
+        }
+
+        /// <summary>
         /// Write array bytes
         /// </summary>
         /// <param name="val"></param>

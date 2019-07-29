@@ -10,6 +10,8 @@ namespace ZeroLevel.Services.Serialization
     {
         void WriteBoolean(bool val);
 
+        void WriteChar(char val);
+
         void WriteByte(byte val);
 
         void WriteBytes(byte[] val);

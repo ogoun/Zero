@@ -55,6 +55,14 @@ namespace ZeroLevel.Services.Serialization
             return (byte)_stream.ReadByte();
         }
 
+        public char ReadChar()
+        {
+            if (CheckOutOfRange(_stream, 1))
+                throw new OutOfMemoryException("Array index out of bounds");
+            var buffer = ReadBuffer(2);
+            return BitConverter.ToChar(buffer, 0);
+        }
+
         /// <summary>
         /// Reading bytes
         /// </summary>

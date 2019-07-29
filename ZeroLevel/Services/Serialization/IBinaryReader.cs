@@ -8,6 +8,8 @@ namespace ZeroLevel.Services.Serialization
     {
         bool ReadBoolean();
 
+        char ReadChar();
+
         byte ReadByte();
 
         byte[] ReadBytes();
