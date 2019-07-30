@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Threading;
 using ZeroLevel.Services.Serialization;
 
 namespace ZeroLevel.Services.Semantic
@@ -6,13 +7,16 @@ namespace ZeroLevel.Services.Semantic
     public class Trie
         : IBinarySerializable
     {
-        private class TrieNode
+        internal class TrieNode
             : IBinarySerializable
         {
             public char Key;
             public uint? Value;
+            public TrieNode Parent;
             public List<TrieNode> Children;
 
+            public TrieNode() { }
+            public TrieNode(TrieNode parent) { Parent = parent; }
             public void Deserialize(IBinaryReader reader)
             {
                 this.Key = reader.ReadChar();
@@ -48,14 +52,14 @@ namespace ZeroLevel.Services.Semantic
                     writer.WriteCollection<TrieNode>(this.Children);
                 }
             }
-
-            internal void Append(string word, ref uint word_index, int index)
+            internal TrieNode Append(string word, ref uint word_index, int index, bool reverse)
             {
-                if (word.Length == index + 1)
+                if (word.Length == index)
                 {
                     if (!this.Value.HasValue)
                     {
                         this.Value = ++word_index;
+                        return this;
                     }
                 }
                 else
@@ -64,24 +68,19 @@ namespace ZeroLevel.Services.Semantic
                     {
                         this.Children = new List<TrieNode>();
                     }
-                    bool found = false;
                     for (int i = 0; i < Children.Count; i++)
                     {
                         if (Children[i].Key == word[index])
                         {
-                            Children[i].Append(word, ref word_index, index + 1);
-                            found = true;
+                            return Children[i].Append(word, ref word_index, index + 1, reverse);
                         }
                     }
-                    if (!found)
-                    {
-                        var tn = new TrieNode { Key = word[index] };
-                        Children.Add(tn);
-                        tn.Append(word, ref word_index, index + 1);
-                    }
+                    var tn = new TrieNode(reverse ? this : null) { Key = word[index] };
+                    Children.Add(tn);
+                    return tn.Append(word, ref word_index, index + 1, reverse);
                 }
+                return null;
             }
-
             internal uint? GetKey(string word, int index)
             {
                 if (word.Length == index + 1)
@@ -106,11 +105,18 @@ namespace ZeroLevel.Services.Semantic
             }
         }
 
-        private List<TrieNode> _roots;
+        internal List<TrieNode> _roots;
         private uint _word_index = 0;
+        private readonly bool _use_reverse_index;
 
-        public Trie()
+        private Dictionary<uint, TrieNode> _reverse_index;
+        public Trie(bool reverse_index = false)
         {
+            _use_reverse_index = reverse_index;
+            if (_use_reverse_index)
+            {
+                _reverse_index = new Dictionary<uint, TrieNode>();
+            }
             _roots = new List<TrieNode>();
         }
 
@@ -122,7 +128,11 @@ namespace ZeroLevel.Services.Semantic
             {
                 if (_roots[i].Key == word[0])
                 {
-                    _roots[i].Append(word, ref _word_index, 1);
+                    var node = _roots[i].Append(word, ref _word_index, 1, _use_reverse_index);
+                    if (_use_reverse_index && node != null)
+                    {
+                        _reverse_index.Add(node.Value.Value, node);
+                    }
                     found = true;
                 }
             }
@@ -130,7 +140,11 @@ namespace ZeroLevel.Services.Semantic
             {
                 var tn = new TrieNode { Key = word[0] };
                 _roots.Add(tn);
-                tn.Append(word, ref _word_index, 1);
+                var node = tn.Append(word, ref _word_index, 1, _use_reverse_index);
+                if (_use_reverse_index && node != null)
+                {
+                    _reverse_index.Add(node.Value.Value, node);
+                }
             }
         }
 
