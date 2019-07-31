@@ -52,13 +52,12 @@ namespace ZeroLevel.Services.Semantic
                     writer.WriteCollection<TrieNode>(this.Children);
                 }
             }
-            internal TrieNode Append(string word, ref uint word_index, int index, bool reverse)
+            internal TrieNode Append(string word, int index, bool reverse)
             {
                 if (word.Length == index)
                 {
                     if (!this.Value.HasValue)
                     {
-                        this.Value = ++word_index;
                         return this;
                     }
                 }
@@ -72,12 +71,12 @@ namespace ZeroLevel.Services.Semantic
                     {
                         if (Children[i].Key == word[index])
                         {
-                            return Children[i].Append(word, ref word_index, index + 1, reverse);
+                            return Children[i].Append(word, index + 1, reverse);
                         }
                     }
                     var tn = new TrieNode(reverse ? this : null) { Key = word[index] };
                     Children.Add(tn);
-                    return tn.Append(word, ref word_index, index + 1, reverse);
+                    return tn.Append(word, index + 1, reverse);
                 }
                 return null;
             }
@@ -103,11 +102,39 @@ namespace ZeroLevel.Services.Semantic
                 }
                 return null;
             }
+
+            internal void RebuildReverseIndex(TrieNode parent, Dictionary<uint, TrieNode> index)
+            {
+                this.Parent = parent;
+                if (this.Value.HasValue)
+                {
+                    index.Add(this.Value.Value, this);
+                }
+                if (this.Children != null)
+                {
+                    foreach (var child in this.Children)
+                    {
+                        child.RebuildReverseIndex(this, index);
+                    }
+                }
+            }
+
+            internal void DestroyReverseIndex()
+            {
+                this.Parent = null;
+                if (this.Children != null)
+                {
+                    foreach (var child in this.Children)
+                    {
+                        child.DestroyReverseIndex();
+                    }
+                }
+            }
         }
 
         internal List<TrieNode> _roots;
-        private uint _word_index = 0;
-        private readonly bool _use_reverse_index;
+        private int _word_index = 0;
+        private bool _use_reverse_index;
 
         private Dictionary<uint, TrieNode> _reverse_index;
         public Trie(bool reverse_index = false)
@@ -120,6 +147,19 @@ namespace ZeroLevel.Services.Semantic
             _roots = new List<TrieNode>();
         }
 
+        public void ToggleReverseIndex(bool enabled)
+        {
+            if (_use_reverse_index == enabled) return;
+            _use_reverse_index = enabled;
+            if (_use_reverse_index)
+            {
+                RebuildReverseIndex();
+            }
+            else
+            {
+                DestroyReverseIndex();
+            }
+        }
         public void Append(string word)
         {
             if (word.Length == 0) return;
@@ -128,10 +168,15 @@ namespace ZeroLevel.Services.Semantic
             {
                 if (_roots[i].Key == word[0])
                 {
-                    var node = _roots[i].Append(word, ref _word_index, 1, _use_reverse_index);
-                    if (_use_reverse_index && node != null)
+                    var node = _roots[i].Append(word, 1, _use_reverse_index);
+                    Thread.MemoryBarrier();
+                    if (node != null)
                     {
-                        _reverse_index.Add(node.Value.Value, node);
+                        node.Value = (uint)Interlocked.Increment(ref _word_index);
+                        if (_use_reverse_index)
+                        {
+                            _reverse_index.Add(node.Value.Value, node);
+                        }
                     }
                     found = true;
                 }
@@ -140,10 +185,15 @@ namespace ZeroLevel.Services.Semantic
             {
                 var tn = new TrieNode { Key = word[0] };
                 _roots.Add(tn);
-                var node = tn.Append(word, ref _word_index, 1, _use_reverse_index);
-                if (_use_reverse_index && node != null)
+                var node = tn.Append(word, 1, _use_reverse_index);
+                Thread.MemoryBarrier();
+                node.Value = (uint)Interlocked.Increment(ref _word_index);
+                if (node != null)
                 {
-                    _reverse_index.Add(node.Value.Value, node);
+                    if (_use_reverse_index)
+                    {
+                        _reverse_index.Add(node.Value.Value, node);
+                    }
                 }
             }
         }
@@ -190,14 +240,45 @@ namespace ZeroLevel.Services.Semantic
 
         public void Serialize(IBinaryWriter writer)
         {
-            writer.WriteUInt32(this._word_index);
+            writer.WriteInt32(this._word_index);
+            writer.WriteBoolean(this._use_reverse_index);
             writer.WriteCollection<TrieNode>(this._roots);
         }
 
         public void Deserialize(IBinaryReader reader)
         {
-            this._word_index = reader.ReadUInt32();
+            this._word_index = reader.ReadInt32();
+            this._use_reverse_index = reader.ReadBoolean();
             this._roots = reader.ReadCollection<TrieNode>();
+            RebuildReverseIndex();
+        }
+
+        private void RebuildReverseIndex()
+        {
+            if (this._use_reverse_index)
+            {
+                if (_reverse_index == null)
+                {
+                    _reverse_index = new Dictionary<uint, TrieNode>();
+                }
+                foreach (var node in _roots)
+                {
+                    node.RebuildReverseIndex(null, _reverse_index);
+                }
+            }
+        }
+
+        private void DestroyReverseIndex()
+        {
+            if (_reverse_index != null)
+            {
+                _reverse_index.Clear();
+                _reverse_index = null;
+            }
+            foreach (var node in _roots)
+            {
+                node.DestroyReverseIndex();
+            }
         }
     }
 }
