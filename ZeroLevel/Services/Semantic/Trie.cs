@@ -1,5 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using ZeroLevel.Services.Serialization;
 
@@ -11,6 +12,7 @@ namespace ZeroLevel.Services.Semantic
         internal class TrieNode
             : IBinarySerializable
         {
+            public char? Key; // settet only with rebuild index
             public uint? Value;
             public TrieNode Parent;
             public ConcurrentDictionary<char, TrieNode> Children;
@@ -83,8 +85,9 @@ namespace ZeroLevel.Services.Semantic
                 return null;
             }
 
-            internal void RebuildReverseIndex(TrieNode parent, Dictionary<uint, TrieNode> index)
+            internal void RebuildReverseIndex(TrieNode parent, char key, Dictionary<uint, TrieNode> index)
             {
+                this.Key = key;
                 this.Parent = parent;
                 if (this.Value.HasValue)
                 {
@@ -94,7 +97,7 @@ namespace ZeroLevel.Services.Semantic
                 {
                     foreach (var child in this.Children)
                     {
-                        child.Value.RebuildReverseIndex(this, index);
+                        child.Value.RebuildReverseIndex(this, child.Key, index);
                     }
                 }
             }
@@ -102,6 +105,7 @@ namespace ZeroLevel.Services.Semantic
             internal void DestroyReverseIndex()
             {
                 this.Parent = null;
+                this.Key = null;
                 if (this.Children != null)
                 {
                     foreach (var child in this.Children)
@@ -117,6 +121,8 @@ namespace ZeroLevel.Services.Semantic
         private bool _use_reverse_index;
 
         private Dictionary<uint, TrieNode> _reverse_index;
+
+        public IEnumerable<uint> Keys => _reverse_index.Keys;
 
         public Trie() : this(false)
         {
@@ -165,6 +171,31 @@ namespace ZeroLevel.Services.Semantic
             return _root.GetKey(word, 0);
         }
 
+        public string Word(uint key)
+        {
+            if (_use_reverse_index)
+            {
+                if (_reverse_index.ContainsKey(key))
+                {
+                    var node = _reverse_index[key];
+                    return new string(Backward(node).Reverse().ToArray());
+                }
+            }
+            return null;
+        }
+
+        private IEnumerable<char> Backward(TrieNode node)
+        {
+            if (_use_reverse_index)
+            {
+                do
+                {
+                    yield return node.Key.Value;
+                    node = node.Parent;
+                } while (node.Parent != null);
+            }
+        }
+
         public bool Contains(string word)
         {
             if (word?.Length == 0) return false;
@@ -194,7 +225,7 @@ namespace ZeroLevel.Services.Semantic
                 {
                     _reverse_index = new Dictionary<uint, TrieNode>();
                 }
-                _root.RebuildReverseIndex(null, _reverse_index);
+                _root.RebuildReverseIndex(null, ' ', _reverse_index);
             }
         }
 
