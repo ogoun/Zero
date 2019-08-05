@@ -12,7 +12,7 @@ namespace ZeroLevel.Services.Semantic
         internal class TrieNode
             : IBinarySerializable
         {
-            public char? Key; // settet only with rebuild index
+            public char? Key; // setted only with rebuild index
             public uint? Value;
             public TrieNode Parent;
             public ConcurrentDictionary<char, TrieNode> Children;
