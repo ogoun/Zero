@@ -62,6 +62,51 @@ namespace ZeroLevel.Serialization
             }
         }
 
+        private void MakeDictionaryTest<TKey, TValue>(Dictionary<TKey, TValue> value
+            , Func<TKey, TKey, bool> keyComparator = null
+            , Func<TValue, TValue, bool> valueComparator = null)
+        {
+            byte[] data;
+            Dictionary<TKey, TValue> clone;
+            // Act
+            using (var writer = new MemoryStreamWriter())
+            {
+                writer.WriteDictionary<TKey, TValue>(value);
+                data = writer.Complete();
+            }
+            using (var reader = new MemoryStreamReader(data))
+            {
+                clone = reader.ReadDictionary<TKey, TValue>();
+            }
+
+            // Assert
+            if (value == null && clone != null && !clone.Any()) return; // OK
+
+            if (value != null && clone == null) throw new Exception("Fail");
+            var original_keys = value.Keys.ToArray();
+            var clone_keys = clone.Keys.ToArray();
+
+            if (keyComparator == null)
+            {
+                Assert.True(CollectionComparsionExtensions.NoOrderingEquals(original_keys, clone_keys));
+            }
+            else
+            {
+                Assert.True(CollectionComparsionExtensions.NoOrderingEquals(original_keys, clone_keys, keyComparator));
+            }
+            foreach (var key in original_keys)
+            {
+                if (valueComparator == null)
+                {
+                    Assert.Equal(value[key], clone[key]);
+                }
+                else
+                {
+                    Assert.True(valueComparator(value[key], clone[key]));
+                }
+            }
+        }
+
         [Fact]
         public void SerializeDateTime()
         {
@@ -134,7 +179,20 @@ namespace ZeroLevel.Serialization
             MakePrimitiveTest<String>("HELLO!", comparator);
             MakePrimitiveTest<String>("𐌼𐌰𐌲 𐌲𐌻𐌴𐍃 𐌹̈𐍄𐌰𐌽, 𐌽𐌹 𐌼𐌹𐍃 𐍅𐌿 𐌽𐌳𐌰𐌽 𐌱𐍂𐌹𐌲𐌲𐌹𐌸", comparator);
         }
+        [Fact]
+        public void SerizlizeCharText()
+        {
+            // Arrange
+            var line = "abcxyzABCZА-Яа-яёЁйЙ123";
 
+            // Act
+            var bytes = line.Select(ch => MessageSerializer.SerializeCompatible<char>(ch));
+
+            // Assert
+            var testLine = new string(bytes.Select(ba => MessageSerializer.DeserializeCompatible<char>(ba)).ToArray());
+
+            Assert.Equal(line, testLine);
+        }
         [Fact]
         public void SerializeInt32()
         {
@@ -324,6 +382,24 @@ namespace ZeroLevel.Serialization
             MakeCollectionTest<String>(new string[] { "", String.Empty, null, "HELLO!", "𐌼𐌰𐌲 𐌲𐌻𐌴𐍃 𐌹̈𐍄𐌰𐌽, 𐌽𐌹 𐌼𐌹𐍃 𐍅𐌿 𐌽𐌳𐌰𐌽 𐌱𐍂𐌹𐌲𐌲𐌹𐌸" }, comparator);
         }
 
+        [Fact]
+        public void SerizlizeCollectionChar()
+        {
+            // Arrange
+            var line = "abcxyzABCZА-Яа-яёЁйЙ123";
+
+            // Act
+            var bytes_string = MessageSerializer.SerializeCompatible<string>(line);
+            var bytes_charenum = MessageSerializer.SerializeCompatible<IEnumerable<char>>(line);
+
+            // Assert
+            var test_line1 = MessageSerializer.DeserializeCompatible<string>(bytes_string);
+            var test_line2 = new string(MessageSerializer.DeserializeCompatible<IEnumerable<char>>(bytes_charenum).ToArray());
+
+            Assert.Equal(line, test_line1);
+            Assert.Equal(line, test_line2);
+            Assert.NotEqual(bytes_string, bytes_charenum);
+        }
 
         [Fact]
         public void SerializeCollectionInt32()
@@ -402,6 +478,37 @@ namespace ZeroLevel.Serialization
                 reader.ReverseByteOrder(true);
                 Assert.Equal(2049, reader.ReadInt32());
             }
+        }
+
+        [Fact]
+        public void SerializeDictionaryTest()
+        {
+            var dict = new Dictionary<int, string>
+            {
+                {0, "Dear" },
+                {1, "Chaisy" },
+                {2, "Lain" }
+            };
+            MakeDictionaryTest(dict);
+        }
+
+        [Fact]
+        public void SerializeDictionaryWithComposedObjectTest()
+        {
+            var dict = new Dictionary<int, Document>
+            {
+                {0, CompositeInstanceFactory.MakeDocument() },
+                {1, CompositeInstanceFactory.MakeDocument() },
+                {2, CompositeInstanceFactory.MakeDocument() },
+                {3, CompositeInstanceFactory.MakeDocument() }
+            };
+            var comparator = new Func<Document, Document, bool>((left, right) =>
+            {
+                var l_bin = MessageSerializer.Serialize(left);
+                var r_bin = MessageSerializer.Serialize(right);
+                return ArrayExtensions.UnsafeEquals(l_bin, r_bin);
+            });
+            MakeDictionaryTest(dict, valueComparator: comparator);
         }
     }
 }

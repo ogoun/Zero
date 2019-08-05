@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
@@ -54,10 +55,10 @@ namespace ZeroLevel.Services.Serialization
                 throw new OutOfMemoryException("Array index out of bounds");
             return (byte)_stream.ReadByte();
         }
-
+        
         public char ReadChar()
         {
-            if (CheckOutOfRange(_stream, 1))
+            if (CheckOutOfRange(_stream, 2))
                 throw new OutOfMemoryException("Array index out of bounds");
             var buffer = ReadBuffer(2);
             return BitConverter.ToChar(buffer, 0);
@@ -240,6 +241,43 @@ namespace ZeroLevel.Services.Serialization
             return collection;
         }
 
+
+        public Dictionary<TKey, TValue> ReadDictionary<TKey, TValue>()
+        {
+            int count = ReadInt32();
+            var collection = new Dictionary<TKey, TValue>(count);            
+            if (count > 0)
+            {
+                TKey key;
+                TValue value;
+                for (int i = 0; i < count; i++)
+                {
+                    key = ReadCompatible<TKey>();
+                    value = ReadCompatible<TValue>();
+                    collection.Add(key, value);
+                }
+            }
+            return collection;
+        }
+
+        public ConcurrentDictionary<TKey, TValue> ReadDictionaryAsConcurrent<TKey, TValue>()
+        {
+            int count = ReadInt32();
+            var collection = new ConcurrentDictionary<TKey, TValue>();
+            if (count > 0)
+            {
+                TKey key;
+                TValue value;
+                for (int i = 0; i < count; i++)
+                {
+                    key = ReadCompatible<TKey>();
+                    value = ReadCompatible<TValue>();
+                    collection.TryAdd(key, value);
+                }
+            }
+            return collection;
+        }
+
         public T ReadCompatible<T>()
         {
             return MessageSerializer.DeserializeCompatible<T>(this);
@@ -379,7 +417,19 @@ namespace ZeroLevel.Services.Serialization
             }
             return collection;
         }
-
+        public List<char> ReadCharCollection()
+        {
+            int count = ReadInt32();
+            var collection = new List<char>(count);
+            if (count > 0)
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    collection.Add(ReadChar());
+                }
+            }
+            return collection;
+        }
         public List<short> ReadShortCollection()
         {
             int count = ReadInt32();

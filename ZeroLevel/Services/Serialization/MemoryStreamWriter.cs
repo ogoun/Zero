@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -50,7 +51,8 @@ namespace ZeroLevel.Services.Serialization
         /// </summary>
         public void WriteChar(char val)
         {
-            _stream.Write(BitConverter.GetBytes(val), 0, 2);
+            var data = BitConverter.GetBytes(val);
+            _stream.Write(data, 0, 2);
         }
 
         /// <summary>
@@ -307,6 +309,17 @@ namespace ZeroLevel.Services.Serialization
             }
         }
 
+        public void WriteCollection(IEnumerable<char> collection)
+        {
+            WriteInt32(collection?.Count() ?? 0);
+            if (collection != null)
+            {
+                foreach (var item in collection)
+                {
+                    WriteChar(item);
+                }
+            }
+        }
         public void WriteCollection(IEnumerable<short> collection)
         {
             WriteInt32(collection?.Count() ?? 0);
@@ -417,7 +430,8 @@ namespace ZeroLevel.Services.Serialization
 
         public void WriteCompatible<T>(T item)
         {
-            WriteBytes(MessageSerializer.SerializeCompatible(item));
+            var buffer = MessageSerializer.SerializeCompatible(item);
+            _stream.Write(buffer, 0, buffer.Length);
         }
 
         public void WriteCollection(IEnumerable<decimal> collection)
@@ -428,6 +442,33 @@ namespace ZeroLevel.Services.Serialization
                 foreach (var item in collection)
                 {
                     WriteDecimal(item);
+                }
+            }
+        }
+
+
+        public void WriteDictionary<TKey, TValue>(Dictionary<TKey, TValue> collection)
+        {
+            WriteInt32(collection?.Count() ?? 0);
+            if (collection != null)
+            {
+                foreach (var item in collection)
+                {
+                    WriteCompatible(item.Key);
+                    WriteCompatible(item.Value);
+                }
+            }
+        }
+
+        public void WriteDictionary<TKey, TValue>(ConcurrentDictionary<TKey, TValue> collection)
+        {
+            WriteInt32(collection?.Count() ?? 0);
+            if (collection != null)
+            {
+                foreach (var item in collection)
+                {
+                    WriteCompatible(item.Key);
+                    WriteCompatible(item.Value);
                 }
             }
         }

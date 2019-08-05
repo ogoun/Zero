@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Net;
 
@@ -52,12 +53,16 @@ namespace ZeroLevel.Services.Serialization
 
         List<T> ReadCollection<T>() where T : IBinarySerializable, new();
 
+        Dictionary<TKey, TValue> ReadDictionary<TKey, TValue>();
+
+        ConcurrentDictionary<TKey, TValue> ReadDictionaryAsConcurrent<TKey, TValue>();
+
         List<string> ReadStringCollection();
 
         List<Guid> ReadGuidCollection();
 
         List<DateTime> ReadDateTimeCollection();
-
+        List<char> ReadCharCollection();
         List<Int64> ReadInt64Collection();
 
         List<Int32> ReadInt32Collection();

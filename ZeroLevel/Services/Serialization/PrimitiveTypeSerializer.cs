@@ -49,6 +49,7 @@ namespace ZeroLevel.Services.Serialization
 
         private static void PreloadCachee()
         {
+            _cachee.Add(typeof(char), Create<char>());
             _cachee.Add(typeof(Boolean), Create<Boolean>());
             _cachee.Add(typeof(Byte), Create<Byte>());
             _cachee.Add(typeof(Byte[]), Create<Byte[]>());
@@ -68,6 +69,7 @@ namespace ZeroLevel.Services.Serialization
             _cachee.Add(typeof(IPEndPoint), Create<IPEndPoint>());
             _cachee.Add(typeof(IPAddress), Create<IPAddress>());
 
+            _cachee.Add(typeof(IEnumerable<char>), Create<IEnumerable<char>>());
             _cachee.Add(typeof(IEnumerable<Boolean>), Create<IEnumerable<Boolean>>());
             _cachee.Add(typeof(IEnumerable<Byte>), Create<IEnumerable<Byte>>());
             _cachee.Add(typeof(IEnumerable<Byte[]>), Create<IEnumerable<Byte[]>>());
@@ -87,6 +89,7 @@ namespace ZeroLevel.Services.Serialization
             _cachee.Add(typeof(IEnumerable<IPEndPoint>), Create<IEnumerable<IPEndPoint>>());
             _cachee.Add(typeof(IEnumerable<IPAddress>), Create<IEnumerable<IPAddress>>());
 
+            _enumTypesCachee.Add(typeof(char), typeof(IEnumerable<char>));
             _enumTypesCachee.Add(typeof(Boolean), typeof(IEnumerable<Boolean>));
             _enumTypesCachee.Add(typeof(Byte), typeof(IEnumerable<Byte>));
             _enumTypesCachee.Add(typeof(Byte[]), typeof(IEnumerable<Byte[]>));
@@ -120,6 +123,11 @@ namespace ZeroLevel.Services.Serialization
             {
                 wrapper.ReadId = wrapper.Invoker.Configure(typeof(MemoryStreamReader), "ReadUInt32").First();
                 wrapper.WriteId = wrapper.Invoker.Configure(typeof(MemoryStreamWriter), "WriteUInt32").First();
+            }
+            else if (type == typeof(char))
+            {
+                wrapper.ReadId = wrapper.Invoker.Configure(typeof(MemoryStreamReader), "ReadChar").First();
+                wrapper.WriteId = wrapper.Invoker.Configure(typeof(MemoryStreamWriter), "WriteChar").First();
             }
             else if (type == typeof(Boolean))
             {
@@ -207,6 +215,11 @@ namespace ZeroLevel.Services.Serialization
             else if (type == typeof(IEnumerable<Int32>))
             {
                 wrapper.ReadId = wrapper.Invoker.Configure(typeof(MemoryStreamReader), "ReadInt32Collection").First();
+                wrapper.WriteId = wrapper.Invoker.Configure(typeof(MemoryStreamWriter), CreatePredicate<Tw>()).First();
+            }
+            else if (type == typeof(IEnumerable<char>))
+            {
+                wrapper.ReadId = wrapper.Invoker.Configure(typeof(MemoryStreamReader), "ReadCharCollection").First();
                 wrapper.WriteId = wrapper.Invoker.Configure(typeof(MemoryStreamWriter), CreatePredicate<Tw>()).First();
             }
             else if (type == typeof(IEnumerable<UInt32>))

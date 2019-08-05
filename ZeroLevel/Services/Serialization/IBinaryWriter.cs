@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
@@ -51,7 +52,12 @@ namespace ZeroLevel.Services.Serialization
         void WriteCollection<T>(IEnumerable<T> collection)
             where T : IBinarySerializable;
 
+        void WriteDictionary<TKey, TValue>(Dictionary<TKey, TValue> collection);
+        void WriteDictionary<TKey, TValue>(ConcurrentDictionary<TKey, TValue> collection);
+
+
         void WriteCollection(IEnumerable<string> collection);
+        void WriteCollection(IEnumerable<char> collection);
 
         void WriteCollection(IEnumerable<Guid> collection);
 
