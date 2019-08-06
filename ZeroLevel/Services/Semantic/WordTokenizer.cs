@@ -15,7 +15,7 @@ namespace ZeroLevel.Services.Semantic
             var buffer = _pool.Allocate();
             try
             {
-                for (int i = 0; i < text.Length; i++)
+                for (int i = 0; i < text?.Length; i++)
                 {
                     if (first && Char.IsLetter(text[i]))
                     {

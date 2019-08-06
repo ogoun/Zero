@@ -15,7 +15,7 @@ namespace ZeroLevel.Services.Semantic
             public char? Key; // setted only with rebuild index
             public uint? Value;
             public TrieNode Parent;
-            public ConcurrentDictionary<char, TrieNode> Children;
+            public Dictionary<char, TrieNode> Children;
 
             public TrieNode() { }
             public TrieNode(TrieNode parent) { Parent = parent; }
@@ -29,7 +29,7 @@ namespace ZeroLevel.Services.Semantic
                 {
                     this.Value = null;
                 }
-                this.Children = reader.ReadDictionaryAsConcurrent<char, TrieNode>();
+                this.Children = reader.ReadDictionary<char, TrieNode>();
             }
 
             public void Serialize(IBinaryWriter writer)
@@ -52,7 +52,7 @@ namespace ZeroLevel.Services.Semantic
                     writer.WriteDictionary<char, TrieNode>(this.Children);
                 }
             }
-            internal TrieNode Append(string word, int index, bool reverse)
+            internal TrieNode Append(string word, int index)
             {
                 if (word.Length == index)
                 {
@@ -65,13 +65,13 @@ namespace ZeroLevel.Services.Semantic
                 {
                     if (this.Children == null)
                     {
-                        this.Children = new ConcurrentDictionary<char, TrieNode>();
+                        this.Children = new Dictionary<char, TrieNode>();
                     }
                     if (!this.Children.ContainsKey(word[index]))
                     {
-                        this.Children.TryAdd(word[index], new TrieNode(this));
+                        this.Children.Add(word[index], new TrieNode(this));
                     }
-                    return Children[word[index]].Append(word, index + 1, reverse);
+                    return Children[word[index]].Append(word, index + 1);
                 }
                 return null;
             }
@@ -154,7 +154,7 @@ namespace ZeroLevel.Services.Semantic
         public void Append(string word)
         {
             if (word.Length == 0) return;
-            var node = _root.Append(word, 0, _use_reverse_index);
+            var node = _root.Append(word, 0);
             if (node != null)
             {
                 node.Value = (uint)Interlocked.Increment(ref _word_index);

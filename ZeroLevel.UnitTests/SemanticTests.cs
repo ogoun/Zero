@@ -29,6 +29,16 @@ namespace ZeroLevel.UnitTests
             {
                 Assert.True(string.CompareOrdinal(test[i], terms[i]) == 0);
             }
+
+            Assert.False(WordTokenizer.Tokenize(string.Empty).Any());
+            Assert.False(WordTokenizer.Tokenize(null).Any());
+            Assert.False(WordTokenizer.Tokenize(" ").Any());
+            Assert.False(WordTokenizer.Tokenize("                        ").Any());
+            Assert.False(WordTokenizer.Tokenize(" 1 ").Any());
+            Assert.False(WordTokenizer.Tokenize("1 1").Any());
+            Assert.False(WordTokenizer.Tokenize(" 1 1 ").Any());
+            Assert.False(WordTokenizer.Tokenize(" 12aa 1a3 ").Any());
+            Assert.False(WordTokenizer.Tokenize(" __a1 _a1 ").Any());
         }
     }
 }
