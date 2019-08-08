@@ -366,5 +366,16 @@ namespace ZeroLevel.SqlServer
             }
         }
         #endregion
+
+        public T Read<T>(DbDataReader reader, int index)
+        {
+            if (reader[index] == DBNull.Value) return default(T);
+            return (T)Convert.ChangeType(reader[index], typeof(T));
+        }
+        public T Read<T>(DbDataReader reader, string name)
+        {
+            if (reader[name] == DBNull.Value) return default(T);
+            return (T)Convert.ChangeType(reader[name], typeof(T));
+        }
     }
 }

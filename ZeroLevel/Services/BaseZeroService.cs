@@ -46,20 +46,30 @@ namespace ZeroLevel.Services.Applications
 
         public void ReadServiceInfo()
         {
-            this.Name = ReadName();
-            this.Key = ReadKey();
-            this.Version = ReadVersion();
-            this.Group = ReadServiceGroup();
-            this.Type = ReadServiceType();
+            if (string.IsNullOrWhiteSpace(this.Name))
+                this.Name = ReadName();
+            if (string.IsNullOrWhiteSpace(this.Key))
+                this.Key = ReadKey();
+            if (string.IsNullOrWhiteSpace(this.Version))
+                this.Version = ReadVersion();
+            if (string.IsNullOrWhiteSpace(this.Group))
+                this.Group = ReadServiceGroup();
+            if (string.IsNullOrWhiteSpace(this.Type))
+                this.Type = ReadServiceType();
         }
 
         public void ReadServiceInfo(IConfigurationSet set)
         {
-            this.Name = ReadName(set);
-            this.Key = ReadKey(set);
-            this.Version = ReadVersion(set);
-            this.Group = ReadServiceGroup(set);
-            this.Type = ReadServiceType(set);
+            if (string.IsNullOrWhiteSpace(this.Name))
+                this.Name = ReadName(set);
+            if (string.IsNullOrWhiteSpace(this.Key))
+                this.Key = ReadKey(set);
+            if (string.IsNullOrWhiteSpace(this.Version))
+                this.Version = ReadVersion(set);
+            if (string.IsNullOrWhiteSpace(this.Group))
+                this.Group = ReadServiceGroup(set);
+            if (string.IsNullOrWhiteSpace(this.Type))
+                this.Type = ReadServiceType(set);
         }
 
         private string ReadName(IConfigurationSet set = null)
@@ -128,6 +138,7 @@ namespace ZeroLevel.Services.Applications
             if (_state == ZeroServiceStatus.Running
                || _state == ZeroServiceStatus.Initialized)
             {
+                ReadServiceInfo();
                 _exhange.UseDiscovery();
             }
         }
@@ -137,6 +148,7 @@ namespace ZeroLevel.Services.Applications
             if (_state == ZeroServiceStatus.Running
                || _state == ZeroServiceStatus.Initialized)
             {
+                ReadServiceInfo();
                 _exhange.UseDiscovery(endpoint);
             }
         }
@@ -146,6 +158,7 @@ namespace ZeroLevel.Services.Applications
             if (_state == ZeroServiceStatus.Running
                || _state == ZeroServiceStatus.Initialized)
             {
+                ReadServiceInfo();
                 _exhange.UseDiscovery(endpoint);
             }
         }
@@ -344,7 +357,7 @@ namespace ZeroLevel.Services.Applications
                 try
                 {
                     _state = ZeroServiceStatus.Running;
-                    StartAction();                    
+                    StartAction();
                     Log.Debug($"[{Name}] Service started");
                 }
                 catch (Exception ex)

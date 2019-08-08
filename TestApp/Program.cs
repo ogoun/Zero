@@ -1,6 +1,4 @@
-﻿using System;
-using System.Net;
-using ZeroLevel;
+﻿using ZeroLevel;
 
 namespace TestApp
 {
@@ -9,7 +7,7 @@ namespace TestApp
         private static void Main(string[] args)
         {
             Configuration.Save(Configuration.ReadFromApplicationConfig());
-            Bootstrap.Startup<MyService>(args,                
+            Bootstrap.Startup<MyService>(args,
                 () => Configuration.ReadSetFromIniFile("config.ini"))
                 .EnableConsoleLog(ZeroLevel.Services.Logging.LogLevel.System | ZeroLevel.Services.Logging.LogLevel.FullDebug)
                 //.UseDiscovery()

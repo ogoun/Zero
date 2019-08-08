@@ -15,6 +15,7 @@ namespace ZeroLevel.Network
         IRouter UseHost(IPEndPoint endpoint);
 
         IServiceRoutesStorage RoutesStorage { get; }
+        IServiceRoutesStorage DiscoveryStorage { get; }
 
         ExClient GetConnection(string alias);
         ExClient GetConnection(IPEndPoint endpoint);

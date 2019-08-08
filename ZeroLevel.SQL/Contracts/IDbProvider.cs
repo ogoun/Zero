@@ -18,5 +18,8 @@ namespace ZeroLevel.SqlServer
         int ExecuteNonResult(string query);
         int ExecuteNonResult(string query, DbParameter[] par);
         void LazySelect(string query, DbParameter[] par, Func<DbDataReader, bool> readHandler, int timeout);
+
+        T Read<T>(DbDataReader reader, int index);
+        T Read<T>(DbDataReader reader, string name);
     }
 }

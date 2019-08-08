@@ -252,6 +252,7 @@ namespace ZeroLevel.Network
             }
             return InvokeResult.Fault<IPEndPoint>($"No endpoints by key '{key}'");
         }
+
         public InvokeResult<IEnumerable<IPEndPoint>> GetAll(string key)
         {
             key = key.ToUpperInvariant();
@@ -262,6 +263,13 @@ namespace ZeroLevel.Network
             }
             return InvokeResult.Fault<IEnumerable<IPEndPoint>>($"No endpoints by key '{key}'");
         }
+
+
+        public IEnumerable<KeyValuePair<string, IPEndPoint>> GetAll()
+        {
+            return _tableByKey.SelectMany(pair => pair.Value.Source.Select(s => new KeyValuePair<string, IPEndPoint>(pair.Key, s)));
+        }
+
         public InvokeResult<IPEndPoint> GetByType(string type)
         {
             type = type.ToUpperInvariant();

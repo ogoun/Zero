@@ -20,6 +20,7 @@ namespace ZeroLevel.Network
         private readonly ExClientServerCachee _cachee = new ExClientServerCachee();
 
         public IServiceRoutesStorage RoutesStorage => _user_aliases;
+        public IServiceRoutesStorage DiscoveryStorage => _dicovery_aliases;
         private readonly IZeroService _owner;
 
         #region Ctor        
@@ -506,6 +507,7 @@ namespace ZeroLevel.Network
             {
                 Sheduller.Remove(_register_in_discovery_table_task);
             }
+            UpdateServiceListFromDiscovery();
             _register_in_discovery_table_task = Sheduller.RemindEvery(TimeSpan.FromMilliseconds(500), _update_discovery_table_period, RegisterServicesInDiscovery);
             _update_discovery_table_task = Sheduller.RemindEvery(TimeSpan.FromMilliseconds(750), _register_in_discovery_table_period, UpdateServiceListFromDiscovery);
         }
