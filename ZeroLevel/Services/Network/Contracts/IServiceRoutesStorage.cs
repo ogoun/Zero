@@ -16,6 +16,7 @@ namespace ZeroLevel.Network
         void Remove(IPEndPoint endpoint);
 
         IEnumerable<KeyValuePair<string, IPEndPoint>> GetAll();
+        IEnumerable<string> GetKeys();
 
         InvokeResult<IPEndPoint> Get(string key);
         InvokeResult<IEnumerable<IPEndPoint>> GetAll(string key);

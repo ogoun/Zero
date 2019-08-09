@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using ZeroLevel.Network.SDL;
 using ZeroLevel.Services.Invokation;
 using ZeroLevel.Services.Serialization;
 
@@ -121,6 +122,55 @@ namespace ZeroLevel.Network
                     return this._invoker.Invoke(this._instance, new object[] { client, incoming });
                 }
                 return null;
+            }
+
+            public InboxServiceDescription GetDescription(string name)
+            {
+                return new InboxServiceDescription
+                {
+                    Name = name,
+                    InboxKind = DetectKind(),
+                    Target = _instance?.GetType()?.Name,
+                    IncomingType = GetIncomingTypeDescription(),
+                    OutcomingType = GetOutcomingTypeDescription()
+                };
+            }
+
+            private InboxType GetIncomingTypeDescription()
+            {
+                if (_typeReq == null) return null;
+                return new InboxType
+                {
+                    Name = _typeReq.FullName,
+                    Fields = _typeReq
+                        .GetMembers(BindingFlags.Public | BindingFlags.FlattenHierarchy | BindingFlags.GetField | BindingFlags.GetProperty | BindingFlags.Instance)
+                        .Where(m => m.MemberType == MemberTypes.Field || m.MemberType == MemberTypes.Property)
+                        .Select(f => new KeyValuePair<string, string>(f.Name, (f.MemberType == MemberTypes.Property) ? (f as PropertyInfo).PropertyType.FullName : (f as FieldInfo).FieldType.FullName))
+                        .ToDictionary(pair => pair.Key, pair => pair.Value)
+                };
+            }
+
+            private InboxType GetOutcomingTypeDescription()
+            {
+                if (_typeResp == null) return null;
+                return new InboxType
+                {
+                    Name = _typeResp.FullName,
+                    Fields = _typeResp
+                        .GetMembers(BindingFlags.Public | BindingFlags.FlattenHierarchy | BindingFlags.GetField | BindingFlags.GetProperty | BindingFlags.Instance)
+                        .Where(m => m.MemberType == MemberTypes.Field || m.MemberType == MemberTypes.Property)
+                        .Select(f => new KeyValuePair<string, string>(f.Name, (f.MemberType == MemberTypes.Property) ? (f as PropertyInfo).PropertyType.FullName : (f as FieldInfo).FieldType.FullName))
+                        .ToDictionary(pair => pair.Key, pair => pair.Value)
+                };
+            }
+
+            private InboxKind DetectKind()
+            {
+                if (_typeResp == null)
+                {
+                    return _noArguments ? InboxKind.HandlerNoArgs : InboxKind.Handler;
+                }
+                return _noArguments ? InboxKind.ReqeustorNoArgs : InboxKind.Reqeustor;
             }
         }
 
@@ -291,6 +341,23 @@ namespace ZeroLevel.Network
             return this;
         }
         #endregion
+
+        public IEnumerable<InboxServiceDescription> CollectInboxInfo()
+        {
+            var inboxes = new List<InboxServiceDescription>();
+            foreach (var handlers in _handlers)
+            {
+                foreach (var handler in handlers.Value)
+                {
+                    inboxes.Add(handler.GetDescription(handlers.Key));
+                }
+            }
+            foreach (var requestor in _requestors)
+            {
+                inboxes.Add(requestor.Value.GetDescription(requestor.Key));
+            }
+            return inboxes;
+        }
     }
 
     internal sealed class NullRouter
@@ -311,5 +378,6 @@ namespace ZeroLevel.Network
         public bool ContainsInbox(string inbox) => false;
         public bool ContainsHandlerInbox(string inbox) => false;
         public bool ContainsRequestorInbox(string inbox) => false;
+        public IEnumerable<InboxServiceDescription> CollectInboxInfo() => Enumerable.Empty<InboxServiceDescription>();
     }
 }

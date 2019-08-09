@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using ZeroLevel.Network.SDL;
 
 namespace ZeroLevel.Network
 {
@@ -25,6 +27,8 @@ namespace ZeroLevel.Network
         bool ContainsInbox(string inbox);
         bool ContainsHandlerInbox(string inbox);
         bool ContainsRequestorInbox(string inbox);
+
+        IEnumerable<InboxServiceDescription> CollectInboxInfo();
 
         event Action<ISocketClient> OnDisconnect;
         event Action<ExClient> OnConnect;

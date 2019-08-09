@@ -1,0 +1,57 @@
+﻿<UserControl x:Class="ZeroNetworkMonitor.ServiceControlPanel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:ZeroNetworkMonitor"
+             mc:Ignorable="d" 
+             d:DesignHeight="600" d:DesignWidth="900">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="81"/>
+            <RowDefinition Height="27"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="300"/>
+        </Grid.RowDefinitions>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="27"/>
+                <RowDefinition Height="27"/>
+                <RowDefinition Height="27"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="150"/>
+                <ColumnDefinition Width="200"/>
+                <ColumnDefinition Width="150"/>
+                <ColumnDefinition Width="200"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Label Grid.Row="0" Grid.Column="0" Content="Service Name" VerticalAlignment="Center" HorizontalAlignment="Stretch"/>
+            <TextBlock x:Name="tbName" Grid.Row="0" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Stretch"/>
+            <Label Grid.Row="1" Grid.Column="0" Content="Service Key" VerticalAlignment="Center" HorizontalAlignment="Stretch"/>
+            <TextBlock x:Name="tbKey" Grid.Row="1" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Stretch"/>
+            <Label Grid.Row="2" Grid.Column="0" Content="Version" VerticalAlignment="Center" HorizontalAlignment="Stretch"/>
+            <TextBlock x:Name="tbVersion" Grid.Row="2" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Stretch"/>
+            <Label Grid.Row="0" Grid.Column="2" Content="Service Type" VerticalAlignment="Center" HorizontalAlignment="Stretch"/>
+            <TextBlock x:Name="tbType" Grid.Row="0" Grid.Column="3" VerticalAlignment="Center" HorizontalAlignment="Stretch"/>
+            <Label Grid.Row="1" Grid.Column="2" Content="Service Group" VerticalAlignment="Center" HorizontalAlignment="Stretch"/>
+            <TextBlock x:Name="tbGroup" Grid.Row="1" Grid.Column="3" VerticalAlignment="Center" HorizontalAlignment="Stretch"/>
+        </Grid>
+        <Label Grid.Row="1" Content="Inbox list"/>
+        <ListBox x:Name="lbInboxes" ItemsSource="{Binding}" Grid.Row="2" SelectionChanged="LbInboxes_SelectionChanged">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <WrapPanel>
+                        <TextBlock Text="["/>
+                        <TextBlock Text="{Binding Port}"/>
+                        <TextBlock Text="] "/>
+                        <TextBlock Text="{Binding Name}"/>
+                    </WrapPanel>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+        <Grid Grid.Row="3">
+            <TextBlock  HorizontalAlignment="Stretch" TextWrapping="Wrap" x:Name="tbInboxDescription" VerticalAlignment="Stretch"/>
+        </Grid>
+    </Grid>
+</UserControl>

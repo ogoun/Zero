@@ -242,13 +242,34 @@ namespace ZeroLevel.Network
         }
 
         #region GET
+        public IEnumerable<string> GetKeys()
+        {
+            _lock.EnterReadLock();
+            try
+            {
+                return _tableByKey.Select(pair => pair.Key).ToArray();
+            }
+            finally
+            {
+                _lock.ExitReadLock();
+            }
+        }
+
         public InvokeResult<IPEndPoint> Get(string key)
         {
             key = key.ToUpperInvariant();
-            if (_tableByKey.ContainsKey(key))
+            _lock.EnterReadLock();
+            try
             {
-                if (_tableByKey[key].MoveNext())
-                    return InvokeResult.Succeeding(_tableByKey[key].Current);
+                if (_tableByKey.ContainsKey(key))
+                {
+                    if (_tableByKey[key].MoveNext())
+                        return InvokeResult.Succeeding(_tableByKey[key].Current);
+                }
+            }
+            finally
+            {
+                _lock.ExitReadLock();
             }
             return InvokeResult.Fault<IPEndPoint>($"No endpoints by key '{key}'");
         }
@@ -256,10 +277,18 @@ namespace ZeroLevel.Network
         public InvokeResult<IEnumerable<IPEndPoint>> GetAll(string key)
         {
             key = key.ToUpperInvariant();
-            if (_tableByKey.ContainsKey(key))
+            _lock.EnterReadLock();
+            try
             {
-                if (_tableByKey[key].MoveNext())
-                    return InvokeResult.Succeeding(_tableByKey[key].GetCurrentSeq());
+                if (_tableByKey.ContainsKey(key))
+                {
+                    if (_tableByKey[key].MoveNext())
+                        return InvokeResult.Succeeding(_tableByKey[key].GetCurrentSeq());
+                }
+            }
+            finally
+            {
+                _lock.ExitReadLock();
             }
             return InvokeResult.Fault<IEnumerable<IPEndPoint>>($"No endpoints by key '{key}'");
         }
@@ -267,46 +296,86 @@ namespace ZeroLevel.Network
 
         public IEnumerable<KeyValuePair<string, IPEndPoint>> GetAll()
         {
-            return _tableByKey.SelectMany(pair => pair.Value.Source.Select(s => new KeyValuePair<string, IPEndPoint>(pair.Key, s)));
+            _lock.EnterReadLock();
+            try
+            {
+                return _tableByKey.SelectMany(pair => pair.Value.Source.Select(s => new KeyValuePair<string, IPEndPoint>(pair.Key, s)));
+            }
+            finally
+            {
+                _lock.ExitReadLock();
+            }
         }
 
         public InvokeResult<IPEndPoint> GetByType(string type)
         {
             type = type.ToUpperInvariant();
-            if (_tableByTypes.ContainsKey(type))
+            _lock.EnterReadLock();
+            try
             {
-                if (_tableByTypes[type].MoveNext())
-                    return InvokeResult.Succeeding(_tableByTypes[type].Current);
+                if (_tableByTypes.ContainsKey(type))
+                {
+                    if (_tableByTypes[type].MoveNext())
+                        return InvokeResult.Succeeding(_tableByTypes[type].Current);
+                }
+            }
+            finally
+            {
+                _lock.ExitReadLock();
             }
             return InvokeResult.Fault<IPEndPoint>($"No endpoints by type '{type}'");
         }
         public InvokeResult<IEnumerable<IPEndPoint>> GetAllByType(string type)
         {
             type = type.ToUpperInvariant();
-            if (_tableByTypes.ContainsKey(type))
+            _lock.EnterReadLock();
+            try
             {
-                if (_tableByTypes[type].MoveNext())
-                    return InvokeResult.Succeeding(_tableByTypes[type].GetCurrentSeq());
+                if (_tableByTypes.ContainsKey(type))
+                {
+                    if (_tableByTypes[type].MoveNext())
+                        return InvokeResult.Succeeding(_tableByTypes[type].GetCurrentSeq());
+                }
+            }
+            finally
+            {
+                _lock.ExitReadLock();
             }
             return InvokeResult.Fault<IEnumerable<IPEndPoint>>($"No endpoints by type '{type}'");
         }
         public InvokeResult<IPEndPoint> GetByGroup(string group)
         {
             group = group.ToUpperInvariant();
-            if (_tableByGroups.ContainsKey(group))
+            _lock.EnterReadLock();
+            try
             {
-                if (_tableByGroups[group].MoveNext())
-                    return InvokeResult.Succeeding(_tableByGroups[group].Current);
+                if (_tableByGroups.ContainsKey(group))
+                {
+                    if (_tableByGroups[group].MoveNext())
+                        return InvokeResult.Succeeding(_tableByGroups[group].Current);
+                }
+            }
+            finally
+            {
+                _lock.ExitReadLock();
             }
             return InvokeResult.Fault<IPEndPoint>($"No endpoints by group '{group}'");
         }
         public InvokeResult<IEnumerable<IPEndPoint>> GetAllByGroup(string group)
         {
             group = group.ToUpperInvariant();
-            if (_tableByGroups.ContainsKey(group))
+            _lock.EnterReadLock();
+            try
             {
-                if (_tableByGroups[group].MoveNext())
-                    return InvokeResult.Succeeding(_tableByGroups[group].GetCurrentSeq());
+                if (_tableByGroups.ContainsKey(group))
+                {
+                    if (_tableByGroups[group].MoveNext())
+                        return InvokeResult.Succeeding(_tableByGroups[group].GetCurrentSeq());
+                }
+            }
+            finally
+            {
+                _lock.ExitReadLock();
             }
             return InvokeResult.Fault<IEnumerable<IPEndPoint>>($"No endpoints by group '{group}'");
         }

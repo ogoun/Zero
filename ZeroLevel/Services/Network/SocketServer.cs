@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
+using ZeroLevel.Network.SDL;
 
 namespace ZeroLevel.Network
 {
@@ -143,6 +144,7 @@ namespace ZeroLevel.Network
         public bool ContainsInbox(string inbox) => _router.ContainsInbox(inbox);
         public bool ContainsHandlerInbox(string inbox) => _router.ContainsHandlerInbox(inbox);
         public bool ContainsRequestorInbox(string inbox) => _router.ContainsRequestorInbox(inbox);
+        public IEnumerable<InboxServiceDescription> CollectInboxInfo() => _router.CollectInboxInfo();
         #endregion
     }
 }

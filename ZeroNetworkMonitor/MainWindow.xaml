@@ -1,0 +1,35 @@
+﻿<Window x:Class="ZeroNetworkMonitor.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ZeroNetworkMonitor"        
+        mc:Ignorable="d"
+        Title="MainWindow" Height="600" Width="1080" Loaded="Window_Loaded">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="27"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="199"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="150"/>
+            </Grid.ColumnDefinitions>
+            <Label Content="Discovery endpoint"/>
+            <TextBox x:Name="tbDiscovery" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Stretch"/>
+            <Button Content="Connect" Grid.Column="2" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Width="150" Click="Button_Click"/>
+        </Grid>
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="200"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+                <ListBox ItemsSource="{Binding}" x:Name="lbServices" MouseDoubleClick="LbServices_MouseDoubleClick"/>
+            </ScrollViewer>
+            <local:ServiceControlPanel x:Name="pService" Grid.Column="1" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"/>
+        </Grid>
+    </Grid>
+</Window>

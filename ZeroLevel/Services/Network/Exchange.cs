@@ -5,6 +5,7 @@ using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using ZeroLevel.Models;
+using ZeroLevel.Network.SDL;
 using ZeroLevel.Services.Serialization;
 
 namespace ZeroLevel.Network
@@ -654,17 +655,24 @@ namespace ZeroLevel.Network
         #region Host service
         public IRouter UseHost()
         {
-            return _cachee.GetServer(new IPEndPoint(IPAddress.Any, NetUtils.GetFreeTcpPort()), new Router());
+            return MakeHost(new IPEndPoint(IPAddress.Any, NetUtils.GetFreeTcpPort()));
         }
 
         public IRouter UseHost(int port)
         {
-            return _cachee.GetServer(new IPEndPoint(IPAddress.Any, port), new Router());
+            return MakeHost(new IPEndPoint(IPAddress.Any, port));
         }
 
         public IRouter UseHost(IPEndPoint endpoint)
         {
-            return _cachee.GetServer(endpoint, new Router());
+            return MakeHost(endpoint);
+        }
+
+        private IRouter MakeHost(IPEndPoint endpoint)
+        {
+            var server = _cachee.GetServer(endpoint, new Router());
+            server.RegisterInbox<ServiceDescription>("__service_description__", _ => CollectServiceDescription());
+            return server;
         }
         #endregion
 
@@ -976,6 +984,22 @@ namespace ZeroLevel.Network
             return response;
         }
         #endregion
+
+        private ServiceDescription CollectServiceDescription()
+        {
+            return new ServiceDescription
+            {
+                ServiceInfo = this._owner?.ServiceInfo,
+                Inboxes = _cachee.ServerList
+                    .SelectMany(se => se
+                        .CollectInboxInfo()
+                        .Select(i =>
+                        {
+                            i.Port = se.LocalEndpoint.Port;
+                            return i;
+                        }))
+            };
+        }
 
         public void Dispose()
         {

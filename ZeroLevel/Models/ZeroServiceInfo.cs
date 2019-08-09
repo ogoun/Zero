@@ -40,6 +40,9 @@ namespace ZeroLevel
         public string Version { get; set; }
         /// <summary>
         /// Service port
+        /// 
+        ///     TODO move port out to new class for discovery service
+        /// 
         /// </summary>
         [DataMember]
         public int Port { get; set; }
