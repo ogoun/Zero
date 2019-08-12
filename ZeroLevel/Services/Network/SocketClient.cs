@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
+using System.Threading.Tasks;
 using ZeroLevel.Services.Pools;
 using ZeroLevel.Services.Serialization;
 
@@ -337,8 +338,7 @@ namespace ZeroLevel.Network
         private void ReceiveAsyncCallback(IAsyncResult ar)
         {
             try
-            {
-                EnsureConnection();
+            {                
                 var count = _stream.EndRead(ar);
                 if (count > 0)
                 {
@@ -350,9 +350,10 @@ namespace ZeroLevel.Network
                     // TODO or not TODO
                     Thread.Sleep(1);
                 }
+                EnsureConnection();
                 if (Status == SocketClientStatus.Working
                     || Status == SocketClientStatus.Initialized)
-                {
+                {                    
                     _stream.BeginRead(_buffer, 0, DEFAULT_RECEIVE_BUFFER_SIZE, ReceiveAsyncCallback, null);
                 }
             }
