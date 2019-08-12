@@ -1,35 +1,48 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 using ZeroLevel.Services.Pools;
 
 namespace ZeroLevel.Network
 {
     internal sealed class RequestBuffer
     {
-        private readonly object _reqeust_lock = new object();
+        private SpinLock _reqeust_lock = new SpinLock();
         private Dictionary<long, RequestInfo> _requests = new Dictionary<long, RequestInfo>();
         private static ObjectPool<RequestInfo> _ri_pool = new ObjectPool<RequestInfo>(() => new RequestInfo());
 
         public void RegisterForFrame(int identity, Action<byte[]> callback, Action<string> fail = null)
         {
             var ri = _ri_pool.Allocate();
-            lock (_reqeust_lock)
+            bool take = false;
+            try
             {
+                _reqeust_lock.Enter(ref take);
                 ri.Reset(callback, fail);
                 _requests.Add(identity, ri);
+            }
+            finally
+            {
+                if (take) _reqeust_lock.Exit(false);
             }
         }
 
         public void Fail(long frameId, string message)
         {
             RequestInfo ri = null;
-            lock (_reqeust_lock)
+            bool take = false;
+            try
             {
+                _reqeust_lock.Enter(ref take);
                 if (_requests.ContainsKey(frameId))
                 {
                     ri = _requests[frameId];
                     _requests.Remove(frameId);
                 }
+            }
+            finally
+            {
+                if (take) _reqeust_lock.Exit(false);
             }
             if (ri != null)
             {
@@ -41,13 +54,19 @@ namespace ZeroLevel.Network
         public void Success(long frameId, byte[] data)
         {
             RequestInfo ri = null;
-            lock (_reqeust_lock)
+            bool take = false;
+            try
             {
+                _reqeust_lock.Enter(ref take);
                 if (_requests.ContainsKey(frameId))
                 {
                     ri = _requests[frameId];
                     _requests.Remove(frameId);
                 }
+            }
+            finally
+            {
+                if (take) _reqeust_lock.Exit(false);
             }
             if (ri != null)
             {
@@ -59,12 +78,18 @@ namespace ZeroLevel.Network
         public void StartSend(long frameId)
         {
             RequestInfo ri = null;
-            lock (_reqeust_lock)
+            bool take = false;
+            try
             {
+                _reqeust_lock.Enter(ref take);
                 if (_requests.ContainsKey(frameId))
                 {
                     ri = _requests[frameId];
                 }
+            }
+            finally
+            {
+                if (take) _reqeust_lock.Exit(false);
             }
             if (ri != null)
             {
@@ -76,8 +101,10 @@ namespace ZeroLevel.Network
         {
             var now_ticks = DateTime.UtcNow.Ticks;
             var to_remove = new List<long>();
-            lock (_reqeust_lock)
+            bool take = false;
+            try
             {
+                _reqeust_lock.Enter(ref take);
                 foreach (var pair in _requests)
                 {
                     if (pair.Value.Sended == false) continue;
@@ -87,6 +114,10 @@ namespace ZeroLevel.Network
                         to_remove.Add(pair.Key);
                     }
                 }
+            }
+            finally
+            {
+                if (take) _reqeust_lock.Exit(false);
             }
             foreach (var key in to_remove)
             {

@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
+using ZeroLevel.Services.Pools;
 using ZeroLevel.Services.Serialization;
 
 namespace ZeroLevel.Network
@@ -11,64 +12,81 @@ namespace ZeroLevel.Network
         : BaseSocket, ISocketClient
     {
         #region Private
-
-        private readonly IRouter _router;
-        private Socket _clientSocket;
-        private NetworkStream _stream;
-        private FrameParser _parser = new FrameParser();
-        private Thread _sendThread;
-        private long _heartbeat_key = -1;
-        private long _last_rw_time = DateTime.UtcNow.Ticks;
-        private readonly byte[] _buffer = new byte[DEFAULT_RECEIVE_BUFFER_SIZE];
-        private readonly object _reconnection_lock = new object();
-        private BlockingCollection<SendInfo> _send_queue = new BlockingCollection<SendInfo>();
-        private readonly RequestBuffer _requests = new RequestBuffer();
-        private int _current_heartbeat_period_in_ms = 0;
-        private bool _socket_freezed = false; // используется для связи сервер-клиент, запрещает пересоздание сокета
-
-        private struct SendInfo
+        private class IncomingFrame
+        {
+            public FrameType type;
+            public int identity;
+            public byte[] data;
+        }
+        private class SendFrame
         {
             public bool isRequest;
             public int identity;
             public byte[] data;
         }
+
+        private Socket _clientSocket;
+        private NetworkStream _stream;
+
+        private FrameParser _parser = new FrameParser();
+        private readonly RequestBuffer _requests = new RequestBuffer();
+
+        private bool _socket_freezed = false; // используется для связи сервер-клиент, запрещает пересоздание сокета
+        private int _current_heartbeat_period_in_ms = 0;
+        private long _heartbeat_key = -1;
+        private long _last_rw_time = DateTime.UtcNow.Ticks;
+        private readonly byte[] _buffer = new byte[DEFAULT_RECEIVE_BUFFER_SIZE];
+        private readonly object _reconnection_lock = new object();
+
+        private Thread _sendThread;
+        private Thread _receiveThread;
+        private BlockingCollection<IncomingFrame> _incoming_queue = new BlockingCollection<IncomingFrame>();
+        private BlockingCollection<SendFrame> _send_queue = new BlockingCollection<SendFrame>(BaseSocket.MAX_SEND_QUEUE_SIZE);
+        private static ObjectPool<IncomingFrame> _incoming_pool = new ObjectPool<IncomingFrame>(() => new IncomingFrame());
+        private static ObjectPool<SendFrame> _sendinfo_pool = new ObjectPool<SendFrame>(() => new SendFrame());
         #endregion Private
 
-        public IRouter Router { get { return _router; } }
+        public IRouter Router { get; }
 
         public bool IsEmptySendQueue { get { return _send_queue.Count == 0; } }
 
         public SocketClient(IPEndPoint ep, IRouter router)
         {
-            _router = router;
+            Router = router;
             Endpoint = ep;
             _parser.OnIncoming += _parser_OnIncoming;
-            _sendThread = new Thread(SendFramesJob);
-            _sendThread.IsBackground = true;
-            _sendThread.Start();
+            StartInternalThreads();
             EnsureConnection();
         }
 
         public SocketClient(Socket socket, IRouter router)
         {
-            _router = router;
+            Router = router;
             _socket_freezed = true;
             _clientSocket = socket;
             _stream = new NetworkStream(_clientSocket, true);
             Endpoint = (IPEndPoint)_clientSocket.RemoteEndPoint;
             _parser.OnIncoming += _parser_OnIncoming;
-            _sendThread = new Thread(SendFramesJob);
-            _sendThread.IsBackground = true;
-            _sendThread.Start();
+            StartInternalThreads();
             Working();
 
             _stream.BeginRead(_buffer, 0, DEFAULT_RECEIVE_BUFFER_SIZE, ReceiveAsyncCallback, null);
         }
 
+        private void StartInternalThreads()
+        {
+            _sendThread = new Thread(SendFramesJob);
+            _sendThread.IsBackground = true;
+            _sendThread.Start();
+
+            _receiveThread = new Thread(IncomingFramesJob);
+            _receiveThread.IsBackground = true;
+            _receiveThread.Start();
+        }
+
         #region API
         public event Action<ISocketClient> OnConnect = (_) => { };
         public event Action<ISocketClient> OnDisconnect = (_) => { };
-        public event Action<ISocketClient, byte[], int> OnIncomingData = (_, __, ___) => { };
         public IPEndPoint Endpoint { get; }
 
         public void Request(Frame frame, Action<byte[]> callback, Action<string> fail = null)
@@ -78,13 +96,11 @@ namespace ZeroLevel.Network
             {
                 while (_send_queue.Count >= MAX_SEND_QUEUE_SIZE)
                 {
-                    Thread.Sleep(50);
+                    Thread.Sleep(1);
                 }
-                var sendInfo = new SendInfo
-                {
-                    isRequest = true,
-                    data = NetworkPacketFactory.Reqeust(MessageSerializer.Serialize(frame), out int id)
-                };
+                var sendInfo = _sendinfo_pool.Allocate();
+                sendInfo.isRequest = true;
+                sendInfo.data = NetworkPacketFactory.Reqeust(MessageSerializer.Serialize(frame), out int id);
                 sendInfo.identity = id;
                 _requests.RegisterForFrame(id, callback, fail);
                 _send_queue.Add(sendInfo);
@@ -104,14 +120,13 @@ namespace ZeroLevel.Network
             {
                 while (_send_queue.Count >= MAX_SEND_QUEUE_SIZE)
                 {
-                    Thread.Sleep(50);
+                    Thread.Sleep(1);
                 }
-                _send_queue.Add(new SendInfo
-                {
-                    isRequest = false,
-                    identity = 0,
-                    data = NetworkPacketFactory.Message(MessageSerializer.Serialize(frame))
-                });
+                var info = _sendinfo_pool.Allocate();
+                info.isRequest = false;
+                info.identity = 0;
+                info.data = NetworkPacketFactory.Message(MessageSerializer.Serialize(frame));
+                _send_queue.Add(info);
                 frame.Release();
             }
         }
@@ -123,14 +138,13 @@ namespace ZeroLevel.Network
             {
                 while (_send_queue.Count >= MAX_SEND_QUEUE_SIZE)
                 {
-                    Thread.Sleep(50);
+                    Thread.Sleep(1);
                 }
-                _send_queue.Add(new SendInfo
-                {
-                    isRequest = false,
-                    identity = 0,
-                    data = NetworkPacketFactory.Response(data, identity)
-                });
+                var info = _sendinfo_pool.Allocate();
+                info.isRequest = false;
+                info.identity = 0;
+                info.data = NetworkPacketFactory.Response(data, identity);
+                _send_queue.Add(info);
             }
         }
 
@@ -153,30 +167,66 @@ namespace ZeroLevel.Network
         #endregion
 
         #region Private methods
+        private void IncomingFramesJob()
+        {
+            IncomingFrame frame = default(IncomingFrame);
+            while (Status != SocketClientStatus.Disposed)
+            {
+                if (_send_queue.IsCompleted)
+                {
+                    return;
+                }
+                try
+                {
+                    frame = _incoming_queue.Take();
+                }
+                catch (Exception ex)
+                {
+                    Log.SystemError(ex, "[SocketClient.IncomingFramesJob] _incoming_queue.Take");
+                    _incoming_queue.Dispose();
+                    _incoming_queue = new BlockingCollection<IncomingFrame>();
+                    continue;
+                }
+                try
+                {
+                    switch (frame.type)
+                    {
+                        case FrameType.Message:
+                            Router?.HandleMessage(MessageSerializer.Deserialize<Frame>(frame.data), this);
+                            break;
+                        case FrameType.Request:
+                            var response = Router?.HandleRequest(MessageSerializer.Deserialize<Frame>(frame.data), this);
+                            if (response != null)
+                            {
+                                this.Response(response, frame.identity);
+                            }
+                            break;
+                        case FrameType.Response:
+                            _requests.Success(frame.identity, frame.data);
+                            break;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Log.SystemError(ex, "[SocketClient.IncomingFramesJob] Handle frame");
+                }
+                finally
+                {
+                    _incoming_pool.Free(frame);
+                }
+            }
+        }
+
         private void _parser_OnIncoming(FrameType type, int identity, byte[] data)
         {
             try
             {
-                switch (type)
-                {
-                    case FrameType.KeepAlive:
-                        // Nothing
-                        return;
-                    case FrameType.Message:
-                        _router?.HandleMessage(MessageSerializer.Deserialize<Frame>(data), this);
-                        break;
-                    case FrameType.Request:
-                        var response = _router?.HandleRequest(MessageSerializer.Deserialize<Frame>(data), this);
-                        if (response != null)
-                        {
-                            this.Response(response, identity);
-                        }
-                        break;
-                    case FrameType.Response:
-                        _requests.Success(identity, data);
-                        break;
-                }
-                OnIncomingData(this, data, identity);
+                if (type == FrameType.KeepAlive) return;
+                var incoming = _incoming_pool.Allocate();
+                incoming.data = data;
+                incoming.type = type;
+                incoming.identity = identity;
+                _incoming_queue.Add(incoming);
             }
             catch (Exception ex)
             {
@@ -265,12 +315,11 @@ namespace ZeroLevel.Network
             _requests.TestForTimeouts();
             try
             {
-                _send_queue.Add(new SendInfo
-                {
-                    identity = 0,
-                    isRequest = false,
-                    data = NetworkPacketFactory.KeepAliveMessage()
-                });
+                var info = _sendinfo_pool.Allocate();
+                info.isRequest = false;
+                info.identity = 0;
+                info.data = NetworkPacketFactory.KeepAliveMessage();
+                _send_queue.Add(info);
             }
             catch (Exception ex)
             {
@@ -298,7 +347,7 @@ namespace ZeroLevel.Network
                 }
                 else
                 {
-                    // TODO!!!!!
+                    // TODO or not TODO
                     Thread.Sleep(1);
                 }
                 if (Status == SocketClientStatus.Working
@@ -318,63 +367,10 @@ namespace ZeroLevel.Network
                 OnDisconnect(this);
             }
         }
-        /*
+
         private void SendFramesJob()
         {
-            SendInfo frame;
-            int unsuccess = 0;
-            while (Status != SocketClientStatus.Disposed)
-            {
-                if (_send_queue.IsCompleted)
-                {
-                    return;
-                }
-                if (Status != SocketClientStatus.Working)
-                {
-                    Thread.Sleep(100);
-                    try
-                    {
-                        EnsureConnection();
-                    }
-                    catch (Exception ex)
-                    {
-                        Log.SystemError(ex, "[SocketClient.SendFramesJob] Send next frame fault");
-                    }
-                    if (Status == SocketClientStatus.Disposed) return;
-                    if (Status == SocketClientStatus.Broken)
-                    {
-                        unsuccess++;
-                        if (unsuccess > 30) unsuccess = 30;
-                    }
-                    if (Status == SocketClientStatus.Working)
-                    {
-                        unsuccess = 0;
-                    }
-                    Thread.Sleep(unsuccess * 100);
-                    continue;
-                }
-                try
-                {
-                    frame = _send_queue.Take();
-                    if (frame.isRequest)
-                    {
-                        _requests.StartSend(frame.identity);
-                    }
-                    _stream.Write(frame.data, 0, frame.data.Length);
-                    _last_rw_time = DateTime.UtcNow.Ticks;
-                }
-                catch (Exception ex)
-                {
-                    Log.SystemError(ex, $"[SocketClient.SendFramesJob] Backward send error.");
-                    Broken();
-                    OnDisconnect(this);
-                }
-            }
-        }
-        */
-        private void SendFramesJob()
-        {
-            SendInfo frame = default(SendInfo);
+            SendFrame frame;
             int unsuccess = 0;
             while (Status != SocketClientStatus.Disposed)
             {
@@ -390,7 +386,7 @@ namespace ZeroLevel.Network
                 {
                     Log.SystemError(ex, "[SocketClient.SendFramesJob] send_queue.Take");
                     _send_queue.Dispose();
-                    _send_queue = new BlockingCollection<SendInfo>();
+                    _send_queue = new BlockingCollection<SendFrame>();                    
                     continue;
                 }
                 while (_stream?.CanWrite == false || Status != SocketClientStatus.Working)
@@ -401,7 +397,7 @@ namespace ZeroLevel.Network
                     }
                     catch (Exception ex)
                     {
-                        Log.SystemError(ex, "[SocketClient.SendFramesJob] Send next frame fault");
+                        Log.SystemError(ex, "[SocketClient.SendFramesJob] Connection broken");
                     }
                     if (Status == SocketClientStatus.Disposed)
                     {
@@ -415,23 +411,31 @@ namespace ZeroLevel.Network
                     if (Status == SocketClientStatus.Working)
                     {
                         unsuccess = 0;
+                        break;
                     }
                     Thread.Sleep(unsuccess * 128);
                 }
-                try
+                if (frame != null)
                 {
-                    if (frame.isRequest)
+                    try
                     {
-                        _requests.StartSend(frame.identity);
+                        if (frame.isRequest)
+                        {
+                            _requests.StartSend(frame.identity);
+                        }
+                        _stream.Write(frame.data, 0, frame.data.Length);
+                        _last_rw_time = DateTime.UtcNow.Ticks;
                     }
-                    _stream.Write(frame.data, 0, frame.data.Length);
-                    _last_rw_time = DateTime.UtcNow.Ticks;
-                }
-                catch (Exception ex)
-                {
-                    Log.SystemError(ex, $"[SocketClient.SendFramesJob] _stream.Write");
-                    Broken();
-                    OnDisconnect(this);
+                    catch (Exception ex)
+                    {
+                        Log.SystemError(ex, $"[SocketClient.SendFramesJob] _stream.Write");
+                        Broken();
+                        OnDisconnect(this);
+                    }
+                    finally
+                    {
+                        _sendinfo_pool.Free(frame);
+                    }
                 }
             }
         }

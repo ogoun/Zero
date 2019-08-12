@@ -6,7 +6,6 @@ namespace ZeroLevel.Network
     public interface ISocketClient:
         IDisposable
     {
-        event Action<ISocketClient, byte[], int> OnIncomingData;
         event Action<ISocketClient> OnConnect;
         event Action<ISocketClient> OnDisconnect;
         IPEndPoint Endpoint { get; }
