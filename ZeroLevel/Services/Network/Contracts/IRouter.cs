@@ -6,6 +6,6 @@ namespace ZeroLevel.Network
         : IServer
     {
         void HandleMessage(Frame frame, ISocketClient client);
-        byte[] HandleRequest(Frame frame, ISocketClient client);
+        void HandleRequest(Frame frame, ISocketClient client, Action<byte[]> handler);
     }
 }

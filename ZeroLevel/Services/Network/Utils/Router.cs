@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Threading.Tasks;
 using ZeroLevel.Network.SDL;
 using ZeroLevel.Services.Invokation;
 using ZeroLevel.Services.Serialization;
@@ -98,6 +99,7 @@ namespace ZeroLevel.Network
                 };
             }
 
+            /*
             public object Invoke(byte[] data, ISocketClient client)
             {
                 if (_typeResp == null)
@@ -122,6 +124,60 @@ namespace ZeroLevel.Network
                     return this._invoker.Invoke(this._instance, new object[] { client, incoming });
                 }
                 return null;
+            }
+            */
+
+            public void InvokeAsync(byte[] data, ISocketClient client)
+            {
+                if (_typeResp == null)
+                {
+                    if (_noArguments)
+                    {
+                        Task.Run(() => this._invoker.Invoke(this._instance, new object[] { client }));
+                        /* F**kin .net core not support asyn delegate invoking
+                        this._invoker.BeginInvoke(this._instance, new object[] { client }, null, null);
+                        */
+                    }
+                    else
+                    {
+                        Task.Run(() =>
+                        {
+                            var incoming = (_typeReq == typeof(byte[])) ? data : MessageSerializer.DeserializeCompatible(_typeReq, data);
+                            this._invoker.Invoke(this._instance, new object[] { client, incoming });
+                        });
+                        /* F**kin .net core not support asyn delegate invoking
+                        this._invoker.BeginInvoke(this._instance, new object[] { client, incoming }, null, null);
+                        */
+                    }
+                }
+            }
+
+            public void InvokeAsync(byte[] data, ISocketClient client, Action<object> callback)
+            {
+                if (_typeReq == null)
+                {
+                    Task.Run(() => { callback(this._invoker.Invoke(this._instance, new object[] { client })); });
+                    /* F**kin .net core not support asyn delegate invoking
+                                        this._invoker.BeginInvoke(this._instance, new object[] { client }, ar =>
+                                        {
+                                            callback(ar.AsyncState);
+                                        }, null);
+                    */
+                }
+                else
+                {
+                    Task.Run(() =>
+                    {
+                        var incoming = (_typeReq == typeof(byte[])) ? data : MessageSerializer.DeserializeCompatible(_typeReq, data);
+                        callback(this._invoker.Invoke(this._instance, new object[] { client, incoming }));
+                    });
+                    /* F**kin .net core not support asyn delegate invoking
+                    this._invoker.BeginInvoke(this._instance, new object[] { client, incoming }, ar =>
+                    {
+                        callback(ar.AsyncState);
+                    }, null);
+                    */
+                }
             }
 
             public InboxServiceDescription GetDescription(string name)
@@ -194,7 +250,7 @@ namespace ZeroLevel.Network
                     {
                         try
                         {
-                            handler.Invoke(frame.Payload, client);
+                            handler.InvokeAsync(frame.Payload, client);
                         }
                         catch (Exception ex)
                         {
@@ -209,13 +265,14 @@ namespace ZeroLevel.Network
             }
         }
 
-        public byte[] HandleRequest(Frame frame, ISocketClient client)
+        public void HandleRequest(Frame frame, ISocketClient client, Action<byte[]> handler)
         {
             try
             {
                 if (_requestors.ContainsKey(frame.Inbox))
                 {
-                    return MessageSerializer.SerializeCompatible(_requestors[frame.Inbox].Invoke(frame.Payload, client));
+                    _requestors[frame.Inbox].InvokeAsync(frame.Payload, client
+                        , result => handler(MessageSerializer.SerializeCompatible(result)));
                 }
                 else
                 {
@@ -226,7 +283,6 @@ namespace ZeroLevel.Network
             {
                 Log.SystemError(ex, $"[ExRouter] Fault handle incomind request");
             }
-            return null;
         }
 
         #endregion Invokation
@@ -366,7 +422,7 @@ namespace ZeroLevel.Network
         public event Action<ISocketClient> OnDisconnect = _ => { };
         public event Action<ExClient> OnConnect = _ => { };
         public void HandleMessage(Frame frame, ISocketClient client) { }
-        public byte[] HandleRequest(Frame frame, ISocketClient client) { return null; }
+        public void HandleRequest(Frame frame, ISocketClient client, Action<byte[]> handler) { }
         public IServer RegisterInbox(string inbox, MessageHandler handler) { return this; }
         public IServer RegisterInbox<T>(string inbox, MessageHandler<T> handler) { return this; }
         public IServer RegisterInbox(MessageHandler handler) { return this; }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.IO;
 using System.Net;
 
 namespace ZeroLevel.Services.Serialization
@@ -94,5 +95,7 @@ namespace ZeroLevel.Services.Serialization
         List<ushort> ReadUShortCollection();
 
         #endregion Extensions
+
+        Stream Stream { get; }
     }
 }

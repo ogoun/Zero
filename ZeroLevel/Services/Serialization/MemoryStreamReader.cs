@@ -55,7 +55,7 @@ namespace ZeroLevel.Services.Serialization
                 throw new OutOfMemoryException("Array index out of bounds");
             return (byte)_stream.ReadByte();
         }
-        
+
         public char ReadChar()
         {
             if (CheckOutOfRange(_stream, 2))
@@ -245,7 +245,7 @@ namespace ZeroLevel.Services.Serialization
         public Dictionary<TKey, TValue> ReadDictionary<TKey, TValue>()
         {
             int count = ReadInt32();
-            var collection = new Dictionary<TKey, TValue>(count);            
+            var collection = new Dictionary<TKey, TValue>(count);
             if (count > 0)
             {
                 TKey key;
@@ -562,5 +562,7 @@ namespace ZeroLevel.Services.Serialization
         {
             _stream.Dispose();
         }
+
+        public Stream Stream => _stream;
     }
 }
