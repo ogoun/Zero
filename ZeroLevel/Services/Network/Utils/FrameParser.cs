@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using ZeroLevel.Services;
 
 namespace ZeroLevel.Network
 {
@@ -25,7 +26,7 @@ namespace ZeroLevel.Network
             public bool IdentityFilled;
             public bool PayloadFilled;
             public bool Corrupted;
-            
+
 
             public void Reset(byte magic)
             {
@@ -151,7 +152,7 @@ namespace ZeroLevel.Network
         {
             try
             {
-                Task.Run(() => OnIncoming?.Invoke(type, identity, payload));
+                OnIncoming?.Invoke(type, identity, payload);
             }
             catch (Exception ex)
             {

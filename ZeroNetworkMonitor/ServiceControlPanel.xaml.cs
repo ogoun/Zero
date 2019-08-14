@@ -36,7 +36,7 @@ namespace ZeroNetworkMonitor
         {
             var exchange = Injector.Default.Resolve<IExchange>();
             var client = exchange.GetConnection(serviceKey);
-            client.Request<ServiceDescription>(SDL_INBOX, desc =>
+            client?.Request<ServiceDescription>(SDL_INBOX, desc =>
             {
                 _description = desc;
                 UpdateDescriptionView();

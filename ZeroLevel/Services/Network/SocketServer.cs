@@ -84,8 +84,6 @@ namespace ZeroLevel.Network
                     _connections[connection.Endpoint] = new ExClient(connection);
                     connection.UseKeepAlive(TimeSpan.FromMilliseconds(BaseSocket.MINIMUM_HEARTBEAT_UPDATE_PERIOD_MS));
                     ConnectEventRise(_connections[connection.Endpoint]);
-
-                    Dbg.Timestamp((int)DbgNetworkEvents.ServerClientConnected, $"{connection.Endpoint.Address}:{connection.Endpoint.Port}");
                 }
                 catch (Exception ex)
                 {
@@ -107,8 +105,6 @@ namespace ZeroLevel.Network
                 _connection_set_lock.EnterWriteLock();
                 _connections[client.Endpoint].Dispose();
                 _connections.Remove(client.Endpoint);
-
-                Dbg.Timestamp((int)DbgNetworkEvents.ServerClientDisconnect, $"{client.Endpoint.Address}:{client.Endpoint.Port}");
             }
             finally
             {
@@ -135,7 +131,7 @@ namespace ZeroLevel.Network
 
         #region IRouter
         public void HandleMessage(Frame frame, ISocketClient client) => _router.HandleMessage(frame, client);
-        public void HandleRequest(Frame frame, ISocketClient client, Action<byte[]> handler) => _router.HandleRequest(frame, client, handler);
+        public void HandleRequest(Frame frame, ISocketClient client, int identity, Action<int, byte[]> handler) => _router.HandleRequest(frame, client, identity, handler);
         public IServer RegisterInbox(string inbox, MessageHandler handler) => _router.RegisterInbox(inbox, handler);
         public IServer RegisterInbox(MessageHandler handler) => _router.RegisterInbox(handler);
 

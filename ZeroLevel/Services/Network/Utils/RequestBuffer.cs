@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using ZeroLevel.Services.Pools;
 
@@ -97,21 +98,18 @@ namespace ZeroLevel.Network
             }
         }
 
-        public void TestForTimeouts()
+        public void Timeout(List<long> frameIds)
         {
-            var now_ticks = DateTime.UtcNow.Ticks;
-            var to_remove = new List<long>();
             bool take = false;
             try
             {
                 _reqeust_lock.Enter(ref take);
-                foreach (var pair in _requests)
+                for (int i = 0; i < frameIds.Count; i++)
                 {
-                    if (pair.Value.Sended == false) continue;
-                    var diff = now_ticks - pair.Value.Timestamp;
-                    if (diff > BaseSocket.MAX_REQUEST_TIME_TICKS)
+                    if (_requests.ContainsKey(frameIds[i]))
                     {
-                        to_remove.Add(pair.Key);
+                        _ri_pool.Free(_requests[frameIds[i]]);
+                        _requests.Remove(frameIds[i]);
                     }
                 }
             }
@@ -119,10 +117,33 @@ namespace ZeroLevel.Network
             {
                 if (take) _reqeust_lock.Exit(false);
             }
-            foreach (var key in to_remove)
+        }
+
+        public void TestForTimeouts()
+        {
+            var now_ticks = DateTime.UtcNow.Ticks;
+            var to_remove = new List<long>();
+            KeyValuePair<long, RequestInfo>[] to_proceed;
+            bool take = false;
+            try
             {
-                Fail(key, "Timeout");
+                _reqeust_lock.Enter(ref take);
+                to_proceed = _requests.Select(x => x).ToArray();
             }
+            finally
+            {
+                if (take) _reqeust_lock.Exit(false);
+            }
+            for (int i = 0; i < to_proceed.Length; i++)
+            {
+                if (to_proceed[i].Value.Sended == false) continue;
+                var diff = now_ticks - to_proceed[i].Value.Timestamp;
+                if (diff > BaseSocket.MAX_REQUEST_TIME_TICKS)
+                {
+                    to_remove.Add(to_proceed[i].Key);
+                }
+            }
+            Timeout(to_remove);
         }
     }
 }

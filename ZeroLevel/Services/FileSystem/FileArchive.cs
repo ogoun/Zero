@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.IO;
-using System.Security.AccessControl;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -11,11 +10,11 @@ namespace ZeroLevel.Services.FileSystem
     {
         protected const int DEFAULT_STREAM_BUFFER_SIZE = 16384;
 
-        public async Task Store()
+        public void Store()
         {
             try
             {
-                await StoreImpl().ConfigureAwait(false);
+                StoreImpl();
             }
             catch (Exception ex)
             {
@@ -23,7 +22,7 @@ namespace ZeroLevel.Services.FileSystem
             }
         }
 
-        protected static async Task TransferAsync(Stream input, Stream output)
+        protected static void Transfer(Stream input, Stream output)
         {
             if (input.CanRead == false)
             {
@@ -35,7 +34,7 @@ namespace ZeroLevel.Services.FileSystem
             }
             var readed = 0;
             var buffer = new byte[DEFAULT_STREAM_BUFFER_SIZE];
-            while ((readed = await input.ReadAsync(buffer, 0, buffer.Length).ConfigureAwait(false)) != 0)
+            while ((readed = input.Read(buffer, 0, buffer.Length)) != 0)
             {
                 output.Write(buffer, 0, readed);
             }
@@ -52,7 +51,7 @@ namespace ZeroLevel.Services.FileSystem
             return stream;
         }
 
-        protected abstract Task StoreImpl();
+        protected abstract void StoreImpl();
     }
 
     internal sealed class StoreText :
@@ -67,13 +66,13 @@ namespace ZeroLevel.Services.FileSystem
             _path = path;
         }
 
-        protected override async Task StoreImpl()
+        protected override void StoreImpl()
         {
             using (var input_stream = GenerateStreamFromString(_text))
             {
                 using (var out_stream = File.Create(_path))
                 {
-                    await TransferAsync(input_stream, out_stream).ConfigureAwait(false);
+                    Transfer(input_stream, out_stream);
                 }
             }
         }
@@ -91,7 +90,7 @@ namespace ZeroLevel.Services.FileSystem
             _path = path;
         }
 
-        protected override async Task StoreImpl()
+        protected override void StoreImpl()
         {
             using (var input_stream = new MemoryStream(_data))
             {
@@ -99,7 +98,7 @@ namespace ZeroLevel.Services.FileSystem
                     DEFAULT_STREAM_BUFFER_SIZE,
                     FileOptions.Asynchronous))
                 {
-                    await TransferAsync(input_stream, out_stream).ConfigureAwait(false);
+                    Transfer(input_stream, out_stream);
                 }
             }
         }
@@ -117,7 +116,7 @@ namespace ZeroLevel.Services.FileSystem
             _path = path;
         }
 
-        protected override async Task StoreImpl()
+        protected override void StoreImpl()
         {
             using (_stream)
             {
@@ -125,7 +124,7 @@ namespace ZeroLevel.Services.FileSystem
                     DEFAULT_STREAM_BUFFER_SIZE,
                     FileOptions.Asynchronous))
                 {
-                    await TransferAsync(_stream, out_stream).ConfigureAwait(false);
+                    Transfer(_stream, out_stream);
                 }
             }
         }
@@ -143,7 +142,7 @@ namespace ZeroLevel.Services.FileSystem
             _path = path;
         }
 
-        protected override async Task StoreImpl()
+        protected override void StoreImpl()
         {
             using (var input_stream = File.Open(_input_path, FileMode.Open,
                 FileAccess.Read, FileShare.Read))
@@ -152,7 +151,7 @@ namespace ZeroLevel.Services.FileSystem
                     DEFAULT_STREAM_BUFFER_SIZE,
                     FileOptions.Asynchronous))
                 {
-                    await TransferAsync(input_stream, out_stream).ConfigureAwait(false);
+                    Transfer(input_stream, out_stream);
                 }
             }
         }
@@ -179,6 +178,7 @@ namespace ZeroLevel.Services.FileSystem
         private volatile bool _stopped = false;
         private string _currentArchivePath;
         private bool _split_by_date = false;
+        private Thread _backThread;
 
         public FileArchive(string base_path,
             string ext,
@@ -196,7 +196,9 @@ namespace ZeroLevel.Services.FileSystem
                     () => (DateTime.Now.AddDays(1).Date - DateTime.Now).Add(TimeSpan.FromMilliseconds(100)),
                     RenewArchivePath);
             }
-            Task.Run(Consume);
+            _backThread = new Thread(Consume);
+            _backThread.IsBackground = true;
+            _backThread.Start();
         }
 
         private void RenewArchivePath()
@@ -216,14 +218,14 @@ namespace ZeroLevel.Services.FileSystem
             }
         }
 
-        private async Task Consume()
+        private void Consume()
         {
             do
             {
                 StoreTask result;
                 while (_tasks.TryDequeue(out result))
                 {
-                    await result.Store().ConfigureAwait(false);
+                    result.Store();
                 }
                 Thread.Sleep(100);
             } while (_disposed == false);
@@ -255,7 +257,7 @@ namespace ZeroLevel.Services.FileSystem
         {
             if (immediate)
             {
-                new StoreFile(file_path, CreateArchiveFilePath(subfolder_name, file_name)).Store().Wait();
+                new StoreFile(file_path, CreateArchiveFilePath(subfolder_name, file_name)).Store();
             }
             else
             {
@@ -391,13 +393,14 @@ namespace ZeroLevel.Services.FileSystem
             while (_disposed == false)
             {
                 result = _tasks.Take();
-                result.Store().ContinueWith(t =>
+                try
                 {
-                    if (t.IsFaulted)
-                    {
-                        Log.SystemError(t.Exception, "[FileBuffer] Fault store file");
-                    }
-                });
+                    result.Store();
+                }
+                catch (Exception ex)
+                {
+                    Log.SystemError(ex, "[FileBuffer] Fault store file");
+                }
             }
         }
 
@@ -433,7 +436,7 @@ namespace ZeroLevel.Services.FileSystem
         {
             if (immediate)
             {
-                new StoreFile(file_path, CreateArchiveFilePath(name)).Store().Wait();
+                new StoreFile(file_path, CreateArchiveFilePath(name)).Store();
             }
             else
             {
