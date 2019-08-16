@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.IO;
 using System.Net;
 using System.Net.Sockets;
+using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
 using ZeroLevel.Services;
@@ -453,7 +455,33 @@ namespace ZeroLevel.Network
             s.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.DontLinger, true);
             return s;
         }
+        /* TODO to test
+        public async Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+        {
+            try
+            {
+                // Workaround for: https://github.com/dotnet/corefx/issues/24430
+                using (cancellationToken.Register(Dispose))
+                {
+                    if (cancellationToken.IsCancellationRequested)
+                    {
+                        return 0;
+                    }
 
+                    return await _stream.ReadAsync(buffer, offset, count, cancellationToken).ConfigureAwait(false);
+                }
+            }
+            catch (IOException exception)
+            {
+                if (exception.InnerException is SocketException socketException)
+                {
+                    ExceptionDispatchInfo.Capture(socketException).Throw();
+                }
+
+                throw;
+            }
+        }
+        */
         #endregion Helper
 
         public override void Dispose()

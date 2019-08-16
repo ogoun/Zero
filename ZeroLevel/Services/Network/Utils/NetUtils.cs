@@ -26,6 +26,7 @@ namespace ZeroLevel.Network
                 try
                 {
                     socket.Connect(endpoint);
+                    socket.Shutdown(SocketShutdown.Both);
                     socket.Close();
                     return true;
                 }

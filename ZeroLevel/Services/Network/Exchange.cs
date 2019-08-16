@@ -6,7 +6,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using ZeroLevel.Models;
 using ZeroLevel.Network.SDL;
-using ZeroLevel.Services.Serialization;
 
 namespace ZeroLevel.Network
 {
@@ -521,23 +520,21 @@ namespace ZeroLevel.Network
                 var discoveryClient = _cachee.GetClient(discovery_endpoint.Value, true);
                 if (discoveryClient != null)
                 {
-                    var services = _cachee.ServerList.
-                        Select(s =>
-                        {
-                            var info = MessageSerializer.Copy(_owner.ServiceInfo);
-                            info.Port = s.LocalEndpoint.Port;
-                            return info;
-                        }).
-                        ToList();
-                    foreach (var service in services)
+                    foreach (var service in _cachee.ServerList)
                     {
-                        var request = discoveryClient.Request<ZeroServiceInfo, InvokeResult>("register", service, r =>
-                        {
-                            if (!r.Success)
+                        var request = discoveryClient.Request<ServiceRegisterInfo, InvokeResult>("register"
+                            , new ServiceRegisterInfo
                             {
-                                Log.SystemWarning($"[Exchange.RegisterServicesInDiscovery] Register canceled. {r.Comment}");
+                                Port = service.LocalEndpoint.Port,
+                                ServiceInfo = _owner.ServiceInfo
                             }
-                        });
+                            , r =>
+                            {
+                                if (!r.Success)
+                                {
+                                    Log.SystemWarning($"[Exchange.RegisterServicesInDiscovery] Register canceled. {r.Comment}");
+                                }
+                            });
                         if (request.Success == false)
                         {
                             Log.SystemWarning($"[Exchange.RegisterServicesInDiscovery] Register canceled.{request.Comment}");
@@ -557,36 +554,22 @@ namespace ZeroLevel.Network
                 {
                     try
                     {
-                        var ir = discoveryClient.Request<IEnumerable<ServiceEndpointsInfo>>("services", records =>
+                        var ir = discoveryClient.Request<IEnumerable<ServiceEndpointInfo>>("services", records =>
                         {
                             if (records == null)
                             {
                                 Log.SystemWarning("[Exchange.UpdateServiceListFromDiscovery] UpdateServiceListInfo. Discrovery response is empty");
                                 return;
                             }
-                            var endpoints = new HashSet<IPEndPoint>();
                             _dicovery_aliases.BeginUpdate();
                             try
                             {
                                 foreach (var service in records)
                                 {
-                                    endpoints.Clear();
-                                    foreach (var ep in service.Endpoints)
-                                    {
-                                        try
-                                        {
-                                            var endpoint = NetUtils.CreateIPEndPoint(ep);
-                                            endpoints.Add(endpoint);
-                                        }
-                                        catch
-                                        {
-                                            Log.SystemWarning($"[Exchange.UpdateServiceListFromDiscovery] Can't parse address {ep} as IPEndPoint");
-                                        }
-                                    }
-                                    _dicovery_aliases.Set(service.ServiceKey,
-                                        service.ServiceType,
-                                        service.ServiceGroup,
-                                        endpoints);
+                                    _dicovery_aliases.Set(service.ServiceInfo.ServiceKey
+                                        , service.ServiceInfo.ServiceType
+                                        , service.ServiceInfo.ServiceGroup
+                                        , NetUtils.CreateIPEndPoint(service.Endpoint));
                                 }
                                 _dicovery_aliases.Commit();
                             }
@@ -997,7 +980,7 @@ namespace ZeroLevel.Network
                         {
                             i.Port = se.LocalEndpoint.Port;
                             return i;
-                        }))
+                        })).ToList()
             };
         }
 

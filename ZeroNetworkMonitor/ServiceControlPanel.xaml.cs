@@ -36,11 +36,29 @@ namespace ZeroNetworkMonitor
         {
             var exchange = Injector.Default.Resolve<IExchange>();
             var client = exchange.GetConnection(serviceKey);
-            client?.Request<ServiceDescription>(SDL_INBOX, desc =>
+
+            exchange.RequestBroadcast<ServiceDescription>(serviceKey, SDL_INBOX, records =>
+            {
+                if (records != null && records.Any())
+                {
+                    _description = records.First();
+                    foreach (var r in records.Skip(1))
+                    {
+                        _description.Inboxes.AddRange(r.Inboxes);
+                    }
+                }
+                else
+                {
+                    _description = null;
+                }
+                UpdateDescriptionView();
+            });
+
+            /*client?.Request<ServiceDescription>(SDL_INBOX, desc =>
             {
                 _description = desc;
                 UpdateDescriptionView();
-            });
+            });*/
         }
 
         private void UpdateDescriptionView()

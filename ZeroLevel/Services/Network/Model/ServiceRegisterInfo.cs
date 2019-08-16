@@ -3,41 +3,38 @@ using ZeroLevel.Services.Serialization;
 
 namespace ZeroLevel.Network
 {
-    /// <summary>
-    /// Endpoint
-    /// </summary>
-    public class ServiceEndpointInfo :
-        IBinarySerializable, IEquatable<ServiceEndpointInfo>
+    public class ServiceRegisterInfo :
+        IBinarySerializable, IEquatable<ServiceRegisterInfo>
     {
-        public string Endpoint { get; set; }
+        public int Port { get; set; }
         public ZeroServiceInfo ServiceInfo { get; set; }
 
-        public bool Equals(ServiceEndpointInfo other)
+        public bool Equals(ServiceRegisterInfo other)
         {
             if (other == null) return false;
-            if (string.Compare(this.Endpoint, other.Endpoint, true) != 0) return false;
+            if (this.Port != other.Port) return false;
             return this.ServiceInfo?.Equals(other.ServiceInfo) ?? other != null ? false : true;
         }
 
         public override bool Equals(object obj)
         {
-            return this.Equals(obj as ServiceEndpointInfo);
+            return this.Equals(obj as ServiceRegisterInfo);
         }
 
         public override int GetHashCode()
         {
-            return this.ServiceInfo?.GetHashCode() ?? 0 ^ Endpoint?.GetHashCode() ?? 0;
+            return Port.GetHashCode() ^ this.ServiceInfo.GetHashCode();
         }
 
         public void Serialize(IBinaryWriter writer)
         {
-            writer.WriteString(this.Endpoint);
+            writer.WriteInt32(this.Port);
             writer.Write(this.ServiceInfo);
         }
 
         public void Deserialize(IBinaryReader reader)
         {
-            this.Endpoint = reader.ReadString();
+            this.Port = reader.ReadInt32();
             this.ServiceInfo = reader.Read<ZeroServiceInfo>();
         }
     }

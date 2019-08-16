@@ -7,7 +7,7 @@ namespace ZeroLevel.Network.SDL
         : IBinarySerializable
     {
         public ZeroServiceInfo ServiceInfo { get; set; }
-        public IEnumerable<InboxServiceDescription> Inboxes { get; set; }
+        public List<InboxServiceDescription> Inboxes { get; set; }
 
         public void Deserialize(IBinaryReader reader)
         {

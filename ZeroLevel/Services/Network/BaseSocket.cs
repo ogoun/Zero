@@ -49,7 +49,7 @@ namespace ZeroLevel.Network
         /// <summary>
         /// The size of the message queue to send
         /// </summary>
-        public const int MAX_SEND_QUEUE_SIZE = 1024;
+        public const int MAX_SEND_QUEUE_SIZE = 256;
 
         protected void Broken() => Status = Status == SocketClientStatus.Disposed ? Status : SocketClientStatus.Broken;
         protected void Disposed() => Status = SocketClientStatus.Disposed;

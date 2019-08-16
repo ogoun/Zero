@@ -10,6 +10,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="81"/>
             <RowDefinition Height="27"/>
+            <RowDefinition Height="27"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="300"/>
         </Grid.RowDefinitions>
@@ -37,8 +38,9 @@
             <Label Grid.Row="1" Grid.Column="2" Content="Service Group" VerticalAlignment="Center" HorizontalAlignment="Stretch"/>
             <TextBlock x:Name="tbGroup" Grid.Row="1" Grid.Column="3" VerticalAlignment="Center" HorizontalAlignment="Stretch"/>
         </Grid>
-        <Label Grid.Row="1" Content="Inbox list"/>
-        <ListBox x:Name="lbInboxes" ItemsSource="{Binding}" Grid.Row="2" SelectionChanged="LbInboxes_SelectionChanged">
+        <ComboBox Grid.Row="1" x:Name="cbEndpoints" ItemsSource="{Binding}"/>
+        <Label Grid.Row="2" Content="Inbox list"/>
+        <ListBox x:Name="lbInboxes" ItemsSource="{Binding}" Grid.Row="3" SelectionChanged="LbInboxes_SelectionChanged">
             <ListBox.ItemTemplate>
                 <DataTemplate>
                     <WrapPanel>
@@ -50,7 +52,7 @@
                 </DataTemplate>
             </ListBox.ItemTemplate>
         </ListBox>
-        <Grid Grid.Row="3">
+        <Grid Grid.Row="4">
             <TextBlock  HorizontalAlignment="Stretch" TextWrapping="Wrap" x:Name="tbInboxDescription" VerticalAlignment="Stretch"/>
         </Grid>
     </Grid>

@@ -1,4 +1,5 @@
-﻿using ZeroLevel.Models;
+﻿using System.Linq;
+using ZeroLevel.Models;
 using ZeroLevel.Network;
 using ZeroLevel.Services.Applications;
 
@@ -8,6 +9,7 @@ namespace ZeroLevel.Discovery
         : BaseZeroService
     {
         private IRouter _exInbox;
+        private ServiceEndpointsTable _table;
 
         public DiscoveryService()
             : base("Discovery")
@@ -16,12 +18,11 @@ namespace ZeroLevel.Discovery
 
         protected override void StartAction()
         {
-            var routeTable = new RouteTable();
-            Injector.Default.Register<RouteTable>(routeTable);
+            _table = new ServiceEndpointsTable();
             var servicePort = Configuration.Default.First<int>("port");
             _exInbox = UseHost(servicePort);
-            _exInbox.RegisterInbox("services", (_) => routeTable.Get());
-            _exInbox.RegisterInbox<ZeroServiceInfo, InvokeResult>("register", (client, info) => routeTable.Append(info, client));
+            _exInbox.RegisterInbox("services", (_) => _table.GetRoutingTable().ToList());
+            _exInbox.RegisterInbox<ServiceRegisterInfo, InvokeResult>("register", (client, info) => _table.AppendOrUpdate(info, client));
         }
 
         protected override void StopAction()
