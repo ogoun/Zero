@@ -96,15 +96,30 @@ namespace ZeroLevel
         {
             try
             {
-                Log.Debug($"[Bootstrap] Resolve assembly '{args.Name}'");
+                Log.Info($"[Bootstrap] Resolve assembly '{args.Name}'");
                 if (args.Name.StartsWith("Newtonsoft.Json", StringComparison.Ordinal))
                 {
                     return Assembly.LoadFile(Path.Combine(Configuration.BaseDirectory, "Newtonsoft.Json.dll"));
                 }
-                var candidates = Directory.GetFiles(Path.Combine(Configuration.BaseDirectory), args.Name, SearchOption.TopDirectoryOnly);
+                var candidates = Directory.GetFiles(Path.Combine(Configuration.BaseDirectory), "*.dll", SearchOption.TopDirectoryOnly)?.ToList();
                 if (candidates != null && candidates.Any())
                 {
-                    return Assembly.LoadFile(candidates.First());
+                    int max = -1; int index = -1;
+                    for (int i = 0; i < candidates.Count; i++)
+                    {
+                        if (args.Name.IndexOf(candidates[i]) >= 0)
+                        {
+                            if (max < candidates[i].Length)
+                            {
+                                max = candidates[i].Length;
+                                index = i;
+                            }
+                        }
+                    }
+                    if (index != -1)
+                    {
+                        return Assembly.LoadFile(candidates[index]);
+                    }
                 }
             }
             catch (Exception ex)
