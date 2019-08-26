@@ -33,6 +33,8 @@ namespace ZeroLevel.Services.Pools
         // than "new T()".
         private readonly Factory _factory;
 
+        public int Count => _items?.Length ?? 0;
+
         public ObjectPool(Factory factory)
             : this(factory, Environment.ProcessorCount * 2)
         { }

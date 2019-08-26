@@ -1,4 +1,5 @@
 ﻿using System;
+using ZeroLevel.Logging;
 using ZeroLevel.Services.Logging;
 using ZeroLevel.Services.Logging.Implementation;
 

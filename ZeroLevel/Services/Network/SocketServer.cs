@@ -76,9 +76,7 @@ namespace ZeroLevel.Network
                 try
                 {
                     var client_socket = _serverSocket.EndAccept(ar);
-                    _serverSocket.BeginAccept(BeginAcceptCallback, null);
                     _connection_set_lock.EnterWriteLock();
-
                     var connection = new SocketClient(client_socket, _router);
                     connection.OnDisconnect += Connection_OnDisconnect;
                     _connections[connection.Endpoint] = new ExClient(connection);
@@ -88,12 +86,24 @@ namespace ZeroLevel.Network
                 catch (Exception ex)
                 {
                     Broken();
-                    Log.SystemError(ex, "[ZSocketServer] Error with connect accepting");
+                    Log.SystemError(ex, "[ZSocketServer.BeginAcceptCallback] Error with connect accepting");
                 }
                 finally
                 {
-                    _connection_set_lock.ExitWriteLock();
+                    _connection_set_lock.ExitWriteLock();                    
                 }
+                try
+                {
+                    _serverSocket.BeginAccept(BeginAcceptCallback, null);
+                }
+                catch (Exception ex)
+                {
+                    Log.SystemError(ex, "[ZSocketServer.BeginAcceptCallback] BeginAccept error");
+                }
+            }
+            else
+            {
+                Log.Warning($"Server socket change state to: {Status}");
             }
         }
 

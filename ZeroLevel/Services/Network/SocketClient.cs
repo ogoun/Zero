@@ -1,13 +1,8 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.IO;
 using System.Net;
 using System.Net.Sockets;
-using System.Runtime.ExceptionServices;
 using System.Threading;
-using System.Threading.Tasks;
-using ZeroLevel.Services;
 using ZeroLevel.Services.Pools;
 using ZeroLevel.Services.Serialization;
 
@@ -17,17 +12,24 @@ namespace ZeroLevel.Network
         : BaseSocket, ISocketClient
     {
         #region Private
-        private struct IncomingFrame
+        private class IncomingFrame
         {
+            private IncomingFrame() { }
             public FrameType type;
             public int identity;
             public byte[] data;
+
+            public static IncomingFrame NewFrame() => new IncomingFrame();
         }
-        private struct SendFrame
+        private class SendFrame
         {
+            private SendFrame() { }
+
             public bool isRequest;
             public int identity;
             public byte[] data;
+
+            public static SendFrame NewFrame() => new SendFrame();
         }
 
         private Socket _clientSocket;
@@ -47,6 +49,8 @@ namespace ZeroLevel.Network
         private Thread _receiveThread;
         private BlockingCollection<IncomingFrame> _incoming_queue = new BlockingCollection<IncomingFrame>();
         private BlockingCollection<SendFrame> _send_queue = new BlockingCollection<SendFrame>(BaseSocket.MAX_SEND_QUEUE_SIZE);
+        private ObjectPool<IncomingFrame> _incoming_frames_pool = new ObjectPool<IncomingFrame>(() => IncomingFrame.NewFrame());
+        private ObjectPool<SendFrame> _send_frames_pool = new ObjectPool<SendFrame>(() => SendFrame.NewFrame());
         #endregion Private
 
         public IRouter Router { get; }
@@ -105,12 +109,11 @@ namespace ZeroLevel.Network
                     Thread.Sleep(1);
                 }
                 _requests.RegisterForFrame(id, callback, fail);
-                _send_queue.Add(new SendFrame
-                {
-                    isRequest = true,
-                    data = data,
-                    identity = id
-                });
+                var sf = _send_frames_pool.Allocate();
+                sf.isRequest = true;
+                sf.identity = id;
+                sf.data = data;
+                _send_queue.Add(sf);
 
             }
         }
@@ -132,15 +135,14 @@ namespace ZeroLevel.Network
                 {
                     Thread.Sleep(1);
                 }
-                _send_queue.Add(new SendFrame
-                {
-                    isRequest = false,
-                    identity = 0,
-                    data = data
-                });
+                var sf = _send_frames_pool.Allocate();
+                sf.isRequest = false;
+                sf.identity = 0;
+                sf.data = data;
+                _send_queue.Add(sf);
             }
         }
-        
+
         public void Response(byte[] data, int identity)
         {
             if (data == null) throw new ArgumentNullException(nameof(data));
@@ -150,12 +152,11 @@ namespace ZeroLevel.Network
                 {
                     Thread.Sleep(1);
                 }
-                _send_queue.Add(new SendFrame
-                {
-                    isRequest = false,
-                    identity = 0,
-                    data = NetworkPacketFactory.Response(data, identity)
-                });
+                var sf = _send_frames_pool.Allocate();
+                sf.isRequest = false;
+                sf.identity = 0;
+                sf.data = NetworkPacketFactory.Response(data, identity);
+                _send_queue.Add(sf);
             }
         }
 
@@ -184,12 +185,11 @@ namespace ZeroLevel.Network
             try
             {
                 if (type == FrameType.KeepAlive) return;
-                _incoming_queue.Add(new IncomingFrame
-                {
-                    data = data,
-                    type = type,
-                    identity = identity
-                });
+                var inc_frame = _incoming_frames_pool.Allocate();
+                inc_frame.data = data;
+                inc_frame.type = type;
+                inc_frame.identity = identity;
+                _incoming_queue.Add(inc_frame);
             }
             catch (Exception ex)
             {
@@ -278,12 +278,10 @@ namespace ZeroLevel.Network
             _requests.TestForTimeouts();
             try
             {
-                var info = new SendFrame
-                {
-                    isRequest = false,
-                    identity = 0,
-                    data = NetworkPacketFactory.KeepAliveMessage()
-                };
+                var info = _send_frames_pool.Allocate();
+                info.isRequest = false;
+                info.identity = 0;
+                info.data = NetworkPacketFactory.KeepAliveMessage();
                 _send_queue.Add(info);
             }
             catch (Exception ex)
@@ -346,6 +344,10 @@ namespace ZeroLevel.Network
                         _incoming_queue.Dispose();
                         _incoming_queue = new BlockingCollection<IncomingFrame>();
                     }
+                    if (frame != null)
+                    {
+                        _incoming_frames_pool.Free(frame);
+                    }
                     continue;
                 }
                 try
@@ -377,12 +379,16 @@ namespace ZeroLevel.Network
                 {
                     Log.SystemError(ex, "[SocketClient.IncomingFramesJob] Handle frame");
                 }
+                finally
+                {
+                    _incoming_frames_pool.Free(frame);
+                }
             }
         }
 
         private void SendFramesJob()
         {
-            SendFrame frame;
+            SendFrame frame = null;
             int unsuccess = 0;
             while (Status != SocketClientStatus.Disposed && !_send_queue.IsCompleted)
             {
@@ -397,6 +403,10 @@ namespace ZeroLevel.Network
                     {
                         _send_queue.Dispose();
                         _send_queue = new BlockingCollection<SendFrame>();
+                    }
+                    if (frame != null)
+                    {
+                        _send_frames_pool.Free(frame);
                     }
                     continue;
                 }
@@ -440,6 +450,10 @@ namespace ZeroLevel.Network
                     Log.SystemError(ex, $"[SocketClient.SendFramesJob] _stream.Write");
                     Broken();
                     OnDisconnect(this);
+                }
+                finally
+                {
+                    _send_frames_pool.Free(frame);
                 }
             }
         }

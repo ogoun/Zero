@@ -4,11 +4,11 @@ using System.Globalization;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
-using System.Security.AccessControl;
 using System.Text;
 using ZeroLevel.Services.FileSystem;
+using ZeroLevel.Services.Logging;
 
-namespace ZeroLevel.Services.Logging.Implementation
+namespace ZeroLevel.Logging
 {
     public sealed class TextFileLoggerOptions
     {
