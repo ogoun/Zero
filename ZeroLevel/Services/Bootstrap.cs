@@ -96,31 +96,47 @@ namespace ZeroLevel
         {
             try
             {
-                Log.Info($"[Bootstrap] Resolve assembly '{args.Name}'");
+                Log.Info($"[Bootstrap] Resolve assembly '{args.Name}' {args.Name}");
                 if (args.Name.StartsWith("Newtonsoft.Json", StringComparison.Ordinal))
                 {
                     return Assembly.LoadFile(Path.Combine(Configuration.BaseDirectory, "Newtonsoft.Json.dll"));
                 }
-                var candidates = Directory.GetFiles(Path.Combine(Configuration.BaseDirectory), "*.dll", SearchOption.TopDirectoryOnly)?.ToList();
-                if (candidates != null && candidates.Any())
+                string name = args.Name.Split(',')[0];
+                if (name.EndsWith(".resources")) return null;
+
+                foreach (string file in Directory.
+                    GetFiles(Path.Combine(Configuration.BaseDirectory), "*.dll", SearchOption.TopDirectoryOnly))
                 {
-                    int max = -1; int index = -1;
-                    for (int i = 0; i < candidates.Count; i++)
+                    if (file.IndexOf(name, StringComparison.OrdinalIgnoreCase) >= 0)
                     {
-                        if (args.Name.IndexOf(candidates[i]) >= 0)
-                        {
-                            if (max < candidates[i].Length)
-                            {
-                                max = candidates[i].Length;
-                                index = i;
-                            }
-                        }
-                    }
-                    if (index != -1)
-                    {
-                        return Assembly.LoadFile(candidates[index]);
+                        Log.Info($"[Bootstrap] Resolve assembly '{args.Name}' found '{file}'");
+                        return Assembly.LoadFile(file);
                     }
                 }
+
+                //var candidates = Directory.GetFiles(Path.Combine(Configuration.BaseDirectory), name + ".dll", SearchOption.TopDirectoryOnly)
+                //    ?.Select(s => Path.GetFileNameWithoutExtension(s))
+                //    ?.ToList();
+                //if (candidates != null && candidates.Any())
+                //{
+                //    int max = -1; int index = -1;
+                //    for (int i = 0; i < candidates.Count; i++)
+                //    {
+                //        if (args.Name.IndexOf(candidates[i], StringComparison.OrdinalIgnoreCase) >= 0)
+                //        {
+                //            if (max < candidates[i].Length)
+                //            {
+                //                max = candidates[i].Length;
+                //                index = i;
+                //            }
+                //        }
+                //    }
+                //    if (index != -1)
+                //    {
+
+                //        return Assembly.LoadFile(Path.Combine(Configuration.BaseDirectory, candidates[index] + ".dll"));
+                //    }
+                //}
             }
             catch (Exception ex)
             {
