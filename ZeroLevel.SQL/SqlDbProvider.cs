@@ -6,6 +6,31 @@ using System.Data.SqlClient;
 
 namespace ZeroLevel.SqlServer
 {
+    public class DbReader
+        :IDisposable
+    {
+        private readonly DbConnection _connection;
+        private readonly IDbCommand _command;
+
+        public DbReader(DbConnection connection, IDbCommand command)
+        {
+            _connection = connection;
+            _command = command;
+        }
+
+        public IDataReader GetReader()
+        {
+            return _command.ExecuteReader(CommandBehavior.CloseConnection);
+        }
+
+        public void Dispose()
+        {
+            _command.Dispose();
+            _connection.Close();
+            _connection.Dispose();
+        }
+    }
+
     public class SqlDbProvider :
         IDbProvider
     {
@@ -184,6 +209,13 @@ namespace ZeroLevel.SqlServer
             }
         }
         #endregion
+
+        public DbReader ExecuteReader(string query, DbParameter[] par)
+        {
+            var connection = _factory.CreateConnection();
+            return new DbReader(connection, CreateCommand(connection, query, par, Timeout));
+
+        }
 
         #region LazySelect
         public void LazySelect(string query, DbParameter[] par, Func<DbDataReader, bool> readHandler, int timeout = Timeout)
