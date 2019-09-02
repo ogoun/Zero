@@ -7,7 +7,7 @@ using System.Data.SqlClient;
 namespace ZeroLevel.SqlServer
 {
     public class DbReader
-        :IDisposable
+        : IDisposable
     {
         private readonly DbConnection _connection;
         private readonly IDbCommand _command;
@@ -76,6 +76,7 @@ namespace ZeroLevel.SqlServer
                         cmd.ExecuteNonQuery();
                     }
                 }
+                connection.Close();
             }
         }
 
@@ -88,9 +89,16 @@ namespace ZeroLevel.SqlServer
         {
             using (DbConnection connection = _factory.CreateConnection())
             {
-                using (var cmd = CreateCommand(connection, query, par, Timeout))
+                try
                 {
-                    return cmd.ExecuteNonQuery();
+                    using (var cmd = CreateCommand(connection, query, par, Timeout))
+                    {
+                        return cmd.ExecuteNonQuery();
+                    }
+                }
+                finally
+                {
+                    connection.Close();
                 }
             }
         }
@@ -108,6 +116,7 @@ namespace ZeroLevel.SqlServer
             }
             finally
             {
+                connection.Close();
                 connection.Dispose();
             }
         }
@@ -148,6 +157,7 @@ namespace ZeroLevel.SqlServer
                         da.Fill(ds);
                     }
                 }
+                connection.Close();
             }
             return ds;
         }
@@ -164,6 +174,7 @@ namespace ZeroLevel.SqlServer
                         da.Fill(ds);
                     }
                 }
+                connection.Close();
             }
             return ds;
         }
@@ -174,9 +185,16 @@ namespace ZeroLevel.SqlServer
         {
             using (var connection = _factory.CreateConnection())
             {
-                using (var cmd = CreateCommand(connection, query, null, Timeout))
+                try
                 {
-                    return cmd.ExecuteScalar();
+                    using (var cmd = CreateCommand(connection, query, null, Timeout))
+                    {
+                        return cmd.ExecuteScalar();
+                    }
+                }
+                finally
+                {
+                    connection.Close();
                 }
             }
         }
@@ -185,9 +203,16 @@ namespace ZeroLevel.SqlServer
         {
             using (var connection = _factory.CreateConnection())
             {
-                using (var cmd = CreateCommand(connection, query, par, Timeout))
+                try
                 {
-                    return cmd.ExecuteScalar();
+                    using (var cmd = CreateCommand(connection, query, par, Timeout))
+                    {
+                        return cmd.ExecuteScalar();
+                    }
+                }
+                finally
+                {
+                    connection.Close();
                 }
             }
         }
@@ -198,13 +223,20 @@ namespace ZeroLevel.SqlServer
         {
             using (var connection = _factory.CreateConnection())
             {
-                using (var command = new SqlCommand(name, connection)
+                try
                 {
-                    CommandType = CommandType.StoredProcedure
-                })
+                    using (var command = new SqlCommand(name, connection)
+                    {
+                        CommandType = CommandType.StoredProcedure
+                    })
+                    {
+                        command.CommandTimeout = 300000;
+                        return command.ExecuteNonQuery();
+                    }
+                }
+                finally
                 {
-                    command.CommandTimeout = 300000;
-                    return command.ExecuteNonQuery();
+                    connection.Close();
                 }
             }
         }
@@ -281,7 +313,7 @@ namespace ZeroLevel.SqlServer
             return new SqlParameter[0];
         }
 
-        private static SqlCommand CreateCommand(DbConnection connection, string query, DbParameter[] parameters, int timeout)
+        public static SqlCommand CreateCommand(DbConnection connection, string query, DbParameter[] parameters, int timeout)
         {
             var command = connection.CreateCommand();
             command.CommandText = query;

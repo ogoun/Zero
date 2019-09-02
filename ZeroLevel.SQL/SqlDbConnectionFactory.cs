@@ -62,14 +62,21 @@ namespace ZeroLevel.SqlServer
             }
             dbConnectionString = new SqlConnectionStringBuilder(_currentConnectionString);
             dbConnectionString.Pooling = true;
-            dbConnectionString.MaxPoolSize = 50;
         }
 
         public SqlConnection CreateConnection()
         {
-            var connection = new SqlConnection(ConnectionString);
-            connection.Open();
-            return connection;
+            try
+            {
+                var connection = new SqlConnection(ConnectionString);
+                connection.Open();
+                return connection;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, $"[SqlDbConnectionFactory.CreateConnection] {ConnectionString}");
+                throw;
+            }
         }
 
         #region Helpers
