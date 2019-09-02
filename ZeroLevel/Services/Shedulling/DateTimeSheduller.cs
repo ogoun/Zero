@@ -42,7 +42,15 @@ namespace ZeroLevel.Services.Shedulling
             }
             if (result != null)
             {
-                Task.Run(() => result.Callback(result.Key)).ContinueWith(t =>
+                try
+                {
+                    result.Callback(result.Key);
+                }
+                catch (Exception ex)
+                {
+                    Log.SystemError(ex, $"Fault task '{result.Key}' on expiration date '{result.ExpirationDate.ToString("yyyy-MM-dd HH:mm:ss fff}")}'");
+                }
+                /*Task.Run(() => result.Callback(result.Key)).ContinueWith(t =>
                 {
                     if (t.IsFaulted)
                     {
@@ -51,7 +59,7 @@ namespace ZeroLevel.Services.Shedulling
                             ex = ex.InnerException;
                         Log.SystemError(ex, $"Fault task '{result.Key}' on expiration date '{result.ExpirationDate.ToString("yyyy-MM-dd HH:mm:ss fff}")}'");
                     }
-                });
+                });*/
             }
         }
 

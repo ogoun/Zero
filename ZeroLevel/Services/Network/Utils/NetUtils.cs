@@ -25,10 +25,17 @@ namespace ZeroLevel.Network
                 socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ExclusiveAddressUse, false);
                 try
                 {
-                    socket.Connect(endpoint);
-                    socket.Shutdown(SocketShutdown.Both);
-                    socket.Close();
-                    return true;
+                    IAsyncResult result = socket.BeginConnect(endpoint, null, null);
+                    bool success = result.AsyncWaitHandle.WaitOne(100, true);
+                    if (socket.Connected)
+                    {
+                        socket.EndConnect(result);
+                        return true;
+                    }
+                    else
+                    {
+                        socket.Close();                        
+                    }
                 }
                 catch
                 {
