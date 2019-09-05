@@ -5,7 +5,6 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using ZeroLevel.Network.SDL;
-using ZeroLevel.Services;
 
 namespace ZeroLevel.Network
 {
