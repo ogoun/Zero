@@ -31,7 +31,7 @@ namespace ZeroLevel.Services.FileSystem
             return Path.Combine(folderName, fn);
         }
 
-        public static string GetAppLocalDirectory(string folderName)
+        public static string GetAppLocalTempDirectory(string folderName)
         {
             folderName = Path.Combine(Configuration.BaseDirectory, "temp", folderName);
             if (false == Directory.Exists(folderName))
@@ -39,6 +39,16 @@ namespace ZeroLevel.Services.FileSystem
                 Directory.CreateDirectory(folderName);
             }
             return folderName;
+        }
+
+        public static string GetAppLocalDbDirectory(string dbFolderName = null)
+        {
+            dbFolderName = Path.Combine(Configuration.BaseDirectory, dbFolderName ?? "db");
+            if (false == Directory.Exists(dbFolderName))
+            {
+                Directory.CreateDirectory(dbFolderName);
+            }
+            return dbFolderName;
         }
 
         #region FileName & Path correction
@@ -241,7 +251,7 @@ namespace ZeroLevel.Services.FileSystem
                         deleted = true;
                     }
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     Log.SystemError(ex, $"[FSUtils.RemoveFolder] Fault remove folder {path}");
                     try_counter++;
