@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
 using System.Data.SqlClient;
+using System.Linq;
 
 namespace ZeroLevel.SqlServer
 {
@@ -192,6 +193,43 @@ namespace ZeroLevel.SqlServer
             {
                 using (var cmd = CreateCommand(connection, query, par, Timeout))
                 {
+                    using (SqlDataReader reader = cmd.ExecuteReader(CommandBehavior.CloseConnection))
+                    {
+                        try
+                        {
+                            while (reader.Read())
+                            {
+                                if (false == readHandler(reader))
+                                    break;
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Log.Error(ex, "Error executing query {0}.", cmd.CommandText);
+                        }
+                        finally
+                        {
+                            // Always call Close when done reading.
+                            reader.Close();
+                        }
+                    }
+                }
+            }
+        }
+
+        public void LazySelectWithParameters(string query, IEnumerable<KeyValuePair<string, object>> par, Func<DbDataReader, bool> readHandler, int timeout = Timeout)
+        {
+            using (var connection = _factory.CreateConnection())
+            {
+                using (var cmd = CreateCommand(connection, query, null, Timeout))
+                {
+                    if (par != null && par.Any())
+                    {
+                        foreach (var p in par)
+                        {
+                            cmd.Parameters.AddWithValue(p.Key, p.Value);
+                        }
+                    }
                     using (SqlDataReader reader = cmd.ExecuteReader(CommandBehavior.CloseConnection))
                     {
                         try
