@@ -18,13 +18,6 @@ namespace TestApp
 
         protected override void StartAction()
         {
-            var client = Exchange.GetConnection("192.168.51.104:49672");
-            client?.Request<ServiceDescription>("__service_description__", record => 
-            {
-                Log.Info(record.ServiceInfo.ServiceKey);
-            });
-            return;
-
             Log.Info("Started");
             ReadServiceInfo();
             var host = UseHost(8800);
