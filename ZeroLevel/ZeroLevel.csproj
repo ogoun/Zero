@@ -6,17 +6,16 @@
 </Description>
     <Authors>ogoun</Authors>
     <Company>ogoun</Company>
-    <AssemblyVersion>3.0.1.0</AssemblyVersion>
-    <PackageReleaseNotes>Network refactoring
-</PackageReleaseNotes>
+    <AssemblyVersion>3.0.2.0</AssemblyVersion>
+    <PackageReleaseNotes>Long request possibility added</PackageReleaseNotes>
     <PackageProjectUrl>https://github.com/ogoun/Zero/wiki</PackageProjectUrl>
     <Copyright>Copyright Ogoun 2019</Copyright>
     <PackageLicenseUrl>https://opensource.org/licenses/MIT</PackageLicenseUrl>
     <PackageIconUrl>https://raw.githubusercontent.com/ogoun/Zero/master/zero.png</PackageIconUrl>
     <RepositoryUrl>https://github.com/ogoun/Zero</RepositoryUrl>
     <RepositoryType>GitHub</RepositoryType>
-    <Version>3.1.1</Version>
-    <FileVersion>3.0.1.0</FileVersion>
+    <Version>3.1.2</Version>
+    <FileVersion>3.0.2.0</FileVersion>
     <Platforms>AnyCPU;x64</Platforms>
   </PropertyGroup>
 
