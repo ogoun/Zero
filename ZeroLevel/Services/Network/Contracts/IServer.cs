@@ -31,6 +31,6 @@ namespace ZeroLevel.Network
         IEnumerable<InboxServiceDescription> CollectInboxInfo();
 
         event Action<ISocketClient> OnDisconnect;
-        event Action<ExClient> OnConnect;
+        event Action<IClient> OnConnect;
     }
 }

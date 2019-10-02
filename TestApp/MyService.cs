@@ -60,7 +60,7 @@ namespace TestApp
             Log.Info($"Client '{obj.Endpoint.Address}:{obj.Endpoint.Port}' disconnected");
         }
 
-        private void Host_OnConnect(ExClient obj)
+        private void Host_OnConnect(IClient obj)
         {
             Log.Info($"Client '{obj.Socket.Endpoint.Address}:{obj.Socket.Endpoint.Port}' connected");
         }

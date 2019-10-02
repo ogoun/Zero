@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Net;
 using System.Threading;
 using ZeroLevel;
 using ZeroLevel.Network;
@@ -19,7 +20,9 @@ namespace Processor
             _processThread.Start();
 
             ReadServiceInfo();
-            AutoregisterInboxes(UseHost());
+            AutoregisterInboxes(UseHost(8801));
+
+            Exchange.RoutesStorage.Set("test.consumer", new IPEndPoint(IPAddress.Loopback, 8802));
 
             Sheduller.RemindEvery(TimeSpan.FromSeconds(1), () =>
             {
@@ -32,9 +35,12 @@ namespace Processor
         {
             while (_incoming.IsCompleted == false)
             {
-                int data = _incoming.Take();
-                var next = (int)(data ^ Interlocked.Increment(ref _proceed));
-                Exchange.Request<int, bool>("test.consumer", "handle", next, result => { });
+                long data;
+                if (_incoming.TryTake(out data, 100))
+                {
+                    var next = (int)(data ^ Interlocked.Increment(ref _proceed));
+                    Exchange.Request<int, bool>("test.consumer", "handle", next, result => { });
+                }
             }
         }
 
@@ -62,12 +68,12 @@ namespace Processor
             return true;
         }
 
-        BlockingCollection<int> _incoming = new BlockingCollection<int>();
+        BlockingCollection<long> _incoming = new BlockingCollection<long>();
 
-        [ExchangeHandler("handle")]
-        public void Handler(ISocketClient client, int data)
+        [ExchangeReplier("handle")]
+        public bool Handler(ISocketClient client, long data)
         {
-            _incoming.Add(data);            
+            return _incoming.TryAdd(data);
         }
     }
 }

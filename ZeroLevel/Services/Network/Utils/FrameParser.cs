@@ -129,11 +129,16 @@ namespace ZeroLevel.Network
 
         #endregion private models
 
-        public event Action<FrameType, int, byte[]> OnIncoming;
+        private Action<FrameType, int, byte[]> _incomingDataHandler;
 
         private readonly _Accum _accum = new _Accum();
         private ParserState _state = ParserState.WaitNew;
         private readonly object _push_lock = new object();
+
+        public FrameParser(Action<FrameType, int, byte[]> incomingDataHandler)
+        {
+            _incomingDataHandler = incomingDataHandler;
+        }
 
         /// <summary>
         /// Parse with state machine
@@ -150,7 +155,7 @@ namespace ZeroLevel.Network
         {
             try
             {
-                OnIncoming?.Invoke(type, identity, payload);
+                _incomingDataHandler?.Invoke(type, identity, payload);
             }
             catch (Exception ex)
             {

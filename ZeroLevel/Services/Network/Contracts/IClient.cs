@@ -1,10 +1,19 @@
 ﻿using System;
+using System.Net;
 using ZeroLevel.Models;
 
 namespace ZeroLevel.Network
 {
     public interface IClient
+        : IDisposable
     {
+        IPEndPoint EndPoint { get; }
+        SocketClientStatus Status { get; }
+        IRouter Router { get; }
+        ISocketClient Socket { get; }
+
+        InvokeResult Send<T>(T message);
+
         InvokeResult Send(string inbox);
         InvokeResult Send(string inbox, byte[] data);
         InvokeResult Send<T>(string inbox, T message);

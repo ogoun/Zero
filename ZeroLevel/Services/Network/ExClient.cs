@@ -5,7 +5,7 @@ using ZeroLevel.Services.Serialization;
 
 namespace ZeroLevel.Network
 {
-    public sealed class ExClient
+    internal sealed class ExClient
         : IClient, IDisposable
     {
         private readonly ISocketClient _client;
@@ -18,8 +18,6 @@ namespace ZeroLevel.Network
         {
             _client = client;
         }
-
-        public void ForceConnect() => _client.ForceConnect();
 
         public InvokeResult Send(string inbox)
         {

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net;
 using System.Threading;
 using ZeroLevel;
 using ZeroLevel.Network;
@@ -14,13 +15,51 @@ namespace Source
             ReadServiceInfo();
             AutoregisterInboxes(UseHost());
 
-            Sheduller.RemindEvery(TimeSpan.FromMilliseconds(100), () =>
+            Exchange.RoutesStorage.Set("test.processor", new IPEndPoint(IPAddress.Loopback, 8801));
+
+            /*Sheduller.RemindEvery(TimeSpan.FromMilliseconds(100), () =>
             {
                 if (Exchange.Send("test.processor", "handle", Environment.TickCount))
                 {
                     Interlocked.Increment(ref _proceed);
                 }
-            });
+            });*/
+
+            try
+            {
+                using (var waiter = new ManualResetEventSlim(false))
+                {
+                    while (true)
+                    {
+                        try
+                        {
+                            var ir = Exchange.GetConnection("test.processor")?.Request<long, bool>("handle"
+                                , Environment.TickCount
+                                , s =>
+                             {
+                                Interlocked.Increment(ref _proceed);
+                                waiter.Set();
+                            });
+                            if (ir == null || ir.Success == false)
+                            {
+                                Thread.Sleep(300);
+                                waiter.Set();
+                            }
+                        }
+                        catch
+                        {
+                            Thread.Sleep(300);
+                            waiter.Set();
+                        }
+                        waiter.Wait(5000);
+                        waiter.Reset();
+                    }
+                }
+            }
+            catch
+            {
+                Thread.Sleep(300);
+            }
         }
 
         protected override void StopAction()

@@ -13,8 +13,6 @@ namespace ZeroLevel.Network
 
         IRouter Router { get; }
 
-        void ForceConnect();
-        void UseKeepAlive(TimeSpan period);
         void Send(Frame data);
         void Request(Frame data, Action<byte[]> callback, Action<string> fail = null);
         void Response(byte[] data, int identity);

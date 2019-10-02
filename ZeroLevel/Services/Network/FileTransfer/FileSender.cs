@@ -25,13 +25,13 @@ namespace ZeroLevel.Network.FileTransfer
             _uploadFileThread.Start();
         }
 
-        public void Send(ExClient client, string fileName, Action<string> completeHandler = null, Action<string, string> errorHandler = null)
+        public void Send(IClient client, string fileName, Action<string> completeHandler = null, Action<string, string> errorHandler = null)
         {
             if (client == null) return;
             PushTransferTask(client, fileName, completeHandler, errorHandler);
         }
 
-        private void PushTransferTask(ExClient client, string filePath, Action<string> completeHandler = null, Action<string, string> errorHandler = null)
+        private void PushTransferTask(IClient client, string filePath, Action<string> completeHandler = null, Action<string, string> errorHandler = null)
         {
             if (client == null)
             {
@@ -74,7 +74,7 @@ namespace ZeroLevel.Network.FileTransfer
             }
         }
 
-        public bool Connected(ExClient client, TimeSpan timeout)
+        public bool Connected(IClient client, TimeSpan timeout)
         {
             bool connected = false;
             using (var waiter = new ManualResetEvent(false))
@@ -85,7 +85,7 @@ namespace ZeroLevel.Network.FileTransfer
             return connected;
         }
 
-        private static bool Send<T>(ExClient client, string inbox, T frame,
+        private static bool Send<T>(IClient client, string inbox, T frame,
             bool resendWhenConnectionError, bool resendWhenServerError)
         {
             bool sended = false;

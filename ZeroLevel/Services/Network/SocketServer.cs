@@ -18,7 +18,7 @@ namespace ZeroLevel.Network
         private readonly IRouter _router;
         public IPEndPoint LocalEndpoint { get; }
         public event Action<ISocketClient> OnDisconnect = _ => { };
-        public event Action<ExClient> OnConnect = _ => { };
+        public event Action<IClient> OnConnect = _ => { };
 
         public IEnumerable<IPEndPoint> ConnectionList
         {
@@ -79,7 +79,6 @@ namespace ZeroLevel.Network
                     var connection = new SocketClient(client_socket, _router);
                     connection.OnDisconnect += Connection_OnDisconnect;
                     _connections[connection.Endpoint] = new ExClient(connection);
-                    connection.UseKeepAlive(TimeSpan.FromMilliseconds(BaseSocket.MINIMUM_HEARTBEAT_UPDATE_PERIOD_MS));
                     ConnectEventRise(_connections[connection.Endpoint]);
                 }
                 catch (Exception ex)

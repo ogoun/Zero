@@ -15,7 +15,7 @@ namespace ZeroLevel.Network
 
         internal IEnumerable<SocketServer> ServerList => _serverInstances.Values;
 
-        public ExClient GetClient(IPEndPoint endpoint, bool use_cachee, IRouter router = null)
+        public IClient GetClient(IPEndPoint endpoint, bool use_cachee, IRouter router = null)
         {
             if (use_cachee)
             {
@@ -41,12 +41,10 @@ namespace ZeroLevel.Network
                             instance = null;
                         }
                         instance = new ExClient(new SocketClient(endpoint, router ?? new Router()));
-                        instance.ForceConnect();
                         if (instance.Status == SocketClientStatus.Initialized
                             || instance.Status == SocketClientStatus.Working)
                         {
                             _clientInstances[key] = instance;
-                            instance.Socket.UseKeepAlive(TimeSpan.FromMilliseconds(BaseSocket.MINIMUM_HEARTBEAT_UPDATE_PERIOD_MS));
                             return instance;
                         }
                     }

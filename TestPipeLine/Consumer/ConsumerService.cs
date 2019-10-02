@@ -12,7 +12,7 @@ namespace Consumer
         protected override void StartAction()
         {
             ReadServiceInfo();
-            AutoregisterInboxes(UseHost());
+            AutoregisterInboxes(UseHost(8802));
 
             Sheduller.RemindEvery(TimeSpan.FromSeconds(1), () =>
             {

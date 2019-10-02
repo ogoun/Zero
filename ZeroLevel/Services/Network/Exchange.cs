@@ -592,7 +592,7 @@ namespace ZeroLevel.Network
         }
         #endregion
 
-        public ExClient GetConnection(string alias)
+        public IClient GetConnection(string alias)
         {
             if (_update_discovery_table_task != -1)
             {
@@ -622,7 +622,7 @@ namespace ZeroLevel.Network
             return null;
         }
 
-        public ExClient GetConnection(IPEndPoint endpoint)
+        public IClient GetConnection(IPEndPoint endpoint)
         {
             try
             {
@@ -750,7 +750,7 @@ namespace ZeroLevel.Network
             return null;
         }
 
-        private IEnumerable<ExClient> GetClientEnumerator(string serviceKey)
+        private IEnumerable<IClient> GetClientEnumerator(string serviceKey)
         {
             IEnumerable<IPEndPoint> candidates;
             try
@@ -766,7 +766,7 @@ namespace ZeroLevel.Network
             {
                 foreach (var endpoint in candidates)
                 {
-                    ExClient transport;
+                    IClient transport;
                     try
                     {
                         transport = _cachee.GetClient(endpoint, true);
@@ -786,7 +786,7 @@ namespace ZeroLevel.Network
             }
         }
 
-        private IEnumerable<ExClient> GetClientEnumeratorByType(string serviceType)
+        private IEnumerable<IClient> GetClientEnumeratorByType(string serviceType)
         {
             IEnumerable<IPEndPoint> candidates;
             try
@@ -802,7 +802,7 @@ namespace ZeroLevel.Network
             {
                 foreach (var endpoint in candidates)
                 {
-                    ExClient transport;
+                    IClient transport;
                     try
                     {
                         transport = _cachee.GetClient(endpoint, true);
@@ -822,7 +822,7 @@ namespace ZeroLevel.Network
             }
         }
 
-        private IEnumerable<ExClient> GetClientEnumeratorByGroup(string serviceGroup)
+        private IEnumerable<IClient> GetClientEnumeratorByGroup(string serviceGroup)
         {
             IEnumerable<IPEndPoint> candidates;
             try
@@ -838,7 +838,7 @@ namespace ZeroLevel.Network
             {
                 foreach (var service in candidates)
                 {
-                    ExClient transport;
+                    IClient transport;
                     try
                     {
                         transport = _cachee.GetClient(service, true);
@@ -863,7 +863,7 @@ namespace ZeroLevel.Network
         /// <param name="serviceKey">Service key</param>
         /// <param name="callHandler">Service call code</param>
         /// <returns>true - service called succesfully</returns>
-        private bool CallService(string serviceKey, Func<ExClient, bool> callHandler)
+        private bool CallService(string serviceKey, Func<IClient, bool> callHandler)
         {
             IEnumerable<IPEndPoint> candidates;
             try
@@ -883,7 +883,7 @@ namespace ZeroLevel.Network
             var success = false;
             foreach (var endpoint in candidates)
             {
-                ExClient transport;
+                IClient transport;
                 try
                 {
                     transport = _cachee.GetClient(endpoint, true);
@@ -911,7 +911,7 @@ namespace ZeroLevel.Network
             return success;
         }
 
-        private IEnumerable<Tresp> _RequestBroadcast<Treq, Tresp>(List<ExClient> clients, string inbox, Treq data)
+        private IEnumerable<Tresp> _RequestBroadcast<Treq, Tresp>(List<IClient> clients, string inbox, Treq data)
         {
             var response = new List<Tresp>();
             using (var waiter = new CountdownEvent(clients.Count))
@@ -939,7 +939,7 @@ namespace ZeroLevel.Network
             return response;
         }
 
-        private IEnumerable<Tresp> _RequestBroadcast<Tresp>(List<ExClient> clients, string inbox)
+        private IEnumerable<Tresp> _RequestBroadcast<Tresp>(List<IClient> clients, string inbox)
         {
             var response = new List<Tresp>();
             using (var waiter = new CountdownEvent(clients.Count))

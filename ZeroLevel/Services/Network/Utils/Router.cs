@@ -14,7 +14,7 @@ namespace ZeroLevel.Network
         : IRouter
     {
         public event Action<ISocketClient> OnDisconnect = _ => { }; // must be never rised
-        public event Action<ExClient> OnConnect = _ => { }; // must be never rised
+        public event Action<IClient> OnConnect = _ => { }; // must be never rised
 
         #region Routing
 
@@ -398,7 +398,7 @@ namespace ZeroLevel.Network
         : IRouter
     {
         public event Action<ISocketClient> OnDisconnect = _ => { };
-        public event Action<ExClient> OnConnect = _ => { };
+        public event Action<IClient> OnConnect = _ => { };
         public void HandleMessage(Frame frame, ISocketClient client) { }
         public void HandleRequest(Frame frame, ISocketClient client, int identity, Action<int, byte[]> handler) { }
         public IServer RegisterInbox(string inbox, MessageHandler handler) { return this; }
