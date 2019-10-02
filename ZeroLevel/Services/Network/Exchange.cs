@@ -635,6 +635,19 @@ namespace ZeroLevel.Network
             return null;
         }
 
+        public IClient GetConnection(ISocketClient client)
+        {
+            try
+            {
+                return new ExClient(client);
+            }
+            catch (Exception ex)
+            {
+                Log.SystemError(ex, "[Exchange.GetConnection]");
+            }
+            return null;
+        }
+
         #region Host service
         public IRouter UseHost()
         {

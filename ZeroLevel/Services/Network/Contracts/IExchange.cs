@@ -17,6 +17,7 @@ namespace ZeroLevel.Network
         IServiceRoutesStorage RoutesStorage { get; }
         IServiceRoutesStorage DiscoveryStorage { get; }
 
+        IClient GetConnection(ISocketClient client);
         IClient GetConnection(string alias);
         IClient GetConnection(IPEndPoint endpoint);
     }
