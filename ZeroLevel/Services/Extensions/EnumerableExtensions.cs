@@ -31,5 +31,25 @@ namespace ZeroLevel
         {
             return !IsEmpty(collection);
         }
+
+        public static IEnumerable<T> Batch<T>(this IEnumerator<T> source, int size)
+        {
+            yield return source.Current;
+            for (var i = 1; i < size && source.MoveNext(); i++)
+            {
+                yield return source.Current;
+            }
+        }
+
+        public static IEnumerable<IEnumerable<T>> Chunkify<T>(this IEnumerable<T> source, int size)
+        {
+            using (var enumerator = source.GetEnumerator())
+            {
+                while (enumerator.MoveNext())
+                {
+                    yield return Batch(enumerator, size);
+                }
+            }
+        }
     }
 }
