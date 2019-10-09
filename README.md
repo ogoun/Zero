@@ -30,7 +30,7 @@ Besides, library includes:
  - StackTrace reader
  - DSL for DOM, that provides describe templates for generation text view
  - Drawing text along the guide curve
- - RijndaelEncryptor
+ - RijndaelEncryptor, Murmur3
  - File archive service
  - File system utils (path correction, pack folder and etc.)
  - FileSystemWatcher without memory leak
@@ -38,10 +38,8 @@ Besides, library includes:
  - Dynamic function invokation wrapper
  - Duplex network protocol over TCP
  - Object pool
- - Runtime type builder
- - IL opcode reader
  - Code block execution with impersonation
- - Semantic analize (abstaction, snowball implementation, stopwords)
+ - Semantic analize (abstaction, snowball implementation, stopwords, ngramms)
  - Fast binary serialization
  - Plain text table render
  - Web utilities
