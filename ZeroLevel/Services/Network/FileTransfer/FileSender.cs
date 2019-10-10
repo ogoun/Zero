@@ -123,6 +123,7 @@ namespace ZeroLevel.Network.FileTransfer
                 }
             }
             Send(task.Client, "__file_transfer_complete_transfer__", reader.GetCompleteInfo(), _resendWhenClientError, _resendWhenServerError);
+            GC.Collect();
         }
     }
 }

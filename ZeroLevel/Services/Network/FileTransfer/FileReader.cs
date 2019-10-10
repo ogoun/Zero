@@ -45,8 +45,7 @@ namespace ZeroLevel.Network.FileTransfer
                     offset = offset + 1;
                     yield return fragment;
                 }
-            }
-            GC.Collect();
+            }            
         }
 
         public FileEndFrame GetCompleteInfo()
