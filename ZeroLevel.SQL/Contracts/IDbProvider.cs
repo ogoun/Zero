@@ -21,8 +21,5 @@ namespace ZeroLevel.SqlServer
         void LazySelect(string query, DbParameter[] par, Func<DbDataReader, bool> readHandler);
         void LazySelect(string query, DbParameter[] par, Func<DbDataReader, bool> readHandler, int timeout);
         void LazySelectWithParameters(string query, IEnumerable<KeyValuePair<string, object>> par, Func<DbDataReader, bool> readHandler, int timeout);
-
-        T Read<T>(DbDataReader reader, int index);
-        T Read<T>(DbDataReader reader, string name);
     }
 }

@@ -52,5 +52,25 @@ namespace ZeroLevel.Services.Trees
                 }
             }
         }
+
+        /// <summary>
+        /// traversing a tree in width from left to right
+        /// </summary>
+        public IEnumerable<GNode<T>> Plain()
+        {
+            var queue = new Queue<GNode<T>>();
+            foreach (var r in _rootNodes) {
+                queue.Enqueue(r.Value);
+            }
+            while (queue.Count > 0)
+            {
+                var current = queue.Dequeue();
+                yield return current;
+                foreach (var r in current.Nodes)
+                {
+                    queue.Enqueue(r.Value);
+                }
+            }
+        }
     }
 }
