@@ -3,63 +3,19 @@ using System.Collections.Generic;
 using System.IO;
 using ZeroLevel.Models;
 using ZeroLevel.Services.HashFunctions;
+using ZeroLevel.Services.Network.FileTransfer.Writers;
 
 namespace ZeroLevel.Network.FileTransfer
 {
     internal sealed class FileWriter
     {
-        private class _FileWriter
-            : IDisposable
-        {
-            private readonly FileStream _stream;
-            internal DateTime _writeTime { get; private set; } = DateTime.UtcNow;
-            private bool _gotCompleteMessage = false;
-
-            public bool GotCompleteMessage() => _gotCompleteMessage = true;
-
-            public bool ReadyToRemove()
-            {
-                if (_gotCompleteMessage)
-                {
-                    return (DateTime.UtcNow - _writeTime).TotalSeconds > 15;
-                }
-                return false;
-            }
-
-            public _FileWriter(string path)
-            {
-                _stream = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.None);
-            }
-
-            public void Write(long offset, byte[] data)
-            {
-                _stream.Position = offset;
-                _stream.Write(data, 0, data.Length);
-                _writeTime = DateTime.Now;
-            }
-
-            public bool IsTimeoutBy(TimeSpan period)
-            {
-                return (DateTime.Now - _writeTime) > period;
-            }
-
-            public void Dispose()
-            {
-                _stream.Flush();
-                _stream.Close();
-                _stream.Dispose();
-            }
-        }
         private string _basePath;
-        private string _disk_prefix;
-
-        private readonly Dictionary<long, _FileWriter> _incoming = new Dictionary<long, _FileWriter>();
+        private readonly Dictionary<long, SafeDataWriter> _incoming = new Dictionary<long, SafeDataWriter>();
         private readonly object _locker = new object();
         private long _cleanErrorsTaskId;
 
-        public FileWriter(string path, string disk_prefix = "DRIVE_")
+        public FileWriter(string path)
         {
-            _disk_prefix = disk_prefix;
             _basePath = path;
             _cleanErrorsTaskId = Sheduller.RemindEvery(TimeSpan.FromMinutes(1), CleanBadFiles);
         }
@@ -70,7 +26,7 @@ namespace ZeroLevel.Network.FileTransfer
             {
                 foreach (var pair in _incoming)
                 {
-                    if (pair.Value.IsTimeoutBy(TimeSpan.FromMinutes(3)) || pair.Value.ReadyToRemove())
+                    if (pair.Value.IsTimeoutBy(TimeSpan.FromMinutes(3)))
                     {
                         Remove(pair.Key);
                     }
@@ -89,7 +45,8 @@ namespace ZeroLevel.Network.FileTransfer
                         if (false == _incoming.ContainsKey(info.UploadFileTaskId))
                         {
                             string path = BuildFilePath(clientFolderName, info.FilePath);
-                            _incoming.Add(info.UploadFileTaskId, new _FileWriter(path));
+                            _incoming.Add(info.UploadFileTaskId, new SafeDataWriter(new DiskFileWriter(path, info.Size)
+                                , () => Remove(info.UploadFileTaskId)));
                         }
                     }
                 }
@@ -106,20 +63,17 @@ namespace ZeroLevel.Network.FileTransfer
         {
             try
             {
-                _FileWriter stream;
-                if (_incoming.TryGetValue(chunk.UploadFileTaskId, out stream))
+                SafeDataWriter writer;
+                if (_incoming.TryGetValue(chunk.UploadFileTaskId, out writer))
                 {
-
                     var hash = Murmur3.ComputeHash(chunk.Payload);
                     var checksumL = BitConverter.ToUInt64(hash, 0);
                     var checksumH = BitConverter.ToUInt64(hash, 8);
-
                     if (chunk.ChecksumH != checksumH
                         || chunk.ChecksumL != checksumL)
                         return InvokeResult.Fault("Checksum incorrect");
 
-
-                    stream.Write(chunk.Offset, chunk.Payload);
+                    writer.Write(chunk);
                     return InvokeResult.Succeeding();
                 }
                 return InvokeResult.Fault("File not expected.");
@@ -137,14 +91,10 @@ namespace ZeroLevel.Network.FileTransfer
             {
                 lock (_locker)
                 {
-                    _FileWriter stream;
-                    if (_incoming.TryGetValue(info.UploadFileTaskId, out stream) && stream != null)
+                    SafeDataWriter writer;
+                    if (_incoming.TryGetValue(info.UploadFileTaskId, out writer) && writer != null)
                     {
-                        using (stream)
-                        {
-                            stream.GotCompleteMessage();
-                        }
-                        _incoming.Remove(info.UploadFileTaskId);
+                        writer.CompleteReceiving();
                     }
                 }
             }
@@ -158,7 +108,7 @@ namespace ZeroLevel.Network.FileTransfer
 
         private void Remove(long uploadTaskId)
         {
-            _FileWriter stream;
+            SafeDataWriter stream;
             if (_incoming.TryGetValue(uploadTaskId, out stream))
             {
                 _incoming.Remove(uploadTaskId);

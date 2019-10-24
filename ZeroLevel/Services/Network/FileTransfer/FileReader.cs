@@ -39,6 +39,7 @@ namespace ZeroLevel.Network.FileTransfer
                     };
                     Array.Copy(buffer, 0, fragment.Payload, 0, bytesRead);
                     var hash = Murmur3.ComputeHash(fragment.Payload);
+
                     fragment.ChecksumL = BitConverter.ToUInt64(hash, 0);
                     fragment.ChecksumH = BitConverter.ToUInt64(hash, 8);
 
