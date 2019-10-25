@@ -142,9 +142,14 @@ namespace ZeroLevel.Network
         public void HandleRequest(Frame frame, ISocketClient client, int identity, Action<int, byte[]> handler) => _router.HandleRequest(frame, client, identity, handler);
         public IServer RegisterInbox(string inbox, MessageHandler handler) => _router.RegisterInbox(inbox, handler);
         public IServer RegisterInbox(MessageHandler handler) => _router.RegisterInbox(handler);
-
         public IServer RegisterInbox<T>(string inbox, MessageHandler<T> handler) => _router.RegisterInbox<T>(inbox, handler);
         public IServer RegisterInbox<T>(MessageHandler<T> handler) => _router.RegisterInbox<T>(handler);
+
+        public IServer RegisterInboxIfNoExists(string inbox, MessageHandler handler) => _router.RegisterInboxIfNoExists(inbox, handler);
+        public IServer RegisterInboxIfNoExists(MessageHandler handler) => _router.RegisterInboxIfNoExists(handler);
+        public IServer RegisterInboxIfNoExists<T>(string inbox, MessageHandler<T> handler) => _router.RegisterInboxIfNoExists<T>(inbox, handler);
+        public IServer RegisterInboxIfNoExists<T>(MessageHandler<T> handler) => _router.RegisterInboxIfNoExists<T>(handler);
+
         public IServer RegisterInbox<Tresponse>(string inbox, RequestHandler<Tresponse> handler) => _router.RegisterInbox<Tresponse>(inbox, handler);
         public IServer RegisterInbox<Trequest, Tresponse>(string inbox, RequestHandler<Trequest, Tresponse> handler) => _router.RegisterInbox<Trequest, Tresponse>(inbox, handler);
         public IServer RegisterInbox<Tresponse>(RequestHandler<Tresponse> handler) => _router.RegisterInbox<Tresponse>(handler);

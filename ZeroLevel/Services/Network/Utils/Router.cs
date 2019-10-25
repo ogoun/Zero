@@ -320,6 +320,46 @@ namespace ZeroLevel.Network
             _handlers[BaseSocket.DEFAULT_MESSAGE_INBOX].Add(MRInvoker.Create<T>(handler));
             return this;
         }
+
+        public IServer RegisterInboxIfNoExists(string inbox, MessageHandler handler)
+        {
+            if (false == _handlers.ContainsKey(inbox))
+            {
+                _handlers.Add(inbox, new List<MRInvoker>());
+                _handlers[inbox].Add(MRInvoker.Create(handler));
+            }
+            return this;
+        }
+
+        public IServer RegisterInboxIfNoExists<T>(string inbox, MessageHandler<T> handler)
+        {
+            if (false == _handlers.ContainsKey(inbox))
+            {
+                _handlers.Add(inbox, new List<MRInvoker>());
+                _handlers[inbox].Add(MRInvoker.Create<T>(handler));
+            }
+            return this;
+        }
+
+        public IServer RegisterInboxIfNoExists(MessageHandler handler)
+        {
+            if (false == _handlers.ContainsKey(BaseSocket.DEFAULT_MESSAGE_INBOX))
+            {
+                _handlers.Add(BaseSocket.DEFAULT_MESSAGE_INBOX, new List<MRInvoker>());
+                _handlers[BaseSocket.DEFAULT_MESSAGE_INBOX].Add(MRInvoker.Create(handler));
+            }
+            return this;
+        }
+
+        public IServer RegisterInboxIfNoExists<T>(MessageHandler<T> handler)
+        {
+            if (false == _handlers.ContainsKey(BaseSocket.DEFAULT_MESSAGE_INBOX))
+            {
+                _handlers.Add(BaseSocket.DEFAULT_MESSAGE_INBOX, new List<MRInvoker>());
+                _handlers[BaseSocket.DEFAULT_MESSAGE_INBOX].Add(MRInvoker.Create<T>(handler));
+            }
+            return this;
+        }
         #endregion 
 
         #region Request handlers registration
@@ -405,6 +445,10 @@ namespace ZeroLevel.Network
         public IServer RegisterInbox<T>(string inbox, MessageHandler<T> handler) { return this; }
         public IServer RegisterInbox(MessageHandler handler) { return this; }
         public IServer RegisterInbox<T>(MessageHandler<T> handler) { return this; }
+        public IServer RegisterInboxIfNoExists(string inbox, MessageHandler handler) { return this; }
+        public IServer RegisterInboxIfNoExists<T>(string inbox, MessageHandler<T> handler) { return this; }
+        public IServer RegisterInboxIfNoExists(MessageHandler handler) { return this; }
+        public IServer RegisterInboxIfNoExists<T>(MessageHandler<T> handler) { return this; }
         public IServer RegisterInbox<Tresponse>(string inbox, RequestHandler<Tresponse> handler) { return this; }
         public IServer RegisterInbox<Trequest, Tresponse>(string inbox, RequestHandler<Trequest, Tresponse> handler) { return this; }
         public IServer RegisterInbox<Tresponse>(RequestHandler<Tresponse> handler) { return this; }

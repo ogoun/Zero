@@ -9,10 +9,13 @@ namespace ZeroLevel.Network
         #region Messages
         IServer RegisterInbox(string inbox, MessageHandler handler);
         IServer RegisterInbox<T>(string inbox, MessageHandler<T> handler);
-
-        // Default inboxe
         IServer RegisterInbox(MessageHandler handler);
         IServer RegisterInbox<T>(MessageHandler<T> handler);
+
+        IServer RegisterInboxIfNoExists(string inbox, MessageHandler handler);
+        IServer RegisterInboxIfNoExists<T>(string inbox, MessageHandler<T> handler);
+        IServer RegisterInboxIfNoExists(MessageHandler handler);
+        IServer RegisterInboxIfNoExists<T>(MessageHandler<T> handler);
         #endregion
 
         #region Requests
