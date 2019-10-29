@@ -34,10 +34,10 @@ namespace ZeroLevel.SqlServer
         private TKey _id;
         private readonly IDbMapper<T> _mapper;
 
-        public IdentitySpecification(TKey id, bool poco)
+        public IdentitySpecification(TKey id, bool mapOnlyMarkedMembers)
         {
             _id = id;
-            _mapper = DbMapperFactory.Create<T>(poco);
+            _mapper = DbMapperFactory.Create<T>(mapOnlyMarkedMembers);
         }
 
         public override bool IsSatisfiedBy(T o)
@@ -45,6 +45,6 @@ namespace ZeroLevel.SqlServer
             return _mapper.Id(o).Equals(_id);
         }
 
-        public static ISpecification<T> Create(TKey id, bool poco) { return new IdentitySpecification<T, TKey>(id, poco); }
+        public static ISpecification<T> Create(TKey id, bool mapOnlyMarkedMembers) { return new IdentitySpecification<T, TKey>(id, mapOnlyMarkedMembers); }
     }
 }

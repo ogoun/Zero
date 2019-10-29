@@ -6,7 +6,7 @@ namespace ZeroLevel.SqlServer
 {
     public class DbMapper<T> : DbMapper, IDbMapper<T>
     {
-        public DbMapper(bool as_poco) : base(typeof(T), as_poco)
+        public DbMapper(bool mapOnlyMarkedMembers) : base(typeof(T), mapOnlyMarkedMembers)
         {
         }
 

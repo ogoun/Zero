@@ -15,7 +15,7 @@ namespace ZeroLevel.SqlServer
         /// <summary>
         /// В случае задания в true, все поля класса считаются данными модели, в т.ч. не отвеченные аттрибутом DbMember
         /// </summary>
-        private readonly bool _analizeAsPoco;
+        private readonly bool _marked_only;
         protected Func<DbField, object, object> typeConverter;
 
         public void SetTypeConverter(Func<IDbField, object, object> converter)
@@ -56,9 +56,9 @@ namespace ZeroLevel.SqlServer
             return IdentityField?.Getter(entity);
         }
 
-        internal DbMapper(Type entityType, bool as_poco)
+        internal DbMapper(Type entityType, bool mapOnlyMarkedMembers)
         {
-            _analizeAsPoco = as_poco;
+            _marked_only = mapOnlyMarkedMembers;
             _entityType = entityType;
             BuildMapping();
         }
@@ -74,7 +74,7 @@ namespace ZeroLevel.SqlServer
                 Do(members =>
                 {
                     IEnumerable<MemberInfo> memberList;
-                    if (false == _analizeAsPoco)
+                    if (_marked_only)
                     {
                         memberList = members.Where(m => null != Attribute.GetCustomAttribute(m, typeof(DbMemberAttribute)));
                     }

@@ -7,31 +7,6 @@ using System.Linq;
 
 namespace ZeroLevel.SqlServer
 {
-    public class DbReader
-        : IDisposable
-    {
-        private readonly DbConnection _connection;
-        private readonly IDbCommand _command;
-
-        public DbReader(DbConnection connection, IDbCommand command)
-        {
-            _connection = connection;
-            _command = command;
-        }
-
-        public IDataReader GetReader()
-        {
-            return _command.ExecuteReader(CommandBehavior.CloseConnection);
-        }
-
-        public void Dispose()
-        {
-            _command.Dispose();
-            _connection.Close();
-            _connection.Dispose();
-        }
-    }
-
     public class SqlDbProvider :
         IDbProvider
     {

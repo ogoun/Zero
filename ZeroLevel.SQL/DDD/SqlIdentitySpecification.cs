@@ -4,7 +4,8 @@ using ZeroLevel.Specification;
 
 namespace ZeroLevel.SqlServer
 {
-    public class SqlIdentitySpecification<T> : IdentitySpecification<T>, ISqlServerSpecification
+    public class SqlIdentitySpecification<T> 
+        : IdentitySpecification<T>, ISqlServerSpecification
         where T : IEntity
     {
         public SqlIdentitySpecification(Guid id) : base(id)

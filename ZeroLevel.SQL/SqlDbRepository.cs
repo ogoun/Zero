@@ -17,9 +17,9 @@ namespace ZeroLevel.SqlServer
         #endregion
 
         #region Ctors
-        public SqlDbRepository(SqlDbConnectionFactory connectionFactory, bool entity_is_poco = false)
+        public SqlDbRepository(SqlDbConnectionFactory connectionFactory, bool mapOnlyMarkedMembers = true)
         {
-            _mapper = new SqlDbMapper<T>(entity_is_poco);
+            _mapper = new SqlDbMapper<T>(mapOnlyMarkedMembers);
             _dbProvider = new SqlDbProvider(connectionFactory);
             if (false == SqlDbProvider.CheckDatabaseExists(connectionFactory.Server, connectionFactory.Base))
             {

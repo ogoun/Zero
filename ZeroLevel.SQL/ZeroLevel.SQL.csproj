@@ -3,6 +3,13 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <Platforms>AnyCPU;x64</Platforms>
+    <Description>Light wrapper over ado.net</Description>
+    <Authors>ogoun</Authors>
+    <Copyright>Copyright Ogoun 2019</Copyright>
+    <PackageProjectUrl>https://github.com/ogoun/Zero</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/ogoun/Zero</RepositoryUrl>
+    <PackageIconUrl>https://raw.githubusercontent.com/ogoun/Zero/master/zero.png</PackageIconUrl>
+    <RepositoryType>GitHub</RepositoryType>
   </PropertyGroup>
 
   <ItemGroup>

@@ -15,9 +15,9 @@ namespace ZeroLevel.SqlServer
             }
         }
 
-        public SqlDbMapper(Type entityType, bool as_poco = false) : base(entityType.Name)
+        public SqlDbMapper(Type entityType, bool mapOnlyMarkedMembers = true) : base(entityType.Name)
         {
-            _mapper = DbMapperFactory.Create(entityType, as_poco);
+            _mapper = DbMapperFactory.Create(entityType, mapOnlyMarkedMembers);
         }
 
         public object Deserialize(DataRow row)
