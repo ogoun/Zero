@@ -34,5 +34,29 @@ namespace ZeroLevel.UnitTests
 
             Assert.True(0 == storage.ReadAndTruncate().ToArray().Length);
         }
+
+        [Fact]
+        public void DumpStorageLongTest()
+        {
+            // Arrange
+            var storage = new DumpStorage<TestSerializableDTO>();
+            long index = 0;
+
+            for (int i = 0; i < 1000; i++)
+            {
+                // Dump
+                for (int j = 0; j < 100; j++)
+                {
+                    storage.Dump(new TestSerializableDTO { Id = i * 1000 + j, Timestamp = DateTime.UtcNow.Ticks, Title = $"#{i * j}" });
+                }
+                // Clean
+                foreach (var entry in storage.ReadAndTruncate())
+                {
+                    Assert.True(entry.Id == index);
+                    index++;
+                }
+            }
+            Assert.True(0 == storage.ReadAndTruncate().ToArray().Length);
+        }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using FASTER.core;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
@@ -21,15 +22,22 @@ namespace ZeroLevel.Services.Microservices.Dump
             }
             device = Devices.CreateLogDevice(Path.Combine(folder, $"dump.log"),
                 true, true, -1, false);
-
+            
             log = new FasterLog(new FasterLogSettings { LogDevice = device });
         }
 
         public void Dump(T value)
         {
             var packet = MessageSerializer.SerializeCompatible(value);
-            while (!log.TryEnqueue(packet, out _)) ;
-            log.Commit();
+            try
+            {
+                while (!log.TryEnqueue(packet, out _)) ;
+                log.Commit();
+            }
+            catch (Exception ex)
+            {
+                
+            }
         }
 
         public async Task DumpAsync(T value)
@@ -41,7 +49,7 @@ namespace ZeroLevel.Services.Microservices.Dump
         public IEnumerable<T> ReadAndTruncate()
         {
             byte[] result;
-            using (var iter = log.Scan(log.BeginAddress, log.TailAddress))
+            using (var iter = log.Scan(log.BeginAddress, long.MaxValue))
             {
                 while (iter.GetNext(out result, out int length))
                 {
