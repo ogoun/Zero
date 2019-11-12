@@ -22,6 +22,7 @@ namespace ZeroLevel.Services.Collections
             private readonly Invoker _containsKey;
             private readonly Invoker _remove;
             private readonly Invoker _getter;
+            private readonly Invoker _keys_getter;
             private readonly object _instance;
 
             public ConcreteTypeRepository(Type entityType)
@@ -31,31 +32,36 @@ namespace ZeroLevel.Services.Collections
                 var instanceType = genericType.MakeGenericType(new Type[] { typeof(string), entityType });
                 _instance = Activator.CreateInstance(instanceType);
 
-                var insert_key = _wrapper.Configure(instanceType, "Insert").Single();
+                var insert_key = _wrapper.Configure(instanceType, "Add").Single();
                 _insert = _wrapper.GetInvoker(insert_key);
 
-                var contains_key = _wrapper.Configure(instanceType, "ContainsKey").Single();
+                var contains_key = _wrapper.Configure(instanceType, mi => mi.Name.Equals("ContainsKey") && mi.GetParameters()?.Length == 1).Single();
                 _containsKey = _wrapper.GetInvoker(contains_key);
 
-                var remove_key = _wrapper.Configure(instanceType, "Remove").Single();
+                var remove_key = _wrapper.Configure(instanceType, mi => mi.Name.Equals("Remove") && mi.GetParameters()?.Length == 1).Single();
                 _remove = _wrapper.GetInvoker(remove_key);
 
                 var p = instanceType.GetProperty("Item", entityType);
                 var getter = p.GetGetMethod();
                 var get_key = _wrapper.Configure(getter);
                 _getter = _wrapper.GetInvoker(get_key);
+
+                var k = instanceType.GetProperty("Keys", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public| System.Reflection.BindingFlags.NonPublic);
+                var keys_getter = k.GetGetMethod();
+                var get_keys = _wrapper.Configure(keys_getter);
+                _keys_getter = _wrapper.GetInvoker(get_keys);
             }
 
             public void Insert<T>(string key, T entity)
             {
-                _insert.Invoke(_instance, new object[] { key, entity, true });
+                _insert.Invoke(_instance, new object[] { key, entity });
             }
 
             public void InsertOrUpdate<T>(string key, T entity)
             {
                 if ((bool)_containsKey.Invoke(_instance, key))
                     _remove.Invoke(_instance, key);
-                _insert.Invoke(_instance, new object[] { key, entity, true });
+                _insert.Invoke(_instance, new object[] { key, entity });
             }
 
             public bool ContainsKey(string key)
@@ -71,6 +77,11 @@ namespace ZeroLevel.Services.Collections
             public T Get<T>(string key)
             {
                 return (T)_getter.Invoke(_instance, key);
+            }
+
+            public IEnumerable<string> Keys()
+            {
+                return (IEnumerable<string>)_keys_getter.Invoke(_instance);
             }
 
             public object Get(string key)
@@ -137,7 +148,7 @@ namespace ZeroLevel.Services.Collections
         public T Get<T>(string key)
         {
             return this[typeof(T)].Get<T>(key);
-        }        
+        }
 
         public void AddOrUpdate<T>(string key, T value)
         {
@@ -191,6 +202,11 @@ namespace ZeroLevel.Services.Collections
         public object Get(Type type, string key)
         {
             return this[type].Get(key);
+        }
+
+        public IEnumerable<string> Keys<T>()
+        {
+            return this[typeof(T)].Keys();
         }
     }
 }

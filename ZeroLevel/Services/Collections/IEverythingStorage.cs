@@ -1,9 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace ZeroLevel.Services.Collections
 {
     public interface IEverythingStorage
     {
+        IEnumerable<string> Keys<T>();
+
         #region Generic
         bool TryAdd<T>(string key, T value);
 
