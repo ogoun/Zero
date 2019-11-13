@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
 using ZeroLevel.Services;
 
 namespace TestApp
@@ -10,14 +7,6 @@ namespace TestApp
     {
         private static void Main(string[] args)
         {
-            var dict = new Dictionary<string, int>();
-            var methods = dict.GetType().GetMethods(BindingFlags.Static |
-                                         BindingFlags.Instance |
-                                         BindingFlags.Public |
-                                         BindingFlags.NonPublic |
-                                         BindingFlags.FlattenHierarchy)
-                .Select(s => s.Name).OrderBy(s => s);
-
             var fiber = new Fiber();
             fiber
                 .Add((s) => { Console.WriteLine("1"); s.Add<int>("1", 1); return s; })
