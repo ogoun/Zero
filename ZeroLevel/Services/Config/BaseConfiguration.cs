@@ -2,6 +2,9 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
+using ZeroLevel.Services.Collections;
+using ZeroLevel.Services.ObjectMapping;
 using ZeroLevel.Services.Reflection;
 using ZeroLevel.Services.Serialization;
 
@@ -458,6 +461,70 @@ namespace ZeroLevel.Services.Config
             {
                 config.Append(key, this[key]);
             }
+        }
+
+        public T Bind<T>()
+        {
+            var mapper = TypeMapper.Create<T>(true);
+            var instance = (T)TypeHelpers.CreateInitialState(typeof(T));
+            mapper.TraversalMembers(member =>
+            {
+                if (Contains(member.Name))
+                {
+                    int count = Count(member.Name);
+                    switch (count)
+                    {
+                        case 0: return;
+                        case 1: // field
+                            member.Setter(instance, First(member.Name));
+                            break;
+                        default:    // array, or first
+                            if (TypeHelpers.IsArray(member.ClrType))
+                            {
+                                var itemType = member.ClrType.GetElementType();
+                                if (itemType == typeof(string))
+                                {
+                                    var array = Items(member.Name).ToArray();
+                                    member.Setter(instance, array);
+                                }
+                                else
+                                {
+                                    var arrayBuilder = CollectionFactory.CreateArray(itemType, count);
+                                    int index = 0;
+                                    foreach (var item in Items(member.Name))
+                                    {
+                                        arrayBuilder.Set(StringToTypeConverter.TryConvert(item, itemType), index);
+                                        index++;
+                                    }
+                                    member.Setter(instance, arrayBuilder.Complete());
+                                }
+                            }
+                            else if (TypeHelpers.IsEnumerable(member.ClrType))
+                            {
+                                var itemType = member.ClrType.GenericTypeArguments.First();
+                                if (itemType == typeof(string))
+                                {
+                                    member.Setter(instance, Items(member.Name));
+                                }
+                                else
+                                {
+                                    var collectionBuilder = CollectionFactory.Create(itemType);
+                                    foreach (var item in Items(member.Name))
+                                    {
+                                        collectionBuilder.Append(StringToTypeConverter.TryConvert(item, itemType));
+                                    }
+                                    member.Setter(instance, collectionBuilder.Complete());
+                                }
+                            }
+                            else
+                            {
+                                member.Setter(instance, First(member.Name));
+                            }
+                            break;
+                    }
+                }
+            });
+            return instance;
         }
     }
 }

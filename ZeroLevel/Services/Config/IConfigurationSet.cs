@@ -91,5 +91,7 @@ namespace ZeroLevel
 
         void Merge(IConfigurationSet set);
         #endregion Methods
+
+        T Bind<T>();
     }
 }

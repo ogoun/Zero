@@ -186,6 +186,11 @@ namespace ZeroLevel.Services.Reflection
             return FormatterServices.GetUninitializedObject(type);
         }
 
+        public static Type GetArrayType(Type elementType)
+        {
+            return elementType.MakeArrayType();
+        }
+
         public static object CreateNonInitializedInstance(Type type)
         {
             if (type == null)

@@ -141,5 +141,7 @@ namespace ZeroLevel
         #endregion Create, Clean, Delete
 
         void CopyTo(IConfiguration config);
+
+        T Bind<T>();
     }
 }

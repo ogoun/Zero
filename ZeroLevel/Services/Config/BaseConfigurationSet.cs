@@ -257,5 +257,10 @@ namespace ZeroLevel.Services.Config
                 set[sectionName].CopyTo(section);
             }
         }
+
+        public T Bind<T>()
+        {
+            return default;
+        }
     }
 }
