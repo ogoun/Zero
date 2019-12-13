@@ -65,9 +65,6 @@ namespace ZeroLevel.Services.Collections
         private class ArrayBuilder
             : IArrayBuilder
         {
-            private readonly IInvokeWrapper _wrapper;
-
-            private readonly Invoker _insert;
             private readonly object _instance;
 
             public ArrayBuilder(Type entityType, int count)

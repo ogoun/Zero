@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using ZeroLevel;
 
 namespace ConfigurationTests
@@ -10,21 +8,7 @@ namespace ConfigurationTests
 
         static void Main(string[] args)
         {
-            var list = new List<int>();
-            for (int i = 0; i < 100; i++)
-            {
-                list.Add(i);
-            }
-            var collection = list.Chunkify(6).ToList();
-            foreach (var t in collection)
-            {
-                Console.WriteLine(string.Join("; ", t.Select(n => n.ToString("D2"))));
-            }
-            Console.ReadKey();
-            return;
-
-
-            var config = Configuration.ReadFromIniFile("config.ini").Bind<AppConfig>();
+            var config = Configuration.ReadSetFromIniFile("config.ini").Bind<AppConfig>();
             Console.WriteLine(config.Url);
             Console.WriteLine(config.BatchSize);
             Console.WriteLine("Ports");
@@ -37,7 +21,16 @@ namespace ConfigurationTests
             {
                 Console.WriteLine($"\t{sheme}");
             }
+            Console.WriteLine($"Range list: {string.Join(", ", config.List)}");
+
+            Console.WriteLine("Service");
+            Console.WriteLine($"\tAppKey: {config.Service.AppKey}");
+            Console.WriteLine($"\tAppName: {config.Service.AppName}");
+            Console.WriteLine($"\tServiceGroup: {config.Service.ServiceGroup}");
+            Console.WriteLine($"\tServiceType: {config.Service.ServiceType}");
+
             Console.ReadKey();
         }
     }
 }
+

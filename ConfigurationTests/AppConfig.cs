@@ -7,8 +7,9 @@ namespace ConfigurationTests
         public string Url;
         public int BatchSize;
         public IEnumerable<string> Sheme;
-        public IEnumerable<int> Port;
+        public int[] Port;
         public ServiceConfig Service;
+        public IEnumerable<int> List;
     }
 
     public class ServiceConfig

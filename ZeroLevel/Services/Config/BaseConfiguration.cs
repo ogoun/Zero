@@ -463,10 +463,11 @@ namespace ZeroLevel.Services.Config
             }
         }
 
-        public T Bind<T>()
+        public T Bind<T>() => (T)Bind(typeof(T));
+        public object Bind(Type type)
         {
-            var mapper = TypeMapper.Create<T>(true);
-            var instance = (T)TypeHelpers.CreateInitialState(typeof(T));
+            var mapper = TypeMapper.Create(type, true);
+            var instance = TypeHelpers.CreateInitialState(type);
             mapper.TraversalMembers(member =>
             {
                 if (Contains(member.Name))
@@ -476,7 +477,33 @@ namespace ZeroLevel.Services.Config
                     {
                         case 0: return;
                         case 1: // field
-                            member.Setter(instance, First(member.Name));
+                            if (TypeHelpers.IsArray(member.ClrType))
+                            {
+                                var itemType = member.ClrType.GetElementType();
+                                var elements = SplitRange(First(member.Name), itemType).ToArray();
+                                var arrayBuilder = CollectionFactory.CreateArray(itemType, elements.Length);
+                                int index = 0;
+                                foreach (var item in elements)
+                                {
+                                    arrayBuilder.Set(item, index);
+                                    index++;
+                                }
+                                member.Setter(instance, arrayBuilder.Complete());
+                            }
+                            else if (TypeHelpers.IsEnumerable(member.ClrType) && member.ClrType != typeof(string))
+                            {
+                                var itemType = member.ClrType.GenericTypeArguments.First();
+                                var collectionBuilder = CollectionFactory.Create(itemType);
+                                foreach (var item in SplitRange(First(member.Name), itemType))
+                                {
+                                    collectionBuilder.Append(item);
+                                }
+                                member.Setter(instance, collectionBuilder.Complete());
+                            }
+                            else
+                            {
+                                member.Setter(instance, First(member.Name));
+                            }
                             break;
                         default:    // array, or first
                             if (TypeHelpers.IsArray(member.ClrType))
@@ -525,6 +552,35 @@ namespace ZeroLevel.Services.Config
                 }
             });
             return instance;
+        }
+        private static IEnumerable<object> SplitRange(string line, Type elementType)
+        {
+            if (string.IsNullOrWhiteSpace(line)) yield return StringToTypeConverter.TryConvert(line, elementType);
+            foreach (var part in line.Split(','))
+            {
+                if (part.IndexOf('-') >= 0)
+                {
+                    var lr = part.Split('-');
+                    if (lr.Length == 2)
+                    {
+                        long left = (long)Convert.ChangeType(StringToTypeConverter.TryConvert(lr[0], elementType), typeof(long));
+                        long right = (long)Convert.ChangeType(StringToTypeConverter.TryConvert(lr[1], elementType), typeof(long));
+                        for (; left <= right; left++)
+                        {
+                            yield return Convert.ChangeType(left, elementType);
+                        }
+                    }
+                    else
+                    {
+                        // incorrect string
+                        yield break;
+                    }
+                }
+                else
+                {
+                    yield return StringToTypeConverter.TryConvert(part, elementType);
+                }
+            }
         }
     }
 }

@@ -143,5 +143,6 @@ namespace ZeroLevel
         void CopyTo(IConfiguration config);
 
         T Bind<T>();
+        object Bind(Type type);
     }
 }

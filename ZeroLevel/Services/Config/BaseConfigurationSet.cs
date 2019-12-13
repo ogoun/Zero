@@ -2,6 +2,8 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
+using ZeroLevel.Services.ObjectMapping;
+using ZeroLevel.Services.Reflection;
 using ZeroLevel.Services.Serialization;
 
 namespace ZeroLevel.Services.Config
@@ -260,7 +262,16 @@ namespace ZeroLevel.Services.Config
 
         public T Bind<T>()
         {
-            return default;
+            var mapper = TypeMapper.Create<T>(true);
+            var instance = Default.Bind<T>();
+            mapper.TraversalMembers(member =>
+            {
+                if (ContainsSection(member.Name))
+                {
+                    member.Setter(instance, GetSection(member.Name).Bind(member.ClrType));
+                }
+            });
+            return instance;
         }
     }
 }
