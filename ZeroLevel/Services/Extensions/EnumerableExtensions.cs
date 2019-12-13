@@ -32,23 +32,20 @@ namespace ZeroLevel
             return !IsEmpty(collection);
         }
 
-        public static IEnumerable<T> Batch<T>(this IEnumerator<T> source, int size)
-        {
-            yield return source.Current;
-            for (var i = 1; i < size && source.MoveNext(); i++)
-            {
-                yield return source.Current;
-            }
-        }
-
         public static IEnumerable<IEnumerable<T>> Chunkify<T>(this IEnumerable<T> source, int size)
         {
-            using (var enumerator = source.GetEnumerator())
+            if (source == null)
             {
-                while (enumerator.MoveNext())
-                {
-                    yield return Batch(enumerator, size);
-                }
+                yield break;
+            }
+            if (size <= 0)
+            {
+                throw new ArgumentException("chunkSize must be greater than 0.");
+            }
+            while (source.Any())
+            {
+                yield return source.Take(size);
+                source = source.Skip(size);
             }
         }
     }
