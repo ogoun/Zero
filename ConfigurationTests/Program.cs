@@ -28,7 +28,7 @@ namespace ConfigurationTests
             Console.WriteLine($"\tAppName: {config.Service.AppName}");
             Console.WriteLine($"\tServiceGroup: {config.Service.ServiceGroup}");
             Console.WriteLine($"\tServiceType: {config.Service.ServiceType}");
-
+            
             Console.ReadKey();
         }
     }

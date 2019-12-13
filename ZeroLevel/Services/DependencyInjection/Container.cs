@@ -7,7 +7,7 @@ using System.Threading;
 using ZeroLevel.Services.Collections;
 
 namespace ZeroLevel.Patterns.DependencyInjection
-{
+{    
     internal sealed class Container :
         IContainer
     {
@@ -1287,9 +1287,7 @@ namespace ZeroLevel.Patterns.DependencyInjection
 
         public object Get(Type type, string key)
         {
-            MethodInfo method = typeof(IEverythingStorage).GetMethod("Get");
-            MethodInfo genericMethod = method.MakeGenericMethod(type);
-            return genericMethod.Invoke(_everything.Value, new object[] { key });
+            return _everything.Value.Get(type, key);
         }
 
         public void SaveOrUpdate<T>(string key, T value)

@@ -1,6 +1,7 @@
 ﻿using System;
+using ZeroLevel.Logging;
 
-namespace ZeroLevel.Services.Logging
+namespace ZeroLevel.Logging
 {
     /// <summary>
     /// Message queue for logging

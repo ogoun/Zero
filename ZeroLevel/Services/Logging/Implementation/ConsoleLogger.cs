@@ -1,6 +1,7 @@
 ﻿using System;
+using ZeroLevel.Services.Logging;
 
-namespace ZeroLevel.Services.Logging.Implementation
+namespace ZeroLevel.Logging
 {
     public sealed class ConsoleLogger
         : ILogger

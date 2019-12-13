@@ -4,7 +4,7 @@ using System.IO;
 using System.Text;
 using ZeroLevel.Services.Encryption;
 
-namespace ZeroLevel.Services.Logging.Implementation
+namespace ZeroLevel.Logging
 {
     public class EncryptedFileLogOptions
     {

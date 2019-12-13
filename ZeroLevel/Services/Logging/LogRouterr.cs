@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading;
+using ZeroLevel.Services.Logging;
 
-namespace ZeroLevel.Services.Logging
+namespace ZeroLevel.Logging
 {
     internal sealed class LogRouter :
         ILogger,

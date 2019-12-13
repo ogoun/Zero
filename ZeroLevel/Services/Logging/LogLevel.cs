@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ZeroLevel.Services.Logging
+namespace ZeroLevel.Logging
 {
     /// <summary>
     /// Enum contains possible types of messages to write to the log

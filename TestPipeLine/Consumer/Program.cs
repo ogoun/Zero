@@ -1,4 +1,5 @@
 ﻿using ZeroLevel;
+using ZeroLevel.Logging;
 
 namespace Consumer
 {
@@ -7,7 +8,7 @@ namespace Consumer
         static void Main(string[] args)
         {
             Bootstrap.Startup<ConsumerService>(args)
-                .EnableConsoleLog(ZeroLevel.Services.Logging.LogLevel.FullStandart)
+                .EnableConsoleLog(LogLevel.FullStandart)
                 .UseDiscovery()
                 .Run()
                 .WaitWhileStatus(ZeroServiceStatus.Running)

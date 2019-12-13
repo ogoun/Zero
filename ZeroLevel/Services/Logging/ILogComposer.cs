@@ -1,4 +1,6 @@
-﻿namespace ZeroLevel.Services.Logging
+﻿using ZeroLevel.Logging;
+
+namespace ZeroLevel.Logging
 {
     public interface ILogComposer
     {

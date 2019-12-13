@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Concurrent;
 
-namespace ZeroLevel.Services.Logging
+namespace ZeroLevel.Logging
 {
-    internal sealed class NoLimitedLogMessageBuffer : ILogMessageBuffer
+    internal sealed class NoLimitedLogMessageBuffer 
+        : ILogMessageBuffer
     {
         private readonly BlockingCollection<Tuple<LogLevel, string>> _messageQueue =
             new BlockingCollection<Tuple<LogLevel, string>>();

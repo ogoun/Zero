@@ -1,11 +1,9 @@
 ﻿using System;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Reflection;
+using ZeroLevel.Logging;
 using ZeroLevel.Network;
-using ZeroLevel.Services;
-using ZeroLevel.Services.Logging;
 
 namespace ZeroLevel
 {

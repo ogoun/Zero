@@ -7,7 +7,7 @@ namespace Source
         static void Main(string[] args)
         {
             Bootstrap.Startup<SourceService>(args)
-                .EnableConsoleLog(ZeroLevel.Services.Logging.LogLevel.FullStandart)
+                .EnableConsoleLog(ZeroLevel.Logging.LogLevel.FullStandart)
                 .UseDiscovery()
                 .Run()
                 .WaitWhileStatus(ZeroServiceStatus.Running)

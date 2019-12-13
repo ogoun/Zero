@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
+using ZeroLevel.Logging;
 
-namespace ZeroLevel.Services.Logging
+namespace ZeroLevel.Logging
 {
     internal static class LogLevelNameMapping
     {

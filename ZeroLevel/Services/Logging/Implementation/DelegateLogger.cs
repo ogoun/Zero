@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ZeroLevel.Services.Logging.Implementation
+namespace ZeroLevel.Logging
 {
     public sealed class DelegateLogger : ILogger
     {

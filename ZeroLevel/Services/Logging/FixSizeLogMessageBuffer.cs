@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading;
+using ZeroLevel.Logging;
 using ZeroLevel.Services.Collections;
 
 namespace ZeroLevel.Services.Logging

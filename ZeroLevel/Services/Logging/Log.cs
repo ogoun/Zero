@@ -1,7 +1,5 @@
 ﻿using System;
 using ZeroLevel.Logging;
-using ZeroLevel.Services.Logging;
-using ZeroLevel.Services.Logging.Implementation;
 
 namespace ZeroLevel
 {
@@ -20,20 +18,7 @@ namespace ZeroLevel
             _router = new LogRouter();
         }
 
-        #endregion Ctor
-
-        private static string FormatMessage(string line, params object[] args)
-        {
-            if (args == null || args.Length == 0) return line;
-            try
-            {
-                return string.Format(line, args);
-            }
-            catch
-            {
-                return line;
-            }
-        }
+        #endregion Ctor        
 
         #region Logging
 
@@ -254,5 +239,18 @@ namespace ZeroLevel
         }
 
         #endregion Disposable
+
+        private static string FormatMessage(string line, params object[] args)
+        {
+            if (args == null || args.Length == 0) return line;
+            try
+            {
+                return string.Format(line, args);
+            }
+            catch
+            {
+                return line;
+            }
+        }
     }
 }
