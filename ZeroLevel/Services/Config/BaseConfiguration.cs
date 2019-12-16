@@ -477,7 +477,8 @@ namespace ZeroLevel.Services.Config
                     {
                         case 0: return;
                         case 1: // field
-                            if (TypeHelpers.IsArray(member.ClrType))
+                            if (TypeHelpers.IsArray(member.ClrType)
+                                && member.ClrType.GetArrayRank() == 1)
                             {
                                 var itemType = member.ClrType.GetElementType();
                                 var elements = SplitRange(First(member.Name), itemType).ToArray();
@@ -506,8 +507,10 @@ namespace ZeroLevel.Services.Config
                             }
                             break;
                         default:    // array, or first
-                            if (TypeHelpers.IsArray(member.ClrType))
+                            if (TypeHelpers.IsArray(member.ClrType)
+                            && member.ClrType.GetArrayRank() == 1)
                             {
+                                //throw new NotSupportedException("Multidimensions array not supported");
                                 var itemType = member.ClrType.GetElementType();
                                 if (itemType == typeof(string))
                                 {

@@ -3,7 +3,6 @@ using System.Net;
 using System.Threading;
 using ZeroLevel;
 using ZeroLevel.Network;
-using ZeroLevel.Network.SDL;
 using ZeroLevel.Services.Applications;
 
 namespace TestApp
