@@ -2,9 +2,11 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using ZeroLevel.Services.Config;
 using ZeroLevel.Services.Config.Implementation;
+using ZeroLevel.Services.Reflection;
 using ZeroLevel.Services.Serialization;
 
 namespace ZeroLevel
@@ -14,14 +16,13 @@ namespace ZeroLevel
         /// <summary>
         /// Application folder path
         /// </summary>
-        public static string BaseDirectory = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
+        public static readonly string BaseDirectory;
 
-        public static string AppLocation = Assembly.GetEntryAssembly()?.Location;
+        public static readonly string AppLocation;
 
         public const string DEFAULT_SECTION_NAME = "_defaultsection";
 
         #region Ctor
-
         static Configuration()
         {
             _empty = new BaseConfiguration();
@@ -29,6 +30,12 @@ namespace ZeroLevel
             _empty.Freeze(true);
             _emptySet.FreezeConfiguration(true);
             DefaultSet = Configuration.CreateSet();
+            var assembly = EntryAssemblyAttribute.GetEntryAssembly();
+            if (assembly != null)
+            {
+                BaseDirectory = Path.GetDirectoryName(assembly.Location);
+                AppLocation = assembly.Location;
+            }
         }
 
         #endregion Ctor

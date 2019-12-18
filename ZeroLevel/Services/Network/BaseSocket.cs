@@ -6,7 +6,7 @@ namespace ZeroLevel.Network
     {
         static BaseSocket()
         {
-            MAX_FRAME_PAYLOAD_SIZE = Configuration.Default.FirstOrDefault<int>("MAX_FRAME_PAYLOAD_SIZE", DEFAULT_MAX_FRAME_PAYLOAD_SIZE);
+            MAX_FRAME_PAYLOAD_SIZE = Configuration.Default?.FirstOrDefault<int>("MAX_FRAME_PAYLOAD_SIZE", DEFAULT_MAX_FRAME_PAYLOAD_SIZE) ?? DEFAULT_MAX_FRAME_PAYLOAD_SIZE;
         }
 
         public static readonly IRouter NullRouter = new NullRouter();
