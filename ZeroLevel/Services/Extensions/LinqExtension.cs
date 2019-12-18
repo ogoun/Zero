@@ -1,7 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
-namespace ZeroLevel
+namespace System.Linq
 {
     public static class LinqExtension
     {
@@ -18,6 +17,36 @@ namespace ZeroLevel
                         yield return element;
                     }
                 }
+            }
+        }
+
+        public static IList<TSource> Materialize<TSource>(this IEnumerable<TSource> source)
+        {
+            if (source is IList<TSource>)
+            {
+                // Already a list, use it as is
+                return (IList<TSource>)source;
+            }
+            else
+            {
+                // Not a list, materialize it to a list
+                return source.ToList();
+            }
+        }
+        public static IEnumerable<IEnumerable<T>> Chunkify<T>(this IEnumerable<T> source, int size)
+        {
+            if (source == null)
+            {
+                yield break;
+            }
+            if (size <= 0)
+            {
+                throw new ArgumentException("chunkSize must be greater than 0.");
+            }
+            while (source.Any())
+            {
+                yield return source.Take(size);
+                source = source.Skip(size);
             }
         }
     }

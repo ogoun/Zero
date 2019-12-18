@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Net;
 using ZeroLevel.Services.Collections;
 using ZeroLevel.Services.ObjectMapping;
 using ZeroLevel.Services.Reflection;
@@ -500,6 +501,26 @@ namespace ZeroLevel.Services.Config
                                     collectionBuilder.Append(item);
                                 }
                                 member.Setter(instance, collectionBuilder.Complete());
+                            }
+                            else if (TypeHelpers.IsEnum(member.ClrType))
+                            {
+                                var value = Enum.Parse(member.ClrType, First(member.Name));
+                                member.Setter(instance, value);
+                            }
+                            else if (TypeHelpers.IsUri(member.ClrType))
+                            { 
+                                var uri = new Uri(First(member.Name));
+                                member.Setter(instance, uri);
+                            }
+                            else if (TypeHelpers.IsIpEndPoint(member.ClrType))
+                            {
+                                var ep = ZeroLevel.Network.NetUtils.CreateIPEndPoint(First(member.Name));
+                                member.Setter(instance, ep);
+                            }
+                            else if (member.ClrType == typeof(IPAddress))
+                            {
+                                var ip = IPAddress.Parse(First(member.Name));
+                                member.Setter(instance, ip);
                             }
                             else
                             {

@@ -6,6 +6,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="BaGet.Protocol" Version="0.2.0-preview1" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\ZeroLevel\ZeroLevel.csproj" />
   </ItemGroup>
 

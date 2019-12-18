@@ -31,22 +31,5 @@ namespace ZeroLevel
         {
             return !IsEmpty(collection);
         }
-
-        public static IEnumerable<IEnumerable<T>> Chunkify<T>(this IEnumerable<T> source, int size)
-        {
-            if (source == null)
-            {
-                yield break;
-            }
-            if (size <= 0)
-            {
-                throw new ArgumentException("chunkSize must be greater than 0.");
-            }
-            while (source.Any())
-            {
-                yield return source.Take(size);
-                source = source.Skip(size);
-            }
-        }
     }
 }

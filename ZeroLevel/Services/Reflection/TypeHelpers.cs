@@ -28,6 +28,11 @@ namespace ZeroLevel.Services.Reflection
             return IsAssignableToGenericType(baseType, genericType);
         }
 
+        public static bool IsEnum(Type type)
+        {
+            return type.Return(t => t.IsEnum, false);
+        }
+
         public static bool IsArray(Type type)
         {
             return type.Return(t => t.IsArray, false);

@@ -1,11 +1,15 @@
-﻿using System;
+﻿using BaGet.Protocol;
+using NuGet.Versioning;
+using System;
+using System.IO;
+using System.Net;
+using System.Net.Http;
 using ZeroLevel;
 
 namespace ConfigurationTests
 {
     class Program
-    {
-
+    {        
         static void Main(string[] args)
         {
             var config = Configuration.ReadSetFromIniFile("config.ini").Bind<AppConfig>();

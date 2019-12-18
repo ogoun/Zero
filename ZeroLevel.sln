@@ -33,7 +33,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZeroNetworkMonitor", "ZeroN
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConfigurationTests", "ConfigurationTests\ConfigurationTests.csproj", "{E37785CE-E75A-49FB-B17F-16A0F2C6D656}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DependencyInjectionTests", "DependencyInjectionTests\DependencyInjectionTests.csproj", "{665B38E3-A5F2-4AD0-946B-209D80C1AA40}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DependencyInjectionTests", "DependencyInjectionTests\DependencyInjectionTests.csproj", "{665B38E3-A5F2-4AD0-946B-209D80C1AA40}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
