@@ -77,6 +77,10 @@ namespace ZeroLevel.Services.Serialization
 
         public static byte[] SerializeCompatible(object obj)
         {
+            if (null == obj)
+            {
+                return null;
+            }
             var direct_seriazlizable = (obj as IBinarySerializable);
             if (direct_seriazlizable != null)
             {
@@ -95,6 +99,10 @@ namespace ZeroLevel.Services.Serialization
 
         public static byte[] SerializeCompatible<T>(T obj)
         {
+            if (null == obj)
+            {
+                return null;
+            }
             var direct_seriazlizable = (obj as IBinarySerializable);
             if (direct_seriazlizable != null)
             {
