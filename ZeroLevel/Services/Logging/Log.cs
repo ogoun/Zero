@@ -21,7 +21,10 @@ namespace ZeroLevel
         #endregion Ctor        
 
         #region Logging
-
+        public static void Write(LogLevel level, string message)
+        {
+            _router.Write(level, message);
+        }
         public static void Raw(string line, params object[] args)
         {
             _router.Write(LogLevel.Raw, FormatMessage(line, args));
@@ -135,6 +138,11 @@ namespace ZeroLevel
         #region Delegate logger
 
         public static void AddDelegateLogger(Action<string> handler, LogLevel level = LogLevel.Standart)
+        {
+            AddLogger(new DelegateLogger(handler), level);
+        }
+
+        public static void AddDelegateLogger(Action<LogLevel, string> handler, LogLevel level = LogLevel.Standart)
         {
             AddLogger(new DelegateLogger(handler), level);
         }

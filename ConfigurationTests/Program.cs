@@ -1,9 +1,4 @@
-﻿using BaGet.Protocol;
-using NuGet.Versioning;
-using System;
-using System.IO;
-using System.Net;
-using System.Net.Http;
+﻿using System;
 using ZeroLevel;
 
 namespace ConfigurationTests

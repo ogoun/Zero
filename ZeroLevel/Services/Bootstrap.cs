@@ -87,7 +87,7 @@ namespace ZeroLevel
         static Bootstrap()
         {
             // Tricks for minimize config changes for dependency resolve
-            AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;
+            //AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;
         }
 
         private static Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args)
