@@ -1,10 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using ZeroLevel;
 
 namespace ConfigurationTests
 {
     class Program
-    {        
+    {
         static void Main(string[] args)
         {
             var config = Configuration.ReadSetFromIniFile("config.ini").Bind<AppConfig>();
@@ -27,7 +28,7 @@ namespace ConfigurationTests
             Console.WriteLine($"\tAppName: {config.Service.AppName}");
             Console.WriteLine($"\tServiceGroup: {config.Service.ServiceGroup}");
             Console.WriteLine($"\tServiceType: {config.Service.ServiceType}");
-            
+
             Console.ReadKey();
         }
     }
