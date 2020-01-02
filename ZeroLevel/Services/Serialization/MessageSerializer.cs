@@ -121,6 +121,7 @@ namespace ZeroLevel.Services.Serialization
 
         public static T DeserializeCompatible<T>(byte[] data)
         {
+            if (data == null || data.Length == 0) return default(T);
             if (typeof(IBinarySerializable).IsAssignableFrom(typeof(T)))
             {
                 using (var reader = new MemoryStreamReader(data))
@@ -168,6 +169,7 @@ namespace ZeroLevel.Services.Serialization
         public static T Copy<T>(T value)
             where T : IBinarySerializable
         {
+            if (default == value) return default;
             using (var writer = new MemoryStreamWriter())
             {
                 value.Serialize(writer);
