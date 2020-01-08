@@ -33,7 +33,8 @@ namespace ZeroLevel.SqlServer
     {
         public static T Read<T>(this DbDataReader reader, int index)
         {
-            if (reader[index] == DBNull.Value) return default(T);
+            if (reader == null) return default;
+            if (reader[index] == DBNull.Value) return default;
             Type t;
             if ((t = Nullable.GetUnderlyingType(typeof(T))) != null)
             {
@@ -43,7 +44,53 @@ namespace ZeroLevel.SqlServer
         }
         public static T Read<T>(this DbDataReader reader, string name)
         {
-            if (reader[name] == DBNull.Value) return default(T);
+            if (reader == null) return default;
+            if (reader[name] == DBNull.Value) return default;
+            Type t;
+            if ((t = Nullable.GetUnderlyingType(typeof(T))) != null)
+            {
+                return (T)Convert.ChangeType(reader[name], t);
+            }
+            return (T)Convert.ChangeType(reader[name], typeof(T));
+        }
+        public static T Read<T>(this IDataReader reader, int index)
+        {
+            if (reader == null) return default;
+            if (reader[index] == DBNull.Value) return default;
+            Type t;
+            if ((t = Nullable.GetUnderlyingType(typeof(T))) != null)
+            {
+                return (T)Convert.ChangeType(reader[index], t);
+            }
+            return (T)Convert.ChangeType(reader[index], typeof(T));
+        }
+        public static T Read<T>(this IDataReader reader, string name)
+        {
+            if (reader == null) return default;
+            if (reader[name] == DBNull.Value) return default;
+            Type t;
+            if ((t = Nullable.GetUnderlyingType(typeof(T))) != null)
+            {
+                return (T)Convert.ChangeType(reader[name], t);
+            }
+            return (T)Convert.ChangeType(reader[name], typeof(T));
+        }
+
+        public static T Read<T>(this DataRow reader, int index)
+        {
+            if (reader == null) return default;
+            if (reader.ItemArray[index] == DBNull.Value) return default;
+            Type t;
+            if ((t = Nullable.GetUnderlyingType(typeof(T))) != null)
+            {
+                return (T)Convert.ChangeType(reader.ItemArray[index], t);
+            }
+            return (T)Convert.ChangeType(reader.ItemArray[index], typeof(T));
+        }
+        public static T Read<T>(this DataRow reader, string name)
+        {
+            if (reader == null) return default;
+            if (reader[name] == DBNull.Value) return default;
             Type t;
             if ((t = Nullable.GetUnderlyingType(typeof(T))) != null)
             {
