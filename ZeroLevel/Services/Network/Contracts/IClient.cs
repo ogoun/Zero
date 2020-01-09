@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Net;
-using ZeroLevel.Models;
 
 namespace ZeroLevel.Network
 {
@@ -12,15 +11,14 @@ namespace ZeroLevel.Network
         IRouter Router { get; }
         ISocketClient Socket { get; }
 
-        InvokeResult Send<T>(T message);
+        bool Send<T>(T message);
+        bool Send(string inbox);
+        bool Send(string inbox, byte[] data);
+        bool Send<T>(string inbox, T message);
 
-        InvokeResult Send(string inbox);
-        InvokeResult Send(string inbox, byte[] data);
-        InvokeResult Send<T>(string inbox, T message);
-
-        InvokeResult Request(string inbox, Action<byte[]> callback);
-        InvokeResult Request(string inbox, byte[] data, Action<byte[]> callback);
-        InvokeResult Request<Tresponse>(string inbox, Action<Tresponse> callback);
-        InvokeResult Request<Trequest, Tresponse>(string inbox, Trequest request, Action<Tresponse> callback);
+        bool Request(string inbox, Action<byte[]> callback);
+        bool Request(string inbox, byte[] data, Action<byte[]> callback);
+        bool Request<Tresponse>(string inbox, Action<Tresponse> callback);
+        bool Request<Trequest, Tresponse>(string inbox, Trequest request, Action<Tresponse> callback);
     }
 }

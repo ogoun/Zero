@@ -32,7 +32,10 @@ namespace ZeroLevel.Network
         #endregion Ctor
 
         #region IMultiClient      
-
+        public bool Peek(string alias, string inbox)
+        {
+            return CallService(alias, (transport) => transport.Send(inbox));
+        }
         /// <summary>
         /// Sending a message to the service
         /// </summary>
@@ -41,7 +44,7 @@ namespace ZeroLevel.Network
         /// <returns></returns>
         public bool Send<T>(string alias, T data)
         {
-            return CallService(alias, (transport) => transport.Send<T>(BaseSocket.DEFAULT_MESSAGE_INBOX, data).Success);
+            return CallService(alias, (transport) => transport.Send<T>(BaseSocket.DEFAULT_MESSAGE_INBOX, data));
         }
 
         /// <summary>
@@ -53,7 +56,7 @@ namespace ZeroLevel.Network
         /// <returns></returns>
         public bool Send<T>(string alias, string inbox, T data)
         {
-            return CallService(alias, (transport) => transport.Send<T>(inbox, data).Success);
+            return CallService(alias, (transport) => transport.Send<T>(inbox, data));
         }
 
         /// <summary>
@@ -75,15 +78,19 @@ namespace ZeroLevel.Network
         /// <returns>true - on successful submission</returns>
         public bool SendBroadcast<T>(string alias, string inbox, T data)
         {
+            var result = false;
             try
             {
-                foreach (var client in GetClientEnumerator(alias))
+                var clients = GetClientEnumerator(alias).ToArray();
+                var tasks = new Task[clients.Length];
+                int index = 0;
+                foreach (var client in clients)
                 {
-                    Task.Run(() =>
+                    tasks[index++] = Task.Run(() =>
                     {
                         try
                         {
-                            client.Send(inbox, data);
+                            result |= client.Send(inbox, data);
                         }
                         catch (Exception ex)
                         {
@@ -91,12 +98,13 @@ namespace ZeroLevel.Network
                         }
                     });
                 }
+                Task.WaitAll(tasks);
             }
             catch (Exception ex)
             {
                 Log.SystemError(ex, $"[Exchange.SendBroadcast] Error broadcast send data in service '{alias}'. Inbox '{inbox}'");
             }
-            return false;
+            return result;
         }
 
         /// <summary>
@@ -109,15 +117,19 @@ namespace ZeroLevel.Network
         /// <returns>true - on successful submission</returns>
         public bool SendBroadcastByType<T>(string type, string inbox, T data)
         {
+            var result = false;
             try
             {
-                foreach (var client in GetClientEnumeratorByType(type))
+                var clients = GetClientEnumeratorByType(type).ToArray();
+                var tasks = new Task[clients.Length];
+                int index = 0;
+                foreach (var client in clients)
                 {
-                    Task.Run(() =>
+                    tasks[index++] = Task.Run(() =>
                     {
                         try
                         {
-                            client.Send(inbox, data);
+                            result |= client.Send(inbox, data);
                         }
                         catch (Exception ex)
                         {
@@ -125,12 +137,13 @@ namespace ZeroLevel.Network
                         }
                     });
                 }
+                Task.WaitAll(tasks);
             }
             catch (Exception ex)
             {
                 Log.SystemError(ex, $"[Exchange.SendBroadcastByType] Error broadcast send data to services with type '{type}'. Inbox '{inbox}'");
             }
-            return false;
+            return result;
         }
 
         /// <summary>
@@ -153,15 +166,19 @@ namespace ZeroLevel.Network
         /// <returns>true - on successful submission</returns>
         public bool SendBroadcastByGroup<T>(string group, string inbox, T data)
         {
+            var result = false;
             try
             {
-                foreach (var client in GetClientEnumeratorByGroup(group))
+                var clients = GetClientEnumeratorByGroup(group).ToArray();
+                var tasks = new Task[clients.Length];
+                int index = 0;
+                foreach (var client in clients)
                 {
-                    Task.Run(() =>
+                    tasks[index++] = Task.Run(() =>
                     {
                         try
                         {
-                            client.Send(inbox, data);
+                            result |= client.Send(inbox, data);
                         }
                         catch (Exception ex)
                         {
@@ -169,12 +186,13 @@ namespace ZeroLevel.Network
                         }
                     });
                 }
+                Task.WaitAll(tasks);
             }
             catch (Exception ex)
             {
                 Log.SystemError(ex, $"[Exchange.SendBroadcastByGroup] Error broadcast send data to services with type '{group}'. Inbox '{inbox}'");
             }
-            return false;
+            return result;
         }
 
         /// <summary>
@@ -192,48 +210,26 @@ namespace ZeroLevel.Network
 
         public bool Request<Tresponse>(string alias, string inbox, Action<Tresponse> callback)
         {
-            bool success = false;
-            Tresponse response = default(Tresponse);
             try
             {
-                if (false == CallService(alias, (transport) =>
+                return CallService(alias, (transport) =>
                 {
                     try
                     {
-                        using (var waiter = new ManualResetEventSlim(false))
-                        {
-                            if (false == transport.Request<Tresponse>(inbox, resp =>
-                            {
-                                response = resp;
-                                success = true;
-                                waiter.Set();
-                            }).Success)
-                            {
-                                return false;
-                            }
-                            if (false == waiter.Wait(BaseSocket.MAX_REQUEST_TIME_MS))
-                            {
-                                return false;
-                            }
-                        }
-                        return true;
+                        return transport.Request<Tresponse>(inbox, callback);
                     }
                     catch (Exception ex)
                     {
                         Log.SystemError(ex, $"[Exchange.Request] Error request to service '{alias}'. Inbox '{inbox}'");
                     }
                     return false;
-                }))
-                {
-                    Log.SystemWarning($"[Exchange.Request] No responce on request. Service key '{alias}'. Inbox '{inbox}'");
-                }
+                });
             }
             catch (Exception ex)
             {
                 Log.SystemError(ex, $"[Exchange.Request] Error request to service '{alias}'. Inbox '{inbox}'");
             }
-            callback(response);
-            return success;
+            return false;
         }
 
         public bool Request<Trequest, Tresponse>(string alias, Trequest request, Action<Tresponse> callback)
@@ -241,48 +237,26 @@ namespace ZeroLevel.Network
 
         public bool Request<Trequest, Tresponse>(string alias, string inbox, Trequest request, Action<Tresponse> callback)
         {
-            bool success = false;
-            Tresponse response = default(Tresponse);
             try
             {
-                if (false == CallService(alias, (transport) =>
+                return CallService(alias, (transport) =>
                 {
                     try
                     {
-                        using (var waiter = new ManualResetEventSlim(false))
-                        {
-                            if (false == transport.Request<Trequest, Tresponse>(inbox, request, resp =>
-                            {
-                                response = resp;
-                                success = true;
-                                waiter.Set();
-                            }).Success)
-                            {
-                                return false;
-                            }
-                            if (false == waiter.Wait(BaseSocket.MAX_REQUEST_TIME_MS))
-                            {
-                                return false;
-                            }
-                        }
-                        return true;
+                        return transport.Request(inbox, request, callback);
                     }
                     catch (Exception ex)
                     {
                         Log.SystemError(ex, $"[Exchange.Request] Error request to service '{alias}'. Inbox '{inbox}'");
                     }
                     return false;
-                }))
-                {
-                    Log.SystemWarning($"[Exchange.Request] No responce on request. Service key '{alias}'. Inbox '{inbox}'");
-                }
+                });
             }
             catch (Exception ex)
             {
                 Log.SystemError(ex, $"[Exchange.Request] Error request to service '{alias}'. Inbox '{inbox}'");
             }
-            callback(response);
-            return success;
+            return false;
         }
 
         /// <summary>
@@ -535,9 +509,9 @@ namespace ZeroLevel.Network
                                     Log.SystemWarning($"[Exchange.RegisterServicesInDiscovery] Register canceled. {r.Comment}");
                                 }
                             });
-                        if (request.Success == false)
+                        if (request == false)
                         {
-                            Log.SystemWarning($"[Exchange.RegisterServicesInDiscovery] Register canceled.{request.Comment}");
+                            Log.SystemWarning($"[Exchange.RegisterServicesInDiscovery] Register canceled.");
                         }
                     }
                 }
@@ -578,9 +552,9 @@ namespace ZeroLevel.Network
                                 _dicovery_aliases.Rollback();
                             }
                         });
-                        if (!ir.Success)
+                        if (!ir)
                         {
-                            Log.SystemWarning($"[Exchange.UpdateServiceListFromDiscovery] Error request to inbox 'services'. {ir.Comment}");
+                            Log.SystemWarning($"[Exchange.UpdateServiceListFromDiscovery] Error request to inbox 'services'.");
                         }
                     }
                     catch (Exception ex)
@@ -935,7 +909,7 @@ namespace ZeroLevel.Network
                     {
                         try
                         {
-                            if (false == client.Request<Treq, Tresp>(inbox, data, resp => { response.Add(resp); waiter.Signal(); }).Success)
+                            if (false == client.Request<Treq, Tresp>(inbox, data, resp => { response.Add(resp); waiter.Signal(); }))
                             {
                                 waiter.Signal();
                             }
@@ -963,7 +937,7 @@ namespace ZeroLevel.Network
                     {
                         try
                         {
-                            if (false == client.Request<Tresp>(inbox, resp => { response.Add(resp); waiter.Signal(); }).Success)
+                            if (false == client.Request<Tresp>(inbox, resp => { response.Add(resp); waiter.Signal(); }))
                             {
                                 waiter.Signal();
                             }

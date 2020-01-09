@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
 using ZeroLevel;
+using ZeroLevel.Logging;
 using ZeroLevel.Services.Web;
 
 namespace TestApp
@@ -21,17 +22,6 @@ namespace TestApp
 
         private static void Main(string[] args)
         {
-            var t = new TestQuery
-            {
-                Age = 133,
-                Roles = new[] { "ad\"\"\"min", "user", "operator" },
-                Name = "su"
-            };
-            var builder = new UrlBuilder(Serialize);
-            var url = builder.BuildRequestUrlFromDTO("http://google.com", "/api/v0/getuserinfo", t);
-            Console.WriteLine(url);
-            Console.ReadKey();
-
             /*var fiber = new Fiber();
             fiber
                 .Add((s) => { Console.WriteLine("1"); s.Add<int>("1", 1); return s; })
@@ -51,15 +41,15 @@ namespace TestApp
 
 
 
-            /*Configuration.Save(Configuration.ReadFromApplicationConfig());
+            Configuration.Save(Configuration.ReadFromApplicationConfig());
             Bootstrap.Startup<MyService>(args,
                 () => Configuration.ReadSetFromIniFile("config.ini"))
-                .EnableConsoleLog(ZeroLevel.Services.Logging.LogLevel.System | ZeroLevel.Services.Logging.LogLevel.FullDebug)
+                .EnableConsoleLog(LogLevel.System | LogLevel.FullDebug)
                 //.UseDiscovery()
                 .Run()
                 .WaitWhileStatus(ZeroServiceStatus.Running)
                 .Stop();
-            Bootstrap.Shutdown();*/
+            Bootstrap.Shutdown();
         }
     }
 }

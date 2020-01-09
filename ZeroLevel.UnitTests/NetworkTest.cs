@@ -3,7 +3,7 @@ using System.Threading;
 using Xunit;
 using ZeroLevel.Services.Applications;
 
-namespace ZeroLevel.UnitTests
+namespace ZeroLevel.Network
 {
     public class NetworkTest
         : BaseZeroService
@@ -13,45 +13,54 @@ namespace ZeroLevel.UnitTests
         {
             // Arrange
             var server = UseHost(8181);
-            var client = Exchange.GetConnection("127.0.0.1:8181");
+            Exchange.RoutesStorage.Set("test", NetUtils.CreateIPEndPoint("127.0.0.1:8181"));
 
             bool got_message_no_request = false;
             bool got_message_with_request = false;
             bool got_response_message_no_request = false;
             bool got_response_message_with_request = false;
 
-            using (var signal = new ManualResetEvent(false))
+            server.RegisterInbox("empty", (_) =>
             {
-                server.RegisterInbox("empty", (_) => { signal.Set(); got_message_no_request = true; });
-                server.RegisterInbox<string>((_, ___) => { signal.Set(); got_message_with_request = true; });
-                server.RegisterInbox<string>("get_response", (_) => "Hello");
-                server.RegisterInbox<int, string>("convert", (__, num) => num.ToString());
+                got_message_no_request = true;
+            });
+            server.RegisterInbox<string>((_, ___) =>
+            {
+                got_message_with_request = true;
+            });
+            server.RegisterInbox<string>("get_response", (_) => "Hello");
+            server.RegisterInbox<int, string>("convert", (__, num) => num.ToString());
 
-                // Act
-                signal.Reset();
-                client.Send("empty");
-                signal.WaitOne(1000);
+            Thread.Sleep(200);
 
-                signal.Reset();
-                client.Send<string>("hello");
-                signal.WaitOne(100);
+            Assert.True(Exchange.Peek("test", "empty"));
+            Assert.True(Exchange.Send<string>("test", "hello"));
 
-                signal.Reset();
-                client.Request<string>("get_response", (s) => { signal.Set(); got_response_message_no_request = s.Equals("Hello", StringComparison.Ordinal); });
-                signal.WaitOne(1000);
-
-                signal.Reset();
-                client.Request<int, string>("convert", 10, (s) => { signal.Set(); got_response_message_with_request = s.Equals("10", StringComparison.Ordinal); });
-                signal.WaitOne(1000);
+            int repeat = 10;
+            while (!got_message_no_request || !got_message_with_request)
+            {
+                Thread.Sleep(200);
+                repeat--;
+                if (repeat == 0) break;
             }
-
-
 
             // Assert
             Assert.True(got_message_no_request, "No signal for no request default inbox");
             Assert.True(got_message_with_request, "No signal for default inbox");
-            Assert.True(got_response_message_no_request, "No response without request");
-            Assert.True(got_response_message_with_request, "No response with request");
+
+            for (int i = 0; i < 100; i++)
+            {
+                got_response_message_no_request =
+                    Exchange.Request<string>("test", "get_response")
+                    .Equals("Hello", StringComparison.Ordinal);
+
+                got_response_message_with_request =
+                    Exchange.Request<int, string>("test", "convert", 10)
+                    .Equals("10", StringComparison.Ordinal);
+
+                Assert.True(got_response_message_no_request, "No response without request");
+                Assert.True(got_response_message_with_request, "No response with request");
+            }
         }
 
         protected override void StartAction()

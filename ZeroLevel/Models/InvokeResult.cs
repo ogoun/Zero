@@ -99,6 +99,8 @@ namespace ZeroLevel.Models
 
         #region Ctor
 
+        public InvokeResult() { }
+
         public InvokeResult(bool success, string comment)
         {
             Success = success;

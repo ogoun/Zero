@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Net;
-using ZeroLevel.Models;
 using ZeroLevel.Services.Serialization;
 
 namespace ZeroLevel.Network
@@ -19,146 +18,146 @@ namespace ZeroLevel.Network
             _client = client;
         }
 
-        public InvokeResult Send(string inbox)
+        public bool Send(string inbox)
         {
             try
             {
                 _client.Send(Frame.FromPool(inbox));
+                return true;
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "[NetworkNode.Send]");
-                return InvokeResult.Fault(ex.Message);
+                Log.Error(ex, "[NetworkNode.Send(inbox)]");
             }
-            return InvokeResult.Succeeding();
+            return false;
         }
 
-        public InvokeResult Send(string inbox, byte[] data)
+        public bool Send(string inbox, byte[] data)
         {
             try
             {
                 _client.Send(Frame.FromPool(inbox, data));
+                return true;
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "[NetworkNode.Send]");
-                return InvokeResult.Fault(ex.Message);
+                Log.Error(ex, "[NetworkNode.Send(inbox, data)]");
             }
-            return InvokeResult.Succeeding();
+            return false;
         }
 
-        public InvokeResult Send<T>(T message)
+        public bool Send<T>(T message)
         {
             try
             {
                 _client.Send(Frame.FromPool(BaseSocket.DEFAULT_MESSAGE_INBOX, MessageSerializer.SerializeCompatible<T>(message)));
+                return true;
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "[NetworkNode.Send]");
-                return InvokeResult.Fault(ex.Message);
+                Log.Error(ex, "[NetworkNode.Send(message)]");
             }
-            return InvokeResult.Succeeding();
+            return false;
         }
 
-        public InvokeResult Send<T>(string inbox, T message)
+        public bool Send<T>(string inbox, T message)
         {
             try
             {
                 _client.Send(Frame.FromPool(inbox, MessageSerializer.SerializeCompatible<T>(message)));
+                return true;
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "[NetworkNode.Send]");
-                return InvokeResult.Fault(ex.Message);
+                Log.Error(ex, "[NetworkNode.Send(inbox, message)]");
             }
-            return InvokeResult.Succeeding();
+            return false;
         }
 
-        public InvokeResult Request(string inbox, Action<byte[]> callback)
+        public bool Request(string inbox, Action<byte[]> callback)
         {
             try
             {
                 _client.Request(Frame.FromPool(inbox), f => callback(f));
+                return true;
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "[NetworkNode.Request]");
-                return InvokeResult.Fault(ex.Message);
+                Log.Error(ex, "[NetworkNode.Request(inbox, callback)]");
             }
-            return InvokeResult.Succeeding();
+            return false;
         }
 
-        public InvokeResult Request(string inbox, byte[] data, Action<byte[]> callback)
+        public bool Request(string inbox, byte[] data, Action<byte[]> callback)
         {
             try
             {
                 _client.Request(Frame.FromPool(inbox, data), f => callback(f));
+                return true;
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "[NetworkNode.Request]");
-                return InvokeResult.Fault(ex.Message);
+                Log.Error(ex, "[NetworkNode.Request(inbox, data, callback)]");
             }
-            return InvokeResult.Succeeding();
+            return false;
         }
 
-        public InvokeResult Request<Tresponse>(string inbox, Action<Tresponse> callback)
+        public bool Request<Tresponse>(string inbox, Action<Tresponse> callback)
         {
             try
             {
                 _client.Request(Frame.FromPool(inbox), f => callback(MessageSerializer.DeserializeCompatible<Tresponse>(f)));
+                return true;
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "[NetworkNode.Request]");
-                return InvokeResult.Fault(ex.Message);
+                Log.Error(ex, "[NetworkNode.Request(inbox, callback)]");
             }
-            return InvokeResult.Succeeding();
+            return false;
         }
 
-        public InvokeResult Request<Tresponse>(Action<Tresponse> callback)
+        public bool Request<Tresponse>(Action<Tresponse> callback)
         {
             try
             {
                 _client.Request(Frame.FromPool(BaseSocket.DEFAULT_REQUEST_INBOX), f => callback(MessageSerializer.DeserializeCompatible<Tresponse>(f)));
+                return true;
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "[NetworkNode.Request]");
-                return InvokeResult.Fault(ex.Message);
+                Log.Error(ex, "[NetworkNode.Request(callback)]");
             }
-            return InvokeResult.Succeeding();
+            return false;
         }
 
-        public InvokeResult Request<Trequest, Tresponse>(string inbox, Trequest request, Action<Tresponse> callback)
+        public bool Request<Trequest, Tresponse>(string inbox, Trequest request, Action<Tresponse> callback)
         {
             try
             {
                 _client.Request(Frame.FromPool(inbox, MessageSerializer.SerializeCompatible<Trequest>(request)),
                     f => callback(MessageSerializer.DeserializeCompatible<Tresponse>(f)));
+                return true;
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "[NetworkNode.Request]");
-                return InvokeResult.Fault(ex.Message);
+                Log.Error(ex, "[NetworkNode.Request(inbox, request, callback)]");
             }
-            return InvokeResult.Succeeding();
+            return false;
         }
 
-        public InvokeResult Request<Trequest, Tresponse>(Trequest request, Action<Tresponse> callback)
+        public bool Request<Trequest, Tresponse>(Trequest request, Action<Tresponse> callback)
         {
             try
             {
                 _client.Request(Frame.FromPool(BaseSocket.DEFAULT_REQUEST_WITHOUT_ARGS_INBOX, MessageSerializer.SerializeCompatible<Trequest>(request)),
                     f => callback(MessageSerializer.DeserializeCompatible<Tresponse>(f)));
+                return true;
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "[NetworkNode.Request]");
-                return InvokeResult.Fault(ex.Message);
+                Log.Error(ex, "[NetworkNode.Request(request, callback)]");
             }
-            return InvokeResult.Succeeding();
+            return false;
         }
 
         public void Dispose()

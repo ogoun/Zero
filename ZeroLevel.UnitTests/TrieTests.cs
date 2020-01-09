@@ -2,7 +2,7 @@
 using ZeroLevel.Services.Semantic;
 using ZeroLevel.Services.Serialization;
 
-namespace ZeroLevel.UnitTests
+namespace ZeroLevel.Tries
 {
     public class TrieTests
     {

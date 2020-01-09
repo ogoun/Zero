@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Linq;
 using Xunit;
 using ZeroLevel.Services.Semantic;
 
-namespace ZeroLevel.UnitTests
+namespace ZeroLevel.Semantic
 {
     public class SemanticTests
     {

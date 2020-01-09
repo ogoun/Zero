@@ -169,7 +169,7 @@ namespace ZeroLevel.Services.Serialization
         public static T Copy<T>(T value)
             where T : IBinarySerializable
         {
-            if (default == value) return default;
+            if (null == value) return default;
             using (var writer = new MemoryStreamWriter())
             {
                 value.Serialize(writer);

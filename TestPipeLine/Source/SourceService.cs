@@ -40,7 +40,7 @@ namespace Source
                                 Interlocked.Increment(ref _proceed);
                                 waiter.Set();
                             });
-                            if (ir == null || ir.Success == false)
+                            if (ir == null || ir == false)
                             {
                                 Thread.Sleep(300);
                                 waiter.Set();

@@ -37,7 +37,7 @@ namespace ZeroLevel.NetworkUnitTests
             locker.WaitOne(1000);
 
             // Assert
-            Assert.True(ir.Success);
+            Assert.True(ir);
             Assert.True(info.Equals(received));
 
             // Dispose
@@ -85,7 +85,7 @@ namespace ZeroLevel.NetworkUnitTests
             locker.WaitOne(1000);
 
             // Assert
-            Assert.True(ir.Success);
+            Assert.True(ir);
             Assert.True(CollectionComparsionExtensions.OrderingEquals(new[] { info1, info2 }, received, (a, b) => a.Equals(b)));
 
             // Dispose

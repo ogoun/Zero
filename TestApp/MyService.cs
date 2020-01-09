@@ -32,24 +32,18 @@ namespace TestApp
             });
 
             Exchange.RoutesStorage.Set("test.app", new IPEndPoint(IPAddress.Loopback, 8800));
-            using (var waiter = new ManualResetEventSlim(false))
+
+            while (true)
             {
-                while (true)
+                try
                 {
-                    try
-                    {
-                        Exchange.GetConnection("test.app")?.Request<int>("counter", s =>
-                        {
-                            waiter.Set();
-                            Interlocked.Add(ref counter, s);
-                        });
-                    }
-                    catch
-                    {
-                        Thread.Sleep(300);
-                    }
-                    waiter.Wait();
-                    waiter.Reset();
+                    //var s = Exchange.Request<int>("test.app", "counter");
+                    Interlocked.Add(ref counter, Exchange.Request<int>("test.app", "counter"));
+                }
+                catch(Exception ex)
+                {
+                    Log.Error(ex, "Request fault");
+                    Thread.Sleep(300);
                 }
             }
         }

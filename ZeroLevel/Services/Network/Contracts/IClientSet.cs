@@ -1,13 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using ZeroLevel.Models;
 
 namespace ZeroLevel.Network
 {
     public interface IClientSet
-    {
-        bool Send<T>(string alias, T data);
+    {        
+        bool Send<T>(string alias, T data);        
         bool Send<T>(string alias, string inbox, T data);
+
+        bool Peek(string alias, string inbox);
+
         bool Request<Tresponse>(string alias, Action<Tresponse> callback);
         bool Request<Tresponse>(string alias, string inbox, Action<Tresponse> callback);
         bool Request<Trequest, Tresponse>(string alias, Trequest request, Action<Tresponse> callback);

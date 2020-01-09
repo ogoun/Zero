@@ -96,10 +96,10 @@ namespace ZeroLevel.Network.FileTransfer
                     Send<T>(client, inbox, frame, resendWhenConnectionError, false);
                 }
             });
-            sended = client.Request<T, InvokeResult>(inbox, frame, handle).Success;
+            sended = client.Request<T, InvokeResult>(inbox, frame, handle);
             if (sended == false && resendWhenConnectionError)
             {
-                sended = client.Request<T, InvokeResult>(inbox, frame, handle).Success;
+                sended = client.Request<T, InvokeResult>(inbox, frame, handle);
             }
             return sended;
         }
