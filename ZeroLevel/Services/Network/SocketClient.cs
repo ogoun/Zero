@@ -42,7 +42,6 @@ namespace ZeroLevel.Network
         #endregion
 
         private Socket _clientSocket;
-        private AsyncCallback _receiveAsyncCallback;
         private FrameParser _parser;
         private readonly RequestBuffer _requests = new RequestBuffer();
         private readonly byte[] _buffer = new byte[DEFAULT_RECEIVE_BUFFER_SIZE];
@@ -77,7 +76,6 @@ namespace ZeroLevel.Network
             Router = router;
             Endpoint = ep;
             _parser = new FrameParser(_parser_OnIncoming);
-            _receiveAsyncCallback = new AsyncCallback(ReceiveAsyncCallback);
 
             Working();
 
@@ -91,7 +89,6 @@ namespace ZeroLevel.Network
             _clientSocket = socket;
             Endpoint = (IPEndPoint)_clientSocket.RemoteEndPoint;
             _parser = new FrameParser(_parser_OnIncoming);
-            _receiveAsyncCallback = new AsyncCallback(ReceiveAsyncCallback);
             _socket_freezed = true;
 
             Working();
@@ -157,7 +154,6 @@ namespace ZeroLevel.Network
                 sf.identity = id;
                 sf.data = data;
                 _send_queue.Add(sf);
-
             }
         }
 

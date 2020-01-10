@@ -87,6 +87,7 @@ namespace ZeroLevel.SqlServer
             }
             return (T)Convert.ChangeType(reader.ItemArray[index], typeof(T));
         }
+
         public static T Read<T>(this DataRow reader, string name)
         {
             if (reader == null) return default;
