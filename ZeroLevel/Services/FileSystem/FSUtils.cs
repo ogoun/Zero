@@ -306,7 +306,7 @@ namespace ZeroLevel.Services.FileSystem
         }
 
         public static bool IsDirectoryEmpty(string path)
-        {
+        {            
             return !Directory.EnumerateFileSystemEntries(path).Any();
         }
     }

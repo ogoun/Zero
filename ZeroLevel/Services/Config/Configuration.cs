@@ -36,6 +36,10 @@ namespace ZeroLevel
                 BaseDirectory = Path.GetDirectoryName(assembly.Location);
                 AppLocation = assembly.Location;
             }
+            else
+            {
+                BaseDirectory = Directory.GetCurrentDirectory();
+            }
         }
 
         #endregion Ctor
