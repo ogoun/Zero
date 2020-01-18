@@ -224,6 +224,7 @@ namespace ZeroLevel.Services.Serialization
 
         #region Extensions
 
+        #region Collections
         public List<T> ReadCollection<T>()
             where T : IBinarySerializable, new()
         {
@@ -239,57 +240,6 @@ namespace ZeroLevel.Services.Serialization
                 }
             }
             return collection;
-        }
-
-
-        public Dictionary<TKey, TValue> ReadDictionary<TKey, TValue>()
-        {
-            int count = ReadInt32();
-            var collection = new Dictionary<TKey, TValue>(count);
-            if (count > 0)
-            {
-                TKey key;
-                TValue value;
-                for (int i = 0; i < count; i++)
-                {
-                    key = ReadCompatible<TKey>();
-                    value = ReadCompatible<TValue>();
-                    collection.Add(key, value);
-                }
-            }
-            return collection;
-        }
-
-        public ConcurrentDictionary<TKey, TValue> ReadDictionaryAsConcurrent<TKey, TValue>()
-        {
-            int count = ReadInt32();
-            var collection = new ConcurrentDictionary<TKey, TValue>();
-            if (count > 0)
-            {
-                TKey key;
-                TValue value;
-                for (int i = 0; i < count; i++)
-                {
-                    key = ReadCompatible<TKey>();
-                    value = ReadCompatible<TValue>();
-                    collection.TryAdd(key, value);
-                }
-            }
-            return collection;
-        }
-
-        public T ReadCompatible<T>()
-        {
-            return MessageSerializer.DeserializeCompatible<T>(this);
-        }
-
-        public T Read<T>() where T : IBinarySerializable
-        {
-            byte type = ReadByte();
-            if (type == 0) return default(T);
-            var item = (T)Activator.CreateInstance<T>();
-            item.Deserialize(this);
-            return item;
         }
 
         public List<string> ReadStringCollection()
@@ -417,6 +367,7 @@ namespace ZeroLevel.Services.Serialization
             }
             return collection;
         }
+
         public List<char> ReadCharCollection()
         {
             int count = ReadInt32();
@@ -430,6 +381,7 @@ namespace ZeroLevel.Services.Serialization
             }
             return collection;
         }
+
         public List<short> ReadShortCollection()
         {
             int count = ReadInt32();
@@ -555,7 +507,344 @@ namespace ZeroLevel.Services.Serialization
             }
             return collection;
         }
+        #endregion
 
+        #region Arrays
+        public T[] ReadArray<T>()
+            where T : IBinarySerializable, new()
+        {
+            int count = ReadInt32();
+            var array = new T[count];
+            if (count > 0)
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    var item = new T();
+                    item.Deserialize(this);
+                    array[i] = item;
+                }
+            }
+            return array;
+        }
+
+        public string[] ReadStringArray()
+        {
+            int count = ReadInt32();
+            var array = new string[count];
+            if (count > 0)
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    array[i] = ReadString();
+                }
+            }
+            return array;
+        }
+
+        public IPAddress[] ReadIPArray()
+        {
+            int count = ReadInt32();
+            var array = new IPAddress[count];
+            if (count > 0)
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    array[i] = ReadIP();
+                }
+            }
+            return array;
+        }
+
+        public IPEndPoint[] ReadIPEndPointArray()
+        {
+            int count = ReadInt32();
+            var array = new IPEndPoint[count];
+            if (count > 0)
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    array[i] = ReadIPEndpoint();
+                }
+            }
+            return array;
+        }
+
+        public Guid[] ReadGuidArray()
+        {
+            int count = ReadInt32();
+            var array = new Guid[count];
+            if (count > 0)
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    array[i] = ReadGuid();
+                }
+            }
+            return array;
+        }
+
+        public DateTime[] ReadDateTimeArray()
+        {
+            int count = ReadInt32();
+            var array = new DateTime[count];
+            if (count > 0)
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    array[i] = (ReadDateTime() ?? DateTime.MinValue);
+                }
+            }
+            return array;
+        }
+
+        public Int64[] ReadInt64Array()
+        {
+            int count = ReadInt32();
+            var array = new Int64[count];
+            if (count > 0)
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    array[i] = ReadLong();
+                }
+            }
+            return array;
+        }
+
+        public Int32[] ReadInt32Array()
+        {
+            int count = ReadInt32();
+            var array = new Int32[count];
+            if (count > 0)
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    array[i] = ReadInt32();
+                }
+            }
+            return array;
+        }
+
+        public UInt64[] ReadUInt64Array()
+        {
+            int count = ReadInt32();
+            var array = new UInt64[count];
+            if (count > 0)
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    array[i] = ReadULong();
+                }
+            }
+            return array;
+        }
+
+        public UInt32[] ReadUInt32Array()
+        {
+            int count = ReadInt32();
+            var array = new UInt32[count];
+            if (count > 0)
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    array[i] = ReadUInt32();
+                }
+            }
+            return array;
+        }
+
+        public char[] ReadCharArray()
+        {
+            int count = ReadInt32();
+            var array = new char[count];
+            if (count > 0)
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    array[i] = ReadChar();
+                }
+            }
+            return array;
+        }
+
+        public short[] ReadShortArray()
+        {
+            int count = ReadInt32();
+            var array = new short[count];
+            if (count > 0)
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    array[i] = ReadShort();
+                }
+            }
+            return array;
+        }
+
+        public ushort[] ReadUShortArray()
+        {
+            int count = ReadInt32();
+            var array = new ushort[count];
+            if (count > 0)
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    array[i] = ReadUShort();
+                }
+            }
+            return array;
+        }
+
+        public float[] ReadFloatArray()
+        {
+            int count = ReadInt32();
+            var array = new float[count];
+            if (count > 0)
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    array[i] = ReadFloat();
+                }
+            }
+            return array;
+        }
+
+        public Double[] ReadDoubleArray()
+        {
+            int count = ReadInt32();
+            var array = new Double[count];
+            if (count > 0)
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    array[i] = ReadDouble();
+                }
+            }
+            return array;
+        }
+
+        public bool[] ReadBooleanArray()
+        {
+            int count = ReadInt32();
+            var array = new bool[count];
+            if (count > 0)
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    array[i] = ReadBoolean();
+                }
+            }
+            return array;
+        }
+
+        public byte[] ReadByteArray()
+        {
+            int count = ReadInt32();
+            var array = new byte[count];
+            if (count > 0)
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    array[i] = ReadByte();
+                }
+            }
+            return array;
+        }
+
+        public byte[][] ReadByteArrayArray()
+        {
+            int count = ReadInt32();
+            var array = new byte[count][];
+            if (count > 0)
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    array[i] = ReadBytes();
+                }
+            }
+            return array;
+        }
+
+        public decimal[] ReadDecimalArray()
+        {
+            int count = ReadInt32();
+            var array = new decimal[count];
+            if (count > 0)
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    array[i] = ReadDecimal();
+                }
+            }
+            return array;
+        }
+
+        public TimeSpan[] ReadTimeSpanArray()
+        {
+            int count = ReadInt32();
+            var array = new TimeSpan[count];
+            if (count > 0)
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    array[i] = ReadTimeSpan();
+                }
+            }
+            return array;
+        }
+        #endregion
+
+
+
+        public Dictionary<TKey, TValue> ReadDictionary<TKey, TValue>()
+        {
+            int count = ReadInt32();
+            var collection = new Dictionary<TKey, TValue>(count);
+            if (count > 0)
+            {
+                TKey key;
+                TValue value;
+                for (int i = 0; i < count; i++)
+                {
+                    key = ReadCompatible<TKey>();
+                    value = ReadCompatible<TValue>();
+                    collection.Add(key, value);
+                }
+            }
+            return collection;
+        }
+
+        public ConcurrentDictionary<TKey, TValue> ReadDictionaryAsConcurrent<TKey, TValue>()
+        {
+            int count = ReadInt32();
+            var collection = new ConcurrentDictionary<TKey, TValue>();
+            if (count > 0)
+            {
+                TKey key;
+                TValue value;
+                for (int i = 0; i < count; i++)
+                {
+                    key = ReadCompatible<TKey>();
+                    value = ReadCompatible<TValue>();
+                    collection.TryAdd(key, value);
+                }
+            }
+            return collection;
+        }
+
+        public T ReadCompatible<T>()
+        {
+            return MessageSerializer.DeserializeCompatible<T>(this);
+        }
+
+        public T Read<T>() where T : IBinarySerializable
+        {
+            byte type = ReadByte();
+            if (type == 0) return default(T);
+            var item = (T)Activator.CreateInstance<T>();
+            item.Deserialize(this);
+            return item;
+        }
         #endregion Extensions
 
         public void Dispose()

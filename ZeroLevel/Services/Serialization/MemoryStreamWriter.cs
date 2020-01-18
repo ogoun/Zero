@@ -249,20 +249,7 @@ namespace ZeroLevel.Services.Serialization
 
         #region Extension
 
-        public void Write<T>(T item)
-            where T : IBinarySerializable
-        {
-            if (item != null)
-            {
-                WriteByte(1);
-                item.Serialize(this);
-            }
-            else
-            {
-                WriteByte(0);
-            }
-        }
-
+        #region Collections
         public void WriteCollection<T>(IEnumerable<T> collection)
             where T : IBinarySerializable
         {
@@ -371,6 +358,7 @@ namespace ZeroLevel.Services.Serialization
                 }
             }
         }
+
         public void WriteCollection(IEnumerable<short> collection)
         {
             WriteInt32(collection?.Count() ?? 0);
@@ -479,12 +467,6 @@ namespace ZeroLevel.Services.Serialization
             }
         }
 
-        public void WriteCompatible<T>(T item)
-        {
-            var buffer = MessageSerializer.SerializeCompatible(item);
-            _stream.Write(buffer, 0, buffer.Length);
-        }
-
         public void WriteCollection(IEnumerable<decimal> collection)
         {
             WriteInt32(collection?.Count() ?? 0);
@@ -497,6 +479,281 @@ namespace ZeroLevel.Services.Serialization
             }
         }
 
+        public void WriteCollection(IEnumerable<TimeSpan> collection)
+        {
+            WriteInt32(collection?.Count() ?? 0);
+            if (collection != null)
+            {
+                foreach (var item in collection)
+                {
+                    WriteTimeSpan(item);
+                }
+            }
+        }
+        #endregion
+
+        #region Arrays
+        public void WriteArray<T>(T[] array)
+            where T : IBinarySerializable
+        {
+            WriteInt32(array?.Length ?? 0);
+            if (array != null)
+            {
+                for (int i = 0; i < array.Length; i++)
+                {
+                    array[i].Serialize(this);
+                }
+            }
+        }
+
+        public void WriteArray(string[] array)
+        {
+            WriteInt32(array?.Length ?? 0);
+            if (array != null)
+            {
+                for (int i = 0; i < array.Length; i++)
+                {
+                    WriteString(array[i]);
+                }
+            }
+        }
+
+        public void WriteArray(IPAddress[] array)
+        {
+            WriteInt32(array?.Length ?? 0);
+            if (array != null)
+            {
+                for (int i = 0; i < array.Length; i++)
+                {
+                    WriteIP(array[i]);
+                }
+            }
+        }
+
+        public void WriteArray(IPEndPoint[] array)
+        {
+            WriteInt32(array?.Length ?? 0);
+            if (array != null)
+            {
+                for (int i = 0; i < array.Length; i++)
+                {
+                    WriteIPEndpoint(array[i]);
+                }
+            }
+        }
+
+        public void WriteArray(Guid[] array)
+        {
+            WriteInt32(array?.Length ?? 0);
+            if (array != null)
+            {
+                for (int i = 0; i < array.Length; i++)
+                {
+                    WriteGuid(array[i]);
+                }
+            }
+        }
+
+        public void WriteArray(DateTime[] array)
+        {
+            WriteInt32(array?.Length ?? 0);
+            if (array != null)
+            {
+                for (int i = 0; i < array.Length; i++)
+                {
+                    WriteDateTime(array[i]);
+                }
+            }
+        }
+
+        public void WriteArray(UInt64[] array)
+        {
+            WriteInt32(array?.Length ?? 0);
+            if (array != null)
+            {
+                for (int i = 0; i < array.Length; i++)
+                {
+                    WriteULong(array[i]);
+                }
+            }
+        }
+
+        public void WriteArray(UInt32[] array)
+        {
+            WriteInt32(array?.Length ?? 0);
+            if (array != null)
+            {
+                for (int i = 0; i < array.Length; i++)
+                {
+                    WriteUInt32(array[i]);
+                }
+            }
+        }
+
+        public void WriteArray(char[] array)
+        {
+            WriteInt32(array?.Length ?? 0);
+            if (array != null)
+            {
+                for (int i = 0; i < array.Length; i++)
+                {
+                    WriteChar(array[i]);
+                }
+            }
+        }
+
+        public void WriteArray(short[] array)
+        {
+            WriteInt32(array?.Length ?? 0);
+            if (array != null)
+            {
+                for (int i = 0; i < array.Length; i++)
+                {
+                    WriteShort(array[i]);
+                }
+            }
+        }
+
+        public void WriteArray(ushort[] array)
+        {
+            WriteInt32(array?.Length ?? 0);
+            if (array != null)
+            {
+                for (int i = 0; i < array.Length; i++)
+                {
+                    WriteUShort(array[i]);
+                }
+            }
+        }
+
+        public void WriteArray(Int64[] array)
+        {
+            WriteInt32(array?.Length ?? 0);
+            if (array != null)
+            {
+                for (int i = 0; i < array.Length; i++)
+                {
+                    WriteLong(array[i]);
+                }
+            }
+        }
+
+        public void WriteArray(Int32[] array)
+        {
+            WriteInt32(array?.Length ?? 0);
+            if (array != null)
+            {
+                for (int i = 0; i < array.Length; i++)
+                {
+                    WriteInt32(array[i]);
+                }
+            }
+        }
+
+        public void WriteArray(float[] array)
+        {
+            WriteInt32(array?.Length ?? 0);
+            if (array != null)
+            {
+                for (int i = 0; i < array.Length; i++)
+                {
+                    WriteFloat(array[i]);
+                }
+            }
+        }
+
+        public void WriteArray(Double[] array)
+        {
+            WriteInt32(array?.Length ?? 0);
+            if (array != null)
+            {
+                for (int i = 0; i < array.Length; i++)
+                {
+                    WriteDouble(array[i]);
+                }
+            }
+        }
+
+        public void WriteArray(bool[] array)
+        {
+            WriteInt32(array?.Length ?? 0);
+            if (array != null)
+            {
+                for (int i = 0; i < array.Length; i++)
+                {
+                    WriteBoolean(array[i]);
+                }
+            }
+        }
+
+        public void WriteArray(byte[] array)
+        {
+            WriteInt32(array?.Length ?? 0);
+            if (array != null)
+            {
+                for (int i = 0; i < array.Length; i++)
+                {
+                    WriteByte(array[i]);
+                }
+            }
+        }
+
+        public void WriteArray(byte[][] array)
+        {
+            WriteInt32(array?.Length ?? 0);
+            if (array != null)
+            {
+                for (int i = 0; i < array.Length; i++)
+                {
+                    WriteBytes(array[i]);
+                }
+            }
+        }
+
+        public void WriteArray(decimal[] array)
+        {
+            WriteInt32(array?.Length ?? 0);
+            if (array != null)
+            {
+                for (int i = 0; i < array.Length; i++)
+                {
+                    WriteDecimal(array[i]);
+                }
+            }
+        }
+
+        public void WriteArray(TimeSpan[] array)
+        {
+            WriteInt32(array?.Length ?? 0);
+            if (array != null)
+            {
+                for (int i = 0; i < array.Length; i++)
+                {
+                    WriteTimeSpan(array[i]);
+                }
+            }
+        }
+        #endregion
+
+        public void WriteCompatible<T>(T item)
+        {
+            var buffer = MessageSerializer.SerializeCompatible(item);
+            _stream.Write(buffer, 0, buffer.Length);
+        }
+
+        public void Write<T>(T item)
+            where T : IBinarySerializable
+        {
+            if (item != null)
+            {
+                WriteByte(1);
+                item.Serialize(this);
+            }
+            else
+            {
+                WriteByte(0);
+            }
+        }
 
         public void WriteDictionary<TKey, TValue>(Dictionary<TKey, TValue> collection)
         {
@@ -520,18 +777,6 @@ namespace ZeroLevel.Services.Serialization
                 {
                     WriteCompatible(item.Key);
                     WriteCompatible(item.Value);
-                }
-            }
-        }
-
-        public void WriteCollection(IEnumerable<TimeSpan> collection)
-        {
-            WriteInt32(collection?.Count() ?? 0);
-            if (collection != null)
-            {
-                foreach (var item in collection)
-                {
-                    WriteTimeSpan(item);
                 }
             }
         }

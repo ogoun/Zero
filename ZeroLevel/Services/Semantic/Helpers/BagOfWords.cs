@@ -11,13 +11,15 @@ namespace ZeroLevel.Services.Semantic.Helpers
     public class BagOfWords :
         IBinarySerializable
     {
-        private readonly ConcurrentDictionary<string, int[]> _words =
-            new ConcurrentDictionary<string, int[]>();
+        private ConcurrentDictionary<string, int[]> _words;
         int _words_count = -1;
         long _number_of_documents = 0;
 
         public long NumberOfDocuments => _number_of_documents;
         public int NumberOfWords => _words.Count;
+
+        public BagOfWords() =>
+            _words = new ConcurrentDictionary<string, int[]>();
 
         /// <summary>
         /// Набор документов, слова в документе должны быть лемматизированы/стеммированы, и быть уникальными
@@ -85,12 +87,16 @@ namespace ZeroLevel.Services.Semantic.Helpers
 
         public void Deserialize(IBinaryReader reader)
         {
-            throw new NotImplementedException();
+            this._number_of_documents = reader.ReadLong();
+            this._words_count = reader.ReadInt32();
+            this._words = reader.ReadDictionaryAsConcurrent<string, int[]>();
         }
 
         public void Serialize(IBinaryWriter writer)
         {
-            throw new NotImplementedException();
+            writer.WriteLong(this._number_of_documents);
+            writer.WriteInt32(this._words_count);
+            writer.WriteDictionary<string, int[]>(this._words);
         }
     }
 }

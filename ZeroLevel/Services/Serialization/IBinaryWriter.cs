@@ -49,49 +49,55 @@ namespace ZeroLevel.Services.Serialization
 
         #region Extensions
 
+        #region Arrays
+        void WriteArray<T>(T[] array) where T : IBinarySerializable;
+        void WriteArray(string[] array);
+        void WriteArray(IPAddress[] array);
+        void WriteArray(IPEndPoint[] array);
+        void WriteArray(Guid[] array);
+        void WriteArray(DateTime[] array);
+        void WriteArray(UInt64[] array);
+        void WriteArray(UInt32[] array);
+        void WriteArray(char[] array);
+        void WriteArray(short[] array);
+        void WriteArray(ushort[] array);
+        void WriteArray(Int64[] array);
+        void WriteArray(Int32[] array);
+        void WriteArray(float[] array);
+        void WriteArray(Double[] array);
+        void WriteArray(bool[] array);
+        void WriteArray(byte[] array);
+        void WriteArray(byte[][] array);
+        void WriteArray(decimal[] array);
+        void WriteArray(TimeSpan[] array);
+        #endregion
+
+        #region Collections
         void WriteCollection<T>(IEnumerable<T> collection)
             where T : IBinarySerializable;
+        void WriteCollection(IEnumerable<string> collection);
+        void WriteCollection(IEnumerable<char> collection);
+        void WriteCollection(IEnumerable<Guid> collection);
+        void WriteCollection(IEnumerable<DateTime> collection);
+        void WriteCollection(IEnumerable<Int64> collection);
+        void WriteCollection(IEnumerable<Int32> collection);
+        void WriteCollection(IEnumerable<UInt64> collection);
+        void WriteCollection(IEnumerable<UInt32> collection);
+        void WriteCollection(IEnumerable<short> collection);
+        void WriteCollection(IEnumerable<ushort> collection);
+        void WriteCollection(IEnumerable<Double> collection);
+        void WriteCollection(IEnumerable<Decimal> collection);
+        void WriteCollection(IEnumerable<TimeSpan> collection);
+        void WriteCollection(IEnumerable<float> collection);
+        void WriteCollection(IEnumerable<bool> collection);
+        void WriteCollection(IEnumerable<byte> collection);
+        void WriteCollection(IEnumerable<byte[]> collection);
+        void WriteCollection(IEnumerable<IPEndPoint> collection);
+        void WriteCollection(IEnumerable<IPAddress> collection);
+        #endregion
 
         void WriteDictionary<TKey, TValue>(Dictionary<TKey, TValue> collection);
         void WriteDictionary<TKey, TValue>(ConcurrentDictionary<TKey, TValue> collection);
-
-
-        void WriteCollection(IEnumerable<string> collection);
-        void WriteCollection(IEnumerable<char> collection);
-
-        void WriteCollection(IEnumerable<Guid> collection);
-
-        void WriteCollection(IEnumerable<DateTime> collection);
-
-        void WriteCollection(IEnumerable<Int64> collection);
-
-        void WriteCollection(IEnumerable<Int32> collection);
-
-        void WriteCollection(IEnumerable<UInt64> collection);
-
-        void WriteCollection(IEnumerable<UInt32> collection);
-
-        void WriteCollection(IEnumerable<short> collection);
-
-        void WriteCollection(IEnumerable<ushort> collection);
-
-        void WriteCollection(IEnumerable<Double> collection);
-
-        void WriteCollection(IEnumerable<Decimal> collection);
-
-        void WriteCollection(IEnumerable<TimeSpan> collection);
-
-        void WriteCollection(IEnumerable<float> collection);
-
-        void WriteCollection(IEnumerable<bool> collection);
-
-        void WriteCollection(IEnumerable<byte> collection);
-
-        void WriteCollection(IEnumerable<byte[]> collection);
-
-        void WriteCollection(IEnumerable<IPEndPoint> collection);
-
-        void WriteCollection(IEnumerable<IPAddress> collection);
 
         void Write<T>(T item)
             where T : IBinarySerializable;

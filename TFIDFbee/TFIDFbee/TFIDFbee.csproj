@@ -7,13 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Accord" Version="3.8.0" />
-    <PackageReference Include="Accord.MachineLearning" Version="3.8.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\..\..\GIT\Zero\ZeroLevel\ZeroLevel.csproj" />
-    <ProjectReference Include="..\..\HoKeMs\Lemmatization\Lemmatization.csproj" />
+    <ProjectReference Include="..\..\Lemmatization\Lemmatization.csproj" />
+    <ProjectReference Include="..\..\ZeroLevel\ZeroLevel.csproj" />
   </ItemGroup>
 
 </Project>

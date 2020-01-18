@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="LemmaSharp-std" Version="1.0.1" />
+    <PackageReference Include="LemmaSharpPreBuilt-std" Version="1.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ZeroLevel\ZeroLevel.csproj" />
+  </ItemGroup>
+
+</Project>
