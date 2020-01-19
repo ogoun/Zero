@@ -10,17 +10,23 @@ namespace ZeroLevel.Services.Semantic
         /// <returns>Spisok tokenov</returns>
         IEnumerable<LexToken> ExtractLexTokens(string text);
 
+        IEnumerable<LexToken> ExtractLexTokens(string[] words);
+
         /// <summary>
         /// Selecting unique tokens from text
         /// </summary>
         /// <returns>Tokens</returns>
         IEnumerable<LexToken> ExtractUniqueLexTokens(string text);
 
+        IEnumerable<LexToken> ExtractUniqueLexTokens(string[] words);
+
         /// <summary>
         /// Allocation of unique tokens from text with drop of stop words
         /// </summary>
         /// <returns>Tokens</returns>
         IEnumerable<LexToken> ExtractUniqueLexTokensWithoutStopWords(string text);
+
+        IEnumerable<LexToken> ExtractUniqueLexTokensWithoutStopWords(string[] words);
 
         /// <summary>
         /// Search for tokens in the text corresponding to the specified words (full-text search)

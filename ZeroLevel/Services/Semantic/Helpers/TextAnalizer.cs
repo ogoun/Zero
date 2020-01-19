@@ -62,6 +62,16 @@ namespace ZeroLevel.Implementation.Semantic.Helpers
             return result;
         }
 
+        public static IEnumerable<WordToken> ExtractWordTokens(string[] words)
+        {
+            var result = new List<WordToken>();
+            for (int i = 0; i < words.Length; i++)
+            {
+                result.Add(new WordToken(words[i], i));
+            }
+            return result;
+        }
+
         /// <summary>
         /// Selection of unique tokens from the text (first entry)
         /// </summary>
@@ -72,6 +82,11 @@ namespace ZeroLevel.Implementation.Semantic.Helpers
             return ExtractWordTokens(text).DistinctBy(t => t.Word);
         }
 
+        public static IEnumerable<WordToken> ExtractUniqueWordTokens(string[] words)
+        {
+            return ExtractWordTokens(words).DistinctBy(t => t.Word);
+        }
+
         /// <summary>
         /// Allocation of unique tokens from text with drop of stop words
         /// </summary>
@@ -80,6 +95,11 @@ namespace ZeroLevel.Implementation.Semantic.Helpers
         public static IEnumerable<WordToken> ExtractUniqueWordTokensWithoutStopWords(string text)
         {
             return ExtractWordTokens(text).DistinctBy(t => t.Word).Where(t => StopWords.IsStopWord(t.Word) == false);
+        }
+
+        public static IEnumerable<WordToken> ExtractUniqueWordTokensWithoutStopWords(string[] words)
+        {
+            return ExtractWordTokens(words).DistinctBy(t => t.Word).Where(t => StopWords.IsStopWord(t.Word) == false);
         }
     }
 }

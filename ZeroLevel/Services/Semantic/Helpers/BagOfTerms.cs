@@ -1,14 +1,84 @@
-﻿using System;
+﻿using Iveonik.Stemmers;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using ZeroLevel.Implementation.Semantic.Helpers;
 using ZeroLevel.Services.Serialization;
 
 namespace ZeroLevel.Services.Semantic.Helpers
 {
-    public class BagOfWords :
+    public class BagOfTerms
+    {
+        private string[] _words;
+        private ILexProvider _lexer;
+
+        public BagOfTerms(string text) : this(TextAnalizer.ExtractWords(text).ToArray(), new LexProvider(new RussianStemmer())) { }
+
+        public BagOfTerms(string text, ILexProvider lexer) : this(TextAnalizer.ExtractWords(text).ToArray(), lexer) { }
+
+        public BagOfTerms(IEnumerable<string> words) : this(words.ToArray(), new LexProvider(new RussianStemmer())) { }
+
+        public BagOfTerms(IEnumerable<string> words, ILexProvider lexer) : this(words.ToArray(), lexer) { }
+
+        public BagOfTerms(string[] words) : this(words, new LexProvider(new RussianStemmer())) { }
+
+        public BagOfTerms(string[] words, ILexProvider lexer)
+        {            
+            _lexer = lexer;
+            _frequency = null;
+            _words = _lexer.ExtractLexTokens(words).Select(t => t.Token).ToArray();
+        }
+
+        public string[] Words => _words;
+
+        private IDictionary<string, int> _frequency;
+
+        public IDictionary<string, int> Freguency()
+        {
+            if (_frequency == null)
+            {
+                var frequency = new Dictionary<string, int>();
+                for (int i = 0; i < _words.Length; i++)
+                {
+                    if (frequency.ContainsKey(_words[i]))
+                    {
+                        frequency[_words[i]]++;
+                    }
+                    else
+                    {
+                        frequency[_words[i]] = 1;
+                    }
+                }
+                _frequency = frequency;
+            }
+            return _frequency;
+        }
+
+        public string[] ToTokens()
+        {
+            return _words;
+        }
+
+        public string[] ToUniqueTokens()
+        {
+            return _words.DistinctBy(s => s)
+                .ToArray();
+        }
+
+        public string[] ToUniqueTokensWithoutStopWords()
+        {
+            return _words.Where(w => StopWords.IsStopWord(w) == false)
+                .DistinctBy(s => s)
+                .ToArray();
+        }
+    }
+
+
+
+    public class BagOfWords1 :
         IBinarySerializable
     {
         private ConcurrentDictionary<string, int[]> _words;
@@ -18,7 +88,7 @@ namespace ZeroLevel.Services.Semantic.Helpers
         public long NumberOfDocuments => _number_of_documents;
         public int NumberOfWords => _words.Count;
 
-        public BagOfWords() =>
+        public BagOfWords1() =>
             _words = new ConcurrentDictionary<string, int[]>();
 
         /// <summary>
@@ -74,7 +144,7 @@ namespace ZeroLevel.Services.Semantic.Helpers
                 if (_words.ContainsKey(word) && !result.ContainsKey(_words[word][0]))
                 {
                     var tf = (double)map[word] / (double)doc.Length;
-                    var idf = Math.Log(_number_of_documents / _words[word][1]);
+                    var idf = Math.Log(1 + (_number_of_documents / _words[word][1]));
                     var tfidf = tf * idf;
                     if (Math.Abs(tfidf) > double.Epsilon)
                     {

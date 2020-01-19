@@ -25,7 +25,16 @@ namespace ZeroLevel.Services.Semantic
             {
                 result.Add(new LexToken(match.Value, _lexer.Lex(match.Value), match.Index));
             }
+            return result;
+        }
 
+        public IEnumerable<LexToken> ExtractLexTokens(string[] words)
+        {
+            var result = new List<LexToken>();
+            for(int i=0; i < words.Length; i++)
+            {
+                result.Add(new LexToken(words[i], _lexer.Lex(words[i]), i));
+            }
             return result;
         }
 
@@ -35,9 +44,21 @@ namespace ZeroLevel.Services.Semantic
                 .Select(w => new LexToken(w.Word, _lexer.Lex(w.Word), w.Position)).DistinctBy(s => s.Token);
         }
 
+        public IEnumerable<LexToken> ExtractUniqueLexTokens(string[] words)
+        {
+            return TextAnalizer.ExtractUniqueWordTokens(words)
+                .Select(w => new LexToken(w.Word, _lexer.Lex(w.Word), w.Position)).DistinctBy(s => s.Token);
+        }
+
         public IEnumerable<LexToken> ExtractUniqueLexTokensWithoutStopWords(string text)
         {
             return TextAnalizer.ExtractUniqueWordTokensWithoutStopWords(text)
+                .Select(w => new LexToken(w.Word, _lexer.Lex(w.Word), w.Position)).DistinctBy(s => s.Token);
+        }
+
+        public IEnumerable<LexToken> ExtractUniqueLexTokensWithoutStopWords(string[] words)
+        {
+            return TextAnalizer.ExtractUniqueWordTokensWithoutStopWords(words)
                 .Select(w => new LexToken(w.Word, _lexer.Lex(w.Word), w.Position)).DistinctBy(s => s.Token);
         }
 

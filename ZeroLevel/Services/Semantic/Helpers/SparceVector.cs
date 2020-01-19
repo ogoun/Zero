@@ -14,6 +14,8 @@ namespace ZeroLevel.Services.Semantic.Helpers
         private double[] values;
         private double power;
 
+
+
         public SparceVector() 
         {
             indexes = EmptyIndexes;

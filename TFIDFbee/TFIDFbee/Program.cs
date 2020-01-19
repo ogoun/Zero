@@ -1,5 +1,6 @@
 ﻿using Lemmatization;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -13,28 +14,39 @@ namespace TFIDFbee
 {
     class Program
     {
-        private const string source = @"E:\Desktop\lenta-ru-data-set_19990901_20171204\lenta-ru-data-set_19990901_20171204.json";
+        private const string source = @"E:\Desktop\lenta-ru-data-set_19990901_20171204\lenta-ru-data-set_19990901_20171204_limit_1000.json";
         private readonly static ILexProvider _lexer = new LexProvider(new LemmaLexer());
+        private readonly static ConcurrentDictionary<string, double> _scoring = new ConcurrentDictionary<string, double>();
 
         static void Main(string[] args)
         {
+            var terms = new BagOfTerms("На практике эти расширения используют нечасто, особенно те расширения, которые для расчёта", _lexer);
+
+            Console.WriteLine(string.Join('-', terms.ToTokens()));
+            Console.WriteLine(string.Join('-', terms.ToUniqueTokens()));
+            Console.WriteLine(string.Join('-', terms.ToUniqueTokensWithoutStopWords()));
+            Console.WriteLine(string.Join('\n', terms.Freguency().Select(pair => $"{pair.Key}: {pair.Value}")));
+
+            
+
+            /*
             Log.AddConsoleLogger(ZeroLevel.Logging.LogLevel.FullDebug);
             Configuration.Save(Configuration.ReadFromApplicationConfig());
-            IDocumentReader reader = new StateMachineReader(source, s => ExtractLemmas(s));
+            IDocumentReader reader = new JsonByLineReader(source, s => ExtractLemmas(s));
 
-            BagOfWords codebook;
+            ZeroLevel.Services.Semantic.Helpers.BagOfTerms codebook;
             if (File.Exists("model.bin"))
             {
                 Log.Info("Load model from file");
                 using (var stream = new FileStream("model.bin", FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
                 {
-                    codebook = MessageSerializer.Deserialize<BagOfWords>(stream);
+                    codebook = MessageSerializer.Deserialize<ZeroLevel.Services.Semantic.Helpers.BagOfTerms>(stream);
                 }
             }
             else
             {
                 Log.Info("Create and train model");
-                codebook = new BagOfWords();
+                codebook = new ZeroLevel.Services.Semantic.Helpers.BagOfTerms();
                 foreach (var batch in reader.ReadBatches(1000))
                 {
                     codebook.Learn(batch);
@@ -42,54 +54,52 @@ namespace TFIDFbee
                 }
                 using (var stream = new FileStream("model.bin", FileMode.Create, FileAccess.Write, FileShare.ReadWrite))
                 {
-                    MessageSerializer.Serialize<BagOfWords>(stream, codebook);
+                    MessageSerializer.Serialize<ZeroLevel.Services.Semantic.Helpers.BagOfTerms>(stream, codebook);
                 }
             }
 
-            Log.Info("Build document vectors");
-            List<SparceVector> vectors;
-            if (File.Exists("vectors.bin"))
+
+            Log.Info("Create vectors");
+
+            foreach (var docs in reader.ReadRawDocumentBatches(1000))
             {
-                Log.Info("Load vectors from file");
-                using (var stream = new FileStream("vectors.bin", FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                foreach (var doc in docs)
                 {
-                    vectors = MessageSerializer.DeserializeCompatible<List<SparceVector>>(stream);
-                }
-            }
-            else
-            {
-                Log.Info("Create vectors");
-                vectors = new List<SparceVector>();
-                foreach (var docs in reader.ReadRawDocumentBatches(1000))
-                {
-                    foreach (var doc in docs)
+                    var words = ExtractLemmas(doc.Item2).Concat(ExtractLemmas(doc.Item1)).Distinct().ToArray();
+                    var vector = codebook.Transform(words);
+                    for (var i = 0; i< words.Length; i++)
                     {
-                        var words = _lexer.ExtractLexTokens(doc.Item2).Select(t => t.Token).Concat(_lexer.ExtractLexTokens(doc.Item1).Select(t => t.Token)).ToArray();
-                        vectors.Add(codebook.Transform(words));
+                        var word = words[i];
+                        if (false == _scoring.ContainsKey(word))
+                        {
+                            _scoring.TryAdd(word, vector)
+                        }
                     }
                 }
-                using (var stream = new FileStream("vectors.bin", FileMode.Create, FileAccess.Write, FileShare.ReadWrite))
-                {
-                    MessageSerializer.SerializeCompatible<List<SparceVector>>(stream, vectors);
-                }
             }
+            using (var stream = new FileStream("vectors.bin", FileMode.Create, FileAccess.Write, FileShare.ReadWrite))
+            {
+                MessageSerializer.SerializeCompatible<List<SparceVector>>(stream, vectors);
+            }
+
 
             Log.Info("Find similar documents");
             var list = new List<Tuple<double, int, int>>();
-            long total_count = (vectors.Count * vectors.Count);
+            long total_count = ((long)vectors.Count * (long)vectors.Count);
             long count = 0;
+            double d = (double.Epsilon * 2.0d);
             for (int i = 0; i < vectors.Count; i++)
             {
                 for (int j = i + 1; j < vectors.Count - 1; j++)
                 {
                     count++;
-                    if (count % 100000 == 0)
+                    if (count % 10000000 == 0)
                     {
-                        Log.Info($"Progress: {(int)(count * 100.0d / (double)total_count)} %.\tFound similars: {list.Count}.");
+                        Log.Info($"Progress: {((count * 100.0d) / total_count)} %.\tFound similars: {list.Count}.");
                     }
                     if (i == j) continue;
                     var diff = vectors[i].Measure(vectors[j]);
-                    if (diff > 0.885d)
+                    if (diff > d && diff < 0.0009d)
                     {
                         list.Add(Tuple.Create(diff, i, j));
                     }
@@ -141,7 +151,7 @@ namespace TFIDFbee
                     output.WriteLine();
                 }
             }
-
+            */
             Console.WriteLine("Completed");
             Console.ReadKey();
         }
