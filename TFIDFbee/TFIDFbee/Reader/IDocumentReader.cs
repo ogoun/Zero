@@ -1,11 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using ZeroLevel.Services.Semantic.Helpers;
 
 namespace TFIDFbee.Reader
 {
     public interface IDocumentReader
     {
-        IEnumerable<string[][]> ReadBatches(int size);
-        public IEnumerable<IEnumerable<Tuple<string, string>>> ReadRawDocumentBatches(int size);
+        IEnumerable<IEnumerable<BagOfTerms>> ReadBatches(int size);
     }
 }

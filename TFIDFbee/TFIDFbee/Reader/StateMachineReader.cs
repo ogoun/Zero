@@ -1,7 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
-using System.Linq;
+using ZeroLevel.Services.Semantic;
+using ZeroLevel.Services.Semantic.Helpers;
 
 namespace TFIDFbee.Reader
 {
@@ -9,9 +9,9 @@ namespace TFIDFbee.Reader
         : IDocumentReader
     {
         private readonly string _file;
-        private readonly Func<string, IEnumerable<string>> _lexer;
+        private readonly ILexProvider _lexer;
 
-        public StateMachineReader(string file, Func<string, IEnumerable<string>> lexer)
+        public StateMachineReader(string file, ILexProvider lexer)
         {
             _file = file;
             _lexer = lexer;
@@ -46,30 +46,12 @@ namespace TFIDFbee.Reader
             }
         }
 
-        public IEnumerable<string[][]> ReadBatches(int size)
+        public IEnumerable<IEnumerable<BagOfTerms>> ReadBatches(int size)
         {
-            var list = new List<string[]>();
+            var list = new List<BagOfTerms>();
             foreach (var record in Parse())
             {
-                list.Add((_lexer(record[0]).Concat(_lexer(record[1])).ToArray()));
-                if (list.Count > size)
-                {
-                    yield return list.ToArray();
-                    list.Clear();
-                }
-            }
-            if (list.Count > 0)
-            {
-                yield return list.ToArray();
-            }
-        }
-
-        public IEnumerable<IEnumerable<Tuple<string, string>>> ReadRawDocumentBatches(int size)
-        {
-            var list = new List<Tuple<string, string>>();
-            foreach (var record in Parse())
-            {
-                list.Add(Tuple.Create(record[0], record[1]));
+                list.Add(new BagOfTerms(record[0] + " " + record[1], _lexer));
                 if (list.Count > size)
                 {
                     yield return list.ToArray();

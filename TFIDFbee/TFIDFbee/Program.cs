@@ -2,32 +2,82 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
+using System.Threading;
 using TFIDFbee.Reader;
-using ZeroLevel;
 using ZeroLevel.Services.Semantic;
 using ZeroLevel.Services.Semantic.Helpers;
-using ZeroLevel.Services.Serialization;
 
 namespace TFIDFbee
 {
+    public class IDF
+    {
+        private ConcurrentDictionary<string, int> _terms =
+            new ConcurrentDictionary<string, int>();
+        private long _documents_count = 0;
+
+        public void Learn(BagOfTerms bag)
+        {
+            _documents_count++;
+            foreach (var term in bag.ToUniqueTokens())
+            {
+                _terms.AddOrUpdate(term, 1, (w, o) => o + 1);
+            }
+        }
+
+        public double Idf(string term)
+        {
+            if (_terms.ContainsKey(term))
+            {
+                double count_documents_with_term = (double)_terms[term];
+                double total_documents = (double)_documents_count;
+                return Math.Log(1.0d + (total_documents / count_documents_with_term));
+            }
+            return 0.0d;
+        }
+    }
+
+    public static class TFIDF
+    {
+        public static IDictionary<string, double> TfIdf(BagOfTerms document, IDF idf)
+        {
+            var freg = document.Freguency();
+            return document
+                .ToUniqueTokensWithoutStopWords()
+                .ToDictionary(t => t, t => idf.Idf(t) * (double)freg[t] / (double)document.Words.Length);
+        }
+    }
+
     class Program
     {
-        private const string source = @"E:\Desktop\lenta-ru-data-set_19990901_20171204\lenta-ru-data-set_19990901_20171204_limit_1000.json";
+        private const string source = @"D:\Desktop\lenta-ru-data-set_19990901_20171204_limit_1000.json";
         private readonly static ILexProvider _lexer = new LexProvider(new LemmaLexer());
         private readonly static ConcurrentDictionary<string, double> _scoring = new ConcurrentDictionary<string, double>();
 
         static void Main(string[] args)
         {
-            var terms = new BagOfTerms("На практике эти расширения используют нечасто, особенно те расширения, которые для расчёта", _lexer);
+            IDF idf = new IDF();
+            IDocumentReader reader = new JsonByLineReader(source, _lexer);
+            foreach (var batch in reader.ReadBatches(1000))
+            {
+                foreach (var doc in batch)
+                {
+                    idf.Learn(doc);
+                }
+            }
+            foreach (var batch in reader.ReadBatches(1000))
+            {
+                foreach (var doc in batch)
+                {
+                    var tfidf = TFIDF.TfIdf(doc, idf);
+                    Console.WriteLine(String.Join(" ", tfidf.OrderByDescending(p => p.Value).Take(10).Select(p => p.Key)));
+                    Console.WriteLine();
+                    Console.WriteLine("                                     ***");
+                    Console.WriteLine();
+                    Thread.Sleep(1000);
+                }
+            }
 
-            Console.WriteLine(string.Join('-', terms.ToTokens()));
-            Console.WriteLine(string.Join('-', terms.ToUniqueTokens()));
-            Console.WriteLine(string.Join('-', terms.ToUniqueTokensWithoutStopWords()));
-            Console.WriteLine(string.Join('\n', terms.Freguency().Select(pair => $"{pair.Key}: {pair.Value}")));
-
-            
 
             /*
             Log.AddConsoleLogger(ZeroLevel.Logging.LogLevel.FullDebug);
