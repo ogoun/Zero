@@ -6,48 +6,9 @@ using System.Linq;
 using System.Threading;
 using TFIDFbee.Reader;
 using ZeroLevel.Services.Semantic;
-using ZeroLevel.Services.Semantic.Helpers;
 
 namespace TFIDFbee
 {
-    public class IDF
-    {
-        private ConcurrentDictionary<string, int> _terms =
-            new ConcurrentDictionary<string, int>();
-        private long _documents_count = 0;
-
-        public void Learn(BagOfTerms bag)
-        {
-            _documents_count++;
-            foreach (var term in bag.ToUniqueTokens())
-            {
-                _terms.AddOrUpdate(term, 1, (w, o) => o + 1);
-            }
-        }
-
-        public double Idf(string term)
-        {
-            if (_terms.ContainsKey(term))
-            {
-                double count_documents_with_term = (double)_terms[term];
-                double total_documents = (double)_documents_count;
-                return Math.Log(1.0d + (total_documents / count_documents_with_term));
-            }
-            return 0.0d;
-        }
-    }
-
-    public static class TFIDF
-    {
-        public static IDictionary<string, double> TfIdf(BagOfTerms document, IDF idf)
-        {
-            var freg = document.Freguency();
-            return document
-                .ToUniqueTokensWithoutStopWords()
-                .ToDictionary(t => t, t => idf.Idf(t) * (double)freg[t] / (double)document.Words.Length);
-        }
-    }
-
     class Program
     {
         private const string source = @"D:\Desktop\lenta-ru-data-set_19990901_20171204_limit_1000.json";
@@ -62,7 +23,7 @@ namespace TFIDFbee
             {
                 foreach (var doc in batch)
                 {
-                    idf.Learn(doc);
+                    idf.Append(doc);
                 }
             }
             foreach (var batch in reader.ReadBatches(1000))

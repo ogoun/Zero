@@ -1,5 +1,4 @@
-﻿using Iveonik.Stemmers;
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,21 +14,21 @@ namespace ZeroLevel.Services.Semantic.Helpers
         private string[] _words;
         private ILexProvider _lexer;
 
-        public BagOfTerms(string text) : this(TextAnalizer.ExtractWords(text).ToArray(), new LexProvider(new RussianStemmer())) { }
+        public BagOfTerms(string text) : this(TextAnalizer.ExtractWords(text).ToArray(), null) { }
 
         public BagOfTerms(string text, ILexProvider lexer) : this(TextAnalizer.ExtractWords(text).ToArray(), lexer) { }
 
-        public BagOfTerms(IEnumerable<string> words) : this(words.ToArray(), new LexProvider(new RussianStemmer())) { }
+        public BagOfTerms(IEnumerable<string> words) : this(words.ToArray(), null) { }
 
         public BagOfTerms(IEnumerable<string> words, ILexProvider lexer) : this(words.ToArray(), lexer) { }
 
-        public BagOfTerms(string[] words) : this(words, new LexProvider(new RussianStemmer())) { }
+        public BagOfTerms(string[] words) : this(words, null) { }
 
         public BagOfTerms(string[] words, ILexProvider lexer)
-        {            
+        {
             _lexer = lexer;
             _frequency = null;
-            _words = _lexer.ExtractLexTokens(words).Select(t => t.Token).ToArray();
+            _words = _lexer == null ? words : _lexer.ExtractLexTokens(words).Select(t => t.Token).ToArray();
         }
 
         public string[] Words => _words;
