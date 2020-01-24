@@ -105,7 +105,6 @@ namespace ZeroLevel.Services.Shedulling
                         ResetTimer();
                     }
                 }
-                _lock.ReleaseLock();
             }
             return insert.Key;
         }
@@ -132,7 +131,6 @@ namespace ZeroLevel.Services.Shedulling
                         return true;
                     }
                 }
-                _lock.ReleaseLock();
             }
             return false;
         }
@@ -160,7 +158,6 @@ namespace ZeroLevel.Services.Shedulling
             {
                 _stopped = true;
                 DisableTimer();
-                _lock.ReleaseLock();
             }
         }
 
@@ -170,7 +167,6 @@ namespace ZeroLevel.Services.Shedulling
             {
                 _stopped = false;
                 ResetTimer();
-                _lock.ReleaseLock();
             }
         }
 
@@ -180,7 +176,6 @@ namespace ZeroLevel.Services.Shedulling
             {
                 DisableTimer();
                 _head = null;
-                _lock.ReleaseLock();
             }
         }
 
@@ -235,7 +230,6 @@ namespace ZeroLevel.Services.Shedulling
                                 {
                                     ResetTimer();
                                     _head = null;
-                                    _lock.ReleaseLock();
                                 }
                                 return Task.CompletedTask;
                             },

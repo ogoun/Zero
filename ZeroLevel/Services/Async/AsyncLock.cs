@@ -5,188 +5,125 @@ using System.Threading.Tasks;
 
 namespace ZeroLevel.Services.Async
 {
-    /// <summary>
-    /// A mutual exclusion lock that is compatible with async. Note that this lock is <b>not</b> recursive!
-    /// </summary>
-    [DebuggerDisplay("Id = {Id}, Taken = {_taken}")]
-    [DebuggerTypeProxy(typeof(DebugView))]
-    public sealed class AsyncLock
+    public class AsyncLock
     {
-        /// <summary>
-        /// Whether the lock is taken by a task.
-        /// </summary>
-        private bool _taken;
+        private object _reentrancy = new object();
+        private int _reentrances = 0;
+        //We are using this SemaphoreSlim like a posix condition variable
+        //we only want to wake waiters, one or more of whom will try to obtain a different lock to do their thing
+        //so long as we can guarantee no wakes are missed, the number of awakees is not important
+        //ideally, this would be "friend" for access only from InnerLock, but whatever.
+        internal SemaphoreSlim _retry = new SemaphoreSlim(0, 1);
+        //We do not have System.Threading.Thread.* on .NET Standard without additional dependencies
+        //Work around is easy: create a new ThreadLocal<T> with a random value and this is our thread id :)
+        private static readonly long UnlockedThreadId = 0; //"owning" thread id when unlocked
+        internal long _owningId = UnlockedThreadId;
+        private static int _globalThreadCounter;
+        private static readonly ThreadLocal<int> _threadId = new ThreadLocal<int>(() => Interlocked.Increment(ref _globalThreadCounter));
+        //We generate a unique id from the thread ID combined with the task ID, if any
+        public static long ThreadId => (long)(((ulong)_threadId.Value) << 32) | ((uint)(Task.CurrentId ?? 0));
 
-        /// <summary>
-        /// The queue of TCSs that other tasks are awaiting to acquire the lock.
-        /// </summary>
-        private readonly IAsyncWaitQueue<IDisposable> _queue;
-
-        /// <summary>
-        /// The semi-unique identifier for this instance. This is 0 if the id has not yet been created.
-        /// </summary>
-        private int _id;
-
-        /// <summary>
-        /// The object used for mutual exclusion.
-        /// </summary>
-        private readonly object _mutex;
-
-        /// <summary>
-        /// Creates a new async-compatible mutual exclusion lock.
-        /// </summary>
-        public AsyncLock()
-            : this(new DefaultAsyncWaitQueue<IDisposable>())
+        struct InnerLock : IDisposable
         {
-        }
+            private readonly AsyncLock _parent;
+#if DEBUG
+            private bool _disposed;
+#endif
 
-        /// <summary>
-        /// Creates a new async-compatible mutual exclusion lock using the specified wait queue.
-        /// </summary>
-        /// <param name="queue">The wait queue used to manage waiters.</param>
-        public AsyncLock(IAsyncWaitQueue<IDisposable> queue)
-        {
-            _queue = queue;
-            _mutex = new object();
-        }
-
-        /// <summary>
-        /// Gets a semi-unique identifier for this asynchronous lock.
-        /// </summary>
-        public int Id
-        {
-            get { return IdManager<AsyncLock>.GetId(ref _id); }
-        }
-
-        /// <summary>
-        /// Asynchronously acquires the lock. Returns a disposable that releases the lock when disposed.
-        /// </summary>
-        /// <param name="cancellationToken">The cancellation token used to cancel the lock. If this is already set, then this method will attempt to take the lock immediately (succeeding if the lock is currently available).</param>
-        /// <returns>A disposable that releases the lock when disposed.</returns>
-        public Task<IDisposable> LockAsync(CancellationToken cancellationToken)
-        {
-            Task<IDisposable> ret;
-            lock (_mutex)
+            internal InnerLock(AsyncLock parent)
             {
-                if (!_taken)
+                _parent = parent;
+#if DEBUG
+                _disposed = false;
+#endif
+            }
+
+            internal async Task ObtainLockAsync()
+            {
+                while (!TryEnter())
                 {
-                    // If the lock is available, take it immediately.
-                    _taken = true;
-                    ret = TaskShim.FromResult<IDisposable>(new Key(this));
-                }
-                else
-                {
-                    // Wait for the lock to become available or cancellation.
-                    ret = _queue.Enqueue(cancellationToken);
+                    //we need to wait for someone to leave the lock before trying again
+                    await _parent._retry.WaitAsync();
                 }
             }
-            return ret;
-        }
 
-        /// <summary>
-        /// Synchronously acquires the lock. Returns a disposable that releases the lock when disposed. This method may block the calling thread.
-        /// </summary>
-        /// <param name="cancellationToken">The cancellation token used to cancel the lock. If this is already set, then this method will attempt to take the lock immediately (succeeding if the lock is currently available).</param>
-        public IDisposable Lock(CancellationToken cancellationToken)
-        {
-            Task<IDisposable> enqueuedTask;
-            lock (_mutex)
+            internal async Task ObtainLockAsync(CancellationToken ct)
             {
-                if (!_taken)
+                while (!TryEnter())
                 {
-                    _taken = true;
-                    return new Key(this);
+                    //we need to wait for someone to leave the lock before trying again
+                    await _parent._retry.WaitAsync(ct);
                 }
-
-                enqueuedTask = _queue.Enqueue(cancellationToken);
             }
 
-            return enqueuedTask.WaitAndUnwrapException();
-        }
-
-        /// <summary>
-        /// Asynchronously acquires the lock. Returns a disposable that releases the lock when disposed.
-        /// </summary>
-        /// <returns>A disposable that releases the lock when disposed.</returns>
-        public Task<IDisposable> LockAsync()
-        {
-            return LockAsync(CancellationToken.None);
-        }
-
-        /// <summary>
-        /// Synchronously acquires the lock. Returns a disposable that releases the lock when disposed. This method may block the calling thread.
-        /// </summary>
-        public IDisposable Lock()
-        {
-            return Lock(CancellationToken.None);
-        }
-
-        /// <summary>
-        /// Releases the lock.
-        /// </summary>
-        internal void ReleaseLock()
-        {
-            IDisposable finish = null;
-            lock (_mutex)
+            internal void ObtainLock()
             {
-                if (_queue.IsEmpty)
-                    _taken = false;
-                else
-                    finish = _queue.Dequeue(new Key(this));
+                while (!TryEnter())
+                {
+                    //we need to wait for someone to leave the lock before trying again
+                    _parent._retry.Wait();
+                }
             }
-            if (finish != null)
-                finish.Dispose();
-        }
 
-        /// <summary>
-        /// The disposable which releases the lock.
-        /// </summary>
-        private sealed class Key : IDisposable
-        {
-            /// <summary>
-            /// The lock to release.
-            /// </summary>
-            private AsyncLock _asyncLock;
-
-            /// <summary>
-            /// Creates the key for a lock.
-            /// </summary>
-            /// <param name="asyncLock">The lock to release. May not be <c>null</c>.</param>
-            public Key(AsyncLock asyncLock)
+            private bool TryEnter()
             {
-                _asyncLock = asyncLock;
+                lock (_parent._reentrancy)
+                {
+                    Debug.Assert((_parent._owningId == UnlockedThreadId) == (_parent._reentrances == 0));
+                    if (_parent._owningId != UnlockedThreadId && _parent._owningId != AsyncLock.ThreadId)
+                    {
+                        //another thread currently owns the lock
+                        return false;
+                    }
+                    //we can go in
+                    Interlocked.Increment(ref _parent._reentrances);
+                    _parent._owningId = AsyncLock.ThreadId;
+                    return true;
+                }
             }
 
-            /// <summary>
-            /// Release the lock.
-            /// </summary>
             public void Dispose()
             {
-                if (_asyncLock == null)
-                    return;
-                _asyncLock.ReleaseLock();
-                _asyncLock = null;
+#if DEBUG
+                Debug.Assert(!_disposed);
+                _disposed = true;
+#endif
+                lock (_parent._reentrancy)
+                {
+                    Interlocked.Decrement(ref _parent._reentrances);
+                    if (_parent._reentrances == 0)
+                    {
+                        //the owning thread is always the same so long as we are in a nested stack call
+                        //we reset the owning id to null only when the lock is fully unlocked
+                        _parent._owningId = UnlockedThreadId;
+                        if (_parent._retry.CurrentCount == 0)
+                        {
+                            _parent._retry.Release();
+                        }
+                    }
+                }
             }
         }
 
-        // ReSharper disable UnusedMember.Local
-        [DebuggerNonUserCode]
-        private sealed class DebugView
+        public IDisposable Lock()
         {
-            private readonly AsyncLock _mutex;
-
-            public DebugView(AsyncLock mutex)
-            {
-                _mutex = mutex;
-            }
-
-            public int Id { get { return _mutex.Id; } }
-
-            public bool Taken { get { return _mutex._taken; } }
-
-            public IAsyncWaitQueue<IDisposable> WaitQueue { get { return _mutex._queue; } }
+            var @lock = new InnerLock(this);
+            @lock.ObtainLock();
+            return @lock;
         }
 
-        // ReSharper restore UnusedMember.Local
+        public async Task<IDisposable> LockAsync()
+        {
+            var @lock = new InnerLock(this);
+            await @lock.ObtainLockAsync();
+            return @lock;
+        }
+
+        public async Task<IDisposable> LockAsync(CancellationToken ct)
+        {
+            var @lock = new InnerLock(this);
+            await @lock.ObtainLockAsync(ct);
+            return @lock;
+        }
     }
 }

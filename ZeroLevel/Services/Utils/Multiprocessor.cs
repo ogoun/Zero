@@ -10,8 +10,9 @@ namespace ZeroLevel.Utils
     {
         private BlockingCollection<T> _queue = new BlockingCollection<T>();
         private List<Thread> _threads = new List<Thread>();
+        private bool _is_disposed = false;
 
-        public Multiprocessor(Action<T> handler, int size, int stackSize = 1024 * 256)
+        public Multiprocessor(Action<T> handler, int size, int stackSize = 1024 * 1024)
         {
             for (int i = 0; i < size; i++)
             {
@@ -20,7 +21,7 @@ namespace ZeroLevel.Utils
                     try
                     {
                         T item;
-                        while (!_queue.IsCompleted)
+                        while (!_is_disposed && !_queue.IsCompleted)
                         {
                             if (_queue.TryTake(out item, 200))
                             {
@@ -28,7 +29,10 @@ namespace ZeroLevel.Utils
                             }
                         }
                     }
-                    catch { }
+                    catch (Exception ex)
+                    {
+                        Log.Error(ex, "[Multiprocessor.HandleThread]");
+                    }
                 }, stackSize);
                 t.IsBackground = true;
                 _threads.Add(t);
@@ -53,7 +57,9 @@ namespace ZeroLevel.Utils
             {
                 Thread.Sleep(100);
             }
-            Thread.Sleep(3000); // wait while threads exit
+            _is_disposed = true;
+            Thread.Sleep(1000); // wait while threads exit
+            foreach (var thread in _threads) thread.Join();
             _queue.Dispose();
         }
     }

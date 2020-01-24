@@ -8,7 +8,33 @@ namespace ZeroLevel.Network
 {
     public static class NetUtils
     {
-        public static bool TestConnection(IPEndPoint endpoint)
+        public static bool PingHost(string hostUri, int portNumber)
+        {
+            try
+            {
+                using (var client = new TcpClient(hostUri, portNumber))
+                {
+                    return true;
+                }
+            }
+            catch
+            {
+            }
+            return false;
+        }
+
+        public static bool TestConnection(string host, int port, int timeout = 100)
+        {
+            var hostEntry = Dns.GetHostEntry(host);
+            if (hostEntry.AddressList.Length > 0)
+            {
+                var ip = hostEntry.AddressList[0];
+                return TestConnection(new IPEndPoint(ip, port), timeout);
+            }
+            return false;
+        }
+
+        public static bool TestConnection(IPEndPoint endpoint, int timeout = 100)
         {
             using (var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
             {
@@ -26,7 +52,7 @@ namespace ZeroLevel.Network
                 try
                 {
                     IAsyncResult result = socket.BeginConnect(endpoint, null, null);
-                    bool success = result.AsyncWaitHandle.WaitOne(100, true);
+                    bool success = result.AsyncWaitHandle.WaitOne(timeout, true);
                     if (socket.Connected)
                     {
                         socket.EndConnect(result);
