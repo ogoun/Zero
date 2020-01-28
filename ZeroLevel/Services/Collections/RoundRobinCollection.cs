@@ -99,6 +99,25 @@ namespace ZeroLevel.Services.Collections
             return false;
         }
 
+        public bool MoveNextAndHandle(Action<T> handler)
+        {
+            _lock.EnterReadLock();
+            try
+            {
+                if (_collection.Count > 0)
+                {
+                    _index = Interlocked.Increment(ref _index) % _collection.Count;
+                    handler.Invoke(Current);
+                    return true;
+                }
+            }
+            finally
+            {
+                _lock.ExitReadLock();
+            }
+            return false;
+        }
+
         public T Current
         {
             get

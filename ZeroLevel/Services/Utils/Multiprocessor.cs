@@ -23,7 +23,7 @@ namespace ZeroLevel.Utils
                         T item;
                         while (!_is_disposed && !_queue.IsCompleted)
                         {
-                            if (_queue.TryTake(out item, 200))
+                            if (_queue.TryTake(out item, 500))
                             {
                                 handler(item);
                             }
