@@ -1,10 +1,4 @@
-﻿using System;
-using System.Linq;
-using Xunit;
-using ZeroLevel.Services.Microservices.Dump;
-using ZeroLevel.UnitTests.Models;
-
-namespace ZeroLevel.UnitTests
+﻿namespace ZeroLevel.UnitTests
 {
     // In developing, not working!
     public class DumpTests
