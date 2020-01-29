@@ -52,25 +52,38 @@ namespace ZeroLevel.Utils
 
         public void Append(T t) => _queue.Add(t);
 
-        public void WaitForEmpty()
+        public bool WaitForEmpty(int timeoutInMs)
         {
-            while (_queue.Count > 0)
+            var start = DateTime.UtcNow;
+            while (Count > 0)
             {
+                if (timeoutInMs > 0)
+                {
+                    if ((DateTime.UtcNow - start).TotalMilliseconds > timeoutInMs)
+                    {
+                        return false;
+                    }
+                }
                 Thread.Sleep(100);
             }
+            return true;
         }
 
         public void Dispose()
         {
-            _queue.CompleteAdding();
-            while (_queue.Count > 0 || _tasks_in_progress > 0)
-            {
-                Thread.Sleep(100);
-            }
             _is_disposed = true;
-            Thread.Sleep(1000); // wait while threads exit
-            foreach (var thread in _threads) thread.Join();
+            _queue.CompleteAdding();
+            Thread.Yield();
             _queue.Dispose();
+            foreach (var thread in _threads)
+            {
+                try
+                {
+                    thread.Join();
+                    thread.Abort();
+                }
+                catch { }
+            }
         }
     }
 }
