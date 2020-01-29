@@ -220,25 +220,6 @@ namespace ZeroLevel.Network
             }
         }
 
-        public class Pack
-        : IBinarySerializable
-        {
-            public int Identity;
-            public long Timestamp;
-
-            public void Deserialize(IBinaryReader reader)
-            {
-                this.Identity = reader.ReadInt32();
-                this.Timestamp = reader.ReadLong();
-            }
-
-            public void Serialize(IBinaryWriter writer)
-            {
-                writer.WriteInt32(this.Identity);
-                writer.WriteLong(this.Timestamp);
-            }
-        }
-
         public void HandleRequest(Frame frame, ISocketClient client, int identity, Action<int, byte[]> handler)
         {            
             try

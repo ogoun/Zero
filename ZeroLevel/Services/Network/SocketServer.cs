@@ -27,7 +27,7 @@ namespace ZeroLevel.Network
                 try
                 {
                     _connection_set_lock.EnterReadLock();
-                    return _connections.Select(c => c.Value.EndPoint).ToList();
+                    return _connections.Select(c => c.Value.Endpoint).ToList();
                 }
                 finally
                 {
@@ -101,7 +101,7 @@ namespace ZeroLevel.Network
             }
             else
             {
-                Log.Warning($"Server socket change state to: {Status}");
+                Log.Warning($"[ZSocketServer.BeginAcceptCallback] Server socket change state to: {Status}");
             }
         }
 

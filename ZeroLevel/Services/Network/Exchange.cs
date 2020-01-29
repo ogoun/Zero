@@ -916,7 +916,7 @@ namespace ZeroLevel.Network
                         }
                         catch (Exception ex)
                         {
-                            Log.SystemError(ex, $"[ExClientSet._RequestBroadcast] Error direct request to service '{client.EndPoint}' in broadcast request. Inbox '{inbox}'");
+                            Log.SystemError(ex, $"[ExClientSet._RequestBroadcast] Error direct request to service '{client.Endpoint}' in broadcast request. Inbox '{inbox}'");
                             waiter.Signal();
                         }
                     });
@@ -944,7 +944,7 @@ namespace ZeroLevel.Network
                         }
                         catch (Exception ex)
                         {
-                            Log.SystemError(ex, $"[ExClientSet._RequestBroadcast] Error direct request to service '{client.EndPoint}' in broadcast request. Inbox '{inbox}'");
+                            Log.SystemError(ex, $"[ExClientSet._RequestBroadcast] Error direct request to service '{client.Endpoint}' in broadcast request. Inbox '{inbox}'");
                             waiter.Signal();
                         }
                     });

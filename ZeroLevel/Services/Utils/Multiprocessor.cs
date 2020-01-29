@@ -11,6 +11,8 @@ namespace ZeroLevel.Utils
         private BlockingCollection<T> _queue = new BlockingCollection<T>();
         private List<Thread> _threads = new List<Thread>();
         private bool _is_disposed = false;
+        private int _tasks_in_progress = 0;
+        public int Count => _queue.Count + _tasks_in_progress;
 
         public Multiprocessor(Action<T> handler, int size, int stackSize = 1024 * 1024)
         {
@@ -18,20 +20,28 @@ namespace ZeroLevel.Utils
             {
                 var t = new Thread(() =>
                 {
-                    try
+                    T item;
+                    while (!_is_disposed)
                     {
-                        T item;
-                        while (!_is_disposed && !_queue.IsCompleted)
+                        try
                         {
                             if (_queue.TryTake(out item, 500))
                             {
-                                handler(item);
+                                Interlocked.Increment(ref _tasks_in_progress);
+                                try
+                                {
+                                    handler(item);
+                                }
+                                finally
+                                {
+                                    Interlocked.Decrement(ref _tasks_in_progress);
+                                }
                             }
                         }
-                    }
-                    catch (Exception ex)
-                    {
-                        Log.Error(ex, "[Multiprocessor.HandleThread]");
+                        catch (Exception ex)
+                        {
+                            Log.Error(ex, "[Multiprocessor.HandleThread]");
+                        }
                     }
                 }, stackSize);
                 t.IsBackground = true;
@@ -53,7 +63,7 @@ namespace ZeroLevel.Utils
         public void Dispose()
         {
             _queue.CompleteAdding();
-            while (_queue.Count > 0)
+            while (_queue.Count > 0 || _tasks_in_progress > 0)
             {
                 Thread.Sleep(100);
             }

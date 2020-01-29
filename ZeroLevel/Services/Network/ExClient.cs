@@ -8,7 +8,7 @@ namespace ZeroLevel.Network
         : IClient, IDisposable
     {
         private readonly ISocketClient _client;
-        public IPEndPoint EndPoint => _client?.Endpoint;
+        public IPEndPoint Endpoint => _client?.Endpoint;
         public SocketClientStatus Status => _client.Status;
         public IRouter Router => _client.Router;
         public ISocketClient Socket => _client;

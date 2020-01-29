@@ -6,7 +6,7 @@ namespace ZeroLevel.Network
     public interface IClient
         : IDisposable
     {
-        IPEndPoint EndPoint { get; }
+        IPEndPoint Endpoint { get; }
         SocketClientStatus Status { get; }
         IRouter Router { get; }
         ISocketClient Socket { get; }
