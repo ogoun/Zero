@@ -72,18 +72,28 @@ namespace ZeroLevel.Utils
         public void Dispose()
         {
             _is_disposed = true;
-            _queue.CompleteAdding();
-            Thread.Yield();
-            _queue.Dispose();
-            foreach (var thread in _threads)
+            try
             {
-                try
+                _queue.CompleteAdding();
+                _queue.Dispose();
+                foreach (var thread in _threads)
                 {
-                    thread.Join();
-                    thread.Abort();
+                    try
+                    {
+                        thread.Abort();
+                    }
+                    catch { }
                 }
-                catch { }
+                foreach (var thread in _threads)
+                {
+                    try
+                    {
+                        thread.Join();
+                    }
+                    catch { }
+                }
             }
+            catch { }
         }
     }
 }
