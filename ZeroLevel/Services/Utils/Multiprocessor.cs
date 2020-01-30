@@ -80,15 +80,7 @@ namespace ZeroLevel.Utils
                 {
                     try
                     {
-                        thread.Abort();
-                    }
-                    catch { }
-                }
-                foreach (var thread in _threads)
-                {
-                    try
-                    {
-                        thread.Join();
+                        thread.Interrupt();
                     }
                     catch { }
                 }
