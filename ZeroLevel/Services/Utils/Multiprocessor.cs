@@ -50,7 +50,7 @@ namespace ZeroLevel.Utils
             foreach (var t in _threads) t.Start();
         }
 
-        public void Append(T t) => _queue.Add(t);
+        public void Append(T t) { if (!_is_disposed) _queue.Add(t); }
 
         public bool WaitForEmpty(int timeoutInMs)
         {
@@ -72,12 +72,8 @@ namespace ZeroLevel.Utils
         public void Dispose()
         {
             _is_disposed = true;
-            try
-            {
-                _queue.CompleteAdding();
-                _queue.Dispose();
-            }
-            catch { }
+            _queue.Dispose();
+            _threads = null;
         }
     }
 }
