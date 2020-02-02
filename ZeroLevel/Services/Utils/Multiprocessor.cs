@@ -10,7 +10,7 @@ namespace ZeroLevel.Utils
     {
         private BlockingCollection<T> _queue = new BlockingCollection<T>();
         private List<Thread> _threads = new List<Thread>();
-        private bool _is_disposed = false;
+        private volatile bool _is_disposed = false;
         private int _tasks_in_progress = 0;
         public int Count => _queue.Count + _tasks_in_progress;
 
@@ -30,7 +30,7 @@ namespace ZeroLevel.Utils
                                 Interlocked.Increment(ref _tasks_in_progress);
                                 try
                                 {
-                                    handler(item);
+                                    handler?.Invoke(item);
                                 }
                                 finally
                                 {
@@ -72,18 +72,12 @@ namespace ZeroLevel.Utils
         public void Dispose()
         {
             _is_disposed = true;
-            _queue.CompleteAdding();
-            Thread.Yield();
-            _queue.Dispose();
-            foreach (var thread in _threads)
+            try
             {
-                try
-                {
-                    thread.Join();
-                    thread.Abort();
-                }
-                catch { }
+                _queue.CompleteAdding();
+                _queue.Dispose();
             }
+            catch { }
         }
     }
 }
