@@ -70,7 +70,7 @@ namespace ZeroLevel.SqLite
                 var body = MessageSerializer.Serialize(data);
                 if (update)
                 {
-                    Execute($"UPDATE {_tableName} SET key=@key, body=@body", _db,
+                    Execute($"UPDATE {_tableName} SET body=@body WHERE key=@key", _db,
                     new SQLiteParameter[]
                     {
                             new SQLiteParameter("key", key),
