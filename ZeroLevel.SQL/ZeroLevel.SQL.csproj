@@ -6,10 +6,15 @@
     <Description>Light wrapper over ado.net</Description>
     <Authors>ogoun</Authors>
     <Copyright>Copyright Ogoun 2019</Copyright>
-    <PackageProjectUrl>https://github.com/ogoun/Zero</PackageProjectUrl>
+    <PackageProjectUrl>https://github.com/ogoun/Zero/tree/master/ZeroLevel.SQL</PackageProjectUrl>
     <RepositoryUrl>https://github.com/ogoun/Zero</RepositoryUrl>
-    <PackageIconUrl>https://raw.githubusercontent.com/ogoun/Zero/master/zero.png</PackageIconUrl>
+    <PackageIconUrl></PackageIconUrl>
     <RepositoryType>GitHub</RepositoryType>
+    <PackageIcon>zero.png</PackageIcon>
+    <AssemblyVersion>1.0.0.1</AssemblyVersion>
+    <Version>1.0.1</Version>
+    <FileVersion>1.0.1.1</FileVersion>
+    <PackageReleaseNotes>Fix read values from DbDataReader, DataRow and IDataReader</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
@@ -20,6 +25,13 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ZeroLevel\ZeroLevel.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="E:\Desktop\Developing\NUGET\zero.png">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
   </ItemGroup>
 
 </Project>

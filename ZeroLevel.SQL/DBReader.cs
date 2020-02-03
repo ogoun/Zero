@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Data;
 using System.Data.Common;
+using System.Linq;
 
 namespace ZeroLevel.SqlServer
 {
@@ -33,8 +34,7 @@ namespace ZeroLevel.SqlServer
     {
         public static T Read<T>(this DbDataReader reader, int index)
         {
-            if (reader == null) return default;
-            if (reader[index] == DBNull.Value) return default;
+            if (reader == null || reader.FieldCount <= index || reader[index] == DBNull.Value) return default;
             Type t;
             if ((t = Nullable.GetUnderlyingType(typeof(T))) != null)
             {
@@ -44,8 +44,7 @@ namespace ZeroLevel.SqlServer
         }
         public static T Read<T>(this DbDataReader reader, string name)
         {
-            if (reader == null) return default;
-            if (reader[name] == DBNull.Value) return default;
+            if (reader == null || false == reader.GetColumnSchema().Any(c => c.ColumnName.Equals(name, StringComparison.OrdinalIgnoreCase)) || reader[name] == DBNull.Value) return default;
             Type t;
             if ((t = Nullable.GetUnderlyingType(typeof(T))) != null)
             {
@@ -55,8 +54,7 @@ namespace ZeroLevel.SqlServer
         }
         public static T Read<T>(this IDataReader reader, int index)
         {
-            if (reader == null) return default;
-            if (reader[index] == DBNull.Value) return default;
+            if (reader == null || reader.FieldCount <= index || reader[index] == DBNull.Value) return default;
             Type t;
             if ((t = Nullable.GetUnderlyingType(typeof(T))) != null)
             {
@@ -66,8 +64,7 @@ namespace ZeroLevel.SqlServer
         }
         public static T Read<T>(this IDataReader reader, string name)
         {
-            if (reader == null) return default;
-            if (reader[name] == DBNull.Value) return default;
+            if (reader == null || false == reader.HasColumn(name) || reader[name] == DBNull.Value) return default;
             Type t;
             if ((t = Nullable.GetUnderlyingType(typeof(T))) != null)
             {
@@ -75,11 +72,9 @@ namespace ZeroLevel.SqlServer
             }
             return (T)Convert.ChangeType(reader[name], typeof(T));
         }
-
         public static T Read<T>(this DataRow reader, int index)
         {
-            if (reader == null) return default;
-            if (reader.ItemArray[index] == DBNull.Value) return default;
+            if (reader == null || reader.ItemArray.Length <= index || reader.ItemArray[index] == DBNull.Value) return default;
             Type t;
             if ((t = Nullable.GetUnderlyingType(typeof(T))) != null)
             {
@@ -87,17 +82,24 @@ namespace ZeroLevel.SqlServer
             }
             return (T)Convert.ChangeType(reader.ItemArray[index], typeof(T));
         }
-
         public static T Read<T>(this DataRow reader, string name)
         {
-            if (reader == null) return default;
-            if (reader[name] == DBNull.Value) return default;
+            if (reader == null || false == reader.Table.Columns.Contains(name) || reader[name] == DBNull.Value) return default;
             Type t;
             if ((t = Nullable.GetUnderlyingType(typeof(T))) != null)
             {
                 return (T)Convert.ChangeType(reader[name], t);
             }
             return (T)Convert.ChangeType(reader[name], typeof(T));
+        }
+        public static bool HasColumn(this IDataRecord dr, string columnName)
+        {
+            for (int i = 0; i < dr.FieldCount; i++)
+            {
+                if (dr.GetName(i).Equals(columnName, StringComparison.InvariantCultureIgnoreCase))
+                    return true;
+            }
+            return false;
         }
     }
 }

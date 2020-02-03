@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <Authors>Ogoun</Authors>
+    <Description>Helpers for sqlite databases. 
+Based on System.Data.SQLite.Core</Description>
+    <Copyright>Copyright Ogoun 2020</Copyright>
+    <PackageProjectUrl>https://github.com/ogoun/Zero/tree/master/ZeroLevel.SqLite</PackageProjectUrl>
+    <RepositoryType>GitHub</RepositoryType>
+    <RepositoryUrl>https://github.com/ogoun/Zero</RepositoryUrl>
+    <PackageIcon>zero.png</PackageIcon>
+    <PackageIconUrl />
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Data.SQLite.Core" Version="1.0.112" />
+    <PackageReference Include="ZeroLevel" Version="3.1.9" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="E:\Desktop\Developing\NUGET\zero.png">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+  </ItemGroup>
+
+</Project>
