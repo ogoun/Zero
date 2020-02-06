@@ -633,6 +633,16 @@ namespace ZeroLevel.Network
             return MakeHost(new IPEndPoint(IPAddress.Any, port));
         }
 
+        public IRouter UseHostV6()
+        {
+            return MakeHost(new IPEndPoint(IPAddress.IPv6Any, NetUtils.GetFreeTcpPort()));
+        }
+
+        public IRouter UseHostV6(int port)
+        {
+            return MakeHost(new IPEndPoint(IPAddress.IPv6Any, port));
+        }
+
         public IRouter UseHost(IPEndPoint endpoint)
         {
             return MakeHost(endpoint);

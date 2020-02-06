@@ -60,7 +60,7 @@ namespace ZeroLevel.Network
         {
             _router = router;
             LocalEndpoint = endpoint;
-            _serverSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            _serverSocket = new Socket(endpoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
             _serverSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive, true);
             _serverSocket.Bind(endpoint);
             _serverSocket.Listen(100);

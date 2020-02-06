@@ -12,6 +12,9 @@ namespace ZeroLevel.Network
 
         IRouter UseHost();
         IRouter UseHost(int port);
+        IRouter UseHostV6();
+        IRouter UseHostV6(int port);
+
         IRouter UseHost(IPEndPoint endpoint);
 
         IServiceRoutesStorage RoutesStorage { get; }

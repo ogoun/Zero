@@ -61,7 +61,7 @@ namespace ZeroLevel.Network
         {
             try
             {
-                _clientSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                _clientSocket = new Socket(ep.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
                 _clientSocket.SetIPProtectionLevel(IPProtectionLevel.Unrestricted);
                 _clientSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.DontLinger, true);
                 _clientSocket.Connect(ep);
