@@ -92,6 +92,8 @@ namespace ZeroLevel.Services.Shedulling
 
         bool Remove(long key);
 
+        void SetInitialIndex(long index);
+
         #endregion Sheduller control
     }
 }

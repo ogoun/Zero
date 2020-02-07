@@ -10,6 +10,9 @@ namespace ZeroLevel.Services.Shedulling
     {
         private static long _counter = 0;
 
+        internal static void ResetIndex(long index)
+            => _counter = index;
+
         public ExpiredObject()
         {
             Key = Interlocked.Increment(ref _counter);

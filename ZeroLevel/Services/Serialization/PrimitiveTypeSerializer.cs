@@ -517,6 +517,7 @@ namespace ZeroLevel.Services.Serialization
                                 wrapper.ReadId = wrapper.Invoker.ConfigureGeneric(typeof(MemoryStreamReader), elementType, readName).First();
                                 wrapper.WriteId = wrapper.Invoker.ConfigureGeneric(typeof(MemoryStreamWriter), elementType,
                                         mi => mi.Name.Equals(writeName) && mi.IsGenericMethod).First();
+
                                 _concrete_type_cachee[type] = wrapper;
                             }
                         }

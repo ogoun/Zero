@@ -288,6 +288,10 @@ namespace ZeroLevel.Services.Shedulling
             return success;
         }
 
+        public void SetInitialIndex(long index)
+        {
+            ExpiredObject.ResetIndex(index);
+        }
         #endregion Sheduller control
 
         #region IDisposable
@@ -305,7 +309,6 @@ namespace ZeroLevel.Services.Shedulling
                 _sheduller.Dispose();
             }
         }
-
         #endregion IDisposable
     }
 }

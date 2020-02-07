@@ -1,5 +1,4 @@
 ﻿using System;
-using ZeroLevel.Services.Logging;
 
 namespace ZeroLevel.Logging
 {
