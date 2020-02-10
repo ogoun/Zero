@@ -2,8 +2,6 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Reflection;
 using ZeroLevel.Services.Config;
 using ZeroLevel.Services.Config.Implementation;
 using ZeroLevel.Services.Reflection;
@@ -137,52 +135,257 @@ namespace ZeroLevel
         /// Creating a configuration from the AppSettings section of the app.config or web.config file
         /// </summary>
         /// <returns>Configuration</returns>
-        public static IConfiguration ReadFromApplicationConfig() { return new ApplicationConfigReader().ReadConfiguration(); }
+        public static IConfiguration ReadFromApplicationConfig() 
+        {
+            try
+            {
+                return new ApplicationConfigReader().ReadConfiguration();
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, $"[Configuration.ReadFromApplicationConfig] Can't read app.config file");
+                throw;
+            }
+        }
+        public static IConfiguration ReadOrEmptyFromApplicationConfig()
+        {
+            try
+            {
+                return new ApplicationConfigReader().ReadConfiguration();
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, $"[Configuration.ReadOrEmptyFromApplicationConfig] Can't read app.config file");
+            }
+            return _empty;
+        }
 
         /// <summary>
         /// Creating a configuration from the AppSettings section of the app.config file or web.config, is supplemented by the 'ConnectionStrings' section
         /// </summary>
         /// <returns>Configuration</returns>
-        public static IConfigurationSet ReadSetFromApplicationConfig() { return new ApplicationConfigReader().ReadConfigurationSet(); }
+        public static IConfigurationSet ReadSetFromApplicationConfig() 
+        { 
+            try
+            {
+                return new ApplicationConfigReader().ReadConfigurationSet();
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, $"[Configuration.ReadSetFromApplicationConfig] Can't read app.config file");
+                throw;
+            }
+        }
+        public static IConfigurationSet ReadOrEmptySetFromApplicationConfig()
+        {
+            try
+            {
+                return new ApplicationConfigReader().ReadConfigurationSet();
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, $"[Configuration.ReadOrEmptySetFromApplicationConfig] Can't read app.config file");
+            }
+            return _emptySet;
+        }
 
         /// <summary>
         /// Creating a configuration from the AppSettings section of the app.config or web.config file
         /// </summary>
         /// <returns>Configuration</returns>
-        public static IConfiguration ReadFromApplicationConfig(string configFilePath) { return new ApplicationConfigReader(configFilePath).ReadConfiguration(); }
+        public static IConfiguration ReadFromApplicationConfig(string configFilePath) 
+        {
+            try
+            {
+                return new ApplicationConfigReader(configFilePath).ReadConfiguration();
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, $"[Configuration.ReadFromApplicationConfig] Can't read config file '{configFilePath}'");
+                throw;
+            }
+        }
+        public static IConfiguration ReadOrEmptyFromApplicationConfig(string configFilePath)
+        {
+            try
+            {
+                return new ApplicationConfigReader(configFilePath).ReadConfiguration();
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, $"[Configuration.ReadOrEmptyFromApplicationConfig] Can't read config file '{configFilePath}'");
+            }
+            return _empty;
+        }
 
         /// <summary>
         /// Creating a configuration from the AppSettings section of the app.config file or web.config, is supplemented by the 'ConnectionStrings' section
         /// </summary>
         /// <returns>Configuration</returns>
-        public static IConfigurationSet ReadSetFromApplicationConfig(string configFilePath) { return new ApplicationConfigReader(configFilePath).ReadConfigurationSet(); }
+        public static IConfigurationSet ReadSetFromApplicationConfig(string configFilePath) 
+        {
+            try
+            {
+                return new ApplicationConfigReader(configFilePath).ReadConfigurationSet();
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, $"[Configuration.ReadSetFromApplicationConfig] Can't read config file '{configFilePath}'");
+                throw;
+            }
+        }
+        public static IConfigurationSet ReadOrEmptySetFromApplicationConfig(string configFilePath)
+        {
+            try
+            {
+                return new ApplicationConfigReader(configFilePath).ReadConfigurationSet();
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, $"[Configuration.ReadOrEmptySetFromApplicationConfig] Can't read config file '{configFilePath}'");
+            }
+            return _emptySet;
+        }
 
         /// <summary>
         /// Create configuration from ini file
         /// </summary>
         /// <param name="path">Path to the ini file</param>
         /// <returns>Configuration</returns>
-        public static IConfiguration ReadFromIniFile(string path) { return new IniFileReader(path).ReadConfiguration(); }
+        public static IConfiguration ReadFromIniFile(string path) 
+        {
+            try
+            {
+                return new IniFileReader(path).ReadConfiguration();
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, $"[Configuration.ReadFromIniFile] Can't read config file '{path}'");
+                throw;
+            }
+        }
+        public static IConfiguration ReadOrEmptyFromIniFile(string path)
+        {
+            try
+            {
+                return new IniFileReader(path).ReadConfiguration();
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, $"[Configuration.ReadOrEmptyFromIniFile] Can't read config file '{path}'");
+            }
+            return _empty;
+        }
 
         /// <summary>
         /// Creating a configuration from an ini file, including sections
         /// </summary>
         /// <param name="path">Path to the ini file</param>
         /// <returns>Configuration</returns>
-        public static IConfigurationSet ReadSetFromIniFile(string path) { return new IniFileReader(path).ReadConfigurationSet(); }
+        public static IConfigurationSet ReadSetFromIniFile(string path) 
+        {
+            try
+            {
+                return new IniFileReader(path).ReadConfigurationSet();
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, $"[Configuration.ReadSetFromIniFile] Can't read config file '{path}'");
+                throw;
+            }
+        }
+        public static IConfigurationSet ReadOrEmptySetFromIniFile(string path)
+        {
+            try
+            {
+                return new IniFileReader(path).ReadConfigurationSet();
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, $"[Configuration.ReadOrEmptySetFromIniFile] Can't read config file '{path}'");
+            }
+            return _emptySet;
+        }
 
         /// <summary>
         /// Creating configuration from command line parameters
         /// </summary>
         /// <param name="args">Command line parameters</param>
         /// <returns>Configuration</returns>
-        public static IConfiguration ReadFromCommandLine(string[] args) { return new CommandLineReader(args).ReadConfiguration(); }
-
-        public static IConfigurationSet ReadBinary(IBinaryReader reader)
+        public static IConfiguration ReadFromCommandLine(string[] args) 
         {
-            return reader.Read<BaseConfigurationSet>();
+            try
+            {
+                return new CommandLineReader(args).ReadConfiguration();
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, $"[Configuration.ReadFromCommandLine] Can't read command line args");
+                throw;
+            }
+        }
+        public static IConfiguration ReadOrEmptyFromCommandLine(string[] args)
+        {
+            try
+            {
+                return new CommandLineReader(args).ReadConfiguration();
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, $"[Configuration.ReadOrEmptyFromCommandLine] Can't read command line args");
+            }
+            return _empty;
         }
 
+        public static IConfiguration ReadFromBinaryReader(IBinaryReader reader)
+        {
+            try
+            {
+                return reader.Read<BaseConfiguration>();
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, $"[Configuration.ReadFromBinaryReader] Can't read config from binaryReader");
+                throw;
+            }
+        }
+        public static IConfiguration ReadOrEmptyFromBinaryReader(IBinaryReader reader)
+        {
+            try
+            {
+                return reader.Read<BaseConfiguration>();
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, $"[Configuration.ReadOrEmptyFromBinaryReader] Can't read config from binaryReader");
+            }
+            return _empty;
+        }
+
+        public static IConfigurationSet ReadSetFromBinaryReader(IBinaryReader reader)
+        {
+            try
+            {
+                return reader.Read<BaseConfigurationSet>();
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, $"[Configuration.ReadSetFromBinaryReader] Can't read config from binaryReader");
+                throw;
+            }
+        }
+        public static IConfigurationSet ReadSetOrEmptyFromBinaryReader(IBinaryReader reader)
+        {
+            try
+            {
+                return reader.Read<BaseConfigurationSet>();
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, $"[Configuration.ReadSetOrEmptyFromBinaryReader] Can't read config from binaryReader");
+            }
+            return _emptySet;
+        }
         #endregion Read configuration
 
         #region Write configuration

@@ -431,45 +431,31 @@ namespace ZeroLevel.Network
         private static TimeSpan _update_discovery_table_period = TimeSpan.FromSeconds(15);
         private static TimeSpan _register_in_discovery_table_period = TimeSpan.FromSeconds(15);
 
-        public void UseDiscovery()
+        private bool _UseDiscovery(Func<IPEndPoint> epf)
         {
+            if (epf == null) return false;
             try
             {
-                var discoveryEndpoint = Configuration.Default.First("discovery");
-                _user_aliases.Set(BaseSocket.DISCOVERY_ALIAS, NetUtils.CreateIPEndPoint(discoveryEndpoint));
+                var ep = epf.Invoke();
+                _user_aliases.Set(BaseSocket.DISCOVERY_ALIAS, ep);
                 RestartDiscoveryTasks();
+                return true;
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "[Exchange.UseDiscovery]");
+                Log.Error(ex, $"[Exchange.UseDiscovery]");
             }
+            return false;
         }
 
-        public void UseDiscovery(string discoveryEndpoint)
-        {
-            try
-            {
-                _user_aliases.Set(BaseSocket.DISCOVERY_ALIAS, NetUtils.CreateIPEndPoint(discoveryEndpoint));
-                RestartDiscoveryTasks();
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "[Exchange.UseDiscovery]");
-            }
-        }
+        public bool UseDiscovery() => 
+            _UseDiscovery(() => NetUtils.CreateIPEndPoint(Configuration.Default.First("discovery")));
 
-        public void UseDiscovery(IPEndPoint discoveryEndpoint)
-        {
-            try
-            {
-                _user_aliases.Set(BaseSocket.DISCOVERY_ALIAS, discoveryEndpoint);
-                RestartDiscoveryTasks();
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "[Exchange.UseDiscovery]");
-            }
-        }
+        public bool UseDiscovery(string discoveryEndpoint) =>
+            _UseDiscovery(() => NetUtils.CreateIPEndPoint(discoveryEndpoint));
+
+        public bool UseDiscovery(IPEndPoint discoveryEndpoint) =>
+            _UseDiscovery(() => discoveryEndpoint);
 
         private void RestartDiscoveryTasks()
         {
