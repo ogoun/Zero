@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using ZeroLevel.Models;
 using ZeroLevel.Services.Serialization;
 
 namespace ZeroLevel.Services.Semantic.Helpers
@@ -99,5 +100,49 @@ namespace ZeroLevel.Services.Semantic.Helpers
             this.indexes = reader.ReadInt32Collection().ToArray();
             this.values = reader.ReadDoubleCollection().ToArray();
         }
+    }
+
+    public sealed class SparseVector<T>
+        where T : IEmptyable
+    {
+        private readonly static int[] EmptyIndexes = new int[0];
+        private readonly static T[] EmptyValues = new T[0];
+
+        private int[] indexes;
+        private T[] values;
+
+        public int Count => indexes?.Length ?? 0;
+
+        public SparseVector()
+        {
+            indexes = EmptyIndexes;
+            values = EmptyValues;
+        }
+
+        public SparseVector(T[] vector)
+        {
+            var l = new List<int>();
+            for (int i = 0; i < vector.Length; i++)
+            {
+                if (!vector[i].IsEmpty)
+                {
+                    l.Add(i);
+                }
+            }
+            indexes = l.ToArray();
+            values = new T[l.Count];
+            for (int i = 0; i < l.Count; i++)
+            {
+                values[i] = vector[indexes[i]];
+            }
+        }
+
+        public SparseVector(T[] vector, int[] indicies)
+        {
+            indexes = indicies;
+            values = vector;
+        }
+
+        public (T, int) this[int index] => (values[index], indexes[index]);
     }
 }
