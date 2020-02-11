@@ -133,34 +133,37 @@ namespace ZeroLevel.Services.Applications
 
         #region Network       
 
-        public void UseDiscovery()
+        public bool UseDiscovery()
         {
             if (_state == ZeroServiceStatus.Running
                || _state == ZeroServiceStatus.Initialized)
             {
                 ReadServiceInfo();
-                _exhange.UseDiscovery();
+                return _exhange.UseDiscovery();
             }
+            return false;
         }
 
-        public void UseDiscovery(string endpoint)
+        public bool UseDiscovery(string endpoint)
         {
             if (_state == ZeroServiceStatus.Running
                || _state == ZeroServiceStatus.Initialized)
             {
                 ReadServiceInfo();
-                _exhange.UseDiscovery(endpoint);
+                return _exhange.UseDiscovery(endpoint);
             }
+            return false;
         }
 
-        public void UseDiscovery(IPEndPoint endpoint)
+        public bool UseDiscovery(IPEndPoint endpoint)
         {
             if (_state == ZeroServiceStatus.Running
                || _state == ZeroServiceStatus.Initialized)
             {
                 ReadServiceInfo();
-                _exhange.UseDiscovery(endpoint);
+                return _exhange.UseDiscovery(endpoint);
             }
+            return false;
         }
 
         public IRouter UseHost()

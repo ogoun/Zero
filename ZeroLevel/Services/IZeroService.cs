@@ -15,10 +15,10 @@ namespace ZeroLevel
 
         ZeroServiceInfo ServiceInfo { get; }
 
-        void UseDiscovery();
-        void UseDiscovery(string url);
-        void UseDiscovery(IPEndPoint endpoint);
-
+        bool UseDiscovery();
+        bool UseDiscovery(string url);
+        bool UseDiscovery(IPEndPoint endpoint);
+        
         IRouter UseHost();
         IRouter UseHost(int port);
         IRouter UseHost(IPEndPoint endpoint);

@@ -6,9 +6,9 @@ namespace ZeroLevel.Network
     public interface IExchange
         : IClientSet, IDisposable
     {
-        void UseDiscovery();
-        void UseDiscovery(string endpoint);
-        void UseDiscovery(IPEndPoint endpoint);
+        bool UseDiscovery();
+        bool UseDiscovery(string endpoint);
+        bool UseDiscovery(IPEndPoint endpoint);
 
         IRouter UseHost();
         IRouter UseHost(int port);
