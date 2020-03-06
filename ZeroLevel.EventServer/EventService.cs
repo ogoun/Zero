@@ -1,4 +1,5 @@
-﻿using ZeroLevel.Network;
+﻿using ZeroLevel.EventServer.Model;
+using ZeroLevel.Network;
 using ZeroLevel.Services.Applications;
 
 namespace ZeroLevel.EventServer
