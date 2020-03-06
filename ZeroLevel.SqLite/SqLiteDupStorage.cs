@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.SQLite;
-using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 
-namespace ZeroLevel.SqLite.Model
+namespace ZeroLevel.SqLite
 {
     /// <summary>
     /// Хранит данные указанное число дней, и позволяет выполнить проверку наличия данных, для отбрасывания дубликатов

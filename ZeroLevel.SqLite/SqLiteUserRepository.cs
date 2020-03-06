@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.SQLite;
-using System.IO;
 using System.Threading;
 using ZeroLevel.Models;
-using ZeroLevel.Services.FileSystem;
 
 namespace ZeroLevel.SqLite
 {

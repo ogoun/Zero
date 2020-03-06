@@ -524,7 +524,9 @@ namespace ZeroLevel.Services.Config
                             }
                             else
                             {
-                                member.Setter(instance, First(member.Name));
+                                var item = First(member.Name);
+                                var itemType = member.ClrType;
+                                member.Setter(instance, StringToTypeConverter.TryConvert(item, itemType));
                             }
                             break;
                         default:    // array, or first
@@ -569,7 +571,9 @@ namespace ZeroLevel.Services.Config
                             }
                             else
                             {
-                                member.Setter(instance, First(member.Name));
+                                var item = First(member.Name);
+                                var itemType = member.ClrType;
+                                member.Setter(instance, StringToTypeConverter.TryConvert(item, itemType));
                             }
                             break;
                     }
