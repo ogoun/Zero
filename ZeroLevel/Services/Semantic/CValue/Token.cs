@@ -20,7 +20,7 @@ namespace ZeroLevel.Services.Semantic.CValue
             wordForm = pWordForm;
             posTag = pPostag;
         }
-       
+
         public Token(String pWordForm, String pPostag, String pLemma)
         {
             wordForm = pWordForm;
@@ -35,7 +35,7 @@ namespace ZeroLevel.Services.Semantic.CValue
             lemma = pLemma;
             chunkerTag = pChunker;
         }
-        
+
         public String getWordForm()
         {
             return wordForm;
@@ -81,3 +81,4 @@ namespace ZeroLevel.Services.Semantic.CValue
             this.chunkerTag = chunkerTag;
         }
     }
+}

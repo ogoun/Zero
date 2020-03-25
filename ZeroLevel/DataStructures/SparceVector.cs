@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using ZeroLevel.Models;
 using ZeroLevel.Services.Serialization;
 
-namespace ZeroLevel.Services.Semantic.Helpers
+namespace ZeroLevel.DataStructures
 {
     public sealed class SparceVector
             : IBinarySerializable

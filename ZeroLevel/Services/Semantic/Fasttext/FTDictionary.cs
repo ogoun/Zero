@@ -12,7 +12,7 @@ namespace ZeroLevel.Services.Semantic.Fasttext
         public entry_type type;
         public List<int> subwords;
     }
-
+    /*
     internal class FTDictionary
     {
         const int MAX_VOCAB_SIZE = 30000000;
@@ -484,4 +484,5 @@ namespace ZeroLevel.Services.Semantic.Fasttext
             return ntokens;
         }
     }
+    */
 }

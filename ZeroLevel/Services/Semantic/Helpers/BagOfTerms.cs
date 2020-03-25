@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using ZeroLevel.DataStructures;
 using ZeroLevel.Implementation.Semantic.Helpers;
 using ZeroLevel.Services.Serialization;
 
