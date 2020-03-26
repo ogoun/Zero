@@ -1,38 +1,33 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using ZeroLevel.Services.HashFunctions;
 
 namespace ZeroLevel.DataStructures
 {
     public class HyperBloomBloom
     {
-        private BloomFilter _trash;
-        private Dictionary<char, BloomFilter> _shardes = new Dictionary<char, BloomFilter>();
+        private IHash _shardHash = new XXHashUnsafe();
+        private BloomFilter[] _shardes;
 
-        public HyperBloomBloom(int bit_size, bool use_reverse)
+        public HyperBloomBloom(int shardes_size, int bit_size, bool use_reverse)
         {
-            _trash = new BloomFilter(bit_size, use_reverse);
-            foreach (var ch in "abcdefghijklmnopqrstuvwxyz0123456789-")
+            _shardes = new BloomFilter[shardes_size];
+            for (int i = 0; i < shardes_size; i++)
             {
-                _shardes.Add(ch, new BloomFilter(bit_size, use_reverse));
+                _shardes[i] = new BloomFilter(bit_size, use_reverse);
             }
         }
 
         public void Add(string item)
         {
             if (item == null || item.Length == 0) return;
-            var k = Char.ToLowerInvariant(item[0]);
-            BloomFilter filter;
-            if (_shardes.TryGetValue(k, out filter) == false) filter = _trash;
-            filter.Add(item);
+            int index = (int)(_shardHash.Hash(item) % _shardes.Length);
+            _shardes[index].Add(item);
         }
 
         public bool Contains(string item)
         {
             if (item == null || item.Length == 0) return true;
-            var k = Char.ToLowerInvariant(item[0]);
-            BloomFilter filter;
-            if (_shardes.TryGetValue(k, out filter) == false) filter = _trash;
-            return filter.Contains(item);
+            int index = (int)(_shardHash.Hash(item) % _shardes.Length);
+            return _shardes[index].Contains(item);
         }
         /// <summary>
         /// true if added, false if already exists
@@ -40,10 +35,8 @@ namespace ZeroLevel.DataStructures
         public bool TryAdd(string item)
         {
             if (item == null || item.Length == 0) return false;
-            var k = Char.ToLowerInvariant(item[0]);
-            BloomFilter filter;
-            if (_shardes.TryGetValue(k, out filter) == false) filter = _trash;
-            return filter.TryAdd(item);
+            int index = (int)(_shardHash.Hash(item) % _shardes.Length);
+            return _shardes[index].TryAdd(item);
         }
     }
 }

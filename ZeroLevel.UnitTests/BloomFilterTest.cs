@@ -55,7 +55,7 @@ namespace ZeroLevel.UnitTests
                 {
                     if (false == lines.Contains(line))
                     {
-                        collision_count++;                        
+                        collision_count++;
                     }
                 }
             }
@@ -67,7 +67,7 @@ namespace ZeroLevel.UnitTests
         public void HyperBloomBloomFilterTest()
         {
             // Arrange
-            var size = 100000;
+            var size = 1000000;
             var lines = new HashSet<string>(size);
             var lines_another = new HashSet<string>(size);
             for (int i = 0; i < size; i++)
@@ -75,7 +75,7 @@ namespace ZeroLevel.UnitTests
                 lines.Add(RandomString(i % 9 + 5));
                 lines_another.Add(RandomString(i % 9 + 5));
             }
-            var bloom = new HyperBloomBloom(16536 * 1024, true);
+            var bloom = new HyperBloomBloom(64, 16536 * 1024, true);
             // Act
             var sw = new Stopwatch();
             sw.Start();
