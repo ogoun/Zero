@@ -508,7 +508,7 @@ namespace ZeroLevel.Services.Config
                                 member.Setter(instance, value);
                             }
                             else if (TypeHelpers.IsUri(member.ClrType))
-                            { 
+                            {
                                 var uri = new Uri(First(member.Name));
                                 member.Setter(instance, uri);
                             }
@@ -552,7 +552,7 @@ namespace ZeroLevel.Services.Config
                                     member.Setter(instance, arrayBuilder.Complete());
                                 }
                             }
-                            else if (TypeHelpers.IsEnumerable(member.ClrType))
+                            else if (typeof(string) != member.ClrType && TypeHelpers.IsEnumerable(member.ClrType))
                             {
                                 var itemType = member.ClrType.GenericTypeArguments.First();
                                 if (itemType == typeof(string))
