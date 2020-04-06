@@ -69,6 +69,14 @@ namespace ZeroLevel.Utils
             return true;
         }
 
+        public void WaitForEmpty()
+        {
+            while (Count > 0)
+            {
+                Thread.Sleep(200);
+            }
+        }
+
         public void Dispose()
         {
             _is_disposed = true;
