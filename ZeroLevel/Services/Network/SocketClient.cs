@@ -69,7 +69,7 @@ namespace ZeroLevel.Network
             }
             catch (Exception ex)
             {
-                Log.SystemError(ex, $"[SocketClient.ctor] connection fault. Endpoint: {Endpoint.Address}:{Endpoint.Port}");
+                Log.SystemError(ex, $"[SocketClient.ctor] connection fault. Endpoint: {ep.Address}:{ep.Port}");
                 Broken();
                 return;
             }

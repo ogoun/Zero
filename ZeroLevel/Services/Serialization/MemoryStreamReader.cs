@@ -203,15 +203,25 @@ namespace ZeroLevel.Services.Serialization
 
         public IPAddress ReadIP()
         {
-            var addr = ReadBytes();
-            return new IPAddress(addr);
+            var exists = ReadByte();
+            if (exists == 1)
+            {
+                var addr = ReadBytes();
+                return new IPAddress(addr);
+            }
+            return null;
         }
 
         public IPEndPoint ReadIPEndpoint()
         {
-            var addr = ReadIP();
-            var port = ReadInt32();
-            return new IPEndPoint(addr, port);
+            var exists = ReadByte();
+            if (exists == 1)
+            {
+                var addr = ReadIP();
+                var port = ReadInt32();
+                return new IPEndPoint(addr, port);
+            }
+            return null;
         }
 
         /// <summary>

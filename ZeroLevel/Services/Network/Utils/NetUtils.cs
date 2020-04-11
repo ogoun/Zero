@@ -36,6 +36,7 @@ namespace ZeroLevel.Network
 
         public static bool TestConnection(IPEndPoint endpoint, int timeout = 100)
         {
+            if (endpoint == null) return false;
             using (var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
             {
                 socket.SetIPProtectionLevel(IPProtectionLevel.Unrestricted);
@@ -72,6 +73,10 @@ namespace ZeroLevel.Network
 
         public static int Compare(this IPEndPoint x, IPEndPoint y)
         {
+            if (x == null && y == null) return 0;
+            if (x == null) return 1;
+            if (y == null) return -1;
+
             var xx = x.Address.ToString();
             var yy = y.Address.ToString();
             var result = string.CompareOrdinal(xx, yy);
@@ -80,6 +85,10 @@ namespace ZeroLevel.Network
 
         public static int Compare(this IPAddress x, IPAddress y)
         {
+            if (x == null && y == null) return 0;
+            if (x == null) return 1;
+            if (y == null) return -1;
+
             var xx = x.ToString();
             var yy = y.ToString();
             return string.CompareOrdinal(xx, yy);
@@ -87,6 +96,8 @@ namespace ZeroLevel.Network
 
         public static IPEndPoint CreateIPEndPoint(string endPoint)
         {
+            if (string.IsNullOrWhiteSpace(endPoint)) return null;
+
             string[] ep = endPoint.Split(':');
             if (ep.Length < 2) throw new FormatException("Invalid endpoint format");
             IPAddress ip;

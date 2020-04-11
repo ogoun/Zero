@@ -13,6 +13,11 @@ namespace ZeroLevel.Network
         void Set(string key, string type, string group, IPEndPoint endpoint);
         void Set(string key, string type, string group, IEnumerable<IPEndPoint> endpoints);
 
+        bool ContainsKey(string key);
+        bool ContainsType(string type);
+        bool ContainsGroup(string group);
+
+        void Remove(string key);
         void Remove(IPEndPoint endpoint);
 
         IEnumerable<KeyValuePair<string, IPEndPoint>> GetAll();

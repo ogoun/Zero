@@ -122,6 +122,7 @@ namespace ZeroLevel.Serialization
         public void SerializeIPAddress()
         {
             var comparator = new Func<IPAddress, IPAddress, bool>((left, right) => NetUtils.Compare(left, right) == 0);
+            MakePrimitiveTest<IPAddress>(null, comparator);
             MakePrimitiveTest<IPAddress>(IPAddress.Any, comparator);
             MakePrimitiveTest<IPAddress>(IPAddress.Broadcast, comparator);
             MakePrimitiveTest<IPAddress>(IPAddress.IPv6Any, comparator);
@@ -136,6 +137,7 @@ namespace ZeroLevel.Serialization
         public void SerializeIPEndPoint()
         {
             var comparator = new Func<IPEndPoint, IPEndPoint, bool>((left, right) => NetUtils.Compare(left, right) == 0);
+            MakePrimitiveTest<IPEndPoint>(null, comparator);
             MakePrimitiveTest<IPEndPoint>(new IPEndPoint(IPAddress.Any, 1), comparator);
             MakePrimitiveTest<IPEndPoint>(new IPEndPoint(IPAddress.Broadcast, 600), comparator);
             MakePrimitiveTest<IPEndPoint>(new IPEndPoint(IPAddress.IPv6Any, IPEndPoint.MaxPort), comparator);

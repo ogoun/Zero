@@ -228,6 +228,24 @@ namespace ZeroLevel.Network
             }
         }
 
+        public bool ContainsKey(string key) => _tableByKey.ContainsKey(key);
+
+        public bool ContainsType(string type) => _tableByTypes.ContainsKey(type);
+
+        public bool ContainsGroup(string group) => _tableByGroups.ContainsKey(group);
+
+        public void Remove(string key)
+        {
+            if (_tableByKey.ContainsKey(key))
+            {
+                var eps = _tableByKey[key].Source.ToList();
+                foreach (var ep in eps)
+                {
+                    RemoveLocked(ep);
+                }
+            }
+        }
+
         public void Remove(IPEndPoint endpoint)
         {
             _lock.EnterWriteLock();

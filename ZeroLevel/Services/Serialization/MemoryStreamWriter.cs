@@ -182,13 +182,29 @@ namespace ZeroLevel.Services.Serialization
 
         public void WriteIP(IPAddress ip)
         {
-            WriteBytes(ip.GetAddressBytes());
+            if (ip == null)
+            {
+                WriteByte(0);
+            }
+            else
+            {
+                WriteByte(1);
+                WriteBytes(ip.GetAddressBytes());
+            }
         }
 
         public void WriteIPEndpoint(IPEndPoint endpoint)
         {
-            WriteIP(endpoint.Address);
-            WriteInt32(endpoint.Port);
+            if (endpoint == null)
+            {
+                WriteByte(0);
+            }
+            else
+            {
+                WriteByte(1);
+                WriteIP(endpoint.Address);
+                WriteInt32(endpoint.Port);
+            }
         }
 
         public byte[] Complete()
