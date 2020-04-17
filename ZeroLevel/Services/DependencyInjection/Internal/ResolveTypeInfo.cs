@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace ZeroLevel.Patterns.DependencyInjection
+namespace ZeroLevel.DependencyInjection
 {
     /// <summary>
     /// Dependency resolving metadata

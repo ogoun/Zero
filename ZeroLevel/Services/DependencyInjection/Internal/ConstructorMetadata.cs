@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
-namespace ZeroLevel.Patterns.DependencyInjection
+namespace ZeroLevel.DependencyInjection
 {
     /// <summary>
     /// Constructor metadata

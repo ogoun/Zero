@@ -41,8 +41,8 @@
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
-    <Reference Include="ZeroLevel, Version=2.0.8.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\..\packages\ZeroLevel.2.0.8\lib\netstandard2.0\ZeroLevel.dll</HintPath>
+    <Reference Include="ZeroLevel, Version=3.3.3.0, Culture=neutral, processorArchitecture=AMD64">
+      <HintPath>..\..\..\packages\ZeroLevel.3.3.3\lib\netstandard2.0\ZeroLevel.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

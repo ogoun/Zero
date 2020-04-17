@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using ZeroLevel.Patterns.DependencyInjection;
+using ZeroLevel.DependencyInjection;
 
 namespace ZeroLevel
 {

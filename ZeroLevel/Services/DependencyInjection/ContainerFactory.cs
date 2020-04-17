@@ -3,7 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
 
-namespace ZeroLevel.Patterns.DependencyInjection
+namespace ZeroLevel.DependencyInjection
 {
     public sealed class ContainerFactory : IContainerFactory
     {

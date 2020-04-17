@@ -6,16 +6,16 @@
 </Description>
     <Authors>ogoun</Authors>
     <Company>ogoun</Company>
-    <AssemblyVersion>3.3.2.0</AssemblyVersion>
-    <PackageReleaseNotes>BloomFilter, RabinKarp, KnuthMorrisPratt,BoyerMoore,LevenshteinDistance, DamerauLevenshteinDistance, XX3Hash</PackageReleaseNotes>
+    <AssemblyVersion>3.3.3.0</AssemblyVersion>
+    <PackageReleaseNotes>Refactoring</PackageReleaseNotes>
     <PackageProjectUrl>https://github.com/ogoun/Zero/wiki</PackageProjectUrl>
     <Copyright>Copyright Ogoun 2020</Copyright>
     <PackageLicenseUrl></PackageLicenseUrl>
     <PackageIconUrl></PackageIconUrl>
     <RepositoryUrl>https://github.com/ogoun/Zero</RepositoryUrl>
     <RepositoryType>GitHub</RepositoryType>
-    <Version>3.3.2</Version>
-    <FileVersion>3.3.2.1</FileVersion>
+    <Version>3.3.3</Version>
+    <FileVersion>3.3.3.1</FileVersion>
     <Platforms>AnyCPU;x64</Platforms>
     <PackageIcon>zero.png</PackageIcon>
   </PropertyGroup>
@@ -35,14 +35,6 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
-
-  <ItemGroup>
-    <PackageReference Include="System.Buffers" Version="4.5.1" />
-    <PackageReference Include="System.Memory" Version="4.5.4" />
-    <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="4.7.1" />
-    <PackageReference Include="System.ServiceProcess.ServiceController" Version="4.7.0" />
-    <PackageReference Include="System.Threading.Tasks.Extensions" Version="4.5.4" />
-  </ItemGroup>
 
   <ItemGroup>
     <None Include="..\zero.png">

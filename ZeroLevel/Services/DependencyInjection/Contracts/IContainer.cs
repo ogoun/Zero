@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ZeroLevel.Patterns.DependencyInjection
+namespace ZeroLevel.DependencyInjection
 {
     public interface IContainer :
         IContainerRegister,

@@ -6,7 +6,7 @@ using System.Reflection;
 using System.Threading;
 using ZeroLevel.Services.Collections;
 
-namespace ZeroLevel.Patterns.DependencyInjection
+namespace ZeroLevel.DependencyInjection
 {    
     internal sealed class Container :
         IContainer

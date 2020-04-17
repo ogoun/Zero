@@ -9,6 +9,8 @@ namespace ZeroLevel.Implementation.Semantic.Helpers
     {
         internal static readonly Regex ReWord = new Regex("\\b[\\wА-Яа-я-’]+\\b",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        internal static readonly Regex ReRuWord = new Regex("\\b[А-Яа-я-]+\\b",
+            RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         /// <summary>
         /// Highlighting words from text
@@ -19,6 +21,17 @@ namespace ZeroLevel.Implementation.Semantic.Helpers
         {
             var result = new List<string>();
             foreach (Match match in ReWord.Matches(text))
+            {
+                result.Add(match.Value);
+            }
+
+            return result;
+        }
+
+        public static IEnumerable<string> ExtractRuWords(string text)
+        {
+            var result = new List<string>();
+            foreach (Match match in ReRuWord.Matches(text))
             {
                 result.Add(match.Value);
             }

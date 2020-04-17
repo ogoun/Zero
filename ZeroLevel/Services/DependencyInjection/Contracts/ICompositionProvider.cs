@@ -1,4 +1,4 @@
-﻿namespace ZeroLevel.Patterns.DependencyInjection
+﻿namespace ZeroLevel.DependencyInjection
 {
     /// <summary>
     /// Provides object composition

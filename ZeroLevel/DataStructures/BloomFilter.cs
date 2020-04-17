@@ -16,19 +16,15 @@ namespace ZeroLevel.DataStructures
         {
             public ulong PrimiryDirect;
             public uint SecondDirect;
-            public uint ThirdDirect;
             public ulong PrimiryReverse;
             public uint SecondReverse;
-            public uint ThirdReverse;
         }
 
         private readonly BitArray _primary;
         private readonly BitArray _second;
-        private readonly BitArray _third;
 
         private readonly BitArray _r_primary;
         private readonly BitArray _r_second;
-        private readonly BitArray _r_third;
 
         private readonly bool _use_reverse = false;
         #endregion
@@ -39,13 +35,11 @@ namespace ZeroLevel.DataStructures
 
             _primary = new BitArray(bit_size);
             _second = new BitArray(bit_size);
-            _third = new BitArray(bit_size);
 
             if (_use_reverse)
             {
                 _r_primary = new BitArray(bit_size);
                 _r_second = new BitArray(bit_size);
-                _r_third = new BitArray(bit_size);
             }
         }
 
@@ -81,16 +75,14 @@ namespace ZeroLevel.DataStructures
         {
             var hind = new HIND
             {
-                PrimiryDirect = HashUL(line),
+                PrimiryDirect = HashMM(line),
                 SecondDirect = HashXX(line),
-                ThirdDirect = HashMM(line)
             };
             if(_use_reverse)
             { 
                 var r = Reverse(line);
-                hind.PrimiryReverse = HashUL(r);
+                hind.PrimiryReverse = HashMM(r);
                 hind.SecondReverse = HashXX(r);
-                hind.ThirdReverse = HashMM(r);
             }
             return hind;
         }
@@ -111,9 +103,6 @@ namespace ZeroLevel.DataStructures
             int si = (int)(hind.SecondDirect % (uint)_second.Length);
             _second[si] = true;
 
-            int ti = (int)(hind.ThirdDirect % (uint)_third.Length);
-            _third[ti] = true;
-
             if (_use_reverse)
             {
                 int rpi = (int)(hind.PrimiryReverse % (ulong)_primary.Length);
@@ -121,9 +110,6 @@ namespace ZeroLevel.DataStructures
 
                 int rsi = (int)(hind.SecondReverse % (uint)_second.Length);
                 _r_second[rsi] = true;
-
-                int rti = (int)(hind.ThirdReverse % (uint)_third.Length);
-                _r_third[rti] = true;
             }
         }
 
@@ -136,9 +122,6 @@ namespace ZeroLevel.DataStructures
             int si = (int)(hind.SecondDirect % (uint)_second.Length);
             if (!_second[si]) return false;
 
-            int ti = (int)(hind.ThirdDirect % (uint)_third.Length);
-            if (!_third[ti]) return false;
-
             if (_use_reverse)
             {
                 int rpi = (int)(hind.PrimiryReverse % (ulong)_primary.Length);
@@ -146,17 +129,8 @@ namespace ZeroLevel.DataStructures
 
                 int rsi = (int)(hind.SecondReverse % (uint)_second.Length);
                 if (!_r_second[rsi]) return false;
-
-                int rti = (int)(hind.ThirdReverse % (uint)_third.Length);
-                if (!_r_third[rti]) return false;
             }
             return true;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private ulong HashUL(string line)
-        {
-            return XXH3_64.Hash(line);
         }
 
         private readonly XXHashUnsafe _hash_xx_32 = new XXHashUnsafe();

@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Globalization;
 using System.IO;
-using System.Security.Permissions;
-using System.Threading.Tasks;
 
 namespace ZeroLevel.Services.FileSystem
 {
@@ -13,9 +11,9 @@ namespace ZeroLevel.Services.FileSystem
         private readonly string _sourceFolder;
         private readonly string _temporaryFolder;
         private readonly TimeSpan _period;
-        private readonly Func<FileMeta, Task> _callback;
+        private readonly Action<FileMeta> _callback;
 
-        public PeriodicFileSystemWatcher(TimeSpan period, string watch_folder, string temp_folder, Func<FileMeta, Task> callback)
+        public PeriodicFileSystemWatcher(TimeSpan period, string watch_folder, string temp_folder, Action<FileMeta> callback)
         {
             if (string.IsNullOrWhiteSpace(watch_folder))
             {
@@ -41,15 +39,15 @@ namespace ZeroLevel.Services.FileSystem
 
         public void Start()
         {
-            _updateSourceTaskKey = Sheduller.RemindAsyncEvery(_period, CheckSourceFolder);
+            _updateSourceTaskKey = Sheduller.RemindEvery(_period, CheckSourceFolder);
         }
 
         public void Stop()
         {
-            Sheduller.RemoveAsync(_updateSourceTaskKey);
+            Sheduller.Remove(_updateSourceTaskKey);
         }
 
-        private async Task CheckSourceFolder()
+        private void CheckSourceFolder()
         {
             try
             {
@@ -73,7 +71,7 @@ namespace ZeroLevel.Services.FileSystem
                             continue;
                         }
                         Log.Debug($"[PeriodicFileSystemWatcher] Handle file {file}");
-                        await _callback(new FileMeta(Path.GetFileName(file), tempFile));
+                        _callback(new FileMeta(Path.GetFileName(file), tempFile));
                         File.Delete(tempFile);
                     }
                     catch (Exception ex)

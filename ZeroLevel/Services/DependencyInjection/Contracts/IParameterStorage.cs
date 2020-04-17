@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ZeroLevel.Patterns.DependencyInjection
+namespace ZeroLevel.DependencyInjection
 {
     /// <summary>
     /// DI parameters stogare (string key and anytype value)
