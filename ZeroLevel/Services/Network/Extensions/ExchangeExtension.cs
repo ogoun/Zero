@@ -88,8 +88,6 @@ namespace ZeroLevel.Network
             return response;
         }
 
-
-
         public static Tresponse Request<Tresponse>(this IClientSet exchange, string alias)
         {
             Tresponse response = default;

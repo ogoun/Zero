@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 using ZeroLevel.Services.Serialization;
@@ -77,6 +78,48 @@ namespace ZeroLevel.Services.Trees
             this._is_teminate = reader.ReadBoolean();
             this._transtions = reader.ReadDictionary<char, State>();
         }
+
+        public void Reverse(State head)
+        {
+            var path = new Stack<Tuple<char, bool>>();
+            foreach (var s in _transtions)
+            {
+                s.Value.Forward(head, s.Key, path);
+            }
+        }
+
+        private void Forward(State head, char ch, Stack<Tuple<char, bool>> path)
+        {
+            path.Push(Tuple.Create(ch, _is_teminate));
+            if (_is_teminate)
+            {
+                Backward(head, path);
+            }
+            foreach (var s in _transtions)
+            {
+                s.Value.Forward(head, s.Key, path);
+            }
+            path.Pop();
+        }
+
+        private void Backward(State head, Stack<Tuple<char, bool>> path)
+        {
+            State current = head;
+            foreach (var pair in path)
+            {
+                if (false == current._transtions.ContainsKey(pair.Item1))
+                {
+                    var next = new State();
+                    current._transtions.Add(pair.Item1, next);
+                    current = next;
+                }
+                else
+                {
+                    current = current._transtions[pair.Item1];
+                }
+            }
+            current._is_teminate = true;
+        }
     }
 
     public class DSA
@@ -123,6 +166,26 @@ namespace ZeroLevel.Services.Trees
         public IEnumerable<string> Iterator()
         {
             return _initialState.Iterator(new StringBuilder());
+        }
+
+        public void Reverse()
+        {
+            var reverse_initial = new State();
+            _initialState.Reverse(reverse_initial);
+            _initialState = reverse_initial;
+        }
+
+        public void Optimize()
+        {
+            // merge
+            // reverse
+            // merge
+            // reverse
+
+            /*var reverse_initial = new State();
+            _initialState.Reverse(reverse_initial);
+            _initialState = new State();
+            reverse_initial.Reverse(_initialState);*/
         }
     }
 }

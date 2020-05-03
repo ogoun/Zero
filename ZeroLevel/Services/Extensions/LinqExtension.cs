@@ -4,6 +4,34 @@ namespace System.Linq
 {
     public static class LinqExtension
     {
+        public static IEnumerable<T[]> ZipLongest<T>(this IEnumerable<T> left, IEnumerable<T> right)
+        {
+            IEnumerator<T> leftEnumerator = left.GetEnumerator();
+            IEnumerator<T> rightEnumerator = right.GetEnumerator();
+
+            bool hasLeft = leftEnumerator.MoveNext();
+            bool hasRight = rightEnumerator.MoveNext();
+
+            while (hasLeft || hasRight)
+            {
+                if (hasLeft && hasRight)
+                {
+                    yield return new T[] { leftEnumerator.Current, rightEnumerator.Current };
+                }
+                else if (hasLeft)
+                {
+                    yield return new T[] { leftEnumerator.Current, default(T) };
+                }
+                else if (hasRight)
+                {
+                    yield return new T[] { default(T), rightEnumerator.Current };
+                }
+
+                hasLeft = leftEnumerator.MoveNext();
+                hasRight = rightEnumerator.MoveNext();
+            }
+        }
+
         public static IEnumerable<TSource> DistinctBy<TSource, TKey>
             (this IEnumerable<TSource> source, Func<TSource, TKey> keySelector)
         {

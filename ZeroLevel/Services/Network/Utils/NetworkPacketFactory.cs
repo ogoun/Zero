@@ -60,7 +60,6 @@ namespace ZeroLevel.Network
             packet[7] = id[2];
             packet[8] = id[3];
 
-
             packet[9] = (byte)(MAGIC ^ packet[1] ^ packet[2] ^ packet[3] ^ packet[4]);
 
             HashData(data, packet[9]);

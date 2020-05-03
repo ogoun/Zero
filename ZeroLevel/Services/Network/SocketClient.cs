@@ -23,6 +23,7 @@ namespace ZeroLevel.Network
 
             public static IncomingFrame NewFrame() => new IncomingFrame();
         }
+
         private class SendFrame
         {
             private SendFrame() { }
