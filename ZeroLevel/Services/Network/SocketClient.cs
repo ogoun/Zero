@@ -138,10 +138,8 @@ namespace ZeroLevel.Network
 
         public void Request(Frame frame, Action<byte[]> callback, Action<string> fail = null)
         {
-            if (frame == null) throw new ArgumentNullException(nameof(frame));
             if (Status != SocketClientStatus.Working) throw new Exception($"[SocketClient.Request] Socket status: {Status}");
             var data = NetworkPacketFactory.Reqeust(MessageSerializer.Serialize(frame), out int id);
-            frame.Release();
 
             if (!_send_queue.IsAddingCompleted)
             {
@@ -160,10 +158,8 @@ namespace ZeroLevel.Network
 
         public void Send(Frame frame)
         {
-            if (frame == null) throw new ArgumentNullException(nameof(frame));
             if (Status != SocketClientStatus.Working) throw new Exception($"[SocketClient.Send] Socket status: {Status}");
             var data = NetworkPacketFactory.Message(MessageSerializer.Serialize(frame));
-            frame.Release();
 
             if (!_send_queue.IsAddingCompleted)
             {

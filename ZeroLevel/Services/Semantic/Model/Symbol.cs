@@ -58,28 +58,4 @@ namespace ZeroLevel.Services.Semantic.Model
             return '\0';
         }
     }
-
-    public class Node
-    {
-        private byte Sym;
-
-        private Node NextSibling;
-
-        private Node NextChild;
-
-        public void Append(string line, int position)
-        {
-            
-        }
-    }
-
-    public class Tree
-    {
-        private Node _root;
-
-        public void Append(string word)
-        {
-            _root.Append(word, 0);
-        }
-    }
 }
