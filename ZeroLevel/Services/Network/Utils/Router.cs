@@ -10,7 +10,7 @@ using ZeroLevel.Services.Serialization;
 
 namespace ZeroLevel.Network
 {
-    internal sealed class Router
+    public sealed class Router
         : IRouter
     {
         public event Action<ISocketClient> OnDisconnect = _ => { }; // must be never rised

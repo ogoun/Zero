@@ -1,6 +1,11 @@
 ﻿using Newtonsoft.Json;
+using System;
+using System.Net;
+using System.Threading;
 using ZeroLevel;
 using ZeroLevel.Logging;
+using ZeroLevel.Network;
+using ZeroLevel.Services.Serialization;
 
 namespace TestApp
 {
@@ -29,6 +34,39 @@ namespace TestApp
                 .WaitWhileStatus(ZeroServiceStatus.Running)
                 .Stop();
             Bootstrap.Shutdown();
+        }
+
+        static void SimpleCSTest()
+        {
+            var server_router = new Router();
+            server_router.RegisterInbox<string>("test", (c, line) =>
+            {
+                Console.WriteLine(line);
+            });
+
+            server_router.RegisterInbox<string, string>("req", (c, line) =>
+            {
+                Console.WriteLine($"Request: {line}");
+                return line.ToUpperInvariant();
+            });
+
+            var server = new SocketServer(new System.Net.IPEndPoint(IPAddress.Any, 666), server_router);
+
+
+            var client_router = new Router();
+            var client = new SocketClient(new IPEndPoint(IPAddress.Loopback, 666), client_router);
+
+            var frm = FrameFactory.Create("req", MessageSerializer.SerializeCompatible("Hello world"));
+
+            while (Console.KeyAvailable == false)
+            {
+                client.Request(frm, data =>
+                {
+                    var line = MessageSerializer.DeserializeCompatible<string>(data);
+                    Console.WriteLine($"Response: {line}");
+                });
+                Thread.Sleep(2000);
+            }
         }
     }
 }

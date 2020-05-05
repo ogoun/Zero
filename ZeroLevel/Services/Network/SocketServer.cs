@@ -8,7 +8,7 @@ using ZeroLevel.Network.SDL;
 
 namespace ZeroLevel.Network
 {
-    internal sealed class SocketServer
+    public sealed class SocketServer
         : BaseSocket, IRouter
     {
         private Socket _serverSocket;
