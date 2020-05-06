@@ -1,89 +1,60 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using ZeroLevel.Services.Pools;
 
 namespace ZeroLevel.Network
 {
     internal sealed class RequestBuffer
     {
-        private ConcurrentDictionary<long, Action<byte[]>> _callbacks = new ConcurrentDictionary<long, Action<byte[]>>();
-        private ConcurrentDictionary<long, Action<string>> _fallbacks = new ConcurrentDictionary<long, Action<string>>();
-        private ConcurrentDictionary<long, long> _timeouts = new ConcurrentDictionary<long, long>();
+        private ConcurrentDictionary<long, RequestInfo> _requests = new ConcurrentDictionary<long, RequestInfo>();
+        private static ObjectPool<RequestInfo> _ri_pool = new ObjectPool<RequestInfo>(() => new RequestInfo());
 
-        public void RegisterForFrame(int identity, Action<byte[]> callback, Action<string> fallback = null)
+        public void RegisterForFrame(int identity, Action<byte[]> callback, Action<string> fail = null)
         {
-            if (callback != null)
+            var ri = _ri_pool.Allocate();
+            ri.Reset(callback, fail);
+            _requests[identity] = ri;
+        }
+
+        public void Fail(long frameId, string message)
+        {
+            RequestInfo ri;
+            if (_requests.TryRemove(frameId, out ri))
             {
-                _callbacks.TryAdd(identity, callback);
-            }
-            if (fallback != null)
-            {
-                _fallbacks.TryAdd(identity, fallback);
+                ri.Fail(message);
+                _ri_pool.Free(ri);
             }
         }
 
-        public void Fail(long identity, string message)
+        public void Success(long frameId, byte[] data)
         {
-            Action<string> rec;
-            if (_fallbacks.TryRemove(identity, out rec))
+            RequestInfo ri;
+            if (_requests.TryRemove(frameId, out ri))
             {
-                try
-                {
-                    rec(message);
-                }
-                catch (Exception ex)
-                {
-                    Log.Error(ex, $"Fail invoke fallback for request '{identity}' with message '{message ?? string.Empty}'");
-                }
-                rec = null;
+                ri.Success(data);
+                _ri_pool.Free(ri);
             }
         }
 
-        public void Success(long identity, byte[] data)
+        public void StartSend(long frameId)
         {
-            Action<byte[]> rec;
-            if (_callbacks.TryRemove(identity, out rec))
+            RequestInfo ri;
+            if (_requests.TryGetValue(frameId, out ri))
             {
-                try
-                {
-                    rec(data);
-                }
-                catch (Exception ex)
-                {
-                    Log.Error(ex, $"Fail invoke callback for request '{identity}'. Response size '{data?.Length ?? 0}'");
-                }
-                rec = null;
+                ri.StartSend();
             }
         }
 
-        public void StartSend(long identity)
+        public void Timeout(List<long> frameIds)
         {
-            if (_callbacks.ContainsKey(identity) 
-                || _fallbacks.ContainsKey(identity))
+            RequestInfo ri;
+            for (int i = 0; i < frameIds.Count; i++)
             {
-                _timeouts.TryAdd(identity, DateTime.UtcNow.Ticks);
-            }
-        }
-
-        public void Timeout(List<long> identities)
-        {
-            long t;
-            Action<string> rec;
-            foreach (var id in identities)
-            {
-                if (_fallbacks.TryRemove(id, out rec))
+                if (_requests.TryRemove(frameIds[i], out ri))
                 {
-                    try
-                    {
-                        rec("Timeout");
-                    }
-                    catch (Exception ex)
-                    {
-                        Log.Error(ex, $"Fail invoke fallback for request '{id}' by timeout");
-                    }
-                    rec = null;
+                    _ri_pool.Free(ri);
                 }
-                _timeouts.TryRemove(id, out t);
             }
         }
 
@@ -91,9 +62,10 @@ namespace ZeroLevel.Network
         {
             var now_ticks = DateTime.UtcNow.Ticks;
             var to_remove = new List<long>();
-            foreach (var pair in _timeouts)
+            foreach (var pair in _requests)
             {
-                var diff = now_ticks - pair.Value;
+                if (pair.Value.Sended == false) continue;
+                var diff = now_ticks - pair.Value.Timestamp;
                 if (diff > BaseSocket.MAX_REQUEST_TIME_TICKS)
                 {
                     to_remove.Add(pair.Key);
