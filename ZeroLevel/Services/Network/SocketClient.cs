@@ -3,7 +3,6 @@ using System.Collections.Concurrent;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
-using ZeroLevel.Services.Pools;
 using ZeroLevel.Services.Serialization;
 
 namespace ZeroLevel.Network
