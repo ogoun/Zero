@@ -1,10 +1,8 @@
-﻿
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Threading.Tasks;
 using ZeroLevel.Network.SDL;
 using ZeroLevel.Services.Invokation;
 using ZeroLevel.Services.Serialization;
@@ -100,38 +98,32 @@ namespace ZeroLevel.Network
                 };
             }
 
-            public void InvokeAsync(byte[] data, ISocketClient client)
+            public void Invoke(byte[] data, ISocketClient client)
             {
                 if (_typeResp == null)
                 {
                     if (_noArguments)
                     {
-                        Task.Run(() => this._invoker.Invoke(this._instance, new object[] { client }));
+                        this._invoker.Invoke(this._instance, new object[] { client });
                     }
                     else
                     {
-                        Task.Run(() =>
-                        {
-                            var incoming = (_typeReq == typeof(byte[])) ? data : MessageSerializer.DeserializeCompatible(_typeReq, data);
-                            this._invoker.Invoke(this._instance, new object[] { client, incoming });
-                        });
+                        var incoming = (_typeReq == typeof(byte[])) ? data : MessageSerializer.DeserializeCompatible(_typeReq, data);
+                        this._invoker.Invoke(this._instance, new object[] { client, incoming });
                     }
                 }
             }
 
-            public void InvokeAsync(byte[] data, ISocketClient client, Action<object> callback)
+            public void Invoke(byte[] data, ISocketClient client, Action<object> callback)
             {
                 if (_typeReq == null)
                 {
-                    Task.Run(() => { callback(this._invoker.Invoke(this._instance, new object[] { client })); });
+                    callback(this._invoker.Invoke(this._instance, new object[] { client }));
                 }
                 else
                 {
-                    Task.Run(() =>
-                    {
-                        var incoming = (_typeReq == typeof(byte[])) ? data : MessageSerializer.DeserializeCompatible(_typeReq, data);
-                        callback(this._invoker.Invoke(this._instance, new object[] { client, incoming }));
-                    });
+                    var incoming = (_typeReq == typeof(byte[])) ? data : MessageSerializer.DeserializeCompatible(_typeReq, data);
+                    callback(this._invoker.Invoke(this._instance, new object[] { client, incoming }));
                 }
             }
 
@@ -206,7 +198,7 @@ namespace ZeroLevel.Network
                     {
                         try
                         {
-                            invoker.InvokeAsync(frame.Payload, client);
+                            invoker.Invoke(frame.Payload, client);
                         }
                         catch (Exception ex)
                         {
@@ -222,13 +214,13 @@ namespace ZeroLevel.Network
         }
 
         public void HandleRequest(Frame frame, ISocketClient client, int identity, Action<int, byte[]> handler)
-        {            
+        {
             try
             {
                 MRInvoker invoker;
                 if (_requestors.TryGetValue(frame.Inbox, out invoker))
                 {
-                    invoker.InvokeAsync(frame.Payload, client
+                    invoker.Invoke(frame.Payload, client
                         , result =>
                         {
                             handler(identity, MessageSerializer.SerializeCompatible(result));

@@ -111,7 +111,10 @@ namespace ZeroLevel.Network
             try
             {
                 _connection_set_lock.EnterWriteLock();
-                _connections[client.Endpoint].Dispose();
+                if (_connections.TryGetValue(client.Endpoint, out var ep))
+                {
+                    ep.Dispose();
+                }
                 _connections.Remove(client.Endpoint);
             }
             finally
