@@ -28,12 +28,14 @@ namespace ZeroLevel.Services.Web
             return result;
         }
 
-        private static readonly bool _use_bot_agents;
+        private static bool _use_bot_agents;
 
         static UserAgents()
         {
             _use_bot_agents = Configuration.Default.FirstOrDefault<bool>("useBotUserAgents");
         }
+
+        public static bool UseBotAgent { get { return _use_bot_agents; } set { _use_bot_agents = true; } }
 
         private static List<string> _bot_agents = new List<string>
         {
