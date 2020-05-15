@@ -5,16 +5,16 @@
     <Platforms>AnyCPU;x64</Platforms>
     <Description>Light wrapper over ado.net</Description>
     <Authors>ogoun</Authors>
-    <Copyright>Copyright Ogoun 2019</Copyright>
+    <Copyright>Copyright Ogoun 2020</Copyright>
     <PackageProjectUrl>https://github.com/ogoun/Zero/tree/master/ZeroLevel.SQL</PackageProjectUrl>
     <RepositoryUrl>https://github.com/ogoun/Zero</RepositoryUrl>
     <PackageIconUrl></PackageIconUrl>
     <RepositoryType>GitHub</RepositoryType>
     <PackageIcon>zero.png</PackageIcon>
-    <AssemblyVersion>1.0.0.1</AssemblyVersion>
-    <Version>1.0.1</Version>
-    <FileVersion>1.0.1.1</FileVersion>
-    <PackageReleaseNotes>Fix read values from DbDataReader, DataRow and IDataReader</PackageReleaseNotes>
+    <AssemblyVersion>1.0.2.1</AssemblyVersion>
+    <Version>1.0.2</Version>
+    <FileVersion>1.0.2.1</FileVersion>
+    <PackageReleaseNotes>Move to new ZeroLevelVersion</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>

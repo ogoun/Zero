@@ -12,6 +12,10 @@ Based on System.Data.SQLite.Core</Description>
     <PackageIcon>zero.png</PackageIcon>
     <PackageIconUrl />
     <Platforms>AnyCPU;x64</Platforms>
+    <PackageReleaseNotes>Move to new ZeroLevelVersion</PackageReleaseNotes>
+    <AssemblyVersion>1.0.2.0</AssemblyVersion>
+    <FileVersion>1.0.2.0</FileVersion>
+    <Version>1.0.2</Version>
   </PropertyGroup>
 
   <ItemGroup>
