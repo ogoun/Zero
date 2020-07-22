@@ -15,8 +15,6 @@ namespace ZeroLevel.DataStructures
         private double[] values;
         private double power;
 
-
-
         public SparceVector() 
         {
             indexes = EmptyIndexes;

@@ -71,10 +71,24 @@ namespace System.Linq
             {
                 throw new ArgumentException("chunkSize must be greater than 0.");
             }
-            while (source.Any())
+            T[] arr = new T[size];
+            int index = 0;
+            foreach (var obj in source)
             {
-                yield return source.Take(size);
-                source = source.Skip(size);
+                arr[index] = obj;
+                index++;
+                if (index >= size)
+                {
+                    yield return arr;
+                    index = 0;
+                    arr = new T[size];
+                }
+            }
+            if (index > 0)
+            {
+                var narr = new T[index];
+                Array.Copy(arr, narr, index);
+                yield return narr;
             }
         }
     }

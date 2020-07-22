@@ -89,7 +89,7 @@ namespace ZeroLevel.Services.FileSystem
         /// <summary>
         /// Moving a file to a temporary directory
         /// </summary>
-        public string MoveToTemporary(string from)
+        private string MoveToTemporary(string from)
         {
             if (from == null)
             {
@@ -139,7 +139,7 @@ namespace ZeroLevel.Services.FileSystem
         /// <summary>
         /// Getting a list of files from the input directory
         /// </summary>
-        public string[] GetFilesFromSource()
+        private string[] GetFilesFromSource()
         {
             string[] files = Directory.GetFiles(_sourceFolder, "*.*", SearchOption.TopDirectoryOnly);
             Array.Sort<string>(files, FileNameSortCompare);
