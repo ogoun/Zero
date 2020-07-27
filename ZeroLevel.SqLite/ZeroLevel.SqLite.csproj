@@ -12,21 +12,21 @@ Based on System.Data.SQLite.Core</Description>
     <PackageIcon>zero.png</PackageIcon>
     <PackageIconUrl />
     <Platforms>AnyCPU;x64</Platforms>
-    <PackageReleaseNotes>Move to new ZeroLevelVersion</PackageReleaseNotes>
-    <AssemblyVersion>1.0.2.0</AssemblyVersion>
-    <FileVersion>1.0.2.0</FileVersion>
-    <Version>1.0.2</Version>
+    <PackageReleaseNotes>Fix bug</PackageReleaseNotes>
+    <AssemblyVersion>1.0.2.1</AssemblyVersion>
+    <FileVersion>1.0.2.1</FileVersion>
+    <Version>1.0.2.1</Version>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Data.SQLite.Core" Version="1.0.112.1" />
+    <None Include="..\zero.png" Link="zero.png">
+      <PackagePath></PackagePath>
+      <Pack>True</Pack>
+    </None>
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="E:\Desktop\Developing\NUGET\zero.png">
-      <Pack>True</Pack>
-      <PackagePath></PackagePath>
-    </None>
+    <PackageReference Include="System.Data.SQLite.Core" Version="1.0.112.1" />
   </ItemGroup>
 
   <ItemGroup>

@@ -29,7 +29,7 @@ namespace ZeroLevel.SqLite
         }
         protected static Tr Read<Tr>(SQLiteDataReader reader, string name)
         {
-            if (reader == null || HasColumn(reader, name) || reader[name] == DBNull.Value) return default;
+            if (reader == null || !HasColumn(reader, name) || reader[name] == DBNull.Value) return default;
             Type t;
             if ((t = Nullable.GetUnderlyingType(typeof(Tr))) != null)
             {
