@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Net;
+using System.Threading;
 using ZeroLevel;
 using ZeroLevel.Network;
 using ZeroLevel.Services.HashFunctions;
@@ -66,7 +67,7 @@ namespace Client
             var port = ReadPort();
             var client = ex.GetConnection(new IPEndPoint(address, port));
 
-            uint index = 623;
+            uint index = 0;
             while (true)
             {
                 if (Console.KeyAvailable)
@@ -80,11 +81,11 @@ namespace Client
                 }
                 if (index % 2 == 0)
                 {
-                    SendDataEqParts(client, index, 1024 * 1024 + index * 30 + 1);
+                    SendDataEqParts(client, index, 1024 * 1024 + index * 3 + 1);
                 }
                 else
                 {
-                    SendDataDiffParts(client, index, 1024 * 1024 + index * 30 + 1);
+                    SendDataDiffParts(client, index, 1024 * 1024 + index * 3 + 1);
                 }
                 index++;
             }
