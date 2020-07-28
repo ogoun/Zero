@@ -2,21 +2,72 @@
 using System.Net;
 using System.Threading;
 using ZeroLevel;
+using ZeroLevel.Network;
+using ZeroLevel.Services.HashFunctions;
+using ZeroLevel.Services.Serialization;
 
 namespace Client
 {
+    public class Info
+        : IBinarySerializable
+    {
+        public uint Id;
+        public uint Length;
+        public uint Checksum;
+
+        public void Deserialize(IBinaryReader reader)
+        {
+            this.Id = reader.ReadUInt32();
+            this.Length = reader.ReadUInt32();
+            this.Checksum = reader.ReadUInt32();
+        }
+
+        public void Serialize(IBinaryWriter writer)
+        {
+            writer.WriteUInt32(this.Id);
+            writer.WriteUInt32(this.Length);
+            writer.WriteUInt32(this.Checksum);
+        }
+    }
+
+    public class Fragment
+        : IBinarySerializable
+    {
+        public uint Id;
+        public uint Offset;
+        public uint Checksum;
+        public byte[] Payload;
+
+        public void Deserialize(IBinaryReader reader)
+        {
+            this.Id = reader.ReadUInt32();
+            this.Offset = reader.ReadUInt32();
+            this.Checksum = reader.ReadUInt32();
+            this.Payload = reader.ReadBytes();
+        }
+
+        public void Serialize(IBinaryWriter writer)
+        {
+            writer.WriteUInt32(this.Id);
+            writer.WriteUInt32(this.Offset);
+            writer.WriteUInt32(this.Checksum);
+            writer.WriteBytes(this.Payload);
+        }
+    }
+
     class Program
     {
+        private readonly static XXHashUnsafe _hash = new XXHashUnsafe(667);
+
         static void Main(string[] args)
         {
             Log.AddConsoleLogger();
             var ex = Bootstrap.CreateExchange();
-
             var address = ReadIP();
             var port = ReadPort();
             var client = ex.GetConnection(new IPEndPoint(address, port));
-            Console.WriteLine("Esc - exit\r\nEnter - recreate connection\r\nSpace - send request");
-            long index = 0;
+
+            uint index = 0;
             while (true)
             {
                 if (Console.KeyAvailable)
@@ -26,60 +77,124 @@ namespace Client
                         case ConsoleKey.Escape:
                             client?.Dispose();
                             return;
-                        case ConsoleKey.Enter:
-                            address = ReadIP();
-                            port = ReadPort();
-                            try
-                            {
-                                if (client != null)
-                                {
-                                    client.Dispose();
-                                }
-
-                                client = ex.GetConnection(new IPEndPoint(address, port));
-                            }
-                            catch (Exception exc)
-                            {
-                                Log.Error(exc, "Fault recreate connection");
-                            }
-                            break;
-                        case ConsoleKey.Spacebar:
-                            Log.Info("Send request");
-                            if (client == null)
-                            {
-                                client = ex.GetConnection(new IPEndPoint(address, port));
-                                if (client == null)
-                                {
-                                    Log.Info("No connection");
-                                }
-                                continue;
-                            }
-                            if (false == client.Request<string, string>("time", "Time reqeust", s => { Log.Info($"Got time response '{s}'"); }))
-                            {
-                                Log.Warning("Send time request fault");
-                            }
-                            break;
                     }
                 }
-                Thread.Sleep(100);
-                index++;
-                if (index % 50 == 0)
+                if (index % 2 == 0)
                 {
-                    if (client == null)
-                    {
-                        client = ex.GetConnection(new IPEndPoint(address, port));
-                        if (client == null)
-                        {
-                            Log.Info("No connection");
-                        }
-                        continue;
-                    }
-                    if (false == client.Request<string, string>("whois", "Whois reqeust", s => { Log.Info($"Got whois response '{s}'"); }))
-                    {
-                        Log.Warning("Send whois request fault");
-                    }
+                    SendDataEqParts(client, index, 1024 * 1024 + index * 3 + 1);
                 }
+                else
+                {
+                    SendDataDiffParts(client, index, 1024 * 1024 + index * 3 + 1);
+                }
+                index++;
             }
+        }
+
+        static void SendDataDiffParts(IClient client, uint id, uint length)
+        {
+            var payload = GetByteArray(length);
+            var full_checksum = _hash.Hash(payload);
+            var info = new Info { Checksum = full_checksum, Id = id, Length = length };
+            if (client.Request<Info, bool>("start", info, res =>
+            {
+                Log.Info($"Success start sending packet '{id}'");
+            }))
+            {
+                uint size = 1;
+                uint offset = 0;
+                while (offset < payload.Length)
+                {
+                    var fragment = GetFragment(id, payload, offset, size);
+                    if (!client.Request<Fragment, bool>("part", fragment, res =>
+                    {
+                        if (!res)
+                        {
+                            Log.Info($"Fault server incoming packet '{id}' fragment. Offset: '{offset}'. Size: '{size}' bytes.");
+                        }
+                    }))
+                    {
+                        Log.Warning($"Can't start send packet '{id}' fragment. Offset: '{offset}'. Size: '{size}' bytes. No connection");
+                    }
+                    offset += size;
+                    size += 1;
+                }
+                client.Send<uint>("complete", id);
+            }
+            else
+            {
+                Log.Warning($"Can't start send packet '{id}'. No connection");
+            }
+        }
+
+        static void SendDataEqParts(IClient client, uint id, uint length)
+        {
+            var payload = GetByteArray(length);
+            var full_checksum = _hash.Hash(payload);
+            var info = new Info { Checksum = full_checksum, Id = id, Length = length };
+            if (client.Request<Info, bool>("start", info, res =>
+            {
+                if (res)
+                {
+                    Log.Info($"Success start sending packet '{id}'");
+                }
+                else
+                {
+                    Log.Info($"Fault server start incoming packet '{id}'");
+                }
+            }))
+            {
+                uint size = 4096;
+                uint offset = 0;
+
+                while (offset < payload.Length)
+                {
+                    var fragment = GetFragment(id, payload, offset, size);
+                    if (!client.Request<Fragment, bool>("part", fragment, res =>
+                    {
+                        if (!res)
+                        {
+                            Log.Info($"Fault server incoming packet '{id}' fragment. Offset: '{offset}'. Size: '{size}' bytes.");
+                        }
+                    }))
+                    {
+                        Log.Warning($"Can't start send packet '{id}' fragment. Offset: '{offset}'. Size: '{size}' bytes. No connection");
+                    }
+                    offset += size;
+                }
+                client.Send<uint>("complete", id);
+            }
+            else
+            {
+                Log.Warning($"Can't start send packet '{id}'. No connection");
+            }
+        }
+
+        private static Fragment GetFragment(uint id, byte[] data, uint offset, uint size)
+        {
+            int diff = (int)(-(data.Length - (offset + size)));
+            if (diff > 0)
+            {
+                size -= (uint)diff;
+            }
+            var payload = new byte[size];
+            Array.Copy(data, offset, payload, 0, size);
+            var ch = _hash.Hash(payload);
+            return new Fragment
+            {
+                Id = id,
+                Checksum = ch,
+                Offset = offset,
+                Payload = payload
+            };
+        }
+
+        private static byte[] GetByteArray(uint size)
+        {
+            Random rnd = new Random();
+            Byte[] b = new Byte[size];
+            rnd.NextBytes(b);
+            return b;
         }
 
         static IPAddress ReadIP()

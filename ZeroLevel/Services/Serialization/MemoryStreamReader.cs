@@ -749,16 +749,7 @@ namespace ZeroLevel.Services.Serialization
 
         public byte[] ReadByteArray()
         {
-            int count = ReadInt32();
-            var array = new byte[count];
-            if (count > 0)
-            {
-                for (int i = 0; i < count; i++)
-                {
-                    array[i] = ReadByte();
-                }
-            }
-            return array;
+            return ReadBytes();
         }
 
         public byte[][] ReadByteArrayArray()
