@@ -13,8 +13,14 @@ namespace ZeroLevel.Services.FileSystem
         private readonly TimeSpan _period;
         private readonly Action<FileMeta> _callback;
 
-        public PeriodicFileSystemWatcher(TimeSpan period, string watch_folder, string temp_folder, Action<FileMeta> callback)
-        {
+        public event Action<int> OnStartMovingFilesToTemporary = delegate { };
+        public event Action OnMovingFileToTemporary = delegate { };
+        public event Action OnCompleteMovingFilesToTemporary = delegate { };
+
+        private readonly bool _autoRemoveTempFileAfterCallback = false;
+
+        public PeriodicFileSystemWatcher(TimeSpan period, string watch_folder, string temp_folder, Action<FileMeta> callback, bool removeTempFileAfterCallback = false)
+        {            
             if (string.IsNullOrWhiteSpace(watch_folder))
             {
                 throw new ArgumentNullException(nameof(watch_folder));
@@ -23,6 +29,7 @@ namespace ZeroLevel.Services.FileSystem
             {
                 throw new ArgumentNullException(nameof(callback));
             }
+            _autoRemoveTempFileAfterCallback = removeTempFileAfterCallback;
             _callback = callback;
             _sourceFolder = watch_folder;
             _temporaryFolder = temp_folder;
@@ -51,11 +58,13 @@ namespace ZeroLevel.Services.FileSystem
         {
             try
             {
-                foreach (var file in GetFilesFromSource())
+                var files = GetFilesFromSource();
+                OnStartMovingFilesToTemporary?.Invoke(files.Length);
+                foreach (var file in files)
                 {
                     try
                     {
-                        Log.Debug($"[PeriodicFileSystemWatcher] Find new file {file}");
+                        Log.Debug($"[PeriodicFileSystemWatcher.CheckSourceFolder] Find new file {file}");
                         if (FSUtils.IsFileLocked(new FileInfo(file)))
                         {
                             continue;
@@ -67,22 +76,40 @@ namespace ZeroLevel.Services.FileSystem
                         }
                         catch (Exception ex)
                         {
-                            Log.SystemError(ex, $"[PeriodicFileSystemWatcher] Failed to attempt to move file '{file}' to temporary directory '{_temporaryFolder}'");
+                            Log.SystemError(ex, $"[PeriodicFileSystemWatcher.CheckSourceFolder] Failed to attempt to move file '{file}' to temporary directory '{_temporaryFolder}'");
                             continue;
                         }
-                        Log.Debug($"[PeriodicFileSystemWatcher] Handle file {file}");
-                        _callback(new FileMeta(Path.GetFileName(file), tempFile));
-                        File.Delete(tempFile);
+                        finally
+                        {
+                            OnMovingFileToTemporary?.Invoke();
+                        }
+                        Log.Debug($"[PeriodicFileSystemWatcher.CheckSourceFolder] Handle file {file}");
+                        try
+                        {
+                            _callback(new FileMeta(Path.GetFileName(file), tempFile));
+                        }
+                        catch (Exception ex)
+                        {
+                            Log.SystemError(ex, $"[PeriodicFileSystemWatcher.CheckSourceFolder] Fault callback for file '{tempFile}'");
+                        }
+                        if (_autoRemoveTempFileAfterCallback)
+                        {
+                            File.Delete(tempFile);
+                        }
                     }
                     catch (Exception ex)
                     {
-                        Log.SystemError(ex, $"[PeriodicFileSystemWatcher] Fault proceed file {file}");
+                        Log.SystemError(ex, $"[PeriodicFileSystemWatcher.CheckSourceFolder] Fault proceed file {file}");
                     }
                 }
             }
             catch (Exception ex)
             {
-                Log.SystemError(ex, $"[PeriodicFileSystemWatcher] Failed to process input directory '{_sourceFolder}'");
+                Log.SystemError(ex, $"[PeriodicFileSystemWatcher.CheckSourceFolder] Failed to process input directory '{_sourceFolder}'");
+            }
+            finally
+            {
+                OnCompleteMovingFilesToTemporary?.Invoke();
             }
         }
 
