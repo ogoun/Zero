@@ -18,9 +18,12 @@ namespace ZeroLevel.Services.FileSystem
         public event Action OnCompleteMovingFilesToTemporary = delegate { };
 
         private readonly bool _autoRemoveTempFileAfterCallback = false;
+        private readonly bool _useSubdirectories = false;
 
-        public PeriodicFileSystemWatcher(TimeSpan period, string watch_folder, string temp_folder, Action<FileMeta> callback, bool removeTempFileAfterCallback = false)
-        {            
+        public PeriodicFileSystemWatcher(TimeSpan period, string watch_folder, string temp_folder, Action<FileMeta> callback
+            , bool removeTempFileAfterCallback = false
+            , bool useSubdirectories = false)
+        {
             if (string.IsNullOrWhiteSpace(watch_folder))
             {
                 throw new ArgumentNullException(nameof(watch_folder));
@@ -29,6 +32,7 @@ namespace ZeroLevel.Services.FileSystem
             {
                 throw new ArgumentNullException(nameof(callback));
             }
+            _useSubdirectories = useSubdirectories;
             _autoRemoveTempFileAfterCallback = removeTempFileAfterCallback;
             _callback = callback;
             _sourceFolder = watch_folder;
@@ -168,7 +172,7 @@ namespace ZeroLevel.Services.FileSystem
         /// </summary>
         private string[] GetFilesFromSource()
         {
-            string[] files = Directory.GetFiles(_sourceFolder, "*.*", SearchOption.TopDirectoryOnly);
+            string[] files = Directory.GetFiles(_sourceFolder, "*.*", _useSubdirectories ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
             Array.Sort<string>(files, FileNameSortCompare);
             return files;
         }
