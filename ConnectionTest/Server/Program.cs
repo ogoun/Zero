@@ -68,7 +68,7 @@ namespace Server
 
         static void Main(string[] args)
         {
-            Log.AddConsoleLogger(ZeroLevel.Logging.LogLevel.Warning);
+            Log.AddConsoleLogger(ZeroLevel.Logging.LogLevel.FullDebug | ZeroLevel.Logging.LogLevel.System);
             var ex = Bootstrap.CreateExchange();
             var port = ReadPort();
             var server = ex.UseHost(port);

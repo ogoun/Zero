@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 
 namespace ZeroLevel.Services.FileSystem
 {
@@ -12,6 +14,7 @@ namespace ZeroLevel.Services.FileSystem
         private readonly string _temporaryFolder;
         private readonly TimeSpan _period;
         private readonly Action<FileMeta> _callback;
+        private readonly HashSet<string> _extensions;
 
         public event Action<int> OnStartMovingFilesToTemporary = delegate { };
         public event Action OnMovingFileToTemporary = delegate { };
@@ -21,6 +24,7 @@ namespace ZeroLevel.Services.FileSystem
         private readonly bool _useSubdirectories = false;
 
         public PeriodicFileSystemWatcher(TimeSpan period, string watch_folder, string temp_folder, Action<FileMeta> callback
+            , IEnumerable<string> extensions = null
             , bool removeTempFileAfterCallback = false
             , bool useSubdirectories = false)
         {
@@ -32,13 +36,14 @@ namespace ZeroLevel.Services.FileSystem
             {
                 throw new ArgumentNullException(nameof(callback));
             }
+            _extensions = new HashSet<string>(extensions?.Select(e => e.ToLowerInvariant()) ?? Enumerable.Empty<string>());
             _useSubdirectories = useSubdirectories;
             _autoRemoveTempFileAfterCallback = removeTempFileAfterCallback;
             _callback = callback;
             _sourceFolder = watch_folder;
             _temporaryFolder = temp_folder;
             _period = period;
-            if (_temporaryFolder.IndexOf(':') < 0)
+            if (Path.IsPathRooted(_temporaryFolder) == false)
             {
                 _temporaryFolder = Path.Combine(Configuration.BaseDirectory, _temporaryFolder);
             }
@@ -172,9 +177,19 @@ namespace ZeroLevel.Services.FileSystem
         /// </summary>
         private string[] GetFilesFromSource()
         {
-            string[] files = Directory.GetFiles(_sourceFolder, "*.*", _useSubdirectories ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
-            Array.Sort<string>(files, FileNameSortCompare);
-            return files;
+            if (_extensions.Count > 0)
+            {
+                string[] files = Directory.GetFiles(_sourceFolder, "*.*", _useSubdirectories ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly)
+                    .Where(f => _extensions.Contains(Path.GetExtension(f).ToLowerInvariant())).ToArray();
+                Array.Sort<string>(files, FileNameSortCompare);
+                return files;
+            }
+            else
+            {
+                string[] files = Directory.GetFiles(_sourceFolder, "*.*", _useSubdirectories ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
+                Array.Sort<string>(files, FileNameSortCompare);
+                return files;
+            }
         }
 
         /// <summary>

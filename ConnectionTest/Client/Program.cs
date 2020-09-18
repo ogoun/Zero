@@ -1,6 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net;
-using System.Threading;
 using ZeroLevel;
 using ZeroLevel.Network;
 using ZeroLevel.Services.HashFunctions;
@@ -65,7 +66,7 @@ namespace Client
             var ex = Bootstrap.CreateExchange();
             var address = ReadIP();
             var port = ReadPort();
-            var client = ex.GetConnection(new IPEndPoint(address, port));
+            ex.RoutesStorage.Set("server", new IPEndPoint(address, port));
 
             uint index = 0;
             while (true)
@@ -75,17 +76,17 @@ namespace Client
                     switch (Console.ReadKey().Key)
                     {
                         case ConsoleKey.Escape:
-                            client?.Dispose();
+                            ex?.Dispose();
                             return;
                     }
                 }
                 if (index % 2 == 0)
                 {
-                    SendDataEqParts(client, index, 1024 * 1024 + index * 3 + 1);
+                    SendDataEqParts(ex, index, 1024 + index * 3 + 1);
                 }
                 else
                 {
-                    SendDataDiffParts(client, index, 1024 * 1024 + index * 3 + 1);
+                    SendDataDiffParts(ex.GetConnection("server"), index, 1024 + index * 3 + 1);
                 }
                 index++;
             }
@@ -127,42 +128,26 @@ namespace Client
             }
         }
 
-        static void SendDataEqParts(IClient client, uint id, uint length)
+        static void SendDataEqParts(IExchange exchange, uint id, uint length)
         {
             var payload = GetByteArray(length);
             var full_checksum = _hash.Hash(payload);
             var info = new Info { Checksum = full_checksum, Id = id, Length = length };
-            if (client.Request<Info, bool>("start", info, res =>
+            if (exchange.Request<Info, bool>("server", "start", info))
             {
-                if (res)
-                {
-                    Log.Info($"Success start sending packet '{id}'");
-                }
-                else
-                {
-                    Log.Info($"Fault server start incoming packet '{id}'");
-                }
-            }))
-            {
+                Log.Info($"Success start sending packet '{id}'");
                 uint size = 4096;
                 uint offset = 0;
-
                 while (offset < payload.Length)
                 {
                     var fragment = GetFragment(id, payload, offset, size);
-                    if (!client.Request<Fragment, bool>("part", fragment, res =>
+                    if (!exchange.Request<Fragment, bool>("server", "part", fragment))
                     {
-                        if (!res)
-                        {
                             Log.Info($"Fault server incoming packet '{id}' fragment. Offset: '{offset}'. Size: '{size}' bytes.");
-                        }
-                    }))
-                    {
-                        Log.Warning($"Can't start send packet '{id}' fragment. Offset: '{offset}'. Size: '{size}' bytes. No connection");
                     }
                     offset += size;
                 }
-                client.Send<uint>("complete", id);
+                exchange.Send<uint>("server", "complete", id);
             }
             else
             {
