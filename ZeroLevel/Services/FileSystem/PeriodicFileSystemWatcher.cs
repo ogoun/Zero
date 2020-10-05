@@ -65,61 +65,68 @@ namespace ZeroLevel.Services.FileSystem
 
         private void CheckSourceFolder()
         {
+            string[] files = null;
             try
             {
-                var files = GetFilesFromSource();
-                OnStartMovingFilesToTemporary?.Invoke(files.Length);
-                foreach (var file in files)
-                {
-                    try
-                    {
-                        Log.Debug($"[PeriodicFileSystemWatcher.CheckSourceFolder] Find new file {file}");
-                        if (FSUtils.IsFileLocked(new FileInfo(file)))
-                        {
-                            continue;
-                        }
-                        string tempFile;
-                        try
-                        {
-                            tempFile = MoveToTemporary(file);
-                        }
-                        catch (Exception ex)
-                        {
-                            Log.SystemError(ex, $"[PeriodicFileSystemWatcher.CheckSourceFolder] Failed to attempt to move file '{file}' to temporary directory '{_temporaryFolder}'");
-                            continue;
-                        }
-                        finally
-                        {
-                            OnMovingFileToTemporary?.Invoke();
-                        }
-                        Log.Debug($"[PeriodicFileSystemWatcher.CheckSourceFolder] Handle file {file}");
-                        try
-                        {
-                            _callback(new FileMeta(Path.GetFileName(file), tempFile));
-                        }
-                        catch (Exception ex)
-                        {
-                            Log.SystemError(ex, $"[PeriodicFileSystemWatcher.CheckSourceFolder] Fault callback for file '{tempFile}'");
-                        }
-                        if (_autoRemoveTempFileAfterCallback)
-                        {
-                            File.Delete(tempFile);
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Log.SystemError(ex, $"[PeriodicFileSystemWatcher.CheckSourceFolder] Fault proceed file {file}");
-                    }
-                }
+                files = GetFilesFromSource();
             }
             catch (Exception ex)
             {
                 Log.SystemError(ex, $"[PeriodicFileSystemWatcher.CheckSourceFolder] Failed to process input directory '{_sourceFolder}'");
             }
-            finally
+            if (files == null || files.Length == 0)
             {
-                OnCompleteMovingFilesToTemporary?.Invoke();
+                return;
             }
+            OnStartMovingFilesToTemporary?.Invoke(files.Length);
+            foreach (var file in files)
+            {
+                try
+                {
+                    Log.Debug($"[PeriodicFileSystemWatcher.CheckSourceFolder] Find new file {file}");
+                    if (FSUtils.IsFileLocked(new FileInfo(file)))
+                    {
+                        continue;
+                    }
+                    string tempFile;
+                    try
+                    {
+                        tempFile = MoveToTemporary(file);
+                        if (string.IsNullOrWhiteSpace(tempFile))
+                        {
+                            Log.SystemWarning($"[PeriodicFileSystemWatcher.CheckSourceFolder] Failed to move file '{file}' to temporary directory '{_temporaryFolder}'. Without system error!");
+                            continue;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.SystemError(ex, $"[PeriodicFileSystemWatcher.CheckSourceFolder] Failed to attempt to move file '{file}' to temporary directory '{_temporaryFolder}'");
+                        continue;
+                    }
+                    finally
+                    {
+                        OnMovingFileToTemporary?.Invoke();
+                    }
+                    Log.Debug($"[PeriodicFileSystemWatcher.CheckSourceFolder] Handle file {file}");
+                    try
+                    {
+                        _callback(new FileMeta(Path.GetFileName(file), tempFile));
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.SystemError(ex, $"[PeriodicFileSystemWatcher.CheckSourceFolder] Fault callback for file '{tempFile}'");
+                    }
+                    if (_autoRemoveTempFileAfterCallback)
+                    {
+                        File.Delete(tempFile);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Log.SystemError(ex, $"[PeriodicFileSystemWatcher.CheckSourceFolder] Fault proceed file {file}");
+                }
+            }
+            OnCompleteMovingFilesToTemporary?.Invoke();
         }
 
         /// <summary>
@@ -137,8 +144,12 @@ namespace ZeroLevel.Services.FileSystem
                 tempFile = TrySolveCollision(tempFile);
             }
             File.Copy(from, tempFile, false);
-            File.Delete(from);
-            return tempFile;
+            if (File.Exists(tempFile))
+            {
+                File.Delete(from);
+                return tempFile;
+            }
+            return null;
         }
 
         /// <summary>
@@ -177,19 +188,22 @@ namespace ZeroLevel.Services.FileSystem
         /// </summary>
         private string[] GetFilesFromSource()
         {
+            string[] files;
             if (_extensions.Count > 0)
             {
-                string[] files = Directory.GetFiles(_sourceFolder, "*.*", _useSubdirectories ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly)
-                    .Where(f => _extensions.Contains(Path.GetExtension(f).ToLowerInvariant())).ToArray();
-                Array.Sort<string>(files, FileNameSortCompare);
-                return files;
+                files = Directory.GetFiles(_sourceFolder, "*.*", _useSubdirectories ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly)
+                    ?.Where(f => _extensions.Contains(Path.GetExtension(f).ToLowerInvariant()))
+                    ?.ToArray();
             }
             else
             {
-                string[] files = Directory.GetFiles(_sourceFolder, "*.*", _useSubdirectories ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
-                Array.Sort<string>(files, FileNameSortCompare);
-                return files;
+                files = Directory.GetFiles(_sourceFolder, "*.*", _useSubdirectories ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
             }
+            if (files != null)
+            {
+                Array.Sort<string>(files, FileNameSortCompare);
+            }
+            return files;
         }
 
         /// <summary>

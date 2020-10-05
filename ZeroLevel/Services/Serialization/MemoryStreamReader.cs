@@ -22,6 +22,11 @@ namespace ZeroLevel.Services.Serialization
             _reverseByteOrder = use_reverse_byte_order;
         }
 
+        /// <summary>
+        /// End of stream
+        /// </summary>
+        public bool EOS => _stream.Position >= _stream.Length;
+
         public MemoryStreamReader(byte[] data)
         {
             if (data == null)
@@ -41,7 +46,7 @@ namespace ZeroLevel.Services.Serialization
         /// </summary>
         public bool ReadBoolean()
         {
-            if (CheckOutOfRange(_stream, 1))
+            if (CheckOutOfRange(1))
                 throw new OutOfMemoryException("Array index out of bounds");
             return BitConverter.ToBoolean(new byte[1] { ReadByte() }, 0);
         }
@@ -51,14 +56,14 @@ namespace ZeroLevel.Services.Serialization
         /// </summary>
         public byte ReadByte()
         {
-            if (CheckOutOfRange(_stream, 1))
+            if (CheckOutOfRange(1))
                 throw new OutOfMemoryException("Array index out of bounds");
             return (byte)_stream.ReadByte();
         }
 
         public char ReadChar()
         {
-            if (CheckOutOfRange(_stream, 2))
+            if (CheckOutOfRange(2))
                 throw new OutOfMemoryException("Array index out of bounds");
             var buffer = ReadBuffer(2);
             return BitConverter.ToChar(buffer, 0);
@@ -169,7 +174,7 @@ namespace ZeroLevel.Services.Serialization
         public byte[] ReadBuffer(int count)
         {
             if (count == 0) return null;
-            if (CheckOutOfRange(_stream, count))
+            if (CheckOutOfRange(count))
                 throw new OutOfMemoryException("Array index out of bounds");
             var buffer = new byte[count];
             var readedCount = _stream.Read(buffer, 0, count);
@@ -227,10 +232,10 @@ namespace ZeroLevel.Services.Serialization
         /// <summary>
         /// Check if data reading is outside the stream
         /// </summary>
-        private bool CheckOutOfRange(Stream stream, int offset)
+        public bool CheckOutOfRange(int offset)
         {
-            return (stream.Position + offset) > stream.Length;
-        }
+            return (_stream.Position + offset) > _stream.Length;
+        }        
 
         #region Extensions
 

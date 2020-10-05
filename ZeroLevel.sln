@@ -53,9 +53,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FileTransferServer", "FileT
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ConnectionTest", "ConnectionTest", "{D5207A5A-2F27-4992-9BA5-0BDCFC59F133}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Client", "ConnectionTest\Client\Client.csproj", "{08CDD42E-E324-40A4-88C3-EDD0493AAF84}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Client", "ConnectionTest\Client\Client.csproj", "{08CDD42E-E324-40A4-88C3-EDD0493AAF84}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Server", "ConnectionTest\Server\Server.csproj", "{3496A688-0749-48C2-BD60-ABB42A5C17C9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Server", "ConnectionTest\Server\Server.csproj", "{3496A688-0749-48C2-BD60-ABB42A5C17C9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -255,8 +255,8 @@ Global
 		{08CDD42E-E324-40A4-88C3-EDD0493AAF84}.Debug|x86.Build.0 = Debug|Any CPU
 		{08CDD42E-E324-40A4-88C3-EDD0493AAF84}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{08CDD42E-E324-40A4-88C3-EDD0493AAF84}.Release|Any CPU.Build.0 = Release|Any CPU
-		{08CDD42E-E324-40A4-88C3-EDD0493AAF84}.Release|x64.ActiveCfg = Release|Any CPU
-		{08CDD42E-E324-40A4-88C3-EDD0493AAF84}.Release|x64.Build.0 = Release|Any CPU
+		{08CDD42E-E324-40A4-88C3-EDD0493AAF84}.Release|x64.ActiveCfg = Release|x64
+		{08CDD42E-E324-40A4-88C3-EDD0493AAF84}.Release|x64.Build.0 = Release|x64
 		{08CDD42E-E324-40A4-88C3-EDD0493AAF84}.Release|x86.ActiveCfg = Release|Any CPU
 		{08CDD42E-E324-40A4-88C3-EDD0493AAF84}.Release|x86.Build.0 = Release|Any CPU
 		{3496A688-0749-48C2-BD60-ABB42A5C17C9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -267,8 +267,8 @@ Global
 		{3496A688-0749-48C2-BD60-ABB42A5C17C9}.Debug|x86.Build.0 = Debug|Any CPU
 		{3496A688-0749-48C2-BD60-ABB42A5C17C9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3496A688-0749-48C2-BD60-ABB42A5C17C9}.Release|Any CPU.Build.0 = Release|Any CPU
-		{3496A688-0749-48C2-BD60-ABB42A5C17C9}.Release|x64.ActiveCfg = Release|Any CPU
-		{3496A688-0749-48C2-BD60-ABB42A5C17C9}.Release|x64.Build.0 = Release|Any CPU
+		{3496A688-0749-48C2-BD60-ABB42A5C17C9}.Release|x64.ActiveCfg = Release|x64
+		{3496A688-0749-48C2-BD60-ABB42A5C17C9}.Release|x64.Build.0 = Release|x64
 		{3496A688-0749-48C2-BD60-ABB42A5C17C9}.Release|x86.ActiveCfg = Release|Any CPU
 		{3496A688-0749-48C2-BD60-ABB42A5C17C9}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
