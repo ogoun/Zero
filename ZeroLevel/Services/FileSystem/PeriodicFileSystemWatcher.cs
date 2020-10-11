@@ -17,7 +17,7 @@ namespace ZeroLevel.Services.FileSystem
         private readonly HashSet<string> _extensions;
 
         public event Action<int> OnStartMovingFilesToTemporary = delegate { };
-        public event Action OnMovingFileToTemporary = delegate { };
+        public event Action<string, string> OnMovingFileToTemporary = delegate { };
         public event Action OnCompleteMovingFilesToTemporary = delegate { };
 
         private readonly bool _autoRemoveTempFileAfterCallback = false;
@@ -81,41 +81,43 @@ namespace ZeroLevel.Services.FileSystem
             OnStartMovingFilesToTemporary?.Invoke(files.Length);
             foreach (var file in files)
             {
+                if (!File.Exists(file))
+                {
+                    Log.Warning($"[PeriodicFileSystemWatcher.CheckSourceFolder] Find '{file}' does not exists");
+                    continue;
+                }
+                Log.Debug($"[PeriodicFileSystemWatcher.CheckSourceFolder] Find new file {file}");
+                if (FSUtils.IsFileLocked(new FileInfo(file)))
+                {
+                    continue;
+                }
+                string tempFile;
                 try
                 {
-                    Log.Debug($"[PeriodicFileSystemWatcher.CheckSourceFolder] Find new file {file}");
-                    if (FSUtils.IsFileLocked(new FileInfo(file)))
+                    tempFile = MoveToTemporary(file);
+                    if (string.IsNullOrWhiteSpace(tempFile))
                     {
+                        Log.SystemWarning($"[PeriodicFileSystemWatcher.CheckSourceFolder] Failed to move file '{file}' to temporary directory '{_temporaryFolder}'. Without system error!");
                         continue;
                     }
-                    string tempFile;
-                    try
-                    {
-                        tempFile = MoveToTemporary(file);
-                        if (string.IsNullOrWhiteSpace(tempFile))
-                        {
-                            Log.SystemWarning($"[PeriodicFileSystemWatcher.CheckSourceFolder] Failed to move file '{file}' to temporary directory '{_temporaryFolder}'. Without system error!");
-                            continue;
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Log.SystemError(ex, $"[PeriodicFileSystemWatcher.CheckSourceFolder] Failed to attempt to move file '{file}' to temporary directory '{_temporaryFolder}'");
-                        continue;
-                    }
-                    finally
-                    {
-                        OnMovingFileToTemporary?.Invoke();
-                    }
-                    Log.Debug($"[PeriodicFileSystemWatcher.CheckSourceFolder] Handle file {file}");
-                    try
-                    {
-                        _callback(new FileMeta(Path.GetFileName(file), tempFile));
-                    }
-                    catch (Exception ex)
-                    {
-                        Log.SystemError(ex, $"[PeriodicFileSystemWatcher.CheckSourceFolder] Fault callback for file '{tempFile}'");
-                    }
+                    OnMovingFileToTemporary?.Invoke(file, tempFile);
+                }
+                catch (Exception ex)
+                {
+                    Log.SystemError(ex, $"[PeriodicFileSystemWatcher.CheckSourceFolder] Failed to attempt to move file '{file}' to temporary directory '{_temporaryFolder}'");
+                    continue;
+                }
+                Log.Debug($"[PeriodicFileSystemWatcher.CheckSourceFolder] Handle file {file}");
+                try
+                {
+                    _callback(new FileMeta(Path.GetFileName(file), tempFile));
+                }
+                catch (Exception ex)
+                {
+                    Log.SystemError(ex, $"[PeriodicFileSystemWatcher.CheckSourceFolder] Fault callback for file '{tempFile}'");
+                }
+                try
+                {
                     if (_autoRemoveTempFileAfterCallback)
                     {
                         File.Delete(tempFile);
@@ -123,7 +125,7 @@ namespace ZeroLevel.Services.FileSystem
                 }
                 catch (Exception ex)
                 {
-                    Log.SystemError(ex, $"[PeriodicFileSystemWatcher.CheckSourceFolder] Fault proceed file {file}");
+                    Log.SystemError(ex, $"[PeriodicFileSystemWatcher.CheckSourceFolder] Fault delete file {tempFile}");
                 }
             }
             OnCompleteMovingFilesToTemporary?.Invoke();

@@ -6,16 +6,16 @@
 </Description>
     <Authors>ogoun</Authors>
     <Company>ogoun</Company>
-    <AssemblyVersion>3.3.4.6</AssemblyVersion>
-    <PackageReleaseNotes>Extended the MemoryStreamReader.</PackageReleaseNotes>
+    <AssemblyVersion>3.3.4.7</AssemblyVersion>
+    <PackageReleaseNotes>Fix PeriodicFileSystemWatcher</PackageReleaseNotes>
     <PackageProjectUrl>https://github.com/ogoun/Zero/wiki</PackageProjectUrl>
     <Copyright>Copyright Ogoun 2020</Copyright>
     <PackageLicenseUrl></PackageLicenseUrl>
     <PackageIconUrl></PackageIconUrl>
     <RepositoryUrl>https://github.com/ogoun/Zero</RepositoryUrl>
     <RepositoryType>GitHub</RepositoryType>
-    <Version>3.3.4.6</Version>
-    <FileVersion>3.3.4.6</FileVersion>
+    <Version>3.3.4.7</Version>
+    <FileVersion>3.3.4.7</FileVersion>
     <Platforms>AnyCPU;x64</Platforms>
     <PackageIcon>zero.png</PackageIcon>
   </PropertyGroup>
