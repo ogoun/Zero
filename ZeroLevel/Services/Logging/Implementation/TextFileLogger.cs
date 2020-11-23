@@ -6,7 +6,6 @@ using System.IO.Compression;
 using System.Linq;
 using System.Text;
 using ZeroLevel.Services.FileSystem;
-using ZeroLevel.Services.Logging;
 
 namespace ZeroLevel.Logging
 {

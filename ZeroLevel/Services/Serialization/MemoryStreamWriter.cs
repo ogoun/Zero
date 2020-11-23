@@ -796,7 +796,6 @@ namespace ZeroLevel.Services.Serialization
                 }
             }
         }
-
         #endregion Extension
     }
 }

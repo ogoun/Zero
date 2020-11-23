@@ -95,6 +95,7 @@ namespace ZeroLevel.Services.Serialization
         #endregion
 
         T Read<T>() where T : IBinarySerializable;
+        T Read<T>(object arg) where T : IBinarySerializable;
 
         T ReadCompatible<T>();
 

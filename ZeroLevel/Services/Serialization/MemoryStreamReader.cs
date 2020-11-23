@@ -851,6 +851,15 @@ namespace ZeroLevel.Services.Serialization
             item.Deserialize(this);
             return item;
         }
+
+        public T Read<T>(object arg) where T : IBinarySerializable
+        {
+            byte type = ReadByte();
+            if (type == 0) return default(T);
+            var item = (T)Activator.CreateInstance(typeof(T), arg);
+            item.Deserialize(this);
+            return item;
+        }
         #endregion Extensions
 
         public void Dispose()

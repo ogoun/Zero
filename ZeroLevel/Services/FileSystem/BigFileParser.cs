@@ -27,6 +27,7 @@ namespace ZeroLevel.Services.FileSystem
             _filePath = filePath;
             _parser = parser;
             _bufferSize = bufferSize;
+
         }
 
         public IEnumerable<IEnumerable<T>> ReadBatches(int batchSize)

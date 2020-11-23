@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 
 namespace ZeroLevel.Services.Collections
 {
@@ -36,5 +37,13 @@ namespace ZeroLevel.Services.Collections
         void Remove(Type type, string key);
 
         object Get(Type type, string key);
+
+        void Save(string path);
+
+        void Load(string path);
+
+        void Save(Stream stream);
+
+        void Load(Stream stream);
     }
 }

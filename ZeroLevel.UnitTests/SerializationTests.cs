@@ -404,6 +404,50 @@ namespace ZeroLevel.Serialization
         }
 
         [Fact]
+        public void EOSTest()
+        {
+            var data = new Dictionary<long, string> 
+            {
+                { 0,  "asd"},
+                { 1,  "sdf"},
+                { 2,  "dfg"},
+                { 3,  "fgh"},
+                { 4,  "ghj"}
+            };
+            var num_data = long.MaxValue >> 1;
+            var date_data = DateTime.UtcNow;
+            byte[] serialized;
+            using (var writer = new MemoryStreamWriter())
+            {
+                writer.WriteDateTime(date_data);
+                foreach (var key in data.Keys.OrderBy(k => k))
+                {
+                    writer.WriteLong(key);
+                    writer.WriteString(data[key]);
+                }
+                writer.WriteLong(num_data);
+                serialized = writer.Complete();
+            }
+            using (var reader = new MemoryStreamReader(serialized))
+            {
+                Assert.False(reader.EOS);
+                var date = reader.ReadDateTime();
+                Assert.Equal(date, date_data);
+                Assert.False(reader.EOS);
+                for (long i = 0; i < 5; i++)
+                {
+                    Assert.Equal(i, reader.ReadLong());
+                    Assert.False(reader.EOS);
+                    Assert.Equal(data[i], reader.ReadString());
+                    Assert.False(reader.EOS);
+                }
+                var num = reader.ReadLong();
+                Assert.Equal(num, num_data);
+                Assert.True(reader.EOS);
+            }
+        }
+
+        [Fact]
         public void SerializeCollectionInt32()
         {
             MakeCollectionTest<Int32>(new int[] { -0, 0, -10, 10, Int32.MinValue, Int32.MaxValue });

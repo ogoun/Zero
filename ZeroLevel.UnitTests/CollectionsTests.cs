@@ -1,4 +1,7 @@
-﻿using System.Linq;
+﻿using System;
+using System.IO;
+using System.Linq;
+using System.Net;
 using Xunit;
 using ZeroLevel.Services.Collections;
 
@@ -113,6 +116,72 @@ namespace ZeroLevel.CollectionUnitTests
             Assert.True(CollectionComparsionExtensions.OrderingEquals(chunks_2[2], new long[] { 5, 6 }));
             Assert.True(CollectionComparsionExtensions.OrderingEquals(chunks_2[3], new long[] { 7, 8 }));
             Assert.True(CollectionComparsionExtensions.OrderingEquals(chunks_2[4], new long[] { 9 }));
+        }
+
+        [Fact]
+        public void EverythingStorageTest()
+        {
+            // Arrange
+            var storage = EverythingStorage.Create();
+
+            // Act
+            storage.Add<int>("int_a", 101);
+            storage.Add<int>("int_b", 255);
+            storage.Add<int>("int_c", 1024);
+
+            storage.Add<TimeSpan>("ts_a", TimeSpan.FromSeconds(6546));
+            storage.Add<TimeSpan>("ts_b", TimeSpan.FromSeconds(777));
+
+            storage.Add<ulong>("l_max", ulong.MaxValue);
+
+            storage.Add<IPAddress>("ip", IPAddress.Loopback);
+
+            // Assert
+            Assert.Equal<int>(101, storage.Get<int>("int_a"));
+            Assert.Equal<int>(255, storage.Get<int>("int_b"));
+            Assert.Equal<int>(1024, storage.Get<int>("int_c"));
+
+            Assert.Equal<TimeSpan>(TimeSpan.FromSeconds(6546), storage.Get<TimeSpan>("ts_a"));
+            Assert.Equal<TimeSpan>(TimeSpan.FromSeconds(777), storage.Get<TimeSpan>("ts_b"));
+
+            Assert.Equal<ulong>(ulong.MaxValue, storage.Get<ulong>("l_max"));
+
+            Assert.Equal<IPAddress>(IPAddress.Loopback, storage.Get<IPAddress>("ip"));
+        }
+
+        [Fact]
+        public void EverythingStorageDumpTest()
+        {
+            // Arrange
+            var storage = EverythingStorage.Create();
+
+            // Act
+            storage.Add<int>("int_a", 101);
+            storage.Add<int>("int_b", 255);
+            storage.Add<int>("int_c", 1024);
+
+            storage.Add<TimeSpan>("ts_a", TimeSpan.FromSeconds(6546));
+            storage.Add<TimeSpan>("ts_b", TimeSpan.FromSeconds(777));
+
+            storage.Add<ulong>("l_max", ulong.MaxValue);
+
+            var restored = EverythingStorage.Create();
+
+            var file = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            storage.Save(file);
+            restored.Load(file);
+
+            File.Delete(file);
+
+            // Assert
+            Assert.Equal<int>(101, restored.Get<int>("int_a"));
+            Assert.Equal<int>(255, restored.Get<int>("int_b"));
+            Assert.Equal<int>(1024, restored.Get<int>("int_c"));
+
+            Assert.Equal<TimeSpan>(TimeSpan.FromSeconds(6546), restored.Get<TimeSpan>("ts_a"));
+            Assert.Equal<TimeSpan>(TimeSpan.FromSeconds(777), restored.Get<TimeSpan>("ts_b"));
+
+            Assert.Equal<ulong>(ulong.MaxValue, restored.Get<ulong>("l_max"));
         }
     }
 }

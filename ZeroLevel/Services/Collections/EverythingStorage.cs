@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using ZeroLevel.Services.Invokation;
+using ZeroLevel.Services.Serialization;
 
 namespace ZeroLevel.Services.Collections
 {
@@ -15,6 +17,7 @@ namespace ZeroLevel.Services.Collections
         }
 
         private class ConcreteTypeRepository
+            : IBinarySerializable
         {
             private readonly IInvokeWrapper _wrapper;
 
@@ -24,9 +27,11 @@ namespace ZeroLevel.Services.Collections
             private readonly Invoker _getter;
             private readonly Invoker _keys_getter;
             private readonly object _instance;
+            private readonly Type _valueType;
 
             public ConcreteTypeRepository(Type entityType)
             {
+                _valueType = entityType;
                 _wrapper = InvokeWrapper.Create();
                 var genericType = typeof(Dictionary<,>);
                 var instanceType = genericType.MakeGenericType(new Type[] { typeof(string), entityType });
@@ -46,7 +51,7 @@ namespace ZeroLevel.Services.Collections
                 var get_key = _wrapper.Configure(getter);
                 _getter = _wrapper.GetInvoker(get_key);
 
-                var k = instanceType.GetProperty("Keys", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public| System.Reflection.BindingFlags.NonPublic);
+                var k = instanceType.GetProperty("Keys", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic);
                 var keys_getter = k.GetGetMethod();
                 var get_keys = _wrapper.Configure(keys_getter);
                 _keys_getter = _wrapper.GetInvoker(get_keys);
@@ -87,6 +92,35 @@ namespace ZeroLevel.Services.Collections
             public object Get(string key)
             {
                 return _getter.Invoke(_instance, key);
+            }
+
+            public Type GetEntityType() => _valueType;
+
+            public void Serialize(IBinaryWriter writer)
+            {
+                writer.WriteString(_valueType.FullName);
+
+                var keys = Keys().ToArray();
+                writer.WriteInt32(keys.Length);
+                for (int i = 0; i < keys.Length; i++)
+                {
+                    writer.WriteString(keys[i]);
+                    writer.WriteBytes(MessageSerializer.SerializeCompatible(Get(keys[i])));
+                }
+            }
+
+            public void Deserialize(IBinaryReader reader)
+            {
+                var typeName = reader.ReadString();
+                var type = Type.GetType(typeName);
+
+                var count = reader.ReadInt32();
+                for (int i = 0; i < count; i++)
+                {
+                    var key = reader.ReadString();
+                    var val = MessageSerializer.DeserializeCompatible(type, reader.ReadBytes());
+                    Insert(key, val);
+                }
             }
         }
 
@@ -207,6 +241,51 @@ namespace ZeroLevel.Services.Collections
         public IEnumerable<string> Keys<T>()
         {
             return this[typeof(T)].Keys();
+        }
+
+        public void Save(string path)
+        {
+            using (var stream = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.None))
+            {
+                Save(stream);
+            }
+        }
+
+        public void Load(string path)
+        {
+            using (var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.None))
+            {
+                Load(stream);
+            }
+        }
+
+        public void Save(Stream stream)
+        {
+            using (var writer = new MemoryStreamWriter(stream))
+            {
+                var keys = _shardedRepositories.Keys.ToArray();
+                writer.WriteInt32(keys.Length);
+                for (int i = 0; i < keys.Length; i++)
+                {
+                    writer.WriteString(keys[i].FullName);
+                    writer.Write(_shardedRepositories[keys[i]]);
+                }
+            }
+        }
+
+        public void Load(Stream stream)
+        {
+            using (var reader = new MemoryStreamReader(stream))
+            {
+                var count = reader.ReadInt32();
+                for (int i = 0; i < count; i++)
+                {
+                    var typeName = reader.ReadString();
+                    var type = Type.GetType(typeName);
+                    var rep = reader.Read<ConcreteTypeRepository>(type);
+                    _shardedRepositories.TryAdd(rep.GetEntityType(), rep);
+                }
+            }
         }
     }
 }
