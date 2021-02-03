@@ -1,45 +1,61 @@
 ﻿using System;
 using System.Collections;
+using System.IO;
 using System.Runtime.CompilerServices;
 using ZeroLevel.Services.HashFunctions;
 
 namespace ZeroLevel.DataStructures
 {
-    /// <summary>
-    /// Bloom filter implementation, 128 bit
-    /// </summary>
     public class BloomFilter
     {
         #region Private
         private struct HIND
         {
-            public ulong PrimiryDirect;
-            public uint SecondDirect;
-            public ulong PrimiryReverse;
-            public uint SecondReverse;
+            public int IndexFirst;
+            public int IndexSecond;
+            public int IndexThird;
+            public int IndexReverse;
         }
 
-        private readonly BitArray _primary;
-        private readonly BitArray _second;
-
-        private readonly BitArray _r_primary;
-        private readonly BitArray _r_second;
-
-        private readonly bool _use_reverse = false;
+        private BitArray _primary;
+        private BitArray _second;
+        private BitArray _third;
+        private BitArray _reverse;
         #endregion
 
-        public BloomFilter(int bit_size, bool use_reverse)
+        public BloomFilter(int bit_size)
         {
-            _use_reverse = use_reverse;
-
+            var diff = bit_size % 8;
+            if (diff != 0)
+            {
+                bit_size += diff;
+            }
             _primary = new BitArray(bit_size);
             _second = new BitArray(bit_size);
+            _third = new BitArray(bit_size);
+            _reverse = new BitArray(bit_size);
+        }
 
-            if (_use_reverse)
+        private HIND Compute(string line)
+        {
+            var r = Reverse(line);
+            var first = HashMM(line) ^ StringHash.DotNetFullHash(line);
+            var second = HashXX(line) ^ StringHash.DotNetFullHash(r);
+            var third = HashMM(r) ^ StringHash.CustomHash(line);
+            var reverse = HashXX(r) ^ StringHash.CustomHash2(r);
+
+            var hind = new HIND
             {
-                _r_primary = new BitArray(bit_size);
-                _r_second = new BitArray(bit_size);
-            }
+                IndexFirst = (int)(first % _primary.Length),
+                IndexSecond = (int)(second % _second.Length),
+                IndexThird = (int)(third % _third.Length),
+                IndexReverse = (int)(reverse % _reverse.Length)
+            };
+            return hind;
+        }
+
+        private BloomFilter()
+        {
         }
 
         public void Add(string item)
@@ -70,22 +86,6 @@ namespace ZeroLevel.DataStructures
             return true;
         }
 
-        private HIND Compute(string line)
-        {
-            var hind = new HIND
-            {
-                PrimiryDirect = HashMM(line),
-                SecondDirect = HashXX(line),
-            };
-            if(_use_reverse)
-            { 
-                var r = Reverse(line);
-                hind.PrimiryReverse = HashMM(r);
-                hind.SecondReverse = HashXX(r);
-            }
-            return hind;
-        }
-
         public static string Reverse(string s)
         {
             char[] charArray = s.ToCharArray();
@@ -96,39 +96,20 @@ namespace ZeroLevel.DataStructures
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void Add(HIND hind)
         {
-            int pi = (int)(hind.PrimiryDirect % (ulong)_primary.Length);
-            _primary[pi] = true;
-
-            int si = (int)(hind.SecondDirect % (uint)_second.Length);
-            _second[si] = true;
-
-            if (_use_reverse)
-            {
-                int rpi = (int)(hind.PrimiryReverse % (ulong)_primary.Length);
-                _r_primary[rpi] = true;
-
-                int rsi = (int)(hind.SecondReverse % (uint)_second.Length);
-                _r_second[rsi] = true;
-            }
+            _primary[hind.IndexFirst] = true;
+            _second[hind.IndexSecond] = true;
+            _third[hind.IndexThird] = true;
+            _reverse[hind.IndexReverse] = true;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private bool Contains(HIND hind)
         {
-            int pi = (int)(hind.PrimiryDirect % (ulong)_primary.Length);
-            if (!_primary[pi]) return false;
+            if (!_primary[hind.IndexFirst]) return false;
+            if (!_second[hind.IndexSecond]) return false;
+            if (!_third[hind.IndexThird]) return false;
+            if (!_reverse[hind.IndexReverse]) return false;
 
-            int si = (int)(hind.SecondDirect % (uint)_second.Length);
-            if (!_second[si]) return false;
-
-            if (_use_reverse)
-            {
-                int rpi = (int)(hind.PrimiryReverse % (ulong)_primary.Length);
-                if (!_r_primary[rpi]) return false;
-
-                int rsi = (int)(hind.SecondReverse % (uint)_second.Length);
-                if (!_r_second[rsi]) return false;
-            }
             return true;
         }
 
@@ -144,6 +125,73 @@ namespace ZeroLevel.DataStructures
         private uint HashMM(string line)
         {
             return _hash_mm_32.Hash(line);
+        }
+
+        public bool IsEqual(BloomFilter other)
+        {
+            if (Equals(this._primary, other._primary) == false) return false;
+            if (Equals(this._second, other._second) == false) return false;
+            if (Equals(this._third, other._third) == false) return false;
+            if (Equals(this._reverse, other._reverse) == false) return false;
+            return true;
+        }
+
+        public bool Equals(BitArray first, BitArray second)
+        {
+            if (first.Length != second.Length)
+            {
+                return false;
+            }
+            for (int i = 0; i < first.Length; i++)
+            {
+                if (first[i] != second[i])
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        public byte[] Dump()
+        {
+            var add = new Action<MemoryStream, BitArray>((ms, arr) =>
+            {
+                int tc = arr.Length / 8;
+                ms.Write(BitConverter.GetBytes(tc), 0, 4);
+                byte[] t = new byte[tc];
+                arr.CopyTo(t, 0);
+                ms.Write(t, 0, tc);
+            });
+            using (var ms = new MemoryStream())
+            {
+                add(ms, _primary);
+                add(ms, _second);
+                add(ms, _third);
+                add(ms, _reverse);
+                return ms.ToArray();
+            }
+        }
+
+        public static BloomFilter Load(byte[] data)
+        {
+            var bf = new BloomFilter();
+            byte[] sizeArr = new byte[4];
+            var readArray = new Func<MemoryStream, BitArray>(stream =>
+            {
+                stream.Read(sizeArr, 0, 4);
+                int count = BitConverter.ToInt32(sizeArr, 0);
+                byte[] bfData = new byte[count];
+                stream.Read(bfData, 0, count);
+                return new BitArray(bfData);
+            });
+            using (var ms = new MemoryStream(data))
+            {
+                bf._primary = readArray(ms);
+                bf._second = readArray(ms);
+                bf._third = readArray(ms);
+                bf._reverse = readArray(ms);
+            }
+            return bf;
         }
     }
 }

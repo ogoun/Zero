@@ -83,6 +83,9 @@ namespace ZeroLevel.Services.PlainTextTables
 
         internal TextTableColumn[] Columns { get { return _columns; } }
         internal IEnumerable<TextTableRow> Rows { get { return _rows; } }
+        
+        public int RowsCount => _rows.Count;
+        public int ColumnsCount => _columns.Length;
 
         #endregion Properties
 
@@ -123,6 +126,11 @@ namespace ZeroLevel.Services.PlainTextTables
             }
             _rows.Add(new TextTableRow(cells.Select((c, i) => new TextTableCell(_columns[i], c)).ToArray()));
         }
+
+        /// <summary>
+        /// Remove all rows data.
+        /// </summary>
+        public void Clear() => _rows.Clear();
 
         #endregion API
     }

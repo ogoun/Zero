@@ -30,7 +30,7 @@ namespace ZeroLevel.UnitTests
                 lines.Add(RandomString(i % 9 + 5));
                 lines_another.Add(RandomString(i % 9 + 5));
             }
-            var bloom = new BloomFilter(16536 * 1024, true);
+            var bloom = new BloomFilter(16536 * 2048);
             // Act
             var sw = new Stopwatch();
             sw.Start();
@@ -75,7 +75,7 @@ namespace ZeroLevel.UnitTests
                 lines.Add(RandomString(i % 9 + 5));
                 lines_another.Add(RandomString(i % 9 + 5));
             }
-            var bloom = new HyperBloomBloom(64, 16536 * 1024, true);
+            var bloom = new HyperBloomBloom(16, 16536 * 4096);
             // Act
             var sw = new Stopwatch();
             sw.Start();
