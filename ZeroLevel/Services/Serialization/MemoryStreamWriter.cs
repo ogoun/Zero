@@ -35,6 +35,11 @@ namespace ZeroLevel.Services.Serialization
             _stream = stream;
         }
 
+        public MemoryStreamWriter(MemoryStreamWriter writer)
+        {
+            _stream = writer._stream;
+        }
+
         /// <summary>
         /// Record a boolean value (1 byte)
         /// </summary>

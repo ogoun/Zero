@@ -41,6 +41,13 @@ namespace ZeroLevel.Services.Serialization
             _stream = stream;
         }
 
+        public MemoryStreamReader(MemoryStreamReader reader)
+        {
+            if (reader == null)
+                throw new ArgumentNullException(nameof(reader));
+            _stream = reader._stream;
+        }
+
         /// <summary>
         /// Flag reading
         /// </summary>
