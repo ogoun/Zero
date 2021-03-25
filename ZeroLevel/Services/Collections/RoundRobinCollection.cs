@@ -99,6 +99,31 @@ namespace ZeroLevel.Services.Collections
             return false;
         }
 
+        public IEnumerable<T> MoveNextSeq()
+        {
+            _lock.EnterReadLock();
+            try
+            {
+                if (_collection.Count > 0)
+                {
+                    _index = Interlocked.Increment(ref _index) % _collection.Count;
+                    int p = 0;
+                    for (int i = _index; i < _collection.Count; i++, p++)
+                    {
+                        yield return _collection[i];
+                    }
+                    for (int i = 0; i < _index; i++, p++)
+                    {
+                        yield return _collection[i];
+                    }
+                }
+            }
+            finally
+            {
+                _lock.ExitReadLock();
+            }
+        }
+
         public bool MoveNextAndHandle(Action<T> handler)
         {
             _lock.EnterReadLock();
@@ -133,17 +158,15 @@ namespace ZeroLevel.Services.Collections
             _lock.EnterReadLock();
             try
             {
-                var arr = new T[_collection.Count];
                 int p = 0;
                 for (int i = _index; i < _collection.Count; i++, p++)
                 {
-                    arr[p] = _collection[i];
+                    yield return _collection[i];
                 }
                 for (int i = 0; i < _index; i++, p++)
                 {
-                    arr[p] = _collection[i];
+                    yield return _collection[i];
                 }
-                return arr;
             }
             finally
             {
