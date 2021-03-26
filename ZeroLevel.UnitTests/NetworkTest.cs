@@ -2,6 +2,7 @@
 using System.Threading;
 using Xunit;
 using ZeroLevel.Services.Applications;
+using ZeroLevel.Services.Network.Proxies;
 
 namespace ZeroLevel.Network
 {
@@ -61,6 +62,42 @@ namespace ZeroLevel.Network
                 Assert.True(got_response_message_no_request, "No response without request");
                 Assert.True(got_response_message_with_request, "No response with request");
             }
+        }
+
+        [Fact]
+        public void ProxyTest()
+        {
+            bool got_message_no_request = false;
+            bool got_message_with_request = false;
+
+            using (var proxy = new Proxy(NetUtils.CreateIPEndPoint("127.0.0.1:92")))
+            {
+                proxy.AppendServer(NetUtils.CreateIPEndPoint("127.0.0.1:93"));
+                proxy.Run();
+                var server = Exchange.UseHost(NetUtils.CreateIPEndPoint("127.0.0.1:93"));
+                server.RegisterInbox("empty", (_) =>
+                {
+                    got_message_no_request = true;
+                });
+                server.RegisterInbox<bool>((_, ___) =>
+                {
+                    got_message_with_request = true;
+                });
+
+                var client = Exchange.GetConnection(NetUtils.CreateIPEndPoint("127.0.0.1:92"));
+                int repeat = 10;
+
+                Assert.True(client.Send("empty"));
+                Assert.True(client.Send<bool>(true));
+                while (!got_message_no_request || !got_message_with_request)
+                {
+                    Thread.Sleep(200);
+                    repeat--;
+                    if (repeat == 0) break;
+                }                
+            }
+            Assert.True(got_message_no_request, "No signal for no request default inbox");
+            Assert.True(got_message_with_request, "No signal for default inbox");
         }
 
         protected override void StartAction()

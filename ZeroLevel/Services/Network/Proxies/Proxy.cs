@@ -1,10 +1,12 @@
-﻿using System.Net;
+﻿using System;
+using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 
 namespace ZeroLevel.Services.Network.Proxies
 {
     public class Proxy
+        : IDisposable
     {
         private readonly ProxyBalancer _balancer = new ProxyBalancer();
 
@@ -16,30 +18,60 @@ namespace ZeroLevel.Services.Network.Proxies
         {
             _incomingSocket = new Socket(listenEndpoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
             _incomingSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.NoDelay, true);
-            _incomingSocket.Bind(listenEndpoint);
-            _incomingSocket.Listen(100);
+            _incomingSocket.Bind(listenEndpoint);            
         }
 
-        public async Task Run()
+        public void Run()
         {
-            while (true)
+            Task.Factory.StartNew(async () =>
             {
-                var socket = await _incomingSocket.AcceptAsync();
-                // no await!
-                CreateProxyConnection(socket);
+                try
+                {
+                    _incomingSocket.Listen(100);
+                    while (true)
+                    {
+                        var socket = await _incomingSocket.AcceptAsync();
+                        // no await!
+                        Task.Run(async () =>
+                        {
+                           await CreateProxyConnection(socket);
+                        });
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex, "[Proxy.Run]");
+                }
+            });
+        }
+
+        private async Task CreateProxyConnection(Socket connection)
+        {
+            try
+            {
+                var endpoint = _balancer.GetServerProxy();
+                var server = new Socket(endpoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+                server.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.NoDelay, true);
+                server.Connect(endpoint);
+                using (var bind = new ProxyBinding(connection, server))
+                {
+                    await bind.Bind();
+                }
+            }
+            catch (Exception ex)
+            { 
             }
         }
 
-        public async Task CreateProxyConnection(Socket connection)
+        public void Dispose()
         {
-            var endpoint = _balancer.GetServerProxy();
-            var server = new Socket(endpoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-            server.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.NoDelay, true);
-            server.Bind(endpoint);
-            using (var bind = new ProxyBinding(connection, server))
+            try
             {
-                await bind.Bind();
+                _incomingSocket.Shutdown(SocketShutdown.Both);
+                _incomingSocket.Dispose();
             }
+            catch (Exception ex)
+            { }
         }
     }
 }

@@ -6,16 +6,16 @@
 </Description>
     <Authors>ogoun</Authors>
     <Company>ogoun</Company>
-    <AssemblyVersion>3.3.5.1</AssemblyVersion>
-    <PackageReleaseNotes>Light Fix in MemoryStreamWriter, MemoryStreamReader</PackageReleaseNotes>
+    <AssemblyVersion>3.3.5.2</AssemblyVersion>
+    <PackageReleaseNotes>Added tcp proxy</PackageReleaseNotes>
     <PackageProjectUrl>https://github.com/ogoun/Zero/wiki</PackageProjectUrl>
-    <Copyright>Copyright Ogoun 2020</Copyright>
+    <Copyright>Copyright Ogoun 2021</Copyright>
     <PackageLicenseUrl></PackageLicenseUrl>
     <PackageIconUrl></PackageIconUrl>
     <RepositoryUrl>https://github.com/ogoun/Zero</RepositoryUrl>
     <RepositoryType>GitHub</RepositoryType>
-    <Version>3.3.5.1</Version>
-    <FileVersion>3.3.5.1</FileVersion>
+    <Version>3.3.5.2</Version>
+    <FileVersion>3.3.5.2</FileVersion>
     <Platforms>AnyCPU;x64;x86</Platforms>
     <PackageIcon>zero.png</PackageIcon>
   </PropertyGroup>
