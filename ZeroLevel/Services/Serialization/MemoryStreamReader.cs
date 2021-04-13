@@ -242,7 +242,7 @@ namespace ZeroLevel.Services.Serialization
         public bool CheckOutOfRange(int offset)
         {
             return (_stream.Position + offset) > _stream.Length;
-        }        
+        }
 
         #region Extensions
 
@@ -528,6 +528,251 @@ namespace ZeroLevel.Services.Serialization
                 }
             }
             return collection;
+        }
+        #endregion
+
+        #region Collections lazy
+        public IEnumerable<T> ReadCollectionLazy<T>()
+            where T : IBinarySerializable, new()
+        {
+            int count = ReadInt32();
+            if (count > 0)
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    var item = new T();
+                    item.Deserialize(this);
+                    yield return item;
+                }
+            }
+        }
+
+        public IEnumerable<string> ReadStringCollectionLazy()
+        {
+            int count = ReadInt32();
+            if (count > 0)
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    yield return ReadString();
+                }
+            }
+        }
+
+        public IEnumerable<IPAddress> ReadIPCollectionLazy()
+        {
+            int count = ReadInt32();
+            if (count > 0)
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    yield return ReadIP();
+                }
+            }
+        }
+
+        public IEnumerable<IPEndPoint> ReadIPEndPointCollectionLazy()
+        {
+            int count = ReadInt32();
+            if (count > 0)
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    yield return ReadIPEndpoint();
+                }
+            }
+        }
+
+        public IEnumerable<Guid> ReadGuidCollectionLazy()
+        {
+            int count = ReadInt32();
+            if (count > 0)
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    yield return ReadGuid();
+                }
+            }
+        }
+
+        public IEnumerable<DateTime> ReadDateTimeCollectionLazy()
+        {
+            int count = ReadInt32();
+            if (count > 0)
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    yield return ReadDateTime() ?? DateTime.MinValue;
+                }
+            }
+        }
+
+        public IEnumerable<Int64> ReadInt64CollectionLazy()
+        {
+            int count = ReadInt32();
+            if (count > 0)
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    yield return ReadLong();
+                }
+            }
+        }
+
+        public IEnumerable<Int32> ReadInt32CollectionLazy()
+        {
+            int count = ReadInt32();
+            if (count > 0)
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    yield return ReadInt32();
+                }
+            }
+        }
+
+        public IEnumerable<UInt64> ReadUInt64CollectionLazy()
+        {
+            int count = ReadInt32();
+            if (count > 0)
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    yield return ReadULong();
+                }
+            }
+        }
+
+        public IEnumerable<UInt32> ReadUInt32CollectionLazy()
+        {
+            int count = ReadInt32();
+            if (count > 0)
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    yield return ReadUInt32();
+                }
+            }
+        }
+
+        public IEnumerable<char> ReadCharCollectionLazy()
+        {
+            int count = ReadInt32();
+            if (count > 0)
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    yield return ReadChar();
+                }
+            }
+        }
+
+        public IEnumerable<short> ReadShortCollectionLazy()
+        {
+            int count = ReadInt32();
+            if (count > 0)
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    yield return ReadShort();
+                }
+            }
+        }
+
+        public IEnumerable<ushort> ReadUShortCollectionLazy()
+        {
+            int count = ReadInt32();
+            if (count > 0)
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    yield return ReadUShort();
+                }
+            }
+        }
+
+        public IEnumerable<float> ReadFloatCollectionLazy()
+        {
+            int count = ReadInt32();
+            if (count > 0)
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    yield return ReadFloat();
+                }
+            }
+        }
+
+        public IEnumerable<Double> ReadDoubleCollectionLazy()
+        {
+            int count = ReadInt32();
+            if (count > 0)
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    yield return ReadDouble();
+                }
+            }
+        }
+
+        public IEnumerable<bool> ReadBooleanCollectionLazy()
+        {
+            int count = ReadInt32();
+            if (count > 0)
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    yield return ReadBoolean();
+                }
+            }
+        }
+
+        public IEnumerable<byte> ReadByteCollectionLazy()
+        {
+            int count = ReadInt32();
+            if (count > 0)
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    yield return ReadByte();
+                }
+            }
+        }
+
+        public IEnumerable<byte[]> ReadByteArrayCollectionLazy()
+        {
+            int count = ReadInt32();
+            if (count > 0)
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    yield return ReadBytes();
+                }
+            }
+        }
+
+        public IEnumerable<decimal> ReadDecimalCollectionLazy()
+        {
+            int count = ReadInt32();
+            if (count > 0)
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    yield return ReadDecimal();
+                }
+            }
+        }
+
+        public IEnumerable<TimeSpan> ReadTimeSpanCollectionLazy()
+        {
+            int count = ReadInt32();
+            if (count > 0)
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    yield return ReadTimeSpan();
+                }
+            }
         }
         #endregion
 

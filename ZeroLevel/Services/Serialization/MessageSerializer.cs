@@ -120,6 +120,27 @@ namespace ZeroLevel.Services.Serialization
             return collection;
         }
 
+        public static IEnumerable<T> DeserializeCollectionLazy<T>(byte[] data)
+           where T : IBinarySerializable
+        {
+            if (data != null && data.Length > 0)
+            {
+                using (var reader = new MemoryStreamReader(data))
+                {
+                    int count = reader.ReadInt32();
+                    if (count > 0)
+                    {
+                        for (int i = 0; i < count; i++)
+                        {
+                            var item = Activator.CreateInstance<T>();
+                            item.Deserialize(reader);
+                            yield return item;
+                        }
+                    }
+                }
+            }
+        }
+
         public static T DeserializeCompatible<T>(byte[] data)
         {
             if (data == null || data.Length == 0) return default(T);
@@ -320,6 +341,27 @@ namespace ZeroLevel.Services.Serialization
                 }
             }
             return collection;
+        }
+
+        public static IEnumerable<T> DeserializeCollectionLazy<T>(Stream stream)
+           where T : IBinarySerializable
+        {
+            if (stream != null)
+            {
+                using (var reader = new MemoryStreamReader(stream))
+                {
+                    int count = reader.ReadInt32();
+                    if (count > 0)
+                    {
+                        for (int i = 0; i < count; i++)
+                        {
+                            var item = Activator.CreateInstance<T>();
+                            item.Deserialize(reader);
+                            yield return item;
+                        }
+                    }
+                }
+            }
         }
 
         public static T DeserializeCompatible<T>(Stream stream)

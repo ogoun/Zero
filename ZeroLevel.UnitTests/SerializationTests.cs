@@ -48,7 +48,7 @@ namespace ZeroLevel.Serialization
         {
             // Act
             var data = MessageSerializer.SerializeCompatible<IEnumerable<T>>(value);
-            var clone = MessageSerializer.DeserializeCompatible<IEnumerable<T>>(data);
+            var clone = MessageSerializer.DeserializeCompatible<IEnumerable<T>>(data);            
 
             // Assert
             if (value == null && clone != null && !clone.Any()) return; // OK
@@ -509,6 +509,26 @@ namespace ZeroLevel.Serialization
             });
 
             MakePrimitiveTest<Document>(CompositeInstanceFactory.MakeDocument(), comparator);
+        }
+
+        [Fact]
+        public void SerializeCompositeOnjectCollection()
+        {
+            var comparator = new Func<Document, Document, bool>((left, right) =>
+            {
+                var l_bin = MessageSerializer.Serialize(left);
+                var r_bin = MessageSerializer.Serialize(right);
+                return ArrayExtensions.UnsafeEquals(l_bin, r_bin);
+            });
+            var collection = new Document[] { CompositeInstanceFactory.MakeDocument(), CompositeInstanceFactory.MakeDocument(), CompositeInstanceFactory.MakeDocument() };
+
+            var data = MessageSerializer.Serialize<Document>(collection);
+            var restored = MessageSerializer.DeserializeCollection<Document>(data);
+            var restored_lazy = MessageSerializer.DeserializeCollectionLazy<Document>(data);
+
+            // Assert
+            Assert.True(CollectionComparsionExtensions.OrderingEquals<Document>(collection, restored, comparator));
+            Assert.True(CollectionComparsionExtensions.OrderingEquals<Document>(collection, restored_lazy, comparator));
         }
 
         [Fact]

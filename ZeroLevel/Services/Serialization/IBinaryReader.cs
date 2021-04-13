@@ -94,6 +94,30 @@ namespace ZeroLevel.Services.Serialization
         List<ushort> ReadUShortCollection();
         #endregion
 
+        #region Collections lazy
+        IEnumerable<T> ReadCollectionLazy<T>()
+            where T : IBinarySerializable, new();
+        IEnumerable<string> ReadStringCollectionLazy();
+        IEnumerable<IPAddress> ReadIPCollectionLazy();
+        IEnumerable<IPEndPoint> ReadIPEndPointCollectionLazy();
+        IEnumerable<Guid> ReadGuidCollectionLazy();
+        IEnumerable<DateTime> ReadDateTimeCollectionLazy();
+        IEnumerable<Int64> ReadInt64CollectionLazy();
+        IEnumerable<Int32> ReadInt32CollectionLazy();
+        IEnumerable<UInt64> ReadUInt64CollectionLazy();
+        IEnumerable<UInt32> ReadUInt32CollectionLazy();
+        IEnumerable<char> ReadCharCollectionLazy();
+        IEnumerable<short> ReadShortCollectionLazy();
+        IEnumerable<ushort> ReadUShortCollectionLazy();
+        IEnumerable<float> ReadFloatCollectionLazy();
+        IEnumerable<Double> ReadDoubleCollectionLazy();
+        IEnumerable<bool> ReadBooleanCollectionLazy();
+        IEnumerable<byte> ReadByteCollectionLazy();
+        IEnumerable<byte[]> ReadByteArrayCollectionLazy();
+        IEnumerable<decimal> ReadDecimalCollectionLazy();
+        IEnumerable<TimeSpan> ReadTimeSpanCollectionLazy();
+        #endregion
+
         T Read<T>() where T : IBinarySerializable;
         T Read<T>(object arg) where T : IBinarySerializable;
 

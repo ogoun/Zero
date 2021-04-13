@@ -6,16 +6,16 @@
 </Description>
     <Authors>ogoun</Authors>
     <Company>ogoun</Company>
-    <AssemblyVersion>3.3.5.2</AssemblyVersion>
-    <PackageReleaseNotes>Added tcp proxy</PackageReleaseNotes>
+    <AssemblyVersion>3.3.5.3</AssemblyVersion>
+    <PackageReleaseNotes>Collection lazy deserialization</PackageReleaseNotes>
     <PackageProjectUrl>https://github.com/ogoun/Zero/wiki</PackageProjectUrl>
     <Copyright>Copyright Ogoun 2021</Copyright>
     <PackageLicenseUrl></PackageLicenseUrl>
     <PackageIconUrl></PackageIconUrl>
     <RepositoryUrl>https://github.com/ogoun/Zero</RepositoryUrl>
     <RepositoryType>GitHub</RepositoryType>
-    <Version>3.3.5.2</Version>
-    <FileVersion>3.3.5.2</FileVersion>
+    <Version>3.3.5.3</Version>
+    <FileVersion>3.3.5.3</FileVersion>
     <Platforms>AnyCPU;x64;x86</Platforms>
     <PackageIcon>zero.png</PackageIcon>
   </PropertyGroup>

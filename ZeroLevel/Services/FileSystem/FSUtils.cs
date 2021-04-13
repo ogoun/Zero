@@ -2,7 +2,6 @@
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
-using System.Security.AccessControl;
 using System.Threading;
 
 namespace ZeroLevel.Services.FileSystem
@@ -306,8 +305,17 @@ namespace ZeroLevel.Services.FileSystem
         }
 
         public static bool IsDirectoryEmpty(string path)
-        {            
+        {
             return !Directory.EnumerateFileSystemEntries(path).Any();
+        }
+
+        public static string GetAbsolutePath(string path)
+        {
+            if (Path.IsPathRooted(path) == false)
+            {
+                path = Path.Combine(Configuration.BaseDirectory, path);
+            }
+            return Path.GetFullPath(path);
         }
     }
 }
