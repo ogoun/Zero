@@ -78,7 +78,9 @@ namespace ZeroLevel.Services.FileSystem
             {
                 return;
             }
-            OnStartMovingFilesToTemporary?.Invoke(files.Length);
+            foreach (Action<int> startFilesMoveingCallback in OnStartMovingFilesToTemporary.GetInvocationList())
+                startFilesMoveingCallback.BeginInvoke(files.Length, null, null);
+
             foreach (var file in files)
             {
                 if (!File.Exists(file))
@@ -100,7 +102,9 @@ namespace ZeroLevel.Services.FileSystem
                         Log.SystemWarning($"[PeriodicFileSystemWatcher.CheckSourceFolder] Failed to move file '{file}' to temporary directory '{_temporaryFolder}'. Without system error!");
                         continue;
                     }
-                    OnMovingFileToTemporary?.Invoke(file, tempFile);
+
+                    foreach (Action<string,string> moveFileToTempCallback in OnMovingFileToTemporary.GetInvocationList())
+                        moveFileToTempCallback.BeginInvoke(file, tempFile, null, null);
                 }
                 catch (Exception ex)
                 {
@@ -110,7 +114,7 @@ namespace ZeroLevel.Services.FileSystem
                 Log.Debug($"[PeriodicFileSystemWatcher.CheckSourceFolder] Handle file {file}");
                 try
                 {
-                    _callback(new FileMeta(Path.GetFileName(file), tempFile));
+                    _callback.Invoke(new FileMeta(Path.GetFileName(file), tempFile));
                 }
                 catch (Exception ex)
                 {
@@ -128,7 +132,8 @@ namespace ZeroLevel.Services.FileSystem
                     Log.SystemError(ex, $"[PeriodicFileSystemWatcher.CheckSourceFolder] Fault delete file {tempFile}");
                 }
             }
-            OnCompleteMovingFilesToTemporary?.Invoke();
+            foreach (Action completeFileMovingCallback in OnCompleteMovingFilesToTemporary.GetInvocationList())
+                completeFileMovingCallback.BeginInvoke(null, null);
         }
 
         /// <summary>

@@ -59,7 +59,8 @@ namespace ZeroLevel.Services.Network.Proxies
                 }
             }
             catch (Exception ex)
-            { 
+            {
+                Log.SystemError(ex, "[Proxy.CreateProxyConnection]");
             }
         }
 
@@ -71,7 +72,9 @@ namespace ZeroLevel.Services.Network.Proxies
                 _incomingSocket.Dispose();
             }
             catch (Exception ex)
-            { }
+            {
+                Log.SystemError(ex, "[Proxy.Dispose]");
+            }
         }
     }
 }
