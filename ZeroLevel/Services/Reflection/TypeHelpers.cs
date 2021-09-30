@@ -204,5 +204,16 @@ namespace ZeroLevel.Services.Reflection
             }
             return FormatterServices.GetUninitializedObject(type);
         }
+
+        public static Type GetElementTypeOfEnumerable(object o)
+        {
+            var enumerable = o as IEnumerable;
+            if (enumerable == null)
+                return null;
+            Type[] interfaces = enumerable.GetType().GetInterfaces();
+            return (from i in interfaces
+                    where i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IEnumerable<>)
+                    select i.GetGenericArguments()[0]).FirstOrDefault();
+        }
     }
 }
