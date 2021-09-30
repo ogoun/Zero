@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace ZeroLevel
@@ -71,6 +72,14 @@ namespace ZeroLevel
                 || array.Length == 0
                 || candidate.Length == 0
                 || candidate.Length > array.Length;
+        }
+
+        public static IEnumerable<T> GetRow<T>(T[,] array, int row)
+        {
+            for (int i = 0; i < array.GetLength(1); i++)
+            {
+                yield return array[row, i];
+            }
         }
 
         public static bool Equals(byte[] first, byte[] second)

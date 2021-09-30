@@ -161,7 +161,7 @@ namespace ZeroLevel.Services.FileSystem
             }
             foreach (var file in files)
             {
-                var filepath = Path.Combine(tmp, file.FullName.Replace(sourceFolder, string.Empty).TrimStart('\\'));
+                var filepath = Path.Combine(tmp, file.FullName.Replace(sourceFolder, string.Empty).TrimStart('\\', '/'));
                 var filedir = Path.GetDirectoryName(filepath);
                 if (false == Directory.Exists(filedir))
                 {

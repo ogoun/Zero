@@ -1,6 +1,6 @@
 ﻿namespace ZeroLevel.Services.Serialization
 {
-    internal static class JsonEscaper
+    public static class JsonEscaper
     {
         /// <summary>
         /// Checking if needed escaping string for use as json value
