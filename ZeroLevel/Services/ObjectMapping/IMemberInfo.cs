@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reflection;
 
 namespace ZeroLevel.Services.ObjectMapping
 {
@@ -13,5 +14,6 @@ namespace ZeroLevel.Services.ObjectMapping
         Type ClrType { get; }
         Action<object, object> Setter { get; }
         Func<object, object> Getter { get; }
+        MemberInfo Original { get; }
     }
 }

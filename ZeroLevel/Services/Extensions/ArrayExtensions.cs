@@ -65,7 +65,7 @@ namespace ZeroLevel
             return false;
         }
 
-        private static bool IsEmptyLocate<T>(T[] array, T[] candidate)
+        private static bool IsEmptyLocate<T>(this T[] array, T[] candidate)
         {
             return array == null
                 || candidate == null
@@ -74,11 +74,19 @@ namespace ZeroLevel
                 || candidate.Length > array.Length;
         }
 
-        public static IEnumerable<T> GetRow<T>(T[,] array, int row)
+        public static IEnumerable<T> GetRow<T>(this T[,] array, int row)
         {
             for (int i = 0; i < array.GetLength(1); i++)
             {
                 yield return array[row, i];
+            }
+        }
+
+        public static IEnumerable<T> GetColumn<T>(this T[,] array, int column)
+        {
+            for (int i = 0; i < array.GetLength(0); i++)
+            {
+                yield return array[i, column];
             }
         }
 

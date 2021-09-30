@@ -6,16 +6,16 @@
 </Description>
     <Authors>ogoun</Authors>
     <Company>ogoun</Company>
-    <AssemblyVersion>3.3.5.3</AssemblyVersion>
-    <PackageReleaseNotes>Collection lazy deserialization</PackageReleaseNotes>
+    <AssemblyVersion>3.3.5.5</AssemblyVersion>
+    <PackageReleaseNotes>Update TypeMapper</PackageReleaseNotes>
     <PackageProjectUrl>https://github.com/ogoun/Zero/wiki</PackageProjectUrl>
     <Copyright>Copyright Ogoun 2021</Copyright>
     <PackageLicenseUrl></PackageLicenseUrl>
     <PackageIconUrl></PackageIconUrl>
     <RepositoryUrl>https://github.com/ogoun/Zero</RepositoryUrl>
     <RepositoryType>GitHub</RepositoryType>
-    <Version>3.3.5.3</Version>
-    <FileVersion>3.3.5.3</FileVersion>
+    <Version>3.3.5.5</Version>
+    <FileVersion>3.3.5.5</FileVersion>
     <Platforms>AnyCPU;x64;x86</Platforms>
     <PackageIcon>zero.png</PackageIcon>
   </PropertyGroup>

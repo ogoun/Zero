@@ -12,8 +12,9 @@ namespace ZeroLevel.Services.ObjectMapping
         public bool IsField { get; set; }
         public string Name { get; set; }
         public Type ClrType { get; set; }
-        public Action<object, object> Setter { get; set; }
-        public Func<object, object> Getter { get; set; }
+        public Action<object, object> Setter { get; private set; }
+        public Func<object, object> Getter { get; private set; }
+        public MemberInfo Original { get; private set; }
 
         #endregion Properties
 
@@ -57,7 +58,8 @@ namespace ZeroLevel.Services.ObjectMapping
         {
             var field = new MapMemberInfo(TypeGetterSetterBuilder.BuildSetter(fieldInfo), TypeGetterSetterBuilder.BuildGetter(fieldInfo))
             {
-                Name = fieldInfo.Name
+                Name = fieldInfo.Name,
+                Original = fieldInfo
             };
             field.IsField = true;
             var type = fieldInfo.FieldType;
@@ -69,7 +71,8 @@ namespace ZeroLevel.Services.ObjectMapping
         {
             var field = new MapMemberInfo(TypeGetterSetterBuilder.BuildSetter(propertyInfo), TypeGetterSetterBuilder.BuildGetter(propertyInfo))
             {
-                Name = propertyInfo.Name
+                Name = propertyInfo.Name,
+                Original = propertyInfo
             };
             field.IsField = false;
             var type = propertyInfo.PropertyType;
