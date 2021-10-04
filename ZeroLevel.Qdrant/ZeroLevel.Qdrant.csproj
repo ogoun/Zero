@@ -9,6 +9,9 @@
     <PackageProjectUrl>https://github.com/ogoun/Zero</PackageProjectUrl>
     <PackageIcon>zero.png</PackageIcon>
     <PackageIconUrl />
+    <RepositoryUrl>https://github.com/ogoun/Zero</RepositoryUrl>
+    <RepositoryType>GitHub</RepositoryType>
+    <Description>Client for qdrant API</Description>
   </PropertyGroup>
 
   <ItemGroup>
