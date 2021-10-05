@@ -171,8 +171,7 @@ namespace ZeroLevel.Qdrant
                 var points = new PointsRequest { ids = ids };
                 var json = JsonConvert.SerializeObject(points);
                 var data = new StringContent(json, Encoding.UTF8, "application/json");
-                var url = $"/collections/{collection_name}/points";
-
+                string url = $"/collections/{collection_name}/points";
                 var response = await _request<PointResponse>(url, new HttpMethod("POST"), data);
                 return InvokeResult.Succeeding<PointResponse>(response);
             }
@@ -182,6 +181,30 @@ namespace ZeroLevel.Qdrant
                 return InvokeResult.Fault<PointResponse>($"[QdrantClient.Points]  Collection name: {collection_name}.\r\n{ex.ToString()}");
             }
         }
+
+        /// <summary>
+        /// There is a method for retrieving points by their ids.
+        /// </summary>
+        public async Task<InvokeResult<ScrollResponse>> Scroll(string collection_name, Filter filter, long limit, long offset = 0, bool with_vector = true, bool with_payload = true)
+        {
+            try
+            {
+                var scroll = new ScrollRequest { Filter = filter, Limit = limit, Offset = offset, WithPayload = with_payload, WithVector = with_vector };
+                var json = scroll.ToJson();
+                var data = new StringContent(json, Encoding.UTF8, "application/json");
+                string url = url = $"/collections/{collection_name}/points/scroll";
+
+                var response = await _request<ScrollResponse>(url, new HttpMethod("POST"), data);
+                return InvokeResult.Succeeding<ScrollResponse>(response);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, $"[QdrantClient.Scroll] Collection name: {collection_name}.");
+                return InvokeResult.Fault<ScrollResponse>($"[QdrantClient.Scroll]  Collection name: {collection_name}.\r\n{ex.ToString()}");
+            }
+        }
+
+
         /// <summary>
         /// Record-oriented of creating batches
         /// </summary>
