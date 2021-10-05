@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
     <Platforms>AnyCPU;x64;x86</Platforms>
-    <Version>1.0.0.0</Version>
+    <Version>1.0.0.1</Version>
     <Authors>ogoun</Authors>
     <Copyright>Copyright Ogoun 2021</Copyright>
     <PackageProjectUrl>https://github.com/ogoun/Zero</PackageProjectUrl>
@@ -12,6 +12,7 @@
     <RepositoryUrl>https://github.com/ogoun/Zero</RepositoryUrl>
     <RepositoryType>GitHub</RepositoryType>
     <Description>Client for qdrant API</Description>
+    <PackageReleaseNotes>Added the Scroll method</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
