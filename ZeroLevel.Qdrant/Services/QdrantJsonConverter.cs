@@ -100,25 +100,25 @@ namespace ZeroLevel.Qdrant.Services
                         if (TypeHelpers.IsEnumerable(member.ClrType) && TypeHelpers.IsString(member.ClrType) == false)
                         {
                             var arr = val as IEnumerable;
-                            json.Append($"\"{member.Name}\": {{ \"type\": \"keyword\", \"value\": [ {string.Join(", ", E(arr).Select(v => KeywordToString(member, v)))}] }},");
+                            json.Append($"\"{member.Name.ToLowerInvariant()}\": {{ \"type\": \"keyword\", \"value\": [ {string.Join(", ", E(arr).Select(v => KeywordToString(member, v)))}] }},");
                         }
                         else
                         {
-                            json.Append($"\"{member.Name}\": {{ \"type\": \"keyword\", \"value\":{KeywordToString(member, val)} }},");
+                            json.Append($"\"{member.Name.ToLowerInvariant()}\": {{ \"type\": \"keyword\", \"value\":{KeywordToString(member, val)} }},");
                         }
                         break;
                     case GEO_TYPE:
                         if (TypeHelpers.IsEnumerable(member.ClrType) && TypeHelpers.IsString(member.ClrType) == false)
                         {
                             var arr = val as IEnumerable;
-                            json.Append($"\"{member.Name}\": {{ \"type\": \"geo\", \"value\": [ {string.Join(",", E(arr).Select(v => v as Location).Where(l => l != null).Select(l => $" {{ \"lon\":{l.lon.ConvertToString()}, \"lat\":{l.lat.ConvertToString()} }}"))}] }},");
+                            json.Append($"\"{member.Name.ToLowerInvariant()}\": {{ \"type\": \"geo\", \"value\": [ {string.Join(",", E(arr).Select(v => v as Location).Where(l => l != null).Select(l => $" {{ \"lon\":{l.lon.ConvertToString()}, \"lat\":{l.lat.ConvertToString()} }}"))}] }},");
                         }
                         else
                         {
                             Location l = val as Location;
                             if (l != null)
                             {
-                                json.Append($"\"{member.Name}\": {{ \"type\": \"geo\", \"value\": {{ \"lon\":{l.lon.ConvertToString()}, \"lat\":{l.lat.ConvertToString()} }} }},");
+                                json.Append($"\"{member.Name.ToLowerInvariant()}\": {{ \"type\": \"geo\", \"value\": {{ \"lon\":{l.lon.ConvertToString()}, \"lat\":{l.lat.ConvertToString()} }} }},");
                             }
                         }
                         break;
@@ -126,23 +126,23 @@ namespace ZeroLevel.Qdrant.Services
                         if (TypeHelpers.IsEnumerable(member.ClrType) && TypeHelpers.IsString(member.ClrType) == false)
                         {
                             var arr = val as IEnumerable;
-                            json.Append($"\"{member.Name}\": {{ \"type\": \"float\", \"value\": [ {string.Join(",", E(arr).Select(v => Convert.ToDouble(v).ConvertToString()))}] }},");
+                            json.Append($"\"{member.Name.ToLowerInvariant()}\": {{ \"type\": \"float\", \"value\": [ {string.Join(",", E(arr).Select(v => Convert.ToDouble(v).ConvertToString()))}] }},");
                         }
                         else
                         {
 
-                            json.Append($"\"{member.Name}\": {{ \"type\": \"float\", \"value\": {Convert.ToDouble(val).ConvertToString()} }},");
+                            json.Append($"\"{member.Name.ToLowerInvariant()}\": {{ \"type\": \"float\", \"value\": {Convert.ToDouble(val).ConvertToString()} }},");
                         }
                         break;
                     case INTEGER_TYPE:
                         if (TypeHelpers.IsEnumerable(member.ClrType) && TypeHelpers.IsString(member.ClrType) == false)
                         {
                             var arr = val as IEnumerable;
-                            json.Append($"\"{member.Name}\": {{ \"type\": \"integer\", \"value\": [ {string.Join(",", E(arr).Select(v => Convert.ToInt64(v)))}] }},");
+                            json.Append($"\"{member.Name.ToLowerInvariant()}\": {{ \"type\": \"integer\", \"value\": [ {string.Join(",", E(arr).Select(v => Convert.ToInt64(v)))}] }},");
                         }
                         else
                         {
-                            json.Append($"\"{member.Name}\": {{ \"type\": \"integer\", \"value\": {Convert.ToInt64(val)}  }},");
+                            json.Append($"\"{member.Name.ToLowerInvariant()}\": {{ \"type\": \"integer\", \"value\": {Convert.ToInt64(val)}  }},");
                         }
                         break;
                 }

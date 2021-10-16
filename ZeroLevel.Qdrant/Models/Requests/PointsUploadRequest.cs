@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Text;
 using ZeroLevel.Qdrant.Services;
 using ZeroLevel.Services.Collections;
@@ -35,11 +36,20 @@ namespace ZeroLevel.Qdrant.Models.Requests
             }
             var converter = _cachee.Get<QdrantJsonConverter<T>>("converter");
 
+            Func<UpsertPoint<T>, string> p_conv = up =>
+            {
+                if (up.id != null)
+                {
+                    return $"\"id\": {up.id}, \"payload\": {{ {converter.ToJson(up.payload)} }}, \"vector\": [{ string.Join(",", up.vector.Select(f => f.ConvertToString()))}]";
+                }
+                return $"\"payload\": {{ {converter.ToJson(up.payload)} }}, \"vector\": [{ string.Join(",", up.vector.Select(f => f.ConvertToString()))}]";
+            };
+
             var json = new StringBuilder();
             json.Append("{");
             json.Append("\"upsert_points\": {");
             json.Append("\"points\":[ {");
-            json.Append(string.Join("},{", upsert_points.points.Select(p => $"\"id\": {p.id}, \"payload\": {{ {converter.ToJson(p.payload)} }}, \"vector\": [{ string.Join(",", p.vector.Select(f => f.ConvertToString()))}]")));
+            json.Append(string.Join("},{", upsert_points.points.Select(p => p_conv(p))));
             json.Append("}]");
             json.Append("}");
             json.Append("}");
@@ -76,7 +86,10 @@ namespace ZeroLevel.Qdrant.Models.Requests
             json.Append("{");
             json.Append("\"upsert_points\": {");
             json.Append("\"batch\": {");
-            json.Append($"\"ids\": [{string.Join(",", upsert_points.batch.ids)}], ");
+            if (upsert_points.batch.ids != null && upsert_points.batch.ids.Length > 0)
+            {
+                json.Append($"\"ids\": [{string.Join(",", upsert_points.batch.ids)}], ");
+            }
             json.Append($"\"payloads\": [ {{ {string.Join("} ,{ ", upsert_points.batch.payloads.Select(payload => converter.ToJson(payload)))} }} ], ");
             json.Append($"\"vectors\": [{string.Join(",", Enumerable.Range(0, upsert_points.batch.vectors.GetLength(0)).Select(row => "[" + string.Join(",", ArrayExtensions.GetRow(upsert_points.batch.vectors, row).Select(f => f.ConvertToString())) + "]"))}]");
             json.Append("}");

@@ -33,7 +33,7 @@ namespace ZeroLevel.Qdrant.Models.Filters
             {
                 case GroupOperator.MustNot: op = "must_not"; break;
                 case GroupOperator.Must: op = "must"; break;
-                default: op = "mushould"; break;
+                default: op = "should"; break;
             }
             return $"\"{op}\": [{string.Join(",", _items.Select(i => i.ToJSON()))}]";
         }

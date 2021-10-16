@@ -26,27 +26,27 @@
         {
             return new Condition
             {
-                Json = $"{{ \"key\": \"{name}\", \"match\": {{ \"integer\": \"{value}\" }} }}"
+                Json = $"{{ \"key\": \"{name.ToLowerInvariant()}\", \"match\": {{ \"integer\": {value} }} }}"
             };
         }
 
         public static Condition IntegerRange(string name, long left, long rigth, bool include_left, bool include_right)
         {
-            var left_cond = include_left ? $"\"lt\": null,\"lte\": {left}" : $"\"lt\": {left},\"lte\": null";
-            var right_cond = include_right ? $"\"gt\": null,\"gte\": {rigth}" : $"\"gt\": {rigth},\"gte\": null";
+            var left_cond = include_left ? $"\"lt\": null,\"lte\": {rigth}" : $"\"lt\": {rigth},\"lte\": null";
+            var right_cond = include_right ? $"\"gt\": null,\"gte\": {left}" : $"\"gt\": {left},\"gte\": null";
             return new Condition
             {
-                Json = $"{{ \"key\": \"{name}\", \"range\": {{ {right_cond}, {left_cond} }} }}"
+                Json = $"{{ \"key\": \"{name.ToLowerInvariant()}\", \"range\": {{ {right_cond}, {left_cond} }} }}"
             };
         }
 
         public static Condition FloatRange(string name, double left, double rigth, bool include_left, bool include_right)
         {
-            var left_cond = include_left ? $"\"lt\": null,\"lte\": {left.ConvertToString()}" : $"\"lt\": {left.ConvertToString()},\"lte\": null";
-            var right_cond = include_right ? $"\"gt\": null,\"gte\": {rigth.ConvertToString()}" : $"\"gt\": {rigth.ConvertToString()},\"gte\": null";
+            var left_cond = include_left ? $"\"lt\": null,\"lte\": {rigth.ConvertToString()}" : $"\"lt\": {rigth.ConvertToString()},\"lte\": null";
+            var right_cond = include_right ? $"\"gt\": null,\"gte\": {left.ConvertToString()}" : $"\"gt\": {left.ConvertToString()},\"gte\": null";
             return new Condition
             {
-                Json = $"{{ \"key\": \"{name}\", \"range\": {{ {left_cond}, {right_cond} }} }}"
+                Json = $"{{ \"key\": \"{name.ToLowerInvariant()}\", \"range\": {{ {left_cond}, {right_cond} }} }}"
             };
         }
 
@@ -54,7 +54,7 @@
         {
             return new Condition
             {
-                Json = $"{{ \"key\": \"{name}\", \"match\": {{ \"keyword\": \"{value}\" }} }}"
+                Json = $"{{ \"key\": \"{name.ToLowerInvariant()}\", \"match\": {{ \"keyword\": \"{value}\" }} }}"
             };
         }
 
@@ -62,7 +62,7 @@
         {
             return new Condition
             {
-                Json = $"{{ \"key\": \"{name}\", \"geo_bounding_box\": {{ \"bottom_right\": {{ \"lat\": {bottom_right.lat.ConvertToString()}, \"lon\": {bottom_right.lon.ConvertToString()} }}, \"top_left\": {{ \"lat\": {top_left.lat.ConvertToString()}, \"lon\": {top_left.lon.ConvertToString()} }} }} }}"
+                Json = $"{{ \"key\": \"{name.ToLowerInvariant()}\", \"geo_bounding_box\": {{ \"bottom_right\": {{ \"lat\": {bottom_right.lat.ConvertToString()}, \"lon\": {bottom_right.lon.ConvertToString()} }}, \"top_left\": {{ \"lat\": {top_left.lat.ConvertToString()}, \"lon\": {top_left.lon.ConvertToString()} }} }} }}"
             };
         }
 
@@ -70,7 +70,7 @@
         {
             return new Condition
             {
-                Json = $"{{\"key\": \"{name}\", \"geo_radius\": {{\"center\": {{ \"lat\": {location.lat.ConvertToString()}, \"lon\": {location.lon.ConvertToString()} }}, \"radius\": {radius.ConvertToString()} }} }}"
+                Json = $"{{\"key\": \"{name.ToLowerInvariant()}\", \"geo_radius\": {{\"center\": {{ \"lat\": {location.lat.ConvertToString()}, \"lon\": {location.lon.ConvertToString()} }}, \"radius\": {radius.ConvertToString()} }} }}"
             };
         }
         public override string ToJSON()
