@@ -1,9 +1,9 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
     <Platforms>AnyCPU;x64;x86</Platforms>
-    <Version>1.0.0.1</Version>
+    <Version>1.0.0.2</Version>
     <Authors>ogoun</Authors>
     <Copyright>Copyright Ogoun 2021</Copyright>
     <PackageProjectUrl>https://github.com/ogoun/Zero</PackageProjectUrl>
@@ -12,7 +12,9 @@
     <RepositoryUrl>https://github.com/ogoun/Zero</RepositoryUrl>
     <RepositoryType>GitHub</RepositoryType>
     <Description>Client for qdrant API</Description>
-    <PackageReleaseNotes>Added the Scroll method</PackageReleaseNotes>
+    <PackageReleaseNotes>Fix bugs</PackageReleaseNotes>
+    <AssemblyVersion>1.0.0.2</AssemblyVersion>
+    <FileVersion>1.0.0.2</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
