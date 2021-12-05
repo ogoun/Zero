@@ -265,6 +265,7 @@ namespace ZeroLevel.Services.Serialization
 
         public void Dispose()
         {
+            _stream.Flush();
             _stream.Dispose();
         }
 

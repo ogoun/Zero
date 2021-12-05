@@ -6,6 +6,7 @@ using ZeroLevel;
 using ZeroLevel.Logging;
 using ZeroLevel.Network;
 using ZeroLevel.Services.Serialization;
+using ZeroLevel.Services.Trees;
 
 namespace TestApp
 {
@@ -67,6 +68,17 @@ namespace TestApp
                 });
                 Thread.Sleep(2000);
             }
+        }
+
+        public static double[] Generate(int vector_size)
+        {
+            var rnd = new Random((int)Environment.TickCount);
+            var vector = new double[vector_size];
+            for (int i = 0; i < vector_size; i++)
+            {
+                vector[i] = 50.0d - rnd.NextDouble() * 100.0d;
+            }
+            return vector;
         }
     }
 }

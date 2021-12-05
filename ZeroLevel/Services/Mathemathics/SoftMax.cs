@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ZeroLevel.Services.Mathematic
+namespace ZeroLevel.Services.Mathemathics
 {
     public static class SoftMax
     {
