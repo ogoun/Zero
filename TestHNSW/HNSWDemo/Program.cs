@@ -84,6 +84,7 @@ namespace HNSWDemo
 
             var sw = new Stopwatch();
             var world = new SmallWorld<float[]>(NSWOptions<float[]>.Create(6, 4, 120, 120, CosineDistance.ForUnits));
+
             for (int i = 0; i < (count / batchSize); i++)
             {
                 var batch = samples.Skip(i * batchSize).Take(batchSize).ToArray();
@@ -101,18 +102,18 @@ namespace HNSWDemo
 
             //HNSWFilter filter = new HNSWFilter(ids => ids.Where(id => { var p = _database[id]; return p.Age > 45 && p.Gender == Gender.Feemale; }));
 
-/*var fackupCount = 0;
-            foreach (var v in vectors)
-            {
-                var result = world.Search(v, 10, filter);                
-                foreach (var r in result)
-                {
-                    if (_database[r.Item1].Age <= 45 || _database[r.Item1].Gender != Gender.Feemale)
-                    {
-                        Interlocked.Increment(ref fackupCount);
-                    }
-                }
-            }*/
+            /*var fackupCount = 0;
+                        foreach (var v in vectors)
+                        {
+                            var result = world.Search(v, 10, filter);                
+                            foreach (var r in result)
+                            {
+                                if (_database[r.Item1].Age <= 45 || _database[r.Item1].Gender != Gender.Feemale)
+                                {
+                                    Interlocked.Increment(ref fackupCount);
+                                }
+                            }
+                        }*/
 
             //Console.WriteLine($"Completed. Fackup count: {fackupCount}");
             Console.ReadKey();

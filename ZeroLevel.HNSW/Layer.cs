@@ -13,6 +13,11 @@ namespace ZeroLevel.HNSW
         private readonly VectorSet<TItem> _vectors;
         private CompactBiDirectionalLinksSet _links = new CompactBiDirectionalLinksSet();
 
+        /// <summary>
+        /// Count nodes at layer
+        /// </summary>
+        public int Count => (_links.Count >> 1);
+
         public Layer(NSWOptions<TItem> options, VectorSet<TItem> vectors)
         {
             _options = options;
@@ -50,147 +55,106 @@ namespace ZeroLevel.HNSW
             }
         }
 
-        public int GetEntryPointFor(int q)
-        {
-            var randomLinkId = DefaultRandomGenerator.Instance.Next(0, _links.Count);
-            var entryId = _links[randomLinkId].Item1;
-            var v = new VisitedBitSet(_vectors._set.Count, _options.M);
-            // v ← ep // set of visited elements
-            var (ep, ed) = DFS_SearchMinFrom(entryId, q, v);
-            return ep;
-        }
-
-        private (int, float) DFS_SearchMinFrom(int entryId, int id, VisitedBitSet visited)
-        {
-            visited.Add(entryId);
-            int candidate = entryId;
-            var candidateDistance = _options.Distance(_vectors[entryId], _vectors[id]);
-            int counter = 0;
-            do
-            {
-                var (mid, dist) = GetMinNearest(visited, entryId, candidate, candidateDistance);
-                if (dist > candidateDistance)
-                {
-                    break;
-                }
-                candidate = mid;
-                candidateDistance = dist;
-
-                counter++;
-            } while (counter < _options.EFConstruction);
-            return (candidate, candidateDistance);
-        }
-
-        private (int, float) GetMinNearest(VisitedBitSet visited, int entryId, int id, float entryDistance)
-        {
-            var minId = entryId;
-            var minDist = entryDistance;
-            foreach (var candidate in _links.FindLinksForId(entryId).Select(l => l.Item2))
-            {
-                if (visited.Contains(candidate) == false)
-                {
-                    var dist = _options.Distance(_vectors[candidate], _vectors[id]);
-                    if (dist < minDist)
-                    {
-                        minDist = dist;
-                        minId = candidate;
-                    }
-                    visited.Add(candidate);
-                }
-            }
-            return (minId, minDist);
-        }
-
         #region Implementation of https://arxiv.org/ftp/arxiv/papers/1603/1603.09320.pdf
-
         /// <summary>
         /// Algorithm 2
         /// </summary>
         /// <param name="q">query element</param>
         /// <param name="ep">enter points ep</param>
         /// <returns>Output: ef closest neighbors to q</returns>
-        public IDictionary<int, float> SEARCH_LAYER(int q, int ep, int ef)
+        public void RunKnnAtLayer(int entryPointId, Func<int, float> targetCosts, IDictionary<int, float> W, int ef)
         {
-            var v = new VisitedBitSet(_vectors._set.Count, _options.M);
+            /*
+             * v ← ep // set of visited elements
+             * C ← ep // set of candidates
+             * W ← ep // dynamic list of found nearest neighbors
+             * while │C│ > 0
+             *   c ← extract nearest element from C to q
+             *   f ← get furthest element from W to q
+             *   if distance(c, q) > distance(f, q)
+             *     break // all elements in W are evaluated
+             *   for each e ∈ neighbourhood(c) at layer lc // update C and W
+             *     if e ∉ v
+             *       v ← v ⋃ e
+             *       f ← get furthest element from W to q
+             *       if distance(e, q) < distance(f, q) or │W│ < ef
+             *         C ← C ⋃ e
+             *         W ← W ⋃ e
+             *         if │W│ > ef
+             *           remove furthest element from W to q
+             * return W
+             */
+
+            var v = new VisitedBitSet(_vectors.Count, _options.M);
             // v ← ep // set of visited elements
-            v.Add(ep);
+            v.Add(entryPointId);
             // C ← ep // set of candidates
             var C = new Dictionary<int, float>();
-            C.Add(ep, _options.Distance(_vectors[ep], _vectors[q]));
+            C.Add(entryPointId, targetCosts(entryPointId));
             // W ← ep // dynamic list of found nearest neighbors
-            var W = new Dictionary<int, float>();
-            W.Add(ep, C[ep]);
-            // while │C│ > 0
+            W.Add(entryPointId, C[entryPointId]);
+
+
+            // run bfs
             while (C.Count > 0)
             {
-                // c ← extract nearest element from C to q
-                var nearest = W.OrderBy(p => p.Value).First();
-                var c = nearest.Key;
-                var md = nearest.Value;
-                // var (c, md) = GetMinimalDistanceIndex(C, q);
-                C.Remove(c);
-                // f ← get furthest element from W to q
-                var f = W.OrderBy(p => p.Value).First().Key;
-                //var f = GetMaximalDistanceIndex(W, q);
-                // if distance(c, q) > distance(f, q)
-                if (_options.Distance(_vectors[c], _vectors[q]) > _options.Distance(_vectors[f], _vectors[q]))
+                // get next candidate to check and expand
+                var toExpand = popCandidate();
+                var farthestResult = fartherFromResult();
+                if (toExpand.Item2 > farthestResult.Item2)
                 {
-                    // break // all elements in W are evaluated
+                    // the closest candidate is farther than farthest result
                     break;
                 }
-                // for each e ∈ neighbourhood(c) at layer lc // update C and W
-                foreach (var l in _links.FindLinksForId(c))
+
+                // expand candidate
+                var neighboursIds = GetNeighbors(toExpand.Item1).ToArray();
+                for (int i = 0; i < neighboursIds.Length; ++i)
                 {
-                    var e = l.Item2;
-                    // if e ∉ v
-                    if (v.Contains(e) == false)
+                    int neighbourId = neighboursIds[i];
+                    if (!v.Contains(neighbourId))
                     {
-                        // v ← v ⋃ e
-                        v.Add(e);
-                        // f ← get furthest element from W to q
-                        f = W.OrderByDescending(p => p.Value).First().Key;
-                        //f = GetMaximalDistanceIndex(W, q);
-                        // if distance(e, q) < distance(f, q) or │W│ < ef
-                        var ed = _options.Distance(_vectors[e], _vectors[q]);
-                        if (ed > _options.Distance(_vectors[f], _vectors[q])
-                            || W.Count < ef)
+                        // enqueue perspective neighbours to expansion list
+                        farthestResult = fartherFromResult();
+
+                        var neighbourDistance = targetCosts(neighbourId);
+                        if (W.Count < ef || neighbourDistance < farthestResult.Item2)
                         {
-                            // C ← C ⋃ e
-                            C.Add(e, ed);
-                            // W ← W ⋃ e
-                            W.Add(e, ed);
-                            // if │W│ > ef
+                            C.Add(neighbourId, neighbourDistance);
+                            W.Add(neighbourId, neighbourDistance);
                             if (W.Count > ef)
                             {
-                                // remove furthest element from W to q
-                                f = W.OrderByDescending(p => p.Value).First().Key;
-                                //f = GetMaximalDistanceIndex(W, q);
-                                W.Remove(f);
+                                fartherPopFromResult();
                             }
                         }
+                        v.Add(neighbourId);
                     }
                 }
             }
-            //  return W
-            return W;
+            C.Clear();
+            v.Clear();
         }
 
         /// <summary>
         /// Algorithm 3
         /// </summary>
-        /// <param name="q">base element</param>
-        /// <param name="C">candidate elements</param>
-        /// <returns>Output: M nearest elements to q</returns>
-        public IDictionary<int, float> SELECT_NEIGHBORS_SIMPLE(int q, IDictionary<int, float> C)
+        public IDictionary<int, float> SELECT_NEIGHBORS_SIMPLE(Func<int, float> distance, IDictionary<int, float> candidates, int M)
         {
-            if (C.Count <= _options.M)
+            var bestN = M;
+            var W = new Dictionary<int, float>(candidates);
+            if (W.Count > bestN)
             {
-                return new Dictionary<int, float>(C);
+                var popFarther = new Action(() => { var pair = W.OrderByDescending(e => e.Value).First(); W.Remove(pair.Key); });
+                while (W.Count > bestN)
+                {
+                    popFarther();
+                }
             }
-            var output = new Dictionary<int, float>();
             // return M nearest elements from C to q
-            return new Dictionary<int, float>(C.OrderBy(p => p.Value).Take(_options.M));
+            return W;
         }
+
+
 
         /// <summary>
         /// Algorithm 4
@@ -200,41 +164,56 @@ namespace ZeroLevel.HNSW
         /// <param name="extendCandidates">flag indicating whether or not to extend candidate list</param>
         /// <param name="keepPrunedConnections">flag indicating whether or not to add discarded elements</param>
         /// <returns>Output: M elements selected by the heuristic</returns>
-        public IDictionary<int, float> SELECT_NEIGHBORS_HEURISTIC(int q, IDictionary<int, float> C, bool extendCandidates, bool keepPrunedConnections)
+        public IDictionary<int, float> SELECT_NEIGHBORS_HEURISTIC(Func<int, float> distance, IDictionary<int, float> candidates, int M, bool extendCandidates, bool keepPrunedConnections)
         {
             // R ← ∅
             var R = new Dictionary<int, float>();
             // W ← C // working queue for the candidates
-            var W = new List<int>(C.Select(p => p.Key));
+            var W = new Dictionary<int, float>(candidates);
             // if extendCandidates // extend candidates by their neighbors
             if (extendCandidates)
             {
+                var extendBuffer = new HashSet<int>();
                 // for each e ∈ C
-                foreach (var e in C)
+                foreach (var e in W)
                 {
+                    var neighbors = GetNeighbors(e.Key);
                     // for each e_adj ∈ neighbourhood(e) at layer lc
-                    foreach (var l in _links.FindLinksForId(e.Key))
+                    foreach (var e_adj in neighbors)
                     {
-                        var e_adj = l.Item2;
                         // if eadj ∉ W
-                        if (W.Contains(e_adj) == false)
+                        if (extendBuffer.Contains(e_adj) == false)
                         {
-                            // W ← W ⋃ eadj
-                            W.Add(e_adj);
+                            extendBuffer.Add(e_adj);
                         }
                     }
                 }
+                // W ← W ⋃ eadj
+                foreach (var id in extendBuffer)
+                {
+                    W.Add(id, distance(id));
+                }
             }
+
             //  Wd ← ∅ // queue for the discarded candidates
             var Wd = new Dictionary<int, float>();
+
+
+            var popCandidate = new Func<(int, float)>(() => { var pair = W.OrderBy(e => e.Value).First(); W.Remove(pair.Key); return (pair.Key, pair.Value); });
+            var fartherFromResult = new Func<(int, float)>(() => { if (R.Count == 0) return (-1, 0f); var pair = R.OrderByDescending(e => e.Value).First(); return (pair.Key, pair.Value); });
+            var popNearestDiscarded = new Func<(int, float)>(() => { var pair = Wd.OrderBy(e => e.Value).First(); W.Remove(pair.Key); return (pair.Key, pair.Value); });
+
+
             // while │W│ > 0 and │R│< M
-            while (W.Count > 0 && R.Count < _options.M)
+            while (W.Count > 0 && R.Count < M)
             {
                 // e ← extract nearest element from W to q
-                var (e, ed) = GetMinimalDistanceIndex(W, q);
-                W.Remove(e);
+                var (e, ed) = popCandidate();
+                var (fe, fd) = fartherFromResult();
+
                 // if e is closer to q compared to any element from R
-                if (ed < R.Min(pair => pair.Value))
+                if (R.Count == 0 ||
+                    ed < fd)
                 {
                     // R ← R ⋃ e
                     R.Add(e, ed);
@@ -248,37 +227,20 @@ namespace ZeroLevel.HNSW
                 if (keepPrunedConnections)
                 {
                     // while │Wd│> 0 and │R│< M
-                    while (Wd.Count > 0 && R.Count < _options.M)
+                    while (Wd.Count > 0 && R.Count < M)
                     {
                         // R ← R ⋃ extract nearest element from Wd to q
-                        var nearest = Wd.Aggregate((l, r) => l.Value < r.Value ? l : r);
-                        Wd.Remove(nearest.Key);
-                        R.Add(nearest.Key, nearest.Value);
+                        var nearest = popNearestDiscarded();
+                        R.Add(nearest.Item1, nearest.Item2);
                     }
                 }
             }
             //  return R
             return R;
         }
-
-
         #endregion
 
-        
-        private (int, float) GetMinimalDistanceIndex(IList<int> self, int q)
-        {
-            float min = _options.Distance(_vectors[self[0]], _vectors[q]);
-            int minIndex = 0;
-            for (int i = 1; i < self.Count; ++i)
-            {
-                var dist = _options.Distance(_vectors[self[i]], _vectors[q]);
-                if (dist < min)
-                {
-                    min = self[i];
-                    minIndex = i;
-                }
-            }
-            return (minIndex, min);
-        }
+
+        private IEnumerable<int> GetNeighbors(int id) => _links.FindLinksForId(id).Select(d => d.Item2);
     }
 }
