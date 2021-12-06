@@ -14,15 +14,14 @@ namespace ZeroLevel.HNSW
 
         private SortedList<long, float> _set = new SortedList<long, float>();
 
-        public (int, int, float) this[int index]
+        public (int, int) this[int index]
         {
             get
             {
                 var k = _set.Keys[index];
-                var d = _set.Values[index];
                 var id1 = (int)(k >> HALF_LONG_BITS);
                 var id2 = (int)(k - (((long)id1) << HALF_LONG_BITS));
-                return (id1, id2, d);
+                return (id1, id2);
             }
         }
 
@@ -72,10 +71,22 @@ namespace ZeroLevel.HNSW
             {
                 _set.Remove(k_id1_id2);
                 _set.Remove(k_id2_id1);
-                _set.Add(k_id_id1, distanceToId1);
-                _set.Add(k_id1_id, distanceToId1);
-                _set.Add(k_id_id2, distanceToId2);
-                _set.Add(k_id2_id, distanceToId2);
+                if (!_set.ContainsKey(k_id_id1))
+                {
+                    _set.Add(k_id_id1, distanceToId1);
+                }
+                if (!_set.ContainsKey(k_id1_id))
+                {
+                    _set.Add(k_id1_id, distanceToId1);
+                }
+                if (!_set.ContainsKey(k_id_id2))
+                {
+                    _set.Add(k_id_id2, distanceToId2);
+                }
+                if (!_set.ContainsKey(k_id2_id))
+                {
+                    _set.Add(k_id2_id, distanceToId2);
+                }
             }
             finally
             {

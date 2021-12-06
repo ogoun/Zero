@@ -94,7 +94,9 @@ namespace ZeroLevel.HNSW
             // W ← ep // dynamic list of found nearest neighbors
             W.Add(entryPointId, C[entryPointId]);
 
-
+            var popCandidate = new Func<(int, float)>(() => { var pair = C.OrderBy(e => e.Value).First(); C.Remove(pair.Key); return (pair.Key, pair.Value); });
+            var fartherFromResult = new Func<(int, float)>(() => { var pair = W.OrderByDescending(e => e.Value).First(); return (pair.Key, pair.Value); });
+            var fartherPopFromResult = new Action(() => { var pair = W.OrderByDescending(e => e.Value).First(); W.Remove(pair.Key); });
             // run bfs
             while (C.Count > 0)
             {
@@ -164,14 +166,14 @@ namespace ZeroLevel.HNSW
         /// <param name="extendCandidates">flag indicating whether or not to extend candidate list</param>
         /// <param name="keepPrunedConnections">flag indicating whether or not to add discarded elements</param>
         /// <returns>Output: M elements selected by the heuristic</returns>
-        public IDictionary<int, float> SELECT_NEIGHBORS_HEURISTIC(Func<int, float> distance, IDictionary<int, float> candidates, int M, bool extendCandidates, bool keepPrunedConnections)
+        public IDictionary<int, float> SELECT_NEIGHBORS_HEURISTIC(Func<int, float> distance, IDictionary<int, float> candidates, int M)
         {
             // R ← ∅
             var R = new Dictionary<int, float>();
             // W ← C // working queue for the candidates
             var W = new Dictionary<int, float>(candidates);
             // if extendCandidates // extend candidates by their neighbors
-            if (extendCandidates)
+            if (_options.ExpandBestSelection)
             {
                 var extendBuffer = new HashSet<int>();
                 // for each e ∈ C
@@ -191,7 +193,7 @@ namespace ZeroLevel.HNSW
                 // W ← W ⋃ eadj
                 foreach (var id in extendBuffer)
                 {
-                    W.Add(id, distance(id));
+                    W[id] = distance(id);
                 }
             }
 
@@ -201,7 +203,7 @@ namespace ZeroLevel.HNSW
 
             var popCandidate = new Func<(int, float)>(() => { var pair = W.OrderBy(e => e.Value).First(); W.Remove(pair.Key); return (pair.Key, pair.Value); });
             var fartherFromResult = new Func<(int, float)>(() => { if (R.Count == 0) return (-1, 0f); var pair = R.OrderByDescending(e => e.Value).First(); return (pair.Key, pair.Value); });
-            var popNearestDiscarded = new Func<(int, float)>(() => { var pair = Wd.OrderBy(e => e.Value).First(); W.Remove(pair.Key); return (pair.Key, pair.Value); });
+            var popNearestDiscarded = new Func<(int, float)>(() => { var pair = Wd.OrderBy(e => e.Value).First(); Wd.Remove(pair.Key); return (pair.Key, pair.Value); });
 
 
             // while │W│ > 0 and │R│< M
@@ -218,21 +220,21 @@ namespace ZeroLevel.HNSW
                     // R ← R ⋃ e
                     R.Add(e, ed);
                 }
-                // else
+                else
                 {
                     // Wd ← Wd ⋃ e
                     Wd.Add(e, ed);
                 }
-                // if keepPrunedConnections // add some of the discarded // connections from Wd
-                if (keepPrunedConnections)
+            }
+            // if keepPrunedConnections // add some of the discarded // connections from Wd
+            if (_options.KeepPrunedConnections)
+            {
+                // while │Wd│> 0 and │R│< M
+                while (Wd.Count > 0 && R.Count < M)
                 {
-                    // while │Wd│> 0 and │R│< M
-                    while (Wd.Count > 0 && R.Count < M)
-                    {
-                        // R ← R ⋃ extract nearest element from Wd to q
-                        var nearest = popNearestDiscarded();
-                        R.Add(nearest.Item1, nearest.Item2);
-                    }
+                    // R ← R ⋃ extract nearest element from Wd to q
+                    var nearest = popNearestDiscarded();
+                    R[nearest.Item1] = nearest.Item2;
                 }
             }
             //  return R

@@ -192,7 +192,9 @@ namespace ZeroLevel.HNSW
 
         private IDictionary<int, float> SelectBestForConnecting(int layer, Func<int, float> distance, IDictionary<int, float> candidates)
         {
-            return _layers[layer].SELECT_NEIGHBORS_SIMPLE(distance, candidates, GetM(layer));
+            if(_options.SelectionHeuristic == NeighbourSelectionHeuristic.SelectSimple)
+                return _layers[layer].SELECT_NEIGHBORS_SIMPLE(distance, candidates, GetM(layer));
+            return _layers[layer].SELECT_NEIGHBORS_HEURISTIC(distance, candidates, GetM(layer));
         }
 
         /// <summary>

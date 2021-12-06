@@ -77,13 +77,13 @@ namespace HNSWDemo
         static void Main(string[] args)
         {
             var dimensionality = 128;
-            var testCount = 1000;
-            var count = 100000;
-            var batchSize = 5000;
+            var testCount = 5000;
+            var count = 10000;
+            var batchSize = 1000;
             var samples = Person.GenerateRandom(dimensionality, count);
 
             var sw = new Stopwatch();
-            var world = new SmallWorld<float[]>(NSWOptions<float[]>.Create(6, 4, 120, 120, CosineDistance.ForUnits));
+            var world = new SmallWorld<float[]>(NSWOptions<float[]>.Create(6, 10, 200, 200, CosineDistance.ForUnits, false, false, selectionHeuristic: NeighbourSelectionHeuristic.SelectHeuristic));
 
             for (int i = 0; i < (count / batchSize); i++)
             {
