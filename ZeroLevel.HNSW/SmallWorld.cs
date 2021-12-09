@@ -55,14 +55,26 @@ namespace ZeroLevel.HNSW
             }
         }
 
+        /// <summary>
+        /// Search in the graph K for vectors closest to a given vector
+        /// </summary>
+        /// <param name="vector">Given vector</param>
+        /// <param name="k">Count of elements for search</param>
+        /// <param name="activeNodes"></param>
+        /// <returns></returns>
         public IEnumerable<(int, TItem, float)> Search(TItem vector, int k, HashSet<int> activeNodes = null)
         {
-            foreach (var pair in KNearest(vector, k))
+            foreach (var pair in KNearest(vector, k, activeNodes))
             {
                 yield return (pair.Item1, _vectors[pair.Item1], pair.Item2);
             }
         }
 
+        /// <summary>
+        /// Adding vectors batch
+        /// </summary>
+        /// <param name="vectors">Vectors</param>
+        /// <returns>Vector identifiers in a graph</returns>
         public int[] AddItems(IEnumerable<TItem> vectors)
         {
             _lockGraph.EnterWriteLock();
@@ -81,32 +93,11 @@ namespace ZeroLevel.HNSW
             }
         }
 
-        public void TestLevelGenerator()
-        {
-            var levels = new Dictionary<int, float>();
-            for (int i = 0; i < 10000; i++)
-            {
-                var level = _layerLevelGenerator.GetRandomLayer();
-                if (levels.ContainsKey(level) == false)
-                {
-                    levels.Add(level, 1);
-                }
-                else
-                {
-                    levels[level] += 1.0f;
-                }
-            }
-            foreach (var pair in levels.OrderBy(l => l.Key))
-            {
-                Console.WriteLine($"[{pair.Key}]: {pair.Value / 100.0f}% ({pair.Value})");
-            }
-        }
-
         #region https://arxiv.org/ftp/arxiv/papers/1603/1603.09320.pdf
         /// <summary>
         /// Algorithm 1
         /// </summary>
-        public void INSERT(int q)
+        private void INSERT(int q)
         {
             var distance = new Func<int, float>(candidate => _options.Distance(_vectors[q], _vectors[candidate]));
             // W ← ∅ // list for the currently found nearest elements
@@ -122,7 +113,7 @@ namespace ZeroLevel.HNSW
             // Проход с верхнего уровня до уровня где появляется элемент, для нахождения точки входа
             for (int lc = L; lc > l; --lc)
             {
-                if (_layers[lc].CountLinks == 0)
+                if (_layers[lc].HasLinks == false)
                 {
                     _layers[lc].Append(q);
                     ep = q;
@@ -130,7 +121,7 @@ namespace ZeroLevel.HNSW
                 else
                 {
                     // W ← SEARCH-LAYER(q, ep, ef = 1, lc)
-                    _layers[lc].RunKnnAtLayer(ep, distance, W, 1);
+                    _layers[lc].KNearestAtLayer(ep, distance, W, 1);
                     // ep ← get the nearest element from W to q
                     var nearest = W.OrderBy(p => p.Value).First();
                     ep = nearest.Key;
@@ -142,7 +133,7 @@ namespace ZeroLevel.HNSW
             // connecting new node to the small world
             for (int lc = Math.Min(L, l); lc >= 0; --lc)
             {
-                if (_layers[lc].CountLinks == 0)
+                if (_layers[lc].HasLinks == false)
                 {
                     _layers[lc].Append(q);
                     ep = q;
@@ -150,7 +141,7 @@ namespace ZeroLevel.HNSW
                 else
                 {
                     // W ← SEARCH - LAYER(q, ep, efConstruction, lc)
-                    _layers[lc].RunKnnAtLayer(ep, distance, W, _options.EFConstruction);
+                    _layers[lc].KNearestAtLayer(ep, distance, W, _options.EFConstruction);
                     // neighbors ← SELECT-NEIGHBORS(q, W, M, lc) // alg. 3 or alg. 4
                     var neighbors = SelectBestForConnecting(lc, distance, W);
                     // add bidirectionall connectionts from neighbors to q at layer lc
@@ -158,7 +149,7 @@ namespace ZeroLevel.HNSW
                     foreach (var e in neighbors)
                     {
                         // eConn ← neighbourhood(e) at layer lc
-                        _layers[lc].AddBidirectionallConnectionts(q, e.Key, e.Value, lc == 0);
+                        _layers[lc].AddBidirectionallConnections(q, e.Key, e.Value, lc == 0);
                         // if distance from newNode to newNeighbour is better than to bestPeer => update bestPeer
                         if (e.Value < epDist)
                         {
@@ -195,7 +186,7 @@ namespace ZeroLevel.HNSW
         /// </remarks>
         /// <param name="layer">The level of the layer.</param>
         /// <returns>The maximum number of connections.</returns>
-        internal int GetM(int layer)
+        private int GetM(int layer)
         {
             return layer == 0 ? 2 * _options.M : _options.M;
         }
@@ -210,7 +201,7 @@ namespace ZeroLevel.HNSW
         /// <summary>
         /// Algorithm 5
         /// </summary>
-        internal IEnumerable<(int, float)> KNearest(TItem q, int k)
+        private IEnumerable<(int, float)> KNearest(TItem q, int k, HashSet<int> activeNodes = null)
         {
             _lockGraph.EnterReadLock();
             try
@@ -231,13 +222,13 @@ namespace ZeroLevel.HNSW
                 for (int layer = L; layer > 0; --layer)
                 {
                     // W ← SEARCH-LAYER(q, ep, ef = 1, lc)
-                    _layers[layer].RunKnnAtLayer(ep, distance, W, 1);
+                    _layers[layer].KNearestAtLayer(ep, distance, W, 1);
                     // ep ← get nearest element from W to q
                     ep = W.OrderBy(p => p.Value).First().Key;
                     W.Clear();
                 }
                 // W ← SEARCH-LAYER(q, ep, ef, lc =0)
-                _layers[0].RunKnnAtLayer(ep, distance, W, k);
+                _layers[0].KNearestAtLayer(ep, distance, W, k, activeNodes);
                 // return K nearest elements from W to q
                 return W.Select(p => (p.Key, p.Value));
             }

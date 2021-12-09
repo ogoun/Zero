@@ -98,33 +98,78 @@ namespace HNSWDemo
 
         static void Main(string[] args)
         {
-            var dimensionality = 128;
-            var testCount = 1000;
+            FilterTest();
+            Console.ReadKey();
+        }
+
+        static void FilterTest()
+        {
             var count = 5000;
+            var testCount = 1000;
+            var dimensionality = 128;
             var samples = Person.GenerateRandom(dimensionality, count);
 
-            var sw = new Stopwatch();
-
-            var test = new VectorsDirectCompare(samples.Select(s => s.Item1).ToList(), CosineDistance.ForUnits);
             var world = new SmallWorld<float[]>(NSWOptions<float[]>.Create(6, 15, 200, 200, CosineDistance.ForUnits, true, true, selectionHeuristic: NeighbourSelectionHeuristic.SelectSimple));
-
-            var batch = samples.ToArray();
-            
-            var ids = world.AddItems(batch.Select(i => i.Item1).ToArray());
-            
-            Console.WriteLine($"Insert {ids.Length} items on {sw.ElapsedMilliseconds} ms");
-            for (int bi = 0; bi < batch.Length; bi++)
+                        
+            var ids = world.AddItems(samples.Select(i => i.Item1).ToArray());
+            for (int bi = 0; bi < samples.Count; bi++)
             {
-                _database.Add(ids[bi], batch[bi].Item2);
+                _database.Add(ids[bi], samples[bi].Item2);
             }
 
             Console.WriteLine("Start test");
             int K = 200;
             var vectors = RandomVectors(dimensionality, testCount);
-            var totalHits = new List<int>();
-            var timewatchesHNSW = new List<float>();
-            var timewatchesNP = new List<float>();
+
+            var activeNodes = _database.Where(pair => pair.Value.Age > 20 && pair.Value.Age < 50 && pair.Value.Gender == Gender.Feemale).Select(pair => pair.Key).ToHashSet();
+
+            var hits = 0;
+            var miss = 0;
             foreach (var v in vectors)
+            {
+                var result = world.Search(v, K, activeNodes);
+                foreach (var r in result)
+                {
+                    var record = _database[r.Item1];
+                    if (record.Gender == Gender.Feemale && record.Age > 20 && record.Age < 50)
+                    {
+                        hits++;
+                    }
+                    else
+                    {
+                        miss++;
+                    }
+                }
+            }
+            Console.WriteLine($"SUCCESS: {hits}");
+            Console.WriteLine($"ERROR: {miss}");
+        }
+
+        static void AccuracityTest()
+        {
+            int K = 200;
+            var count = 5000;
+            var testCount = 1000;
+            var dimensionality = 128;
+            var totalHits = new List<int>();
+            var timewatchesNP = new List<float>();
+            var timewatchesHNSW = new List<float>();
+            var samples = RandomVectors(dimensionality, count);
+
+            var sw = new Stopwatch();
+
+            var test = new VectorsDirectCompare(samples, CosineDistance.ForUnits);
+            var world = new SmallWorld<float[]>(NSWOptions<float[]>.Create(6, 15, 200, 200, CosineDistance.ForUnits, true, true, selectionHeuristic: NeighbourSelectionHeuristic.SelectSimple));
+
+            sw.Start();
+            var ids = world.AddItems(samples.ToArray());
+            sw.Stop();
+
+            Console.WriteLine($"Insert {ids.Length} items on {sw.ElapsedMilliseconds} ms");
+            Console.WriteLine("Start test");
+            
+            var test_vectors = RandomVectors(dimensionality, testCount);
+            foreach (var v in test_vectors)
             {
                 sw.Restart();
                 var gt = test.KNearest(v, K).ToDictionary(p => p.Item1, p => p.Item2);
@@ -156,26 +201,6 @@ namespace HNSWDemo
             Console.WriteLine($"MIN NP TIME: {timewatchesNP.Min()} ms");
             Console.WriteLine($"AVG NP TIME: {timewatchesNP.Average()} ms");
             Console.WriteLine($"MAX NP TIME: {timewatchesNP.Max()} ms");
-
-
-
-            //HNSWFilter filter = new HNSWFilter(ids => ids.Where(id => { var p = _database[id]; return p.Age > 45 && p.Gender == Gender.Feemale; }));
-
-            /*var fackupCount = 0;
-                        foreach (var v in vectors)
-                        {
-                            var result = world.Search(v, 10, filter);                
-                            foreach (var r in result)
-                            {
-                                if (_database[r.Item1].Age <= 45 || _database[r.Item1].Gender != Gender.Feemale)
-                                {
-                                    Interlocked.Increment(ref fackupCount);
-                                }
-                            }
-                        }*/
-
-            //Console.WriteLine($"Completed. Fackup count: {fackupCount}");
-            Console.ReadKey();
         }
     }
 }
