@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using ZeroLevel.Services.Serialization;
 
 namespace ZeroLevel.HNSW
 {
@@ -8,6 +9,7 @@ namespace ZeroLevel.HNSW
     /// NSW graph
     /// </summary>
     internal sealed class Layer<TItem>
+        : IBinarySerializable
     {
         private readonly NSWOptions<TItem> _options;
         private readonly VectorSet<TItem> _vectors;
@@ -352,5 +354,15 @@ namespace ZeroLevel.HNSW
         #endregion
 
         private IEnumerable<int> GetNeighbors(int id) => _links.FindLinksForId(id).Select(d => d.Item2);
+
+        public void Serialize(IBinaryWriter writer)
+        {
+            _links.Serialize(writer);
+        }
+
+        public void Deserialize(IBinaryReader reader)
+        {
+            _links.Deserialize(reader);
+        }
     }
 }

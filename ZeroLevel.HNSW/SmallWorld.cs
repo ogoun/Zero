@@ -1,43 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading;
+using ZeroLevel.HNSW.Services;
+using ZeroLevel.Services.Serialization;
 
 namespace ZeroLevel.HNSW
 {
-    public class ProbabilityLayerNumberGenerator
-    {
-        private const float DIVIDER = 3.361f;
-        private readonly float[] _probabilities;
-
-        public ProbabilityLayerNumberGenerator(int maxLayers, int M)
-        {
-            _probabilities = new float[maxLayers];
-            var probability = 1.0f / DIVIDER;
-            for (int i = 0; i < maxLayers; i++)
-            {
-                _probabilities[i] = probability;
-                probability /= DIVIDER;
-            }
-        }
-
-        public int GetRandomLayer()
-        {
-            var probability = DefaultRandomGenerator.Instance.NextFloat();
-            for (int i = 0; i < _probabilities.Length; i++)
-            {
-                if (probability > _probabilities[i])
-                    return i;
-            }
-            return 0;
-        }
-    }
-
     public class SmallWorld<TItem>
     {
         private readonly NSWOptions<TItem> _options;
         private readonly VectorSet<TItem> _vectors;
-        private readonly Layer<TItem>[] _layers;
+        private Layer<TItem>[] _layers;
         private int EntryPoint = 0;
         private int MaxLayer = 0;
         private readonly ProbabilityLayerNumberGenerator _layerLevelGenerator;
@@ -55,6 +30,12 @@ namespace ZeroLevel.HNSW
             }
         }
 
+        internal SmallWorld(NSWOptions<TItem> options, Stream stream)
+        {
+            _options = options;
+            Deserialize(stream);
+        }
+
         /// <summary>
         /// Search in the graph K for vectors closest to a given vector
         /// </summary>
@@ -62,11 +43,29 @@ namespace ZeroLevel.HNSW
         /// <param name="k">Count of elements for search</param>
         /// <param name="activeNodes"></param>
         /// <returns></returns>
-        public IEnumerable<(int, TItem, float)> Search(TItem vector, int k, HashSet<int> activeNodes = null)
+        public IEnumerable<(int, TItem, float)> Search(TItem vector, int k)
         {
-            foreach (var pair in KNearest(vector, k, activeNodes))
+            foreach (var pair in KNearest(vector, k))
             {
                 yield return (pair.Item1, _vectors[pair.Item1], pair.Item2);
+            }
+        }
+
+        public IEnumerable<(int, TItem, float)> Search(TItem vector, int k, HashSet<int> activeNodes)
+        {
+            if (activeNodes == null)
+            {
+                foreach (var pair in KNearest(vector, k))
+                {
+                    yield return (pair.Item1, _vectors[pair.Item1], pair.Item2);
+                }
+            }
+            else
+            {
+                foreach (var pair in KNearest(vector, k, activeNodes))
+                {
+                    yield return (pair.Item1, _vectors[pair.Item1], pair.Item2);
+                }
             }
         }
 
@@ -108,7 +107,7 @@ namespace ZeroLevel.HNSW
             // L ← level of ep // top layer for hnsw
             var L = MaxLayer;
             // l ← ⌊-ln(unif(0..1))∙mL⌋ // new element’s level            
-            int l = _layerLevelGenerator.GetRandomLayer();            
+            int l = _layerLevelGenerator.GetRandomLayer();
             // for lc ← L … l+1
             // Проход с верхнего уровня до уровня где появляется элемент, для нахождения точки входа
             for (int lc = L; lc > l; --lc)
@@ -201,7 +200,43 @@ namespace ZeroLevel.HNSW
         /// <summary>
         /// Algorithm 5
         /// </summary>
-        private IEnumerable<(int, float)> KNearest(TItem q, int k, HashSet<int> activeNodes = null)
+        private IEnumerable<(int, float)> KNearest(TItem q, int k)
+        {
+            _lockGraph.EnterReadLock();
+            try
+            {
+                if (_vectors.Count == 0)
+                {
+                    return Enumerable.Empty<(int, float)>();
+                }
+                var distance = new Func<int, float>(candidate => _options.Distance(q, _vectors[candidate]));
+
+                // W ← ∅ // set for the current nearest elements
+                var W = new Dictionary<int, float>(k + 1);
+                // ep ← get enter point for hnsw
+                var ep = EntryPoint;
+                // L ← level of ep // top layer for hnsw
+                var L = MaxLayer;
+                // for lc ← L … 1
+                for (int layer = L; layer > 0; --layer)
+                {
+                    // W ← SEARCH-LAYER(q, ep, ef = 1, lc)
+                    _layers[layer].KNearestAtLayer(ep, distance, W, 1);
+                    // ep ← get nearest element from W to q
+                    ep = W.OrderBy(p => p.Value).First().Key;
+                    W.Clear();
+                }
+                // W ← SEARCH-LAYER(q, ep, ef, lc =0)
+                _layers[0].KNearestAtLayer(ep, distance, W, k);
+                // return K nearest elements from W to q
+                return W.Select(p => (p.Key, p.Value));
+            }
+            finally
+            {
+                _lockGraph.ExitReadLock();
+            }
+        }
+        private IEnumerable<(int, float)> KNearest(TItem q, int k, HashSet<int> activeNodes)
         {
             _lockGraph.EnterReadLock();
             try
@@ -238,5 +273,37 @@ namespace ZeroLevel.HNSW
             }
         }
         #endregion
+
+        public void Serialize(Stream stream)
+        {
+            using (var writer = new MemoryStreamWriter(stream))
+            {
+                writer.WriteInt32(EntryPoint);
+                writer.WriteInt32(MaxLayer);
+                _vectors.Serialize(writer);
+                writer.WriteInt32(_layers.Length);
+                foreach (var l in _layers)
+                {
+                    l.Serialize(writer);
+                }
+            }
+        }
+
+        public void Deserialize(Stream stream)
+        {
+            using (var reader = new MemoryStreamReader(stream))
+            {
+                this.EntryPoint = reader.ReadInt32();
+                this.MaxLayer = reader.ReadInt32();
+                _vectors.Deserialize(reader);
+                var countLayers = reader.ReadInt32();
+                _layers = new Layer<TItem>[countLayers];
+                for (int i = 0; i < countLayers; i++)
+                {
+                    _layers[i] = new Layer<TItem>(_options, _vectors);
+                    _layers[i].Deserialize(reader);
+                }
+            }
+        }
     }
 }

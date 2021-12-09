@@ -2,20 +2,12 @@
 
 namespace ZeroLevel.HNSW
 {
-    public sealed class NSWOptions<TItem>
+    public sealed class NSWReadOnlyOption<TItem>
     {
-        /// <summary>
-        /// Mox node connections on Layer
-        /// </summary>
-        public readonly int M;
         /// <summary>
         /// Max search buffer
         /// </summary>
         public readonly int EF;
-        /// <summary>
-        /// Max search buffer for inserting
-        /// </summary>
-        public readonly int EFConstruction;
         /// <summary>
         /// Distance function beetween vectors
         /// </summary>
@@ -27,36 +19,26 @@ namespace ZeroLevel.HNSW
 
         public readonly NeighbourSelectionHeuristic SelectionHeuristic;
 
-        public readonly int LayersCount;
-
-
-        private NSWOptions(int layersCount,
-            int m,
+        private NSWReadOnlyOption(
             int ef,
-            int ef_construction,
             Func<TItem, TItem, float> distance,
             bool expandBestSelection,
             bool keepPrunedConnections,
             NeighbourSelectionHeuristic selectionHeuristic)
         {
-            LayersCount = layersCount;
-            M = m;
             EF = ef;
-            EFConstruction = ef_construction;
             Distance = distance;
             ExpandBestSelection = expandBestSelection;
             KeepPrunedConnections = keepPrunedConnections;
             SelectionHeuristic = selectionHeuristic;
         }
 
-        public static NSWOptions<TItem> Create(int layersCount,
-            int M,
+        public static NSWReadOnlyOption<TItem> Create(
             int EF,
-            int EF_construction,
             Func<TItem, TItem, float> distance,
             bool expandBestSelection = false,
             bool keepPrunedConnections = false,
             NeighbourSelectionHeuristic selectionHeuristic = NeighbourSelectionHeuristic.SelectSimple) =>
-            new NSWOptions<TItem>(layersCount, M, EF, EF_construction, distance, expandBestSelection, keepPrunedConnections, selectionHeuristic);
+            new NSWReadOnlyOption<TItem>(EF, distance, expandBestSelection, keepPrunedConnections, selectionHeuristic);
     }
 }

@@ -2,11 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using ZeroLevel.Services.Serialization;
 
 namespace ZeroLevel.HNSW
 {
     internal sealed class CompactBiDirectionalLinksSet
-        : IDisposable
+        : IBinarySerializable, IDisposable
     {
         private readonly ReaderWriterLockSlim _rwLock = new ReaderWriterLockSlim();
 
@@ -14,7 +15,7 @@ namespace ZeroLevel.HNSW
 
         private SortedList<long, float> _set = new SortedList<long, float>();
 
-        public (int, int) this[int index]
+        internal (int, int) this[int index]
         {
             get
             {
@@ -25,12 +26,12 @@ namespace ZeroLevel.HNSW
             }
         }
 
-        public int Count => _set.Count;
+        internal int Count => _set.Count;
 
         /// <summary>
         /// Разрывает связи id1 - id2 и id2 - id1, и строит новые id1 - id, id - id1
         /// </summary>
-        public void Relink(int id1, int id2, int id, float distance)
+        internal void Relink(int id1, int id2, int id, float distance)
         {
             long k1old = (((long)(id1)) << HALF_LONG_BITS) + id2;
             long k2old = (((long)(id2)) << HALF_LONG_BITS) + id1;
@@ -57,7 +58,7 @@ namespace ZeroLevel.HNSW
         /// <summary>
         /// Разрывает связи id1 - id2 и id2 - id1, и строит новые id1 - id, id - id1, id2 - id, id - id2
         /// </summary>
-        public void Relink(int id1, int id2, int id, float distanceToId1, float distanceToId2)
+        internal void Relink(int id1, int id2, int id, float distanceToId1, float distanceToId2)
         {
             long k_id1_id2 = (((long)(id1)) << HALF_LONG_BITS) + id2;
             long k_id2_id1 = (((long)(id2)) << HALF_LONG_BITS) + id1;
@@ -96,7 +97,7 @@ namespace ZeroLevel.HNSW
             }
         }
 
-        public IEnumerable<(int, int, float)> FindLinksForId(int id)
+        internal IEnumerable<(int, int, float)> FindLinksForId(int id)
         {
             _rwLock.EnterReadLock();
             try
@@ -114,7 +115,7 @@ namespace ZeroLevel.HNSW
             }
         }
 
-        public IEnumerable<(int, int, float)> Items()
+        internal IEnumerable<(int, int, float)> Items()
         {
             _rwLock.EnterReadLock();
             try
@@ -132,7 +133,7 @@ namespace ZeroLevel.HNSW
             }
         }
 
-        public void RemoveIndex(int id)
+        internal void RemoveIndex(int id)
         {
             long[] forward;
             long[] backward;
@@ -169,7 +170,7 @@ namespace ZeroLevel.HNSW
             }
         }
 
-        public bool Add(int id1, int id2, float distance)
+        internal bool Add(int id1, int id2, float distance)
         {
             _rwLock.EnterWriteLock();
             try
@@ -193,7 +194,7 @@ namespace ZeroLevel.HNSW
             return false;
         }
 
-        static IEnumerable<(long, float)> Search(SortedList<long, float> set, int index)
+        private static IEnumerable<(long, float)> Search(SortedList<long, float> set, int index)
         {
             long k = ((long)index) << HALF_LONG_BITS;
             int left = 0;
@@ -232,7 +233,7 @@ namespace ZeroLevel.HNSW
             return Enumerable.Empty<(long, float)>();
         }
 
-        static IEnumerable<(long, float)> SearchByPosition(SortedList<long, float> set, long k, int position)
+        private static IEnumerable<(long, float)> SearchByPosition(SortedList<long, float> set, long k, int position)
         {
             var start = position;
             var end = position;
@@ -258,6 +259,35 @@ namespace ZeroLevel.HNSW
             _rwLock.Dispose();
             _set.Clear();
             _set = null;
+        }
+
+        public void Serialize(IBinaryWriter writer)
+        {
+            writer.WriteBoolean(true); // true - set with weights
+            writer.WriteInt32(_set.Count);
+            foreach (var record in _set)
+            {
+                writer.WriteLong(record.Key);
+                writer.WriteFloat(record.Value);
+            }
+        }
+
+        public void Deserialize(IBinaryReader reader)
+        {
+            if (reader.ReadBoolean() == false)
+            {
+                throw new InvalidOperationException("Incompatible data format. The set does not contain weights.");
+            }
+            _set.Clear();
+            _set = null;
+            var count = reader.ReadInt32();
+            _set = new SortedList<long, float>(count + 1);
+            for (int i = 0; i < count; i++)
+            {
+                var key = reader.ReadLong();
+                var value = reader.ReadFloat();
+                _set.Add(key, value);
+            }
         }
     }
 }

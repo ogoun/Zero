@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using ZeroLevel.HNSW;
 
@@ -98,8 +99,265 @@ namespace HNSWDemo
 
         static void Main(string[] args)
         {
-            FilterTest();
+            TransformToCompactWorldTestWithAccuracity();
             Console.ReadKey();
+        }
+
+        static void TransformToCompactWorldTest()
+        {
+            var count = 10000;
+            var dimensionality = 128;
+            var samples = RandomVectors(dimensionality, count);
+            var world = new SmallWorld<float[]>(NSWOptions<float[]>.Create(6, 15, 200, 200, CosineDistance.ForUnits, true, true, selectionHeuristic: NeighbourSelectionHeuristic.SelectSimple));
+            var ids = world.AddItems(samples.ToArray());
+
+            Console.WriteLine("Start test");
+
+            byte[] dump;
+            using (var ms = new MemoryStream())
+            {
+                world.Serialize(ms);
+                dump = ms.ToArray();
+            }
+            Console.WriteLine($"Full dump size: {dump.Length} bytes");
+
+            ReadOnlySmallWorld<float[]> compactWorld;
+            using (var ms = new MemoryStream(dump))
+            {
+                compactWorld = SmallWorld.CreateReadOnlyWorldFrom<float[]>(NSWReadOnlyOption<float[]>.Create(200, CosineDistance.ForUnits, true, true, selectionHeuristic: NeighbourSelectionHeuristic.SelectSimple), ms);
+            }
+
+            // Compare worlds outputs
+            int K = 200;
+            var hits = 0;
+            var miss = 0;
+            var testCount = 1000;
+            var sw = new Stopwatch();
+            var timewatchesHNSW = new List<float>();
+            var timewatchesHNSWCompact = new List<float>();
+            var test_vectors = RandomVectors(dimensionality, testCount);
+
+            foreach (var v in test_vectors)
+            {
+                sw.Restart();
+                var gt = world.Search(v, K).Select(e => e.Item1).ToHashSet();
+                sw.Stop();
+                timewatchesHNSW.Add(sw.ElapsedMilliseconds);
+
+                sw.Restart();
+                var result = compactWorld.Search(v, K).Select(e => e.Item1).ToHashSet();
+                sw.Stop();
+                timewatchesHNSWCompact.Add(sw.ElapsedMilliseconds);
+
+                foreach (var r in result)
+                {
+                    if (gt.Contains(r))
+                    {
+                        hits++;
+                    }
+                    else
+                    {
+                        miss++;
+                    }
+                }
+            }
+
+            byte[] smallWorldDump;
+            using (var ms = new MemoryStream())
+            {
+                compactWorld.Serialize(ms);
+                smallWorldDump = ms.ToArray();
+            }
+            var p = smallWorldDump.Length * 100.0f / dump.Length;
+            Console.WriteLine($"Compact dump size: {smallWorldDump.Length} bytes. Decrease: {100 - p}%");
+
+            Console.WriteLine($"HITS: {hits}");
+            Console.WriteLine($"MISSES: {miss}");
+
+            Console.WriteLine($"MIN HNSW TIME: {timewatchesHNSW.Min()} ms");
+            Console.WriteLine($"AVG HNSW TIME: {timewatchesHNSW.Average()} ms");
+            Console.WriteLine($"MAX HNSW TIME: {timewatchesHNSW.Max()} ms");
+
+            Console.WriteLine($"MIN HNSWCompact TIME: {timewatchesHNSWCompact.Min()} ms");
+            Console.WriteLine($"AVG HNSWCompact TIME: {timewatchesHNSWCompact.Average()} ms");
+            Console.WriteLine($"MAX HNSWCompact TIME: {timewatchesHNSWCompact.Max()} ms");
+        }
+
+        static void TransformToCompactWorldTestWithAccuracity()
+        {
+            var count = 10000;
+            var dimensionality = 128;
+            var samples = RandomVectors(dimensionality, count);
+
+            var test = new VectorsDirectCompare(samples, CosineDistance.ForUnits);
+            var world = new SmallWorld<float[]>(NSWOptions<float[]>.Create(6, 15, 200, 200, CosineDistance.ForUnits, true, true, selectionHeuristic: NeighbourSelectionHeuristic.SelectSimple));
+            var ids = world.AddItems(samples.ToArray());
+
+            Console.WriteLine("Start test");
+
+            byte[] dump;
+            using (var ms = new MemoryStream())
+            {
+                world.Serialize(ms);
+                dump = ms.ToArray();
+            }           
+
+            ReadOnlySmallWorld<float[]> compactWorld;
+            using (var ms = new MemoryStream(dump))
+            {
+                compactWorld = SmallWorld.CreateReadOnlyWorldFrom<float[]>(NSWReadOnlyOption<float[]>.Create(200, CosineDistance.ForUnits, true, true, selectionHeuristic: NeighbourSelectionHeuristic.SelectSimple), ms);
+            }
+
+            // Compare worlds outputs
+            int K = 200;
+            var hits = 0;
+            var miss = 0;            
+
+            var testCount = 2000;
+            var sw = new Stopwatch();
+            var timewatchesNP = new List<float>();
+            var timewatchesHNSW = new List<float>();
+            var timewatchesHNSWCompact = new List<float>();
+            var test_vectors = RandomVectors(dimensionality, testCount);
+
+            var totalHitsHNSW = new List<int>();
+            var totalHitsHNSWCompact = new List<int>();
+
+            foreach (var v in test_vectors)
+            {
+                var npHitsHNSW = 0;
+                var npHitsHNSWCompact = 0;
+
+                sw.Restart();
+                var gtNP = test.KNearest(v, K).Select(p => p.Item1).ToHashSet();
+                sw.Stop();
+                timewatchesNP.Add(sw.ElapsedMilliseconds);
+
+                sw.Restart();
+                var gt = world.Search(v, K).Select(e => e.Item1).ToHashSet();
+                sw.Stop();
+                timewatchesHNSW.Add(sw.ElapsedMilliseconds);
+
+                sw.Restart();
+                var result = compactWorld.Search(v, K).Select(e => e.Item1).ToHashSet();
+                sw.Stop();
+                timewatchesHNSWCompact.Add(sw.ElapsedMilliseconds);
+
+                foreach (var r in result)
+                {
+                    if (gt.Contains(r))
+                    {
+                        hits++;
+                    }
+                    else
+                    {
+                        miss++;
+                    }
+                    if (gtNP.Contains(r))
+                    {
+                        npHitsHNSWCompact++;
+                    }
+                }
+
+                foreach (var r in gt)
+                {
+                    if (gtNP.Contains(r))
+                    {
+                        npHitsHNSW++;
+                    }
+                }
+
+                totalHitsHNSW.Add(npHitsHNSW);
+                totalHitsHNSWCompact.Add(npHitsHNSWCompact);
+            }
+
+            byte[] smallWorldDump;
+            using (var ms = new MemoryStream())
+            {
+                compactWorld.Serialize(ms);
+                smallWorldDump = ms.ToArray();
+            }
+            var p = smallWorldDump.Length * 100.0f / dump.Length;
+            Console.WriteLine($"Full dump size: {dump.Length} bytes");
+            Console.WriteLine($"Compact dump size: {smallWorldDump.Length} bytes. Decrease: {100 - p}%");
+
+            Console.WriteLine($"HITS: {hits}");
+            Console.WriteLine($"MISSES: {miss}");
+
+            Console.WriteLine($"MIN NP TIME: {timewatchesNP.Min()} ms");
+            Console.WriteLine($"AVG NP TIME: {timewatchesNP.Average()} ms");
+            Console.WriteLine($"MAX NP TIME: {timewatchesNP.Max()} ms");
+
+            Console.WriteLine($"MIN HNSW TIME: {timewatchesHNSW.Min()} ms");
+            Console.WriteLine($"AVG HNSW TIME: {timewatchesHNSW.Average()} ms");
+            Console.WriteLine($"MAX HNSW TIME: {timewatchesHNSW.Max()} ms");
+
+            Console.WriteLine($"MIN HNSWCompact TIME: {timewatchesHNSWCompact.Min()} ms");
+            Console.WriteLine($"AVG HNSWCompact TIME: {timewatchesHNSWCompact.Average()} ms");
+            Console.WriteLine($"MAX HNSWCompact TIME: {timewatchesHNSWCompact.Max()} ms");
+
+            Console.WriteLine($"MIN HNSW Accuracity: {totalHitsHNSW.Min() * 100 / K}%");
+            Console.WriteLine($"AVG HNSW Accuracity: {totalHitsHNSW.Average() * 100 / K}%");
+            Console.WriteLine($"MAX HNSW Accuracity: {totalHitsHNSW.Max() * 100 / K}%");
+
+            Console.WriteLine($"MIN HNSWCompact Accuracity: {totalHitsHNSWCompact.Min() * 100 / K}%");
+            Console.WriteLine($"AVG HNSWCompact Accuracity: {totalHitsHNSWCompact.Average() * 100 / K}%");
+            Console.WriteLine($"MAX HNSWCompact Accuracity: {totalHitsHNSWCompact.Max() * 100 / K}%");
+        }
+
+        static void SaveRestoreTest()
+        {
+            var count = 1000;
+            var dimensionality = 128;
+            var samples = RandomVectors(dimensionality, count);
+            var world = new SmallWorld<float[]>(NSWOptions<float[]>.Create(6, 15, 200, 200, CosineDistance.ForUnits, true, true, selectionHeuristic: NeighbourSelectionHeuristic.SelectSimple));
+            var sw = new Stopwatch();
+            sw.Start();
+            var ids = world.AddItems(samples.ToArray());
+            sw.Stop();
+            Console.WriteLine($"Insert {ids.Length} items on {sw.ElapsedMilliseconds} ms");
+            Console.WriteLine("Start test");
+
+            byte[] dump;
+            using (var ms = new MemoryStream())
+            {
+                world.Serialize(ms);
+                dump = ms.ToArray();
+            }
+            Console.WriteLine($"Full dump size: {dump.Length} bytes");
+
+            byte[] testDump;
+            var restoredWorld = new SmallWorld<float[]>(NSWOptions<float[]>.Create(6, 15, 200, 200, CosineDistance.ForUnits, true, true, selectionHeuristic: NeighbourSelectionHeuristic.SelectSimple));
+            using (var ms = new MemoryStream(dump))
+            {
+                restoredWorld.Deserialize(ms);
+            }
+
+            using (var ms = new MemoryStream())
+            {
+                restoredWorld.Serialize(ms);
+                testDump = ms.ToArray();
+            }
+            if (testDump.Length != dump.Length)
+            {
+                Console.WriteLine($"Incorrect restored size. Got {testDump.Length}. Expected: {dump.Length}");
+                return;
+            }
+
+            ReadOnlySmallWorld<float[]> compactWorld;
+            using (var ms = new MemoryStream(dump))
+            {
+                compactWorld = SmallWorld.CreateReadOnlyWorldFrom<float[]>(NSWReadOnlyOption<float[]>.Create(200, CosineDistance.ForUnits, true, true, selectionHeuristic: NeighbourSelectionHeuristic.SelectSimple), ms);
+            }
+
+            byte[] smallWorldDump;
+            using (var ms = new MemoryStream())
+            {
+                compactWorld.Serialize(ms);
+                smallWorldDump = ms.ToArray();
+            }
+            var p = smallWorldDump.Length * 100.0f / dump.Length;
+            Console.WriteLine($"Compact dump size: {smallWorldDump.Length} bytes. Decrease: {100 - p}%");
         }
 
         static void FilterTest()
@@ -110,7 +368,7 @@ namespace HNSWDemo
             var samples = Person.GenerateRandom(dimensionality, count);
 
             var world = new SmallWorld<float[]>(NSWOptions<float[]>.Create(6, 15, 200, 200, CosineDistance.ForUnits, true, true, selectionHeuristic: NeighbourSelectionHeuristic.SelectSimple));
-                        
+
             var ids = world.AddItems(samples.Select(i => i.Item1).ToArray());
             for (int bi = 0; bi < samples.Count; bi++)
             {
@@ -167,7 +425,7 @@ namespace HNSWDemo
 
             Console.WriteLine($"Insert {ids.Length} items on {sw.ElapsedMilliseconds} ms");
             Console.WriteLine("Start test");
-            
+
             var test_vectors = RandomVectors(dimensionality, testCount);
             foreach (var v in test_vectors)
             {
