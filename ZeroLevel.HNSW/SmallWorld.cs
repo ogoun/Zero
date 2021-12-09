@@ -7,7 +7,7 @@ namespace ZeroLevel.HNSW
 {
     public class ProbabilityLayerNumberGenerator
     {
-        private const float DIVIDER = 4.362f;
+        private const float DIVIDER = 3.361f;
         private readonly float[] _probabilities;
 
         public ProbabilityLayerNumberGenerator(int maxLayers, int M)
@@ -38,11 +38,8 @@ namespace ZeroLevel.HNSW
         private readonly NSWOptions<TItem> _options;
         private readonly VectorSet<TItem> _vectors;
         private readonly Layer<TItem>[] _layers;
-
-        private Layer<TItem> EnterPointsLayer => _layers[_layers.Length - 1];
-        private Layer<TItem> LastLayer => _layers[0];
-        private int EntryPoint = -1;
-        private int MaxLayer = -1;
+        private int EntryPoint = 0;
+        private int MaxLayer = 0;
         private readonly ProbabilityLayerNumberGenerator _layerLevelGenerator;
         private ReaderWriterLockSlim _lockGraph = new ReaderWriterLockSlim();
 
@@ -58,9 +55,12 @@ namespace ZeroLevel.HNSW
             }
         }
 
-        public IEnumerable<(int, TItem[])> Search(TItem vector, int k, HashSet<int> activeNodes = null)
+        public IEnumerable<(int, TItem, float)> Search(TItem vector, int k, HashSet<int> activeNodes = null)
         {
-            return Enumerable.Empty<(int, TItem[])>();
+            foreach (var pair in KNearest(vector, k))
+            {
+                yield return (pair.Item1, _vectors[pair.Item1], pair.Item2);
+            }
         }
 
         public int[] AddItems(IEnumerable<TItem> vectors)
@@ -109,57 +109,67 @@ namespace ZeroLevel.HNSW
         public void INSERT(int q)
         {
             var distance = new Func<int, float>(candidate => _options.Distance(_vectors[q], _vectors[candidate]));
-
             // W ← ∅ // list for the currently found nearest elements
             IDictionary<int, float> W = new Dictionary<int, float>();
             // ep ← get enter point for hnsw
-            var ep = EntryPoint == -1 ? 0 : EntryPoint;
-            var epDist = 0.0f;
+            var ep = EntryPoint;
+            var epDist = distance(ep);
             // L ← level of ep // top layer for hnsw
             var L = MaxLayer;
             // l ← ⌊-ln(unif(0..1))∙mL⌋ // new element’s level            
-            int l = _layerLevelGenerator.GetRandomLayer();
-            if (L == -1)
-            {
-                L = l;
-                MaxLayer = l;
-            }
+            int l = _layerLevelGenerator.GetRandomLayer();            
             // for lc ← L … l+1
             // Проход с верхнего уровня до уровня где появляется элемент, для нахождения точки входа
             for (int lc = L; lc > l; --lc)
             {
-                // W ← SEARCH-LAYER(q, ep, ef = 1, lc)
-                _layers[lc].RunKnnAtLayer(ep, distance, W, 1);
-                // ep ← get the nearest element from W to q
-                var nearest = W.OrderBy(p => p.Value).First();
-                ep = nearest.Key;
-                epDist = nearest.Value;
-                W.Clear();
+                if (_layers[lc].CountLinks == 0)
+                {
+                    _layers[lc].Append(q);
+                    ep = q;
+                }
+                else
+                {
+                    // W ← SEARCH-LAYER(q, ep, ef = 1, lc)
+                    _layers[lc].RunKnnAtLayer(ep, distance, W, 1);
+                    // ep ← get the nearest element from W to q
+                    var nearest = W.OrderBy(p => p.Value).First();
+                    ep = nearest.Key;
+                    epDist = nearest.Value;
+                    W.Clear();
+                }
             }
             //for lc ← min(L, l) … 0
             // connecting new node to the small world
             for (int lc = Math.Min(L, l); lc >= 0; --lc)
             {
-                // W ← SEARCH - LAYER(q, ep, efConstruction, lc)
-                _layers[lc].RunKnnAtLayer(ep, distance, W, _options.EFConstruction);
-                // neighbors ← SELECT-NEIGHBORS(q, W, M, lc) // alg. 3 or alg. 4
-                var neighbors = SelectBestForConnecting(lc, distance, W);;
-                // add bidirectionall connectionts from neighbors to q at layer lc
-                // for each e ∈ neighbors // shrink connections if needed
-                foreach (var e in neighbors)
+                if (_layers[lc].CountLinks == 0)
                 {
-                    // eConn ← neighbourhood(e) at layer lc
-                    _layers[lc].AddBidirectionallConnectionts(q, e.Key, e.Value);
-                    // if distance from newNode to newNeighbour is better than to bestPeer => update bestPeer
-                    if (e.Value < epDist)
-                    {
-                        ep = e.Key;
-                        epDist = e.Value;
-                    }
+                    _layers[lc].Append(q);
+                    ep = q;
                 }
-                // ep ← W
-                ep = W.OrderBy(p => p.Value).First().Key;
-                W.Clear();
+                else
+                {
+                    // W ← SEARCH - LAYER(q, ep, efConstruction, lc)
+                    _layers[lc].RunKnnAtLayer(ep, distance, W, _options.EFConstruction);
+                    // neighbors ← SELECT-NEIGHBORS(q, W, M, lc) // alg. 3 or alg. 4
+                    var neighbors = SelectBestForConnecting(lc, distance, W);
+                    // add bidirectionall connectionts from neighbors to q at layer lc
+                    // for each e ∈ neighbors // shrink connections if needed
+                    foreach (var e in neighbors)
+                    {
+                        // eConn ← neighbourhood(e) at layer lc
+                        _layers[lc].AddBidirectionallConnectionts(q, e.Key, e.Value, lc == 0);
+                        // if distance from newNode to newNeighbour is better than to bestPeer => update bestPeer
+                        if (e.Value < epDist)
+                        {
+                            ep = e.Key;
+                            epDist = e.Value;
+                        }
+                    }
+                    // ep ← W
+                    ep = W.OrderBy(p => p.Value).First().Key;
+                    W.Clear();
+                }
             }
             // if l > L
             if (l > L)
@@ -192,7 +202,7 @@ namespace ZeroLevel.HNSW
 
         private IDictionary<int, float> SelectBestForConnecting(int layer, Func<int, float> distance, IDictionary<int, float> candidates)
         {
-            if(_options.SelectionHeuristic == NeighbourSelectionHeuristic.SelectSimple)
+            if (_options.SelectionHeuristic == NeighbourSelectionHeuristic.SelectSimple)
                 return _layers[layer].SELECT_NEIGHBORS_SIMPLE(distance, candidates, GetM(layer));
             return _layers[layer].SELECT_NEIGHBORS_HEURISTIC(distance, candidates, GetM(layer));
         }

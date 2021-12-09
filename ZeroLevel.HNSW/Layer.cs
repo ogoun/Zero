@@ -16,7 +16,7 @@ namespace ZeroLevel.HNSW
         /// <summary>
         /// Count nodes at layer
         /// </summary>
-        public int Count => (_links.Count >> 1);
+        public int CountLinks => (_links.Count);
 
         public Layer(NSWOptions<TItem> options, VectorSet<TItem> vectors)
         {
@@ -24,13 +24,13 @@ namespace ZeroLevel.HNSW
             _vectors = vectors;
         }
 
-        public void AddBidirectionallConnectionts(int q, int p, float qpDistance)
+        public void AddBidirectionallConnectionts(int q, int p, float qpDistance, bool isMapLayer)
         {
             // поиск в ширину ближайших узлов к найденному
             var nearest = _links.FindLinksForId(p).ToArray();
             // если у найденного узла максимальное количество связей
             // if │eConn│ > Mmax // shrink connections of e
-            if (nearest.Length >= _options.M)
+            if (nearest.Length >= (isMapLayer ? _options.M * 2 : _options.M))
             {
                 // ищем связь с самой большой дистанцией
                 float distance = nearest[0].Item3;
@@ -54,6 +54,12 @@ namespace ZeroLevel.HNSW
                 _links.Add(q, p, qpDistance);
             }
         }
+
+        public void Append(int q)
+        {
+            _links.Add(q, q, 0);
+        }
+
 
         #region Implementation of https://arxiv.org/ftp/arxiv/papers/1603/1603.09320.pdf
         /// <summary>

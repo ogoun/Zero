@@ -2,13 +2,35 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Threading;
 using ZeroLevel.HNSW;
 
 namespace HNSWDemo
 {
     class Program
     {
+        public class VectorsDirectCompare
+        {
+            private readonly IList<float[]> _vectors;
+            private readonly Func<float[], float[], float> _distance;
+
+            public VectorsDirectCompare(List<float[]> vectors, Func<float[], float[], float> distance)
+            {
+                _vectors = vectors;
+                _distance = distance;
+            }
+
+            public IEnumerable<(int, float)> KNearest(float[] v, int k)
+            {
+                var weights = new Dictionary<int, float>();
+                for (int i = 0; i < _vectors.Count; i++)
+                {
+                    var d = _distance(v, _vectors[i]);
+                    weights[i] = d;
+                }
+                return weights.OrderBy(p => p.Value).Take(k).Select(p => (p.Key, p.Value));
+            }
+        }
+
         public enum Gender
         {
             Unknown, Male, Feemale
@@ -77,28 +99,65 @@ namespace HNSWDemo
         static void Main(string[] args)
         {
             var dimensionality = 128;
-            var testCount = 5000;
-            var count = 10000;
-            var batchSize = 1000;
+            var testCount = 1000;
+            var count = 5000;
             var samples = Person.GenerateRandom(dimensionality, count);
 
             var sw = new Stopwatch();
-            var world = new SmallWorld<float[]>(NSWOptions<float[]>.Create(6, 10, 200, 200, CosineDistance.ForUnits, false, false, selectionHeuristic: NeighbourSelectionHeuristic.SelectHeuristic));
 
-            for (int i = 0; i < (count / batchSize); i++)
+            var test = new VectorsDirectCompare(samples.Select(s => s.Item1).ToList(), CosineDistance.ForUnits);
+            var world = new SmallWorld<float[]>(NSWOptions<float[]>.Create(6, 15, 200, 200, CosineDistance.ForUnits, true, true, selectionHeuristic: NeighbourSelectionHeuristic.SelectSimple));
+
+            var batch = samples.ToArray();
+            
+            var ids = world.AddItems(batch.Select(i => i.Item1).ToArray());
+            
+            Console.WriteLine($"Insert {ids.Length} items on {sw.ElapsedMilliseconds} ms");
+            for (int bi = 0; bi < batch.Length; bi++)
             {
-                var batch = samples.Skip(i * batchSize).Take(batchSize).ToArray();
-                sw.Restart();
-                var ids = world.AddItems(batch.Select(i => i.Item1).ToArray());
-                sw.Stop();
-                Console.WriteLine($"Batch [{i}]. Insert {ids.Length} items on {sw.ElapsedMilliseconds} ms");
-                for (int bi = 0; bi < batch.Length; bi++)
-                {
-                    _database.Add(ids[bi], batch[bi].Item2);
-                }
+                _database.Add(ids[bi], batch[bi].Item2);
             }
 
+            Console.WriteLine("Start test");
+            int K = 200;
             var vectors = RandomVectors(dimensionality, testCount);
+            var totalHits = new List<int>();
+            var timewatchesHNSW = new List<float>();
+            var timewatchesNP = new List<float>();
+            foreach (var v in vectors)
+            {
+                sw.Restart();
+                var gt = test.KNearest(v, K).ToDictionary(p => p.Item1, p => p.Item2);
+                sw.Stop();
+                timewatchesNP.Add(sw.ElapsedMilliseconds);
+
+                sw.Restart();
+                var result = world.Search(v, K);
+                sw.Stop();
+                timewatchesHNSW.Add(sw.ElapsedMilliseconds);
+                var hits = 0;
+                foreach (var r in result)
+                {
+                    if (gt.ContainsKey(r.Item1))
+                    {
+                        hits++;
+                    }
+                }
+                totalHits.Add(hits);
+            }
+            Console.WriteLine($"MIN Accuracity: {totalHits.Min() * 100 / K}%");
+            Console.WriteLine($"AVG Accuracity: {totalHits.Average() * 100 / K}%");
+            Console.WriteLine($"MAX Accuracity: {totalHits.Max() * 100 / K}%");
+
+            Console.WriteLine($"MIN HNSW TIME: {timewatchesHNSW.Min()} ms");
+            Console.WriteLine($"AVG HNSW TIME: {timewatchesHNSW.Average()} ms");
+            Console.WriteLine($"MAX HNSW TIME: {timewatchesHNSW.Max()} ms");
+
+            Console.WriteLine($"MIN NP TIME: {timewatchesNP.Min()} ms");
+            Console.WriteLine($"AVG NP TIME: {timewatchesNP.Average()} ms");
+            Console.WriteLine($"MAX NP TIME: {timewatchesNP.Max()} ms");
+
+
 
             //HNSWFilter filter = new HNSWFilter(ids => ids.Where(id => { var p = _database[id]; return p.Age > 45 && p.Gender == Gender.Feemale; }));
 

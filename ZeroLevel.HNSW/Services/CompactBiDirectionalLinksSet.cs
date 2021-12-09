@@ -43,8 +43,10 @@ namespace ZeroLevel.HNSW
             {
                 _set.Remove(k1old);
                 _set.Remove(k2old);
-                _set.Add(k1new, distance);
-                _set.Add(k2new, distance);
+                if (!_set.ContainsKey(k1new))
+                    _set.Add(k1new, distance);
+                if (!_set.ContainsKey(k2new))
+                    _set.Add(k2new, distance);
             }
             finally
             {
