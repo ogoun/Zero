@@ -380,7 +380,11 @@ namespace HNSWDemo
             int K = 200;
             var vectors = RandomVectors(dimensionality, testCount);
 
-            var context = new SearchContext().SetActiveNodes(map.ConvertFeaturesToIds(samples.Where(p => p.Item2.Age > 20 && p.Item2.Age < 50 && p.Item2.Gender == Gender.Feemale).Select(p => p.Item2.Number)));
+            var context = new SearchContext()
+                .SetActiveNodes(map
+                    .ConvertFeaturesToIds(samples
+                        .Where(p => p.Item2.Age > 20 && p.Item2.Age < 50 && p.Item2.Gender == Gender.Feemale)
+                        .Select(p => p.Item2.Number)));
 
             var hits = 0;
             var miss = 0;
