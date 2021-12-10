@@ -16,7 +16,7 @@ namespace ZeroLevel.HNSW
         }
 
         private HashSet<int> _activeNodes;
-        private HashSet<int> _inactiveNodes;
+        private HashSet<int> _entryNodes;
         private Mode _mode;
 
         public SearchContext()
@@ -30,8 +30,8 @@ namespace ZeroLevel.HNSW
             switch (_mode)
             {
                 case Mode.ActiveCheck: return _activeNodes.Contains(nodeId);
-                case Mode.InactiveCheck: return _inactiveNodes.Contains(nodeId) == false;
-                case Mode.ActiveInactiveCheck: return _inactiveNodes.Contains(nodeId) == false && _activeNodes.Contains(nodeId);
+                case Mode.InactiveCheck: return _entryNodes.Contains(nodeId) == false;
+                case Mode.ActiveInactiveCheck: return _entryNodes.Contains(nodeId) == false && _activeNodes.Contains(nodeId);
             }
             return nodeId >= 0;
         }
@@ -57,15 +57,15 @@ namespace ZeroLevel.HNSW
             return this;
         }
 
-        public SearchContext SetInactiveNodes(IEnumerable<int> inactiveNodes)
+        public SearchContext SetEntryPointsNodes(IEnumerable<int> entryNodes)
         {
-            if (inactiveNodes != null && inactiveNodes.Any())
+            if (entryNodes != null && entryNodes.Any())
             {
                 if (_mode == Mode.InactiveCheck || _mode == Mode.ActiveInactiveCheck)
                 {
                     throw new InvalidOperationException("Inctive nodes are already defined");
                 }
-                _inactiveNodes = new HashSet<int>(inactiveNodes);
+                _entryNodes = new HashSet<int>(entryNodes);
                 if (_mode == Mode.None)
                 {
                     _mode = Mode.InactiveCheck;

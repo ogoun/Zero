@@ -95,8 +95,6 @@ namespace HNSWDemo
             return vectors;
         }
 
-        private static Dictionary<int, Person> _database = new Dictionary<int, Person>();
-
         static void Main(string[] args)
         {
             FilterTest();
@@ -200,7 +198,7 @@ namespace HNSWDemo
             {
                 world.Serialize(ms);
                 dump = ms.ToArray();
-            }           
+            }
 
             ReadOnlySmallWorld<float[]> compactWorld;
             using (var ms = new MemoryStream(dump))
@@ -211,7 +209,7 @@ namespace HNSWDemo
             // Compare worlds outputs
             int K = 200;
             var hits = 0;
-            var miss = 0;            
+            var miss = 0;
 
             var testCount = 2000;
             var sw = new Stopwatch();
@@ -367,28 +365,31 @@ namespace HNSWDemo
             var dimensionality = 128;
             var samples = Person.GenerateRandom(dimensionality, count);
 
+            var testDict = samples.ToDictionary(s => s.Item2.Number, s => s.Item2);
+
+            var map = new HNSWMap<long>();
             var world = new SmallWorld<float[]>(NSWOptions<float[]>.Create(6, 15, 200, 200, CosineDistance.ForUnits, true, true, selectionHeuristic: NeighbourSelectionHeuristic.SelectSimple));
 
             var ids = world.AddItems(samples.Select(i => i.Item1).ToArray());
             for (int bi = 0; bi < samples.Count; bi++)
             {
-                _database.Add(ids[bi], samples[bi].Item2);
+                map.Append(samples[bi].Item2.Number, ids[bi]);
             }
 
             Console.WriteLine("Start test");
             int K = 200;
             var vectors = RandomVectors(dimensionality, testCount);
 
-            var context = new SearchContext().SetActiveNodes(_database.Where(pair => pair.Value.Age > 20 && pair.Value.Age < 50 && pair.Value.Gender == Gender.Feemale).Select(pair => pair.Key));
+            var context = new SearchContext().SetActiveNodes(map.ConvertFeaturesToIds(samples.Where(p => p.Item2.Age > 20 && p.Item2.Age < 50 && p.Item2.Gender == Gender.Feemale).Select(p => p.Item2.Number)));
 
             var hits = 0;
             var miss = 0;
             foreach (var v in vectors)
             {
-                var result = world.Search(v, K, context);
-                foreach (var r in result)
+                var numbers = map.ConvertIdsToFeatures( world.Search(v, K, context).Select(r=>r.Item1));
+                foreach (var r in numbers)
                 {
-                    var record = _database[r.Item1];
+                    var record = testDict[r];
                     if (record.Gender == Gender.Feemale && record.Age > 20 && record.Age < 50)
                     {
                         hits++;
