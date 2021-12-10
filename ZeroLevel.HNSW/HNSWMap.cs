@@ -1,5 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using System.Collections.Generic;
+using ZeroLevel.Services.Serialization;
 
 namespace ZeroLevel.HNSW
 {
@@ -7,9 +8,10 @@ namespace ZeroLevel.HNSW
     // HNSW vectorId + vector
     // Map object feature - vectorId
     public class HNSWMap<TFeature>
+        : IBinarySerializable
     {
-        private readonly ConcurrentDictionary<TFeature, int> _map = new ConcurrentDictionary<TFeature, int>();
-        private readonly ConcurrentDictionary<int, TFeature> _reverse_map = new ConcurrentDictionary<int, TFeature>();
+        private ConcurrentDictionary<TFeature, int> _map = new ConcurrentDictionary<TFeature, int>();
+        private ConcurrentDictionary<int, TFeature> _reverse_map = new ConcurrentDictionary<int, TFeature>();
 
         public void Append(TFeature feature, int vectorId)
         {
@@ -39,6 +41,18 @@ namespace ZeroLevel.HNSW
                     yield return feature;
                 }
             }
+        }
+
+        public void Deserialize(IBinaryReader reader)
+        {
+            this._map = reader.ReadDictionaryAsConcurrent<TFeature, int>();
+            this._reverse_map = reader.ReadDictionaryAsConcurrent<int, TFeature>();
+        }
+
+        public void Serialize(IBinaryWriter writer)
+        {
+            writer.WriteDictionary<TFeature, int>(this._map);
+            writer.WriteDictionary<int, TFeature>(this._reverse_map);
         }
     }
 }
