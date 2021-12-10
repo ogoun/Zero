@@ -99,7 +99,7 @@ namespace HNSWDemo
 
         static void Main(string[] args)
         {
-            TransformToCompactWorldTestWithAccuracity();
+            FilterTest();
             Console.ReadKey();
         }
 
@@ -362,8 +362,8 @@ namespace HNSWDemo
 
         static void FilterTest()
         {
-            var count = 5000;
-            var testCount = 1000;
+            var count = 1000;
+            var testCount = 100;
             var dimensionality = 128;
             var samples = Person.GenerateRandom(dimensionality, count);
 
@@ -379,13 +379,13 @@ namespace HNSWDemo
             int K = 200;
             var vectors = RandomVectors(dimensionality, testCount);
 
-            var activeNodes = _database.Where(pair => pair.Value.Age > 20 && pair.Value.Age < 50 && pair.Value.Gender == Gender.Feemale).Select(pair => pair.Key).ToHashSet();
+            var context = new SearchContext().SetActiveNodes(_database.Where(pair => pair.Value.Age > 20 && pair.Value.Age < 50 && pair.Value.Gender == Gender.Feemale).Select(pair => pair.Key));
 
             var hits = 0;
             var miss = 0;
             foreach (var v in vectors)
             {
-                var result = world.Search(v, K, activeNodes);
+                var result = world.Search(v, K, context);
                 foreach (var r in result)
                 {
                     var record = _database[r.Item1];

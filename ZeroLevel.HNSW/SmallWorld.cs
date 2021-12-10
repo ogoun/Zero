@@ -51,9 +51,9 @@ namespace ZeroLevel.HNSW
             }
         }
 
-        public IEnumerable<(int, TItem, float)> Search(TItem vector, int k, HashSet<int> activeNodes)
+        public IEnumerable<(int, TItem, float)> Search(TItem vector, int k, SearchContext context)
         {
-            if (activeNodes == null)
+            if (context == null)
             {
                 foreach (var pair in KNearest(vector, k))
                 {
@@ -62,7 +62,7 @@ namespace ZeroLevel.HNSW
             }
             else
             {
-                foreach (var pair in KNearest(vector, k, activeNodes))
+                foreach (var pair in KNearest(vector, k, context))
                 {
                     yield return (pair.Item1, _vectors[pair.Item1], pair.Item2);
                 }
@@ -236,7 +236,7 @@ namespace ZeroLevel.HNSW
                 _lockGraph.ExitReadLock();
             }
         }
-        private IEnumerable<(int, float)> KNearest(TItem q, int k, HashSet<int> activeNodes)
+        private IEnumerable<(int, float)> KNearest(TItem q, int k, SearchContext context)
         {
             _lockGraph.EnterReadLock();
             try
@@ -263,7 +263,7 @@ namespace ZeroLevel.HNSW
                     W.Clear();
                 }
                 // W ← SEARCH-LAYER(q, ep, ef, lc =0)
-                _layers[0].KNearestAtLayer(ep, distance, W, k, activeNodes);
+                _layers[0].KNearestAtLayer(ep, distance, W, k, context);
                 // return K nearest elements from W to q
                 return W.Select(p => (p.Key, p.Value));
             }

@@ -166,7 +166,7 @@ namespace ZeroLevel.HNSW
         /// <param name="q">query element</param>
         /// <param name="ep">enter points ep</param>
         /// <returns>Output: ef closest neighbors to q</returns>
-        internal void KNearestAtLayer(int entryPointId, Func<int, float> targetCosts, IDictionary<int, float> W, int ef, HashSet<int> activeNodes)
+        internal void KNearestAtLayer(int entryPointId, Func<int, float> targetCosts, IDictionary<int, float> W, int ef, SearchContext context)
         {
             /*
              * v ← ep // set of visited elements
@@ -195,7 +195,7 @@ namespace ZeroLevel.HNSW
             var C = new Dictionary<int, float>();
             C.Add(entryPointId, targetCosts(entryPointId));
             // W ← ep // dynamic list of found nearest neighbors
-            if (activeNodes.Contains(entryPointId))
+            if (context.IsActiveNode(entryPointId))
             {
                 W.Add(entryPointId, C[entryPointId]);
             }
@@ -225,7 +225,7 @@ namespace ZeroLevel.HNSW
                     {
                         // enqueue perspective neighbours to expansion list
                         var neighbourDistance = targetCosts(neighbourId);
-                        if (activeNodes.Contains(neighbourId))
+                        if (context.IsActiveNode(neighbourId))
                         {
                             if (W.Count < ef || (W.Count > 0 && neighbourDistance < farthestDistance()))
                             {
