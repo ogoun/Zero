@@ -249,6 +249,128 @@ namespace ZeroLevel.HNSW
         }
 
         /// <summary>
+        /// Algorithm 2, modified for LookAlike
+        /// </summary>
+        /// <param name="q">query element</param>
+        /// <param name="ep">enter points ep</param>
+        /// <returns>Output: ef closest neighbors to q</returns>
+        internal void KNearestAtLayer(IDictionary<int, float> W, int ef, SearchContext context)
+        {
+            /*
+             * v ← ep // set of visited elements
+             * C ← ep // set of candidates
+             * W ← ep // dynamic list of found nearest neighbors
+             * while │C│ > 0
+             *   c ← extract nearest element from C to q
+             *   f ← get furthest element from W to q
+             *   if distance(c, q) > distance(f, q)
+             *     break // all elements in W are evaluated
+             *   for each e ∈ neighbourhood(c) at layer lc // update C and W
+             *     if e ∉ v
+             *       v ← v ⋃ e
+             *       f ← get furthest element from W to q
+             *       if distance(e, q) < distance(f, q) or │W│ < ef
+             *         C ← C ⋃ e
+             *         W ← W ⋃ e
+             *         if │W│ > ef
+             *           remove furthest element from W to q
+             * return W
+             */
+            // v ← ep // set of visited elements
+            var v = new VisitedBitSet(_vectors.Count, _options.M);
+            // C ← ep // set of candidates
+            var C = new Dictionary<int, float>();
+            foreach (var ep in context.EntryPoints)
+            {
+                var neighboursIds = GetNeighbors(ep).ToArray();
+                for (int i = 0; i < neighboursIds.Length; ++i)
+                {
+                    C.Add(ep, _links.Distance(ep, neighboursIds[i]));
+                }
+                v.Add(ep);
+            }
+            // W ← ep // dynamic list of found nearest neighbors
+
+            var popCandidate = new Func<(int, float)>(() => { var pair = C.OrderBy(e => e.Value).First(); C.Remove(pair.Key); return (pair.Key, pair.Value); });
+            var farthestDistance = new Func<float>(() => { var pair = W.OrderByDescending(e => e.Value).First(); return pair.Value; });
+            var fartherPopFromResult = new Action(() => { var pair = W.OrderByDescending(e => e.Value).First(); W.Remove(pair.Key); });
+            // run bfs
+            while (C.Count > 0)
+            {
+                // get next candidate to check and expand
+                var toExpand = popCandidate();
+                if (W.Count > 0)
+                {
+                    if (toExpand.Item2 > farthestDistance())
+                    {
+                        // the closest candidate is farther than farthest result
+                        break;
+                    }
+                }
+                if (context.IsActiveNode(toExpand.Item1))
+                {
+                    if (W.Count < ef || W.Count == 0 || (W.Count > 0 && toExpand.Item2 < farthestDistance()))
+                    {
+                        W.Add(toExpand.Item1, toExpand.Item2);
+                        if (W.Count > ef)
+                        {
+                            fartherPopFromResult();
+                        }
+                    }
+                }
+            }
+            if (W.Count > ef)
+            {
+                while (W.Count > ef)
+                {
+                    fartherPopFromResult();
+                }
+                return;
+            }
+            else
+            {
+                foreach (var c in W)
+                {
+                    C.Add(c.Key, c.Value);
+                }
+            }
+            while (C.Count > 0)
+            {
+                // get next candidate to check and expand
+                var toExpand = popCandidate();
+                // expand candidate
+                var neighboursIds = GetNeighbors(toExpand.Item1).ToArray();
+                for (int i = 0; i < neighboursIds.Length; ++i)
+                {
+                    int neighbourId = neighboursIds[i];
+                    if (!v.Contains(neighbourId))
+                    {
+                        // enqueue perspective neighbours to expansion list
+                        var neighbourDistance = _links.Distance(toExpand.Item1, neighbourId);
+                        if (context.IsActiveNode(neighbourId))
+                        {
+                            if (W.Count < ef || (W.Count > 0 && neighbourDistance < farthestDistance()))
+                            {
+                                W.Add(neighbourId, neighbourDistance);
+                                if (W.Count > ef)
+                                {
+                                    fartherPopFromResult();
+                                }
+                            }
+                        }
+                        if (W.Count < ef)
+                        {
+                            C.Add(neighbourId, neighbourDistance);
+                        }
+                        v.Add(neighbourId);
+                    }
+                }
+            }
+            C.Clear();
+            v.Clear();
+        }
+
+        /// <summary>
         /// Algorithm 3
         /// </summary>
         internal IDictionary<int, float> SELECT_NEIGHBORS_SIMPLE(Func<int, float> distance, IDictionary<int, float> candidates, int M)

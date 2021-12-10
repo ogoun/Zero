@@ -69,6 +69,21 @@ namespace ZeroLevel.HNSW
             }
         }
 
+        public IEnumerable<(int, TItem, float)> Search(int k, SearchContext context)
+        {
+            if (context == null)
+            {
+                throw new ArgumentNullException(nameof(context));
+            }
+            else
+            {
+                foreach (var pair in KNearest(k, context))
+                {
+                    yield return (pair.Item1, _vectors[pair.Item1], pair.Item2);
+                }
+            }
+        }
+
         /// <summary>
         /// Adding vectors batch
         /// </summary>
@@ -264,6 +279,43 @@ namespace ZeroLevel.HNSW
                 }
                 // W ← SEARCH-LAYER(q, ep, ef, lc =0)
                 _layers[0].KNearestAtLayer(ep, distance, W, k, context);
+                // return K nearest elements from W to q
+                return W.Select(p => (p.Key, p.Value));
+            }
+            finally
+            {
+                _lockGraph.ExitReadLock();
+            }
+        }
+
+        private IEnumerable<(int, float)> KNearest(int k, SearchContext context)
+        {
+            _lockGraph.EnterReadLock();
+            try
+            {
+                if (_vectors.Count == 0)
+                {
+                    return Enumerable.Empty<(int, float)>();
+                }
+                var distance = new Func<int, int, float>((id1, id2) => _options.Distance(_vectors[id1], _vectors[id2]));
+
+                // W ← ∅ // set for the current nearest elements
+                var W = new Dictionary<int, float>(k + 1);
+                // ep ← get enter point for hnsw
+                var ep = EntryPoint;
+                // L ← level of ep // top layer for hnsw
+                var L = MaxLayer;
+                // for lc ← L … 1
+                for (int layer = L; layer > 0; --layer)
+                {
+                    // W ← SEARCH-LAYER(q, ep, ef = 1, lc)
+                    _layers[layer].KNearestAtLayer(ep, W, 1, context);
+                    // ep ← get nearest element from W to q
+                    ep = W.OrderBy(p => p.Value).First().Key;
+                    W.Clear();
+                }
+                // W ← SEARCH-LAYER(q, ep, ef, lc =0)
+                _layers[0].KNearestAtLayer(ep, W, k, context);
                 // return K nearest elements from W to q
                 return W.Select(p => (p.Key, p.Value));
             }

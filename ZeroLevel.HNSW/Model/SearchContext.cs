@@ -36,6 +36,8 @@ namespace ZeroLevel.HNSW
             return nodeId >= 0;
         }
 
+        public IEnumerable<int> EntryPoints => _entryNodes;
+
         public SearchContext SetActiveNodes(IEnumerable<int> activeNodes)
         {
             if (activeNodes != null && activeNodes.Any())

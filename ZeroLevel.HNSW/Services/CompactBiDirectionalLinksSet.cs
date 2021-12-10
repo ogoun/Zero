@@ -254,6 +254,16 @@ namespace ZeroLevel.HNSW
             }
         }
 
+        internal float Distance(int id1, int id2)
+        {
+            long k = (((long)(id1)) << HALF_LONG_BITS) + id2;
+            if (_set.ContainsKey(k))
+            {
+                return _set[k];
+            }
+            return float.MaxValue;
+        }
+
         public void Dispose()
         {
             _rwLock.Dispose();
