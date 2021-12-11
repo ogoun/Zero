@@ -4,19 +4,16 @@ namespace ZeroLevel.HNSW.Services
 {
     internal sealed class ProbabilityLayerNumberGenerator
     {
-        private const float DIVIDER = 3.361f;
         private readonly float[] _probabilities;
-        private float _mL;
 
         internal ProbabilityLayerNumberGenerator(int maxLayers, int M)
         {
             _mL = maxLayers;
             _probabilities = new float[maxLayers];
-            var probability = 1.0f / DIVIDER;
+            var m_L = 1.0f / Math.Log(M);
             for (int i = 0; i < maxLayers; i++)
             {
-                _probabilities[i] = probability;
-                probability /= DIVIDER;
+                _probabilities[i] = (float)(Math.Exp(-i / m_L) * (1 - Math.Exp(-1 / m_L)));
             }
         }
 

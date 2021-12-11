@@ -98,7 +98,7 @@ namespace HNSWDemo
 
         static void Main(string[] args)
         {
-            AccuracityTest();
+            TransformToCompactWorldTestWithAccuracity();
             Console.ReadKey();
         }
 
@@ -423,7 +423,7 @@ namespace HNSWDemo
             var sw = new Stopwatch();
 
             var test = new VectorsDirectCompare(samples, CosineDistance.ForUnits);
-            var world = new SmallWorld<float[]>(NSWOptions<float[]>.Create(32, 15, 200, 200, CosineDistance.ForUnits, true, true, selectionHeuristic: NeighbourSelectionHeuristic.SelectSimple));
+            var world = new SmallWorld<float[]>(NSWOptions<float[]>.Create(8, 15, 200, 200, CosineDistance.ForUnits, true, true, selectionHeuristic: NeighbourSelectionHeuristic.SelectSimple));
 
             sw.Start();
             var ids = world.AddItems(samples.ToArray());
