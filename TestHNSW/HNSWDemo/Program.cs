@@ -95,9 +95,10 @@ namespace HNSWDemo
             return vectors;
         }
 
+
         static void Main(string[] args)
         {
-            FilterTest();
+            AccuracityTest();
             Console.ReadKey();
         }
 
@@ -390,7 +391,7 @@ namespace HNSWDemo
             var miss = 0;
             foreach (var v in vectors)
             {
-                var numbers = map.ConvertIdsToFeatures( world.Search(v, K, context).Select(r=>r.Item1));
+                var numbers = map.ConvertIdsToFeatures(world.Search(v, K, context).Select(r => r.Item1));
                 foreach (var r in numbers)
                 {
                     var record = testDict[r];
@@ -422,7 +423,7 @@ namespace HNSWDemo
             var sw = new Stopwatch();
 
             var test = new VectorsDirectCompare(samples, CosineDistance.ForUnits);
-            var world = new SmallWorld<float[]>(NSWOptions<float[]>.Create(6, 15, 200, 200, CosineDistance.ForUnits, true, true, selectionHeuristic: NeighbourSelectionHeuristic.SelectSimple));
+            var world = new SmallWorld<float[]>(NSWOptions<float[]>.Create(32, 15, 200, 200, CosineDistance.ForUnits, true, true, selectionHeuristic: NeighbourSelectionHeuristic.SelectSimple));
 
             sw.Start();
             var ids = world.AddItems(samples.ToArray());
