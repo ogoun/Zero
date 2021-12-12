@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ZeroLevel.HNSW.Utils
+namespace ZeroLevel.HNSW
 {
     public static class Metrics
     {

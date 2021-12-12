@@ -343,5 +343,8 @@ namespace ZeroLevel.HNSW
                 }
             }
         }
+
+        public Histogram GetHistogram(HistogramMode mode = HistogramMode.SQRT)
+            => _layers[0].GetHistogram(mode);
     }
 }

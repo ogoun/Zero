@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using ZeroLevel.HNSW;
@@ -89,7 +90,7 @@ namespace HNSWDemo
             {
                 var vector = new float[vectorSize];
                 DefaultRandomGenerator.Instance.NextFloats(vector);
-                VectorUtils.NormalizeSIMD(vector);
+                //VectorUtils.NormalizeSIMD(vector);
                 vectors.Add(vector);
             }
             return vectors;
@@ -98,8 +99,51 @@ namespace HNSWDemo
 
         static void Main(string[] args)
         {
-            TransformToCompactWorldTestWithAccuracity();
+            var vectors = RandomVectors(128, 3000);
+            var world = SmallWorld.CreateWorld<float[]>(NSWOptions<float[]>.Create(8, 16, 200, 200, Metrics.L2Euclidean, selectionHeuristic: NeighbourSelectionHeuristic.SelectSimple));
+            world.AddItems(vectors);
+            DrawHistogram(world, @"D:\hist.jpg");
+            Console.WriteLine("Completed");
             Console.ReadKey();
+        }
+
+        static void DrawHistogram(SmallWorld<float[]> world, string filename)
+        {
+            var histogram = world.GetHistogram();
+           /* while (histogram.CountSignChanges() > 3)
+            {
+                histogram.Smooth();
+            }*/
+            var wb = 1200 / histogram.Values.Length;
+            var k = 600.0f / (float)histogram.Values.Max();
+
+            var maxes = histogram.GetMaximums().ToDictionary(m => m.Index, m => m);
+            int threshold = histogram.OTSU();
+
+            using (var bmp = new Bitmap(1200, 600))
+            {
+                using (var g = Graphics.FromImage(bmp))
+                {
+                    for (int i = 0; i < histogram.Values.Length; i++)
+                    {
+                        var height = (int)(histogram.Values[i] * k);
+                        if (maxes.ContainsKey(i))
+                        {
+                            g.DrawRectangle(Pens.Red, i * wb, bmp.Height - height, wb, height);
+                            g.DrawRectangle(Pens.Red, i * wb + 1, bmp.Height - height, wb - 1, height);
+                        }
+                        else
+                        {
+                            g.DrawRectangle(Pens.Blue, i * wb, bmp.Height - height, wb, height);
+                        }
+                        if (i == threshold)
+                        {
+                            g.DrawLine(Pens.Green, i * wb + wb / 2, 0, i * wb + wb / 2, bmp.Height);
+                        }
+                    }
+                }
+                bmp.Save(filename);
+            }
         }
 
         static void TransformToCompactWorldTest()

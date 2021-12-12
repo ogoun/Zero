@@ -254,6 +254,11 @@ namespace ZeroLevel.HNSW
             }
         }
 
+        public Histogram CalculateHistogram(HistogramMode mode)
+        {
+            return new Histogram(mode, _set.Values);
+        }
+
         internal float Distance(int id1, int id2)
         {
             long k = (((long)(id1)) << HALF_LONG_BITS) + id2;

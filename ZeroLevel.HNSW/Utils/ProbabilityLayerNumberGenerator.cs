@@ -8,7 +8,6 @@ namespace ZeroLevel.HNSW.Services
 
         internal ProbabilityLayerNumberGenerator(int maxLayers, int M)
         {
-            _mL = maxLayers;
             _probabilities = new float[maxLayers];
             var m_L = 1.0f / Math.Log(M);
             for (int i = 0; i < maxLayers; i++)

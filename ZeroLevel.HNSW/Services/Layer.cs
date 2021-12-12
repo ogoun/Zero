@@ -486,5 +486,7 @@ namespace ZeroLevel.HNSW
         {
             _links.Deserialize(reader);
         }
+
+        internal Histogram GetHistogram(HistogramMode mode) => _links.CalculateHistogram(mode);
     }
 }
