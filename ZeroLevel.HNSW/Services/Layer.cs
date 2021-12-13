@@ -14,6 +14,7 @@ namespace ZeroLevel.HNSW
         private readonly NSWOptions<TItem> _options;
         private readonly VectorSet<TItem> _vectors;
         private readonly CompactBiDirectionalLinksSet _links;
+        internal SortedList<long, float> Links => _links.Links;
 
         /// <summary>
         /// There are links е the layer

@@ -5,6 +5,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using ZeroLevel.HNSW;
+using ZeroLevel.HNSW.Services;
 
 namespace HNSWDemo
 {
@@ -99,17 +100,41 @@ namespace HNSWDemo
 
         static void Main(string[] args)
         {
-            var vectors = RandomVectors(128, 3000);
-            var world = SmallWorld.CreateWorld<float[]>(NSWOptions<float[]>.Create(8, 16, 200, 200, Metrics.L2Euclidean, selectionHeuristic: NeighbourSelectionHeuristic.SelectSimple));
-            world.AddItems(vectors);
-            DrawHistogram(world, @"D:\hist.jpg");
+            AutoClusteringTest();
             Console.WriteLine("Completed");
             Console.ReadKey();
         }
 
-        static void DrawHistogram(SmallWorld<float[]> world, string filename)
+        static void AutoClusteringTest()
         {
+            var vectors = RandomVectors(128, 3000);
+            var world = SmallWorld.CreateWorld<float[]>(NSWOptions<float[]>.Create(8, 16, 200, 200, Metrics.L2Euclidean, selectionHeuristic: NeighbourSelectionHeuristic.SelectSimple));
+            world.AddItems(vectors);
+            var clusters = AutomaticGraphClusterer.DetectClusters(world);
+            Console.WriteLine($"Found {clusters.Count} clusters");
+            for (int i = 0; i < clusters.Count; i++)
+            {
+                Console.WriteLine($"Cluster {i+1} countains {clusters[i].Count} items");
+            }
+        }
+
+        static void HistogramTest()
+        {
+            var vectors = RandomVectors(128, 3000);
+            var world = SmallWorld.CreateWorld<float[]>(NSWOptions<float[]>.Create(8, 16, 200, 200, Metrics.L2Euclidean, selectionHeuristic: NeighbourSelectionHeuristic.SelectSimple));
+            world.AddItems(vectors);
             var histogram = world.GetHistogram();
+
+            int threshold = histogram.OTSU();
+            var min = histogram.Bounds[threshold - 1];
+            var max = histogram.Bounds[threshold];
+            var R = (max + min) / 2;
+
+            DrawHistogram(histogram, @"D:\hist.jpg");
+        }
+
+        static void DrawHistogram(Histogram histogram, string filename)
+        {
            /* while (histogram.CountSignChanges() > 3)
             {
                 histogram.Smooth();

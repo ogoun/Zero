@@ -15,6 +15,8 @@ namespace ZeroLevel.HNSW
 
         private SortedList<long, float> _set = new SortedList<long, float>();
 
+        internal SortedList<long, float> Links => _set;
+
         internal (int, int) this[int index]
         {
             get

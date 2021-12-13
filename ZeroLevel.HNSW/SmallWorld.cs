@@ -17,6 +17,7 @@ namespace ZeroLevel.HNSW
         private int MaxLayer = 0;
         private readonly ProbabilityLayerNumberGenerator _layerLevelGenerator;
         private ReaderWriterLockSlim _lockGraph = new ReaderWriterLockSlim();
+        internal SortedList<long, float> GetNSWLinks() => _layers[0].Links;
 
         public SmallWorld(NSWOptions<TItem> options)
         {
