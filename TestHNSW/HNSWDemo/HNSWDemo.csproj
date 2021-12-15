@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -11,6 +11,12 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\ZeroLevel.HNSW\ZeroLevel.HNSW.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="t10k-images.idx3-ubyte">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

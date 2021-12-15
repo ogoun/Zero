@@ -53,6 +53,12 @@ namespace ZeroLevel.HNSW
                 int index = 0;
                 for (int ni = 1; ni < nearest.Length; ni++)
                 {
+                    // Если осталась ссылка узла на себя, удаляем ее в первую очередь
+                    if (nearest[ni].Item1 == nearest[ni].Item2)
+                    {
+                        index = ni;
+                        break;
+                    }
                     if (nearest[ni].Item3 > distance)
                     {
                         index = ni;
@@ -81,6 +87,23 @@ namespace ZeroLevel.HNSW
         }
 
         #region Implementation of https://arxiv.org/ftp/arxiv/papers/1603/1603.09320.pdf
+        internal int FingEntryPointAtLayer(Func<int, float> targetCosts)
+        {
+            var set = new HashSet<int>(_links.Items().Select(p => p.Item1));
+            int minId = -1;
+            float minDist = float.MaxValue;
+            foreach (var id in set)
+            {
+                var d = targetCosts(id);
+                if (d < minDist && Math.Abs(d) > float.Epsilon)
+                {
+                    minDist = d;
+                    minId = id;
+                }
+            }
+            return minId;
+        }
+
         /// <summary>
         /// Algorithm 2
         /// </summary>

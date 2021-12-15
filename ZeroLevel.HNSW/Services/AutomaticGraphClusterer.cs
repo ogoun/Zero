@@ -16,6 +16,7 @@ namespace ZeroLevel.HNSW.Services
             var max = histogram.Bounds[threshold];
             var R = (max + min) / 2;
 
+
             // 2. Get links with distances less than R
             var resultLinks = new SortedList<long, float>();
             foreach (var pair in links)

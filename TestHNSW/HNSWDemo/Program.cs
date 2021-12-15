@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using ZeroLevel.HNSW;
 using ZeroLevel.HNSW.Services;
+using ZeroLevel.HNSW.Services.OPT;
 
 namespace HNSWDemo
 {
@@ -13,6 +14,7 @@ namespace HNSWDemo
     {
         public class VectorsDirectCompare
         {
+            private const int HALF_LONG_BITS = 32;
             private readonly IList<float[]> _vectors;
             private readonly Func<float[], float[], float> _distance;
 
@@ -31,6 +33,70 @@ namespace HNSWDemo
                     weights[i] = d;
                 }
                 return weights.OrderBy(p => p.Value).Take(k).Select(p => (p.Key, p.Value));
+            }
+
+            public List<HashSet<int>> DetectClusters()
+            {
+                var links = new SortedList<long, float>();
+                for (int i = 0; i < _vectors.Count; i++)
+                {
+                    for (int j = i + 1; j < _vectors.Count; j++)
+                    {
+                        long k = (((long)(i)) << HALF_LONG_BITS) + j;
+                        links.Add(k, _distance(_vectors[i], _vectors[j]));
+                    }
+                }
+
+                // 1. Find R - bound between intra-cluster distances and out-of-cluster distances
+                var histogram = new Histogram(HistogramMode.SQRT, links.Values);
+                int threshold = histogram.OTSU();
+                var min = histogram.Bounds[threshold - 1];
+                var max = histogram.Bounds[threshold];
+                var R = (max + min) / 2;
+
+                // 2. Get links with distances less than R
+                var resultLinks = new SortedList<long, float>();
+                foreach (var pair in links)
+                {
+                    if (pair.Value < R)
+                    {
+                        resultLinks.Add(pair.Key, pair.Value);
+                    }
+                }
+
+                // 3. Extract clusters
+                List<HashSet<int>> clusters = new List<HashSet<int>>();
+                foreach (var pair in resultLinks)
+                {
+                    var k = pair.Key;
+                    var id1 = (int)(k >> HALF_LONG_BITS);
+                    var id2 = (int)(k - (((long)id1) << HALF_LONG_BITS));
+
+                    bool found = false;
+                    foreach (var c in clusters)
+                    {
+                        if (c.Contains(id1))
+                        {
+                            c.Add(id2);
+                            found = true;
+                            break;
+                        }
+                        else if (c.Contains(id2))
+                        {
+                            c.Add(id1);
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (found == false)
+                    {
+                        var c = new HashSet<int>();
+                        c.Add(id1);
+                        c.Add(id2);
+                        clusters.Add(c);
+                    }
+                }
+                return clusters;
             }
         }
 
@@ -91,7 +157,7 @@ namespace HNSWDemo
             {
                 var vector = new float[vectorSize];
                 DefaultRandomGenerator.Instance.NextFloats(vector);
-                //VectorUtils.NormalizeSIMD(vector);
+                VectorUtils.NormalizeSIMD(vector);
                 vectors.Add(vector);
             }
             return vectors;
@@ -100,9 +166,105 @@ namespace HNSWDemo
 
         static void Main(string[] args)
         {
-            AutoClusteringTest();
+            var samples = RandomVectors(128, 600);
+            var opt_world = new OptWorld<float[]>(NSWOptions<float[]>.Create(8, 15, 200, 200, Metrics.L2Euclidean, true, true, selectionHeuristic: NeighbourSelectionHeuristic.SelectSimple));
+            opt_world.AddItems(samples);
+            //AccuracityTest();
             Console.WriteLine("Completed");
             Console.ReadKey();
+        }
+
+        static void BinaryHeapTest()
+        {
+            var heap = new BinaryHeap();
+            heap.Push(1, .03f);
+            heap.Push(2, .05f);
+            heap.Push(3, .01f);
+            heap.Push(4, 1.03f);
+            heap.Push(5, 2.03f);
+            heap.Push(6, .73f);
+
+            var n = heap.Nearest;
+            Console.WriteLine($"Nearest: [{n.Item1}] = {n.Item2}");
+            var f = heap.Farthest;
+            Console.WriteLine($"Farthest: [{f.Item1}] = {f.Item2}");
+
+            Console.WriteLine("From nearest to farthest");
+            while (heap.Count > 0)
+            {
+                var i = heap.PopNearest();
+                Console.WriteLine($"[{i.Item1}] = {i.Item2}");
+            }
+
+            heap.Push(1, .03f);
+            heap.Push(2, .05f);
+            heap.Push(3, .01f);
+            heap.Push(4, 1.03f);
+            heap.Push(5, 2.03f);
+            heap.Push(6, .73f);
+            Console.WriteLine("From farthest to nearest");
+            while (heap.Count > 0)
+            {
+                var i = heap.PopFarthest();
+                Console.WriteLine($"[{i.Item1}] = {i.Item2}");
+            }
+        }
+
+        static void TestOnMnist()
+        {
+            int imageCount, rowCount, colCount;
+            var buf = new byte[4];
+            var image = new byte[28 * 28];
+            var vectors = new List<float[]>();
+            using (var fs = new FileStream("t10k-images.idx3-ubyte", FileMode.Open, FileAccess.Read, FileShare.None))
+            {
+                // first 4 bytes is a magic number
+                fs.Read(buf, 0, 4);
+                // second 4 bytes is the number of images
+                fs.Read(buf, 0, 4);
+                imageCount = BitConverter.ToInt32(buf.Reverse().ToArray(), 0);
+                // third 4 bytes is the row count
+                fs.Read(buf, 0, 4);
+                rowCount = BitConverter.ToInt32(buf.Reverse().ToArray(), 0);
+                // fourth 4 bytes is the column count
+                fs.Read(buf, 0, 4);
+                colCount = BitConverter.ToInt32(buf.Reverse().ToArray(), 0);
+
+                for (int i = 0; i < imageCount; i++)
+                {
+                    fs.Read(image, 0, image.Length);
+                    vectors.Add(image.Select(b => (float)b).ToArray());
+                }
+            }
+
+            //var direct = new VectorsDirectCompare(vectors, Metrics.L2Euclidean);
+            
+            var options = NSWOptions<float[]>.Create(8, 16, 200, 200, Metrics.L2Euclidean, selectionHeuristic: NeighbourSelectionHeuristic.SelectSimple);
+            SmallWorld<float[]> world;
+            if (File.Exists("graph.bin"))
+            {
+                using (var fs = new FileStream("graph.bin", FileMode.Open, FileAccess.Read, FileShare.None))
+                {
+                    world = SmallWorld.CreateWorldFrom<float[]>(options, fs);
+                }
+            }
+            else
+            {
+                world = SmallWorld.CreateWorld<float[]>(options);
+                world.AddItems(vectors);
+                using (var fs = new FileStream("graph.bin", FileMode.Create, FileAccess.Write, FileShare.None))
+                {
+                    world.Serialize(fs);
+                }
+            }
+            
+            var clusters = AutomaticGraphClusterer.DetectClusters(world);
+            Console.WriteLine($"Found {clusters.Count} clusters");
+            for (int i = 0; i < clusters.Count; i++)
+            {
+                Console.WriteLine($"Cluster {i + 1} countains {clusters[i].Count} items");
+            }
+
         }
 
         static void AutoClusteringTest()
@@ -114,7 +276,7 @@ namespace HNSWDemo
             Console.WriteLine($"Found {clusters.Count} clusters");
             for (int i = 0; i < clusters.Count; i++)
             {
-                Console.WriteLine($"Cluster {i+1} countains {clusters[i].Count} items");
+                Console.WriteLine($"Cluster {i + 1} countains {clusters[i].Count} items");
             }
         }
 
@@ -135,10 +297,10 @@ namespace HNSWDemo
 
         static void DrawHistogram(Histogram histogram, string filename)
         {
-           /* while (histogram.CountSignChanges() > 3)
-            {
-                histogram.Smooth();
-            }*/
+            /* while (histogram.CountSignChanges() > 3)
+             {
+                 histogram.Smooth();
+             }*/
             var wb = 1200 / histogram.Values.Length;
             var k = 600.0f / (float)histogram.Values.Max();
 
@@ -147,8 +309,7 @@ namespace HNSWDemo
 
             using (var bmp = new Bitmap(1200, 600))
             {
-                using (var g = Graphics.FromImage(bmp))
-                {
+                using (var g = Graphics.FromImage(bmp))                {
                     for (int i = 0; i < histogram.Values.Length; i++)
                     {
                         var height = (int)(histogram.Values[i] * k);
@@ -481,25 +642,36 @@ namespace HNSWDemo
         static void AccuracityTest()
         {
             int K = 200;
-            var count = 5000;
+            var count = 2000;
             var testCount = 1000;
             var dimensionality = 128;
             var totalHits = new List<int>();
             var timewatchesNP = new List<float>();
             var timewatchesHNSW = new List<float>();
+
+            var totalOptHits = new List<int>();
+            var timewatchesOptHNSW = new List<float>();
+
             var samples = RandomVectors(dimensionality, count);
 
             var sw = new Stopwatch();
 
-            var test = new VectorsDirectCompare(samples, CosineDistance.ForUnits);
-            var world = new SmallWorld<float[]>(NSWOptions<float[]>.Create(8, 15, 200, 200, CosineDistance.ForUnits, true, true, selectionHeuristic: NeighbourSelectionHeuristic.SelectSimple));
+            var test = new VectorsDirectCompare(samples, Metrics.L2Euclidean);
+            var world = new SmallWorld<float[]>(NSWOptions<float[]>.Create(8, 15, 200, 200, Metrics.L2Euclidean, true, true, selectionHeuristic: NeighbourSelectionHeuristic.SelectSimple));
+
+            var opt_world = new OptWorld<float[]>(NSWOptions<float[]>.Create(8, 15, 200, 200, Metrics.L2Euclidean, true, true, selectionHeuristic: NeighbourSelectionHeuristic.SelectSimple));
 
             sw.Start();
             var ids = world.AddItems(samples.ToArray());
             sw.Stop();
+            Console.WriteLine($"Insert {ids.Length} items: {sw.ElapsedMilliseconds} ms");
 
-            Console.WriteLine($"Insert {ids.Length} items on {sw.ElapsedMilliseconds} ms");
+            sw.Restart();
+            opt_world.AddItems(samples.ToArray());
+            sw.Stop();
+            Console.WriteLine($"Insert {ids.Length} items in OPT: {sw.ElapsedMilliseconds} ms");
             Console.WriteLine("Start test");
+
 
             var test_vectors = RandomVectors(dimensionality, testCount);
             foreach (var v in test_vectors)
@@ -512,6 +684,7 @@ namespace HNSWDemo
                 sw.Restart();
                 var result = world.Search(v, K);
                 sw.Stop();
+
                 timewatchesHNSW.Add(sw.ElapsedMilliseconds);
                 var hits = 0;
                 foreach (var r in result)
@@ -522,14 +695,38 @@ namespace HNSWDemo
                     }
                 }
                 totalHits.Add(hits);
+
+
+                sw.Restart();
+                result = opt_world.Search(v, K);
+                sw.Stop();
+
+                timewatchesOptHNSW.Add(sw.ElapsedMilliseconds);
+                hits = 0;
+                foreach (var r in result)
+                {
+                    if (gt.ContainsKey(r.Item1))
+                    {
+                        hits++;
+                    }
+                }
+                totalOptHits.Add(hits);
             }
             Console.WriteLine($"MIN Accuracity: {totalHits.Min() * 100 / K}%");
             Console.WriteLine($"AVG Accuracity: {totalHits.Average() * 100 / K}%");
             Console.WriteLine($"MAX Accuracity: {totalHits.Max() * 100 / K}%");
 
+            Console.WriteLine($"MIN Opt Accuracity: {totalOptHits.Min() * 100 / K}%");
+            Console.WriteLine($"AVG Opt Accuracity: {totalOptHits.Average() * 100 / K}%");
+            Console.WriteLine($"MAX Opt Accuracity: {totalOptHits.Max() * 100 / K}%");
+
             Console.WriteLine($"MIN HNSW TIME: {timewatchesHNSW.Min()} ms");
             Console.WriteLine($"AVG HNSW TIME: {timewatchesHNSW.Average()} ms");
             Console.WriteLine($"MAX HNSW TIME: {timewatchesHNSW.Max()} ms");
+
+            Console.WriteLine($"MIN Opt HNSW TIME: {timewatchesOptHNSW.Min()} ms");
+            Console.WriteLine($"AVG Opt HNSW TIME: {timewatchesOptHNSW.Average()} ms");
+            Console.WriteLine($"MAX Opt HNSW TIME: {timewatchesOptHNSW.Max()} ms");
 
             Console.WriteLine($"MIN NP TIME: {timewatchesNP.Min()} ms");
             Console.WriteLine($"AVG NP TIME: {timewatchesNP.Average()} ms");

@@ -21,7 +21,7 @@ namespace ZeroLevel.HNSW
         public float[] Bounds { get; }
         public int[] Values { get; }
 
-        internal Histogram(HistogramMode mode, IList<float> data)
+        public Histogram(HistogramMode mode, IList<float> data)
         {
             Mode = mode;
             Min = data.Min();
@@ -171,6 +171,13 @@ namespace ZeroLevel.HNSW
                     threshold = k;
                 }
             }
+            /*
+            var local_max = Values[threshold];
+            for (int i = threshold + 1; i < Values.Length; i++)
+            {
+                
+            }
+            */
             return threshold;
         }
         #endregion

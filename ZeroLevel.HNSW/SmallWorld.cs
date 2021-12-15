@@ -11,7 +11,7 @@ namespace ZeroLevel.HNSW
     public class SmallWorld<TItem>
     {
         private readonly NSWOptions<TItem> _options;
-        private readonly VectorSet<TItem> _vectors;
+        private VectorSet<TItem> _vectors;
         private Layer<TItem>[] _layers;
         private int EntryPoint = 0;
         private int MaxLayer = 0;
@@ -118,6 +118,8 @@ namespace ZeroLevel.HNSW
             // W ← ∅ // list for the currently found nearest elements
             IDictionary<int, float> W = new Dictionary<int, float>();
             // ep ← get enter point for hnsw
+            //var ep = _layers[MaxLayer].FingEntryPointAtLayer(distance);
+            //if(ep == -1) ep = EntryPoint;
             var ep = EntryPoint;
             var epDist = distance(ep);
             // L ← level of ep // top layer for hnsw
@@ -334,6 +336,7 @@ namespace ZeroLevel.HNSW
             {
                 this.EntryPoint = reader.ReadInt32();
                 this.MaxLayer = reader.ReadInt32();
+                _vectors = new VectorSet<TItem>();
                 _vectors.Deserialize(reader);
                 var countLayers = reader.ReadInt32();
                 _layers = new Layer<TItem>[countLayers];

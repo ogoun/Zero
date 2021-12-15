@@ -104,11 +104,23 @@ namespace ZeroLevel.HNSW
             _rwLock.EnterReadLock();
             try
             {
-                foreach (var (k, v) in Search(_set, id))
+                if (_set.Count == 1)
                 {
+                    var k = _set.Keys[0];
+                    var v = _set[k];
                     var id1 = (int)(k >> HALF_LONG_BITS);
                     var id2 = (int)(k - (((long)id1) << HALF_LONG_BITS));
-                    yield return (id1, id2, v);
+                    if (id1 == id) yield return (id, id2, v);
+                    else if (id2 == id) yield return (id1, id, v);
+                }
+                else if (_set.Count > 1)
+                {
+                    foreach (var (k, v) in Search(_set, id))
+                    {
+                        var id1 = (int)(k >> HALF_LONG_BITS);
+                        var id2 = (int)(k - (((long)id1) << HALF_LONG_BITS));
+                        yield return (id1, id2, v);
+                    }
                 }
             }
             finally
