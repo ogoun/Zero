@@ -12,10 +12,10 @@ namespace temp2
     {
         static void Main(string[] args)
         {
-            OptWorld<float[]> world;
+            SmallWorld<float[]> world;
             using (var ms = new FileStream(@"F:\graph_test.bin", FileMode.Open, FileAccess.Read, FileShare.None))
             {
-                world = new OptWorld<float[]>(NSWOptions<float[]>.Create(6, 12, 100, 10, Metrics.L2Euclidean, true, true, selectionHeuristic: NeighbourSelectionHeuristic.SelectSimple), ms);
+                world = new SmallWorld<float[]>(NSWOptions<float[]>.Create(6, 12, 100, 10, Metrics.L2Euclidean, true, true, selectionHeuristic: NeighbourSelectionHeuristic.SelectSimple), ms);
             }
 
             var test_vectors = new List<float[]>();
@@ -34,7 +34,7 @@ namespace temp2
             Console.WriteLine("Completed");
         }
 
-        static void Forward(OptWorld<float[]> world, List<float[]> test_vectors)
+        static void Forward(SmallWorld<float[]> world, List<float[]> test_vectors)
         {
             int K = 10;
             foreach (var v in test_vectors)
