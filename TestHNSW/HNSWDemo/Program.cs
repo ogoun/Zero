@@ -7,6 +7,7 @@ using System.Linq;
 using ZeroLevel.HNSW;
 using ZeroLevel.HNSW.Services;
 using ZeroLevel.HNSW.Services.OPT;
+using ZeroLevel.Services.Serialization;
 
 namespace HNSWDemo
 {
@@ -166,48 +167,9 @@ namespace HNSWDemo
 
         static void Main(string[] args)
         {
-            var samples = RandomVectors(128, 600);
-            var opt_world = new OptWorld<float[]>(NSWOptions<float[]>.Create(8, 15, 200, 200, Metrics.L2Euclidean, true, true, selectionHeuristic: NeighbourSelectionHeuristic.SelectSimple));
-            opt_world.AddItems(samples);
-            //AccuracityTest();
+            OptAccuracityTest();
             Console.WriteLine("Completed");
             Console.ReadKey();
-        }
-
-        static void BinaryHeapTest()
-        {
-            var heap = new BinaryHeap();
-            heap.Push(1, .03f);
-            heap.Push(2, .05f);
-            heap.Push(3, .01f);
-            heap.Push(4, 1.03f);
-            heap.Push(5, 2.03f);
-            heap.Push(6, .73f);
-
-            var n = heap.Nearest;
-            Console.WriteLine($"Nearest: [{n.Item1}] = {n.Item2}");
-            var f = heap.Farthest;
-            Console.WriteLine($"Farthest: [{f.Item1}] = {f.Item2}");
-
-            Console.WriteLine("From nearest to farthest");
-            while (heap.Count > 0)
-            {
-                var i = heap.PopNearest();
-                Console.WriteLine($"[{i.Item1}] = {i.Item2}");
-            }
-
-            heap.Push(1, .03f);
-            heap.Push(2, .05f);
-            heap.Push(3, .01f);
-            heap.Push(4, 1.03f);
-            heap.Push(5, 2.03f);
-            heap.Push(6, .73f);
-            Console.WriteLine("From farthest to nearest");
-            while (heap.Count > 0)
-            {
-                var i = heap.PopFarthest();
-                Console.WriteLine($"[{i.Item1}] = {i.Item2}");
-            }
         }
 
         static void TestOnMnist()
@@ -727,6 +689,106 @@ namespace HNSWDemo
             Console.WriteLine($"MIN Opt HNSW TIME: {timewatchesOptHNSW.Min()} ms");
             Console.WriteLine($"AVG Opt HNSW TIME: {timewatchesOptHNSW.Average()} ms");
             Console.WriteLine($"MAX Opt HNSW TIME: {timewatchesOptHNSW.Max()} ms");
+
+            Console.WriteLine($"MIN NP TIME: {timewatchesNP.Min()} ms");
+            Console.WriteLine($"AVG NP TIME: {timewatchesNP.Average()} ms");
+            Console.WriteLine($"MAX NP TIME: {timewatchesNP.Max()} ms");
+        }
+
+        static void OptAccuracityTest()
+        {
+            int K = 200;
+            var count = 5000;
+            var testCount = 1000;
+            var dimensionality = 128;
+            var timewatchesNP = new List<float>();
+            var totalOptHits = new List<int>();
+            var timewatchesOptHNSW = new List<float>();
+
+            var totalRestoredHits = new List<int>();
+            var timewatchesRestoredHNSW = new List<float>();
+
+            var samples = RandomVectors(dimensionality, count);
+
+            var sw = new Stopwatch();
+
+            var test = new VectorsDirectCompare(samples, Metrics.L2Euclidean);
+
+            var opt_world = new OptWorld<float[]>(NSWOptions<float[]>.Create(8, 16, 200, 200, Metrics.L2Euclidean, true, true, selectionHeuristic: NeighbourSelectionHeuristic.SelectSimple));
+
+            sw.Restart();
+            var ids = opt_world.AddItems(samples.ToArray());
+            sw.Stop();
+            Console.WriteLine($"Insert {ids.Length} items in OPT: {sw.ElapsedMilliseconds} ms");
+
+            byte[] dump;
+            using (var ms = new MemoryStream())
+            {
+                opt_world.Serialize(ms);
+                dump = ms.ToArray();
+            }
+
+            SmallWorld<float[]> compactWorld;
+            using (var ms = new MemoryStream(dump))
+            {
+                compactWorld = SmallWorld.CreateWorldFrom<float[]>(NSWOptions<float[]>.Create(8, 16, 200, 200, Metrics.L2Euclidean, true, true, selectionHeuristic: NeighbourSelectionHeuristic.SelectSimple), ms);
+            }
+
+            
+            Console.WriteLine("Start test");
+
+
+            var test_vectors = RandomVectors(dimensionality, testCount);
+            foreach (var v in test_vectors)
+            {
+                sw.Restart();
+                var gt = test.KNearest(v, K).ToDictionary(p => p.Item1, p => p.Item2);
+                sw.Stop();
+                timewatchesNP.Add(sw.ElapsedMilliseconds);
+
+                sw.Restart();
+                var result = opt_world.Search(v, K).ToArray();
+                sw.Stop();
+                timewatchesOptHNSW.Add(sw.ElapsedMilliseconds);
+                var hits = 0;
+                foreach (var r in result)
+                {
+                    if (gt.ContainsKey(r.Item1))
+                    {
+                        hits++;
+                    }
+                }
+                totalOptHits.Add(hits);
+
+                sw.Restart();
+                result = compactWorld.Search(v, K).ToArray();
+                sw.Stop();
+                timewatchesRestoredHNSW.Add(sw.ElapsedMilliseconds);
+                hits = 0;
+                foreach (var r in result)
+                {
+                    if (gt.ContainsKey(r.Item1))
+                    {
+                        hits++;
+                    }
+                }
+                totalRestoredHits.Add(hits);
+            }
+            Console.WriteLine($"MIN Opt Accuracity: {totalOptHits.Min() * 100 / K}%");
+            Console.WriteLine($"AVG Opt Accuracity: {totalOptHits.Average() * 100 / K}%");
+            Console.WriteLine($"MAX Opt Accuracity: {totalOptHits.Max() * 100 / K}%");
+
+            Console.WriteLine($"MIN Test Accuracity: {totalRestoredHits.Min() * 100 / K}%");
+            Console.WriteLine($"AVG Test Accuracity: {totalRestoredHits.Average() * 100 / K}%");
+            Console.WriteLine($"MAX Test Accuracity: {totalRestoredHits.Max() * 100 / K}%");
+
+            Console.WriteLine($"MIN Opt HNSW TIME: {timewatchesOptHNSW.Min()} ms");
+            Console.WriteLine($"AVG Opt HNSW TIME: {timewatchesOptHNSW.Average()} ms");
+            Console.WriteLine($"MAX Opt HNSW TIME: {timewatchesOptHNSW.Max()} ms");
+
+            Console.WriteLine($"MIN Test HNSW TIME: {timewatchesRestoredHNSW.Min()} ms");
+            Console.WriteLine($"AVG Test HNSW TIME: {timewatchesRestoredHNSW.Average()} ms");
+            Console.WriteLine($"MAX Test HNSW TIME: {timewatchesRestoredHNSW.Max()} ms");
 
             Console.WriteLine($"MIN NP TIME: {timewatchesNP.Min()} ms");
             Console.WriteLine($"AVG NP TIME: {timewatchesNP.Average()} ms");

@@ -103,7 +103,7 @@ namespace ZeroLevel.HNSW.Services.OPT
         /// <param name="q">query element</param>
         /// <param name="ep">enter points ep</param>
         /// <returns>Output: ef closest neighbors to q</returns>
-        internal void KNearestAtLayer(int entryPointId, Func<int, float> targetCosts, BinaryHeap W, int ef)
+        internal IEnumerable<(int, float)> KNearestAtLayer(int entryPointId, Func<int, float> targetCosts, IEnumerable<(int, float)> w, int ef)
         {
             /*
              * v ← ep // set of visited elements
@@ -128,21 +128,25 @@ namespace ZeroLevel.HNSW.Services.OPT
             var v = new VisitedBitSet(_vectors.Count, _options.M);
             // v ← ep // set of visited elements
             v.Add(entryPointId);
+            var W = new MaxHeap(ef + 1);
+            foreach (var i in w) W.Push(i);
 
             var d = targetCosts(entryPointId);
             // C ← ep // set of candidates
-            var C = new BinaryHeap();
-            C.Push(entryPointId, d);
+            var C = new MinHeap(ef);
+            C.Push((entryPointId, d));
             // W ← ep // dynamic list of found nearest neighbors
-            W.Push(entryPointId, d);
+            W.Push((entryPointId, d));
+
+            int farthestId;
+            float farthestDistance;
 
             // run bfs
             while (C.Count > 0)
             {
                 // get next candidate to check and expand
-                var toExpand = C.PopNearest();
-                var farthestResult = W.Farthest;
-                if (toExpand.Item2 > farthestResult.Item2)
+                var toExpand = C.Pop();
+                if (W.TryPeek(out _, out farthestDistance) && toExpand.Item2 > farthestDistance)
                 {
                     // the closest candidate is farther than farthest result
                     break;
@@ -156,16 +160,17 @@ namespace ZeroLevel.HNSW.Services.OPT
                     if (!v.Contains(neighbourId))
                     {
                         // enqueue perspective neighbours to expansion list
-                        farthestResult = W.Farthest;
+                        W.TryPeek(out farthestId, out farthestDistance);
 
                         var neighbourDistance = targetCosts(neighbourId);
-                        if (W.Count < ef || neighbourDistance < farthestResult.Item2)
+                        if (W.Count < ef || (farthestId >= 0 && neighbourDistance < farthestDistance))
                         {
-                            C.Push(neighbourId, neighbourDistance);
-                            W.Push(neighbourId, neighbourDistance);
+                            C.Push((neighbourId, neighbourDistance));
+
+                            W.Push((neighbourId, neighbourDistance));
                             if (W.Count > ef)
                             {
-                                W.PopFarthest();
+                                W.Pop();
                             }
                         }
                         v.Add(neighbourId);
@@ -174,6 +179,7 @@ namespace ZeroLevel.HNSW.Services.OPT
             }
             C.Clear();
             v.Clear();
+            return W;
         }
 
         /// <summary>
@@ -182,7 +188,7 @@ namespace ZeroLevel.HNSW.Services.OPT
         /// <param name="q">query element</param>
         /// <param name="ep">enter points ep</param>
         /// <returns>Output: ef closest neighbors to q</returns>
-        internal void KNearestAtLayer(int entryPointId, Func<int, float> targetCosts, BinaryHeap W, int ef, SearchContext context)
+        internal IEnumerable<(int, float)> KNearestAtLayer(int entryPointId, Func<int, float> targetCosts, IEnumerable<(int, float)> w, int ef, SearchContext context)
         {
             /*
              * v ← ep // set of visited elements
@@ -207,23 +213,28 @@ namespace ZeroLevel.HNSW.Services.OPT
             var v = new VisitedBitSet(_vectors.Count, _options.M);
             // v ← ep // set of visited elements
             v.Add(entryPointId);
+
+            var W = new MaxHeap(ef + 1);
+            foreach (var i in w) W.Push(i);
+
             // C ← ep // set of candidates
-            var C = new BinaryHeap();
+            var C = new MinHeap(ef);
             var d = targetCosts(entryPointId);
-            C.Push(entryPointId, d);
+            C.Push((entryPointId, d));
             // W ← ep // dynamic list of found nearest neighbors
             if (context.IsActiveNode(entryPointId))
             {
-                W.Push(entryPointId, d);
+                W.Push((entryPointId, d));
             }
             // run bfs
             while (C.Count > 0)
             {
                 // get next candidate to check and expand
-                var toExpand = C.PopNearest();
+                var toExpand = C.Pop();
                 if (W.Count > 0)
                 {
-                    if (toExpand.Item2 > W.Farthest.Item2)
+                    if(W.TryPeek(out _, out var dist ))
+                    if (toExpand.Item2 > dist)
                     {
                         // the closest candidate is farther than farthest result
                         break;
@@ -241,18 +252,18 @@ namespace ZeroLevel.HNSW.Services.OPT
                         var neighbourDistance = targetCosts(neighbourId);
                         if (context.IsActiveNode(neighbourId))
                         {
-                            if (W.Count < ef || (W.Count > 0 && neighbourDistance < W.Farthest.Item2))
+                            if (W.Count < ef || (W.Count > 0 && (W.TryPeek(out _, out var dist) &&  neighbourDistance < dist)))
                             {
-                                W.Push(neighbourId, neighbourDistance);
+                                W.Push((neighbourId, neighbourDistance));
                                 if (W.Count > ef)
                                 {
-                                    W.PopFarthest();
+                                    W.Pop();
                                 }
                             }
                         }
                         if (W.Count < ef)
                         {
-                            C.Push(neighbourId, neighbourDistance);
+                            C.Push((neighbourId, neighbourDistance));
                         }
                         v.Add(neighbourId);
                     }
@@ -260,6 +271,7 @@ namespace ZeroLevel.HNSW.Services.OPT
             }
             C.Clear();
             v.Clear();
+            return W;
         }
 
         /// <summary>
@@ -268,7 +280,7 @@ namespace ZeroLevel.HNSW.Services.OPT
         /// <param name="q">query element</param>
         /// <param name="ep">enter points ep</param>
         /// <returns>Output: ef closest neighbors to q</returns>
-        internal void KNearestAtLayer(BinaryHeap W, int ef, SearchContext context)
+        internal IEnumerable<(int, float)> KNearestAtLayer(IEnumerable<(int, float)> w, int ef, SearchContext context)
         {
             /*
              * v ← ep // set of visited elements
@@ -293,25 +305,28 @@ namespace ZeroLevel.HNSW.Services.OPT
             // v ← ep // set of visited elements
             var v = new VisitedBitSet(_vectors.Count, _options.M);
             // C ← ep // set of candidates
-            var C = new BinaryHeap();
+            var C = new MinHeap(ef);
             foreach (var ep in context.EntryPoints)
             {
                 var neighboursIds = GetNeighbors(ep).ToArray();
                 for (int i = 0; i < neighboursIds.Length; ++i)
                 {
-                    C.Push(ep, _links.Distance(ep, neighboursIds[i]));
+                    C.Push((ep, _links.Distance(ep, neighboursIds[i])));
                 }
                 v.Add(ep);
             }
             // W ← ep // dynamic list of found nearest neighbors
+            var W = new MaxHeap(ef + 1);
+            foreach (var i in w) W.Push(i);
+
             // run bfs
             while (C.Count > 0)
             {
                 // get next candidate to check and expand
-                var toExpand = C.PopNearest();
+                var toExpand = C.Pop();
                 if (W.Count > 0)
                 {
-                    if (toExpand.Item2 > W.Farthest.Item2)
+                    if (W.TryPeek(out _, out var dist) && toExpand.Item2 > dist)
                     {
                         // the closest candidate is farther than farthest result
                         break;
@@ -319,12 +334,12 @@ namespace ZeroLevel.HNSW.Services.OPT
                 }
                 if (context.IsActiveNode(toExpand.Item1))
                 {
-                    if (W.Count < ef || W.Count == 0 || (W.Count > 0 && toExpand.Item2 < W.Farthest.Item2))
+                    if (W.Count < ef || W.Count == 0 || (W.Count > 0 && (W.TryPeek(out _, out var dist) && toExpand.Item2 < dist)))
                     {
-                        W.Push(toExpand.Item1, toExpand.Item2);
+                        W.Push((toExpand.Item1, toExpand.Item2));
                         if (W.Count > ef)
                         {
-                            W.PopFarthest();
+                            W.Pop();
                         }
                     }
                 }
@@ -333,21 +348,21 @@ namespace ZeroLevel.HNSW.Services.OPT
             {
                 while (W.Count > ef)
                 {
-                    W.PopFarthest();
+                    W.Pop();
                 }
-                return;
+                return W;
             }
             else
             {
                 foreach (var c in W)
                 {
-                    C.Push(c.Item1, c.Item2);
+                    C.Push((c.Item1, c.Item2));
                 }
             }
             while (C.Count > 0)
             {
                 // get next candidate to check and expand
-                var toExpand = C.PopNearest();
+                var toExpand = C.Pop();
                 // expand candidate
                 var neighboursIds = GetNeighbors(toExpand.Item1).ToArray();
                 for (int i = 0; i < neighboursIds.Length; ++i)
@@ -359,18 +374,18 @@ namespace ZeroLevel.HNSW.Services.OPT
                         var neighbourDistance = _links.Distance(toExpand.Item1, neighbourId);
                         if (context.IsActiveNode(neighbourId))
                         {
-                            if (W.Count < ef || (W.Count > 0 && neighbourDistance < W.Farthest.Item2))
+                            if (W.Count < ef || (W.Count > 0 && (W.TryPeek(out _, out var dist) && neighbourDistance < dist)))
                             {
-                                W.Push(neighbourId, neighbourDistance);
+                                W.Push((neighbourId, neighbourDistance));
                                 if (W.Count > ef)
                                 {
-                                    W.PopFarthest();
+                                    W.Pop();
                                 }
                             }
                         }
                         if (W.Count < ef)
                         {
-                            C.Push(neighbourId, neighbourDistance);
+                            C.Push((neighbourId, neighbourDistance));
                         }
                         v.Add(neighbourId);
                     }
@@ -378,19 +393,22 @@ namespace ZeroLevel.HNSW.Services.OPT
             }
             C.Clear();
             v.Clear();
+            return W;
         }
 
         /// <summary>
         /// Algorithm 3
         /// </summary>
-        internal BinaryHeap SELECT_NEIGHBORS_SIMPLE(BinaryHeap W, int M)
+        internal MaxHeap SELECT_NEIGHBORS_SIMPLE(IEnumerable<(int, float)> w, int M)
         {
+            var W = new MaxHeap(w.Count());
+            foreach (var i in w) W.Push(i);
             var bestN = M;
             if (W.Count > bestN)
             {
                 while (W.Count > bestN)
                 {
-                    W.PopFarthest();
+                    W.Pop();
                 }
             }
             return W;
@@ -406,11 +424,13 @@ namespace ZeroLevel.HNSW.Services.OPT
         /// <param name="extendCandidates">flag indicating whether or not to extend candidate list</param>
         /// <param name="keepPrunedConnections">flag indicating whether or not to add discarded elements</param>
         /// <returns>Output: M elements selected by the heuristic</returns>
-        internal BinaryHeap SELECT_NEIGHBORS_HEURISTIC(Func<int, float> distance, BinaryHeap W, int M)
+        internal MaxHeap SELECT_NEIGHBORS_HEURISTIC(Func<int, float> distance, IEnumerable<(int, float)> w, int M)
         {
             // R ← ∅
-            var R = new BinaryHeap();
+            var R = new MaxHeap(_options.EFConstruction);
             // W ← C // working queue for the candidates
+            var W = new MaxHeap(_options.EFConstruction + 1);
+            foreach (var i in w) W.Push(i);
             // if extendCandidates // extend candidates by their neighbors
             if (_options.ExpandBestSelection)
             {
@@ -432,30 +452,30 @@ namespace ZeroLevel.HNSW.Services.OPT
                 // W ← W ⋃ eadj
                 foreach (var id in extendBuffer)
                 {
-                    W.Push(id, distance(id));
+                    W.Push((id, distance(id)));
                 }
             }
 
             //  Wd ← ∅ // queue for the discarded candidates
-            var Wd = new BinaryHeap();
+            var Wd = new MinHeap(_options.EFConstruction);
             // while │W│ > 0 and │R│< M
             while (W.Count > 0 && R.Count < M)
             {
                 // e ← extract nearest element from W to q
-                var (e, ed) = W.PopNearest();
-                var (fe, fd) = R.PopFarthest();
+                var (e, ed) = W.Pop();
+                var (fe, fd) = R.Pop();
 
                 // if e is closer to q compared to any element from R
                 if (R.Count == 0 ||
                     ed < fd)
                 {
                     // R ← R ⋃ e
-                    R.Push(e, ed);
+                    R.Push((e, ed));
                 }
                 else
                 {
                     // Wd ← Wd ⋃ e
-                    Wd.Push(e, ed);
+                    Wd.Push((e, ed));
                 }
             }
             // if keepPrunedConnections // add some of the discarded // connections from Wd
@@ -465,8 +485,8 @@ namespace ZeroLevel.HNSW.Services.OPT
                 while (Wd.Count > 0 && R.Count < M)
                 {
                     // R ← R ⋃ extract nearest element from Wd to q
-                    var nearest = Wd.PopNearest();
-                    R.Push(nearest.Item1, nearest.Item2);
+                    var nearest = Wd.Pop();
+                    R.Push((nearest.Item1, nearest.Item2));
                 }
             }
             //  return R

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using ZeroLevel.Services.Serialization;
 
@@ -29,7 +30,7 @@ namespace ZeroLevel.HNSW.Services.OPT
             }
         }
 
-        internal OptWorld(NSWOptions<TItem> options, Stream stream)
+        public OptWorld(NSWOptions<TItem> options, Stream stream)
         {
             _options = options;
             Deserialize(stream);
@@ -114,7 +115,7 @@ namespace ZeroLevel.HNSW.Services.OPT
         {
             var distance = new Func<int, float>(candidate => _options.Distance(_vectors[q], _vectors[candidate]));
             // W ← ∅ // list for the currently found nearest elements
-            var W = new BinaryHeap();
+            var W = new MinHeap();
             // ep ← get enter point for hnsw
             //var ep = _layers[MaxLayer].FingEntryPointAtLayer(distance);
             //if(ep == -1) ep = EntryPoint;
@@ -126,14 +127,22 @@ namespace ZeroLevel.HNSW.Services.OPT
             int l = _layerLevelGenerator.GetRandomLayer();
             // for lc ← L … l+1
             // Проход с верхнего уровня до уровня где появляется элемент, для нахождения точки входа
+
+            int id;
+            float value;
             for (int lc = L; lc > l; --lc)
             {
                 // W ← SEARCH-LAYER(q, ep, ef = 1, lc)
-                _layers[lc].KNearestAtLayer(ep, distance, W, 1);
+                foreach (var i in _layers[lc].KNearestAtLayer(ep, distance, W, 1))
+                {
+                    W.Push(i);
+                }
                 // ep ← get the nearest element from W to q
-                var nearest = W.Nearest;
-                ep = nearest.Item1;
-                epDist = nearest.Item2;
+                if (W.TryPeek(out id, out value))
+                {
+                    ep = id;
+                    epDist = value;
+                }
                 W.Clear();
             }
             //for lc ← min(L, l) … 0
@@ -147,12 +156,17 @@ namespace ZeroLevel.HNSW.Services.OPT
                 else
                 {
                     // W ← SEARCH - LAYER(q, ep, efConstruction, lc)
-                    _layers[lc].KNearestAtLayer(ep, distance, W, _options.EFConstruction);
+                    foreach (var i in _layers[lc].KNearestAtLayer(ep, distance, W, _options.EFConstruction))
+                    {
+                        W.Push(i);
+                    }
 
                     // ep ← W
-                    var nearest = W.Nearest;
-                    ep = nearest.Item1;
-                    epDist = nearest.Item2;
+                    if (W.TryPeek(out id, out value))
+                    {
+                        ep = id;
+                        epDist = value;
+                    }
 
                     // neighbors ← SELECT-NEIGHBORS(q, W, M, lc) // alg. 3 or alg. 4
                     var neighbors = SelectBestForConnecting(lc, distance, W);
@@ -201,7 +215,7 @@ namespace ZeroLevel.HNSW.Services.OPT
             return layer == 0 ? 2 * _options.M : _options.M;
         }
 
-        private BinaryHeap SelectBestForConnecting(int layer, Func<int, float> distance, BinaryHeap candidates)
+        private IEnumerable<(int, float)> SelectBestForConnecting(int layer, Func<int, float> distance, IEnumerable<(int, float)> candidates)
         {
             if (_options.SelectionHeuristic == NeighbourSelectionHeuristic.SelectSimple)
                 return _layers[layer].SELECT_NEIGHBORS_SIMPLE(candidates, GetM(layer));
@@ -211,19 +225,22 @@ namespace ZeroLevel.HNSW.Services.OPT
         /// <summary>
         /// Algorithm 5
         /// </summary>
-        private BinaryHeap KNearest(TItem q, int k)
+        private IEnumerable<(int, float)> KNearest(TItem q, int k)
         {
             _lockGraph.EnterReadLock();
             try
             {
                 if (_vectors.Count == 0)
                 {
-                    return BinaryHeap.Empty;
+                    return Enumerable.Empty<(int, float)>();
                 }
+
+                int id;
+                float value;
                 var distance = new Func<int, float>(candidate => _options.Distance(q, _vectors[candidate]));
 
                 // W ← ∅ // set for the current nearest elements
-                var W = new BinaryHeap(k + 1);
+                var W = new MinHeap(k + 1);
                 // ep ← get enter point for hnsw
                 var ep = EntryPoint;
                 // L ← level of ep // top layer for hnsw
@@ -232,13 +249,22 @@ namespace ZeroLevel.HNSW.Services.OPT
                 for (int layer = L; layer > 0; --layer)
                 {
                     // W ← SEARCH-LAYER(q, ep, ef = 1, lc)
-                    _layers[layer].KNearestAtLayer(ep, distance, W, 1);
+                    foreach (var i in _layers[layer].KNearestAtLayer(ep, distance, W, 1))
+                    {
+                        W.Push(i);
+                    }
                     // ep ← get nearest element from W to q
-                    ep = W.Nearest.Item1;
+                    if (W.TryPeek(out id, out value))
+                    {
+                        ep = id;
+                    }
                     W.Clear();
                 }
                 // W ← SEARCH-LAYER(q, ep, ef, lc =0)
-                _layers[0].KNearestAtLayer(ep, distance, W, k);
+                foreach (var i in _layers[0].KNearestAtLayer(ep, distance, W, k))
+                {
+                    W.Push(i);
+                }
                 // return K nearest elements from W to q
                 return W;
             }
@@ -247,19 +273,21 @@ namespace ZeroLevel.HNSW.Services.OPT
                 _lockGraph.ExitReadLock();
             }
         }
-        private BinaryHeap KNearest(TItem q, int k, SearchContext context)
+        private IEnumerable<(int, float)> KNearest(TItem q, int k, SearchContext context)
         {
             _lockGraph.EnterReadLock();
             try
             {
                 if (_vectors.Count == 0)
                 {
-                    return BinaryHeap.Empty;
+                    return Enumerable.Empty<(int, float)>();
                 }
+                int id;
+                float value;
                 var distance = new Func<int, float>(candidate => _options.Distance(q, _vectors[candidate]));
 
                 // W ← ∅ // set for the current nearest elements
-                var W = new BinaryHeap(k + 1);
+                var W = new MinHeap(k + 1);
                 // ep ← get enter point for hnsw
                 var ep = EntryPoint;
                 // L ← level of ep // top layer for hnsw
@@ -268,13 +296,22 @@ namespace ZeroLevel.HNSW.Services.OPT
                 for (int layer = L; layer > 0; --layer)
                 {
                     // W ← SEARCH-LAYER(q, ep, ef = 1, lc)
-                    _layers[layer].KNearestAtLayer(ep, distance, W, 1);
+                    foreach (var i in _layers[layer].KNearestAtLayer(ep, distance, W, 1))
+                    {
+                        W.Push(i);
+                    }
                     // ep ← get nearest element from W to q
-                    ep = W.Nearest.Item1;
+                    if (W.TryPeek(out id, out value))
+                    {
+                        ep = id;
+                    }
                     W.Clear();
                 }
                 // W ← SEARCH-LAYER(q, ep, ef, lc =0)
-                _layers[0].KNearestAtLayer(ep, distance, W, k, context);
+                foreach (var i in _layers[0].KNearestAtLayer(ep, distance, W, k, context))
+                {
+                    W.Push(i);
+                }
                 // return K nearest elements from W to q
                 return W;
             }
@@ -284,20 +321,22 @@ namespace ZeroLevel.HNSW.Services.OPT
             }
         }
 
-        private BinaryHeap KNearest(int k, SearchContext context)
+        private IEnumerable<(int, float)> KNearest(int k, SearchContext context)
         {
             _lockGraph.EnterReadLock();
             try
             {
                 if (_vectors.Count == 0)
                 {
-                    return BinaryHeap.Empty;
+                    return Enumerable.Empty<(int, float)>();
                 }
-                var distance = new Func<int, int, float>((id1, id2) => _options.Distance(_vectors[id1], _vectors[id2]));
                 // W ← ∅ // set for the current nearest elements
-                var W = new BinaryHeap(k + 1);
+                var W = new MaxHeap(k + 1);
                 // W ← SEARCH-LAYER(q, ep, ef, lc =0)
-                _layers[0].KNearestAtLayer(W, k, context);
+                foreach (var i in _layers[0].KNearestAtLayer(W, k, context))
+                {
+                    W.Push(i);
+                }
                 // return K nearest elements from W to q
                 return W;
             }
