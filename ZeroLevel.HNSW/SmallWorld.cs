@@ -119,7 +119,7 @@ namespace ZeroLevel.HNSW
             var W = new MinHeap(_options.EFConstruction + 1);
             // ep ← get enter point for hnsw
             var ep = _layers[MaxLayer].FindEntryPointAtLayer(distance);
-            if(ep == -1) ep = EntryPoint;
+            if (ep == -1) ep = EntryPoint;
             var epDist = distance(ep);
             // L ← level of ep // top layer for hnsw
             var L = MaxLayer;
@@ -143,6 +143,7 @@ namespace ZeroLevel.HNSW
                     ep = id;
                     epDist = value;
                 }
+                _layers[lc].TrimLinks(q, lc == 0);
                 W.Clear();
             }
             //for lc ← min(L, l) … 0
@@ -175,7 +176,7 @@ namespace ZeroLevel.HNSW
                     foreach (var e in neighbors)
                     {
                         // eConn ← neighbourhood(e) at layer lc
-                        _layers[lc].AddBidirectionallConnections(q, e.Item1, e.Item2, lc == 0);
+                        _layers[lc].AddBidirectionallConnections(q, e.Item1, e.Item2);
                         // if distance from newNode to newNeighbour is better than to bestPeer => update bestPeer
                         if (e.Item2 < epDist)
                         {
@@ -183,6 +184,8 @@ namespace ZeroLevel.HNSW
                             epDist = e.Item2;
                         }
                     }
+
+                    _layers[lc].TrimLinks(q, lc == 0);
                     W.Clear();
                 }
             }

@@ -5,20 +5,20 @@ namespace DOM.DSL.Services
 {
     public class TContainerFactory
     {
-        private readonly ObjectPool<TContainer> _pool;
+        private readonly Pool<TContainer> _pool;
 
         private static int _get_count = 0;
         private static int _release_count = 0;
 
         internal TContainerFactory(TRender render)
         {
-            _pool = new ObjectPool<TContainer>(() => new TContainer(this, render), 64);
+            _pool = new Pool<TContainer>(64, p => new TContainer(this, render));
         }
 
         internal TContainer Get(object value)
         {
             Interlocked.Increment(ref _get_count);
-            var c = _pool.Allocate();
+            var c = _pool.Acquire();
             c.Reset(value);
             return c;
         }
@@ -26,7 +26,7 @@ namespace DOM.DSL.Services
         internal TContainer Get(object value, int index)
         {
             Interlocked.Increment(ref _get_count);
-            var c = _pool.Allocate();
+            var c = _pool.Acquire();
             c.Reset(value);
             c.Index = index;
             return c;
@@ -37,7 +37,7 @@ namespace DOM.DSL.Services
             if (container != null)
             {
                 Interlocked.Increment(ref _release_count);
-                _pool.Free(container);
+                _pool.Release(container);
             }
         }
 

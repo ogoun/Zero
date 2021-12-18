@@ -165,7 +165,7 @@ namespace HNSWDemo
 
         static void Main(string[] args)
         {
-            AccuracityTest();
+            InsertTimeExplosionTest();
             Console.WriteLine("Completed");
             Console.ReadKey();
         }
@@ -661,18 +661,18 @@ namespace HNSWDemo
 
         static void InsertTimeExplosionTest()
         {
-            var count = 1000;
-            var iterationCount = 1000;
+            var count = 20000;
+            var iterationCount = 100;
             var dimensionality = 128;
             var sw = new Stopwatch();
-            var world = new SmallWorld<float[]>(NSWOptions<float[]>.Create(6, 12, 100, 100, CosineDistance.NonOptimized, true, true, selectionHeuristic: NeighbourSelectionHeuristic.SelectSimple));
+            var world = new SmallWorld<float[]>(NSWOptions<float[]>.Create(6, 8, 150, 150, Metrics.L2Euclidean, true, true, selectionHeuristic: NeighbourSelectionHeuristic.SelectSimple));
             for (int i = 0; i < iterationCount; i++)
             {
                 var samples = RandomVectors(dimensionality, count);
                 sw.Restart();
                 var ids = world.AddItems(samples.ToArray());
                 sw.Stop();
-                Console.WriteLine($"ITERATION: [{i.ToString("D4")}] COUNT: [{ids.Length}] ELAPSEF [{sw.ElapsedMilliseconds} ms]");
+                Console.WriteLine($"ITERATION: [{i.ToString("D4")}] COUNT: [{ids.Length}] ELAPSED [{sw.ElapsedMilliseconds} ms]");
             }
         }
     }

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using ZeroLevel.HNSW;
-using ZeroLevel.HNSW.Services.OPT;
 using ZeroLevel.Services.Serialization;
 
 namespace temp2

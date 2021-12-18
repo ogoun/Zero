@@ -6,12 +6,12 @@ namespace ZeroLevel.Network
 {
     public static class ExchangeExtension
     {
-        static ObjectPool<AutoResetEvent> _mrePool = new ObjectPool<AutoResetEvent>(() => new AutoResetEvent(false), 16);
+        static Pool<AutoResetEvent> _mrePool = new Pool<AutoResetEvent>(16, (p) => new AutoResetEvent(false));
 
         public static Tresponse Request<Tresponse>(this IClientSet exchange, string alias, TimeSpan timeout)
         {
             Tresponse response = default;
-            var ev = _mrePool.Allocate();
+            var ev = _mrePool.Acquire();
             try
             {
                 if (exchange.Request<Tresponse>(alias, 
@@ -22,7 +22,7 @@ namespace ZeroLevel.Network
             }
             finally
             {
-                _mrePool.Free(ev);
+                _mrePool.Release(ev);
             }
             return response;
         }
@@ -30,7 +30,7 @@ namespace ZeroLevel.Network
         public static Tresponse Request<Tresponse>(this IClientSet exchange, string alias, string inbox, TimeSpan timeout)
         {
             Tresponse response = default;
-            var ev = _mrePool.Allocate();
+            var ev = _mrePool.Acquire();
             try
             {
                 if (exchange.Request<Tresponse>(alias, inbox, 
@@ -44,7 +44,7 @@ namespace ZeroLevel.Network
             }
             finally
             {
-                _mrePool.Free(ev);
+                _mrePool.Release(ev);
             }
             return response;
         }
@@ -52,7 +52,7 @@ namespace ZeroLevel.Network
         public static Tresponse Request<Trequest, Tresponse>(this IClientSet exchange, string alias, Trequest request, TimeSpan timeout)
         {
             Tresponse response = default;
-            var ev = _mrePool.Allocate();
+            var ev = _mrePool.Acquire();
             try
             {
                 if (exchange.Request<Trequest, Tresponse>(alias, request,
@@ -63,7 +63,7 @@ namespace ZeroLevel.Network
             }
             finally
             {
-                _mrePool.Free(ev);
+                _mrePool.Release(ev);
             }
             return response;
         }
@@ -72,7 +72,7 @@ namespace ZeroLevel.Network
             , Trequest request, TimeSpan timeout)
         { 
             Tresponse response = default;
-            var ev = _mrePool.Allocate();
+            var ev = _mrePool.Acquire();
             try
             {
                 if (exchange.Request<Trequest, Tresponse>(alias, inbox, request, 
@@ -83,7 +83,7 @@ namespace ZeroLevel.Network
             }
             finally
             {
-                _mrePool.Free(ev);
+                _mrePool.Release(ev);
             }
             return response;
         }
@@ -91,7 +91,7 @@ namespace ZeroLevel.Network
         public static Tresponse Request<Tresponse>(this IClientSet exchange, string alias)
         {
             Tresponse response = default;
-            var ev = _mrePool.Allocate();
+            var ev = _mrePool.Acquire();
             try
             {
                 if (exchange.Request<Tresponse>(alias,
@@ -102,7 +102,7 @@ namespace ZeroLevel.Network
             }
             finally
             {
-                _mrePool.Free(ev);
+                _mrePool.Release(ev);
             }
             return response;
         }
@@ -110,7 +110,7 @@ namespace ZeroLevel.Network
         public static Tresponse Request<Tresponse>(this IClientSet exchange, string alias, string inbox)
         {
             Tresponse response = default;
-            var ev = _mrePool.Allocate();
+            var ev = _mrePool.Acquire();
             try
             {
                 if (exchange.Request<Tresponse>(alias, inbox,
@@ -124,7 +124,7 @@ namespace ZeroLevel.Network
             }
             finally
             {
-                _mrePool.Free(ev);
+                _mrePool.Release(ev);
             }
             return response;
         }
@@ -132,7 +132,7 @@ namespace ZeroLevel.Network
         public static Tresponse Request<Trequest, Tresponse>(this IClientSet exchange, string alias, Trequest request)
         {
             Tresponse response = default;
-            var ev = _mrePool.Allocate();
+            var ev = _mrePool.Acquire();
             try
             {
                 if (exchange.Request<Trequest, Tresponse>(alias, request,
@@ -143,7 +143,7 @@ namespace ZeroLevel.Network
             }
             finally
             {
-                _mrePool.Free(ev);
+                _mrePool.Release(ev);
             }
             return response;
         }
@@ -152,7 +152,7 @@ namespace ZeroLevel.Network
             , Trequest request)
         {
             Tresponse response = default;
-            var ev = _mrePool.Allocate();
+            var ev = _mrePool.Acquire();
             try
             {
                 if (exchange.Request<Trequest, Tresponse>(alias, inbox, request,
@@ -163,7 +163,7 @@ namespace ZeroLevel.Network
             }
             finally
             {
-                _mrePool.Free(ev);
+                _mrePool.Release(ev);
             }
             return response;
         }

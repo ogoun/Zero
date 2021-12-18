@@ -6,13 +6,13 @@ namespace ZeroLevel.Services.Semantic
 {
     public static class WordTokenizer
     {
-        static ObjectPool<char[]> _pool = new ObjectPool<char[]>(() => new char[2048]);
+        static Pool<char[]> _pool = new Pool<char[]>(64 ,(p) => new char[2048]);
 
         public static IEnumerable<string> Tokenize(string text)
         {
             int index = 0;
             bool first = true;
-            var buffer = _pool.Allocate();
+            var buffer = _pool.Acquire();
             try
             {
                 for (int i = 0; i < text?.Length; i++)
@@ -40,7 +40,7 @@ namespace ZeroLevel.Services.Semantic
             }
             finally
             {
-                _pool.Free(buffer);
+                _pool.Release(buffer);
             }
         }
     }

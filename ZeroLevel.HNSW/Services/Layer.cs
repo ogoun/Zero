@@ -41,7 +41,7 @@ namespace ZeroLevel.HNSW
         /// <param name="p">The node with which the connection will be made</param>
         /// <param name="qpDistance"></param>
         /// <param name="isMapLayer"></param>
-        internal void AddBidirectionallConnections(int q, int p, float qpDistance, bool isMapLayer)
+        /*internal void AddBidirectionallConnections(int q, int p, float qpDistance, bool isMapLayer)
         {
             // поиск в ширину ближайших узлов к найденному
             var nearest = _links.FindLinksForId(p).ToArray();
@@ -86,7 +86,39 @@ namespace ZeroLevel.HNSW
                     _links.Add(q, p, qpDistance);
                 }
             }
+        }*/
+
+        internal void AddBidirectionallConnections(int q, int p, float qpDistance)
+        {
+            _links.Add(q, p, qpDistance);
         }
+
+        internal void TrimLinks(int q, bool isMapLayer)
+        {
+            var M = (isMapLayer ? _options.M * 2 : _options.M);
+            // поиск в ширину ближайших узлов к найденному
+            var nearest = _links.FindLinksForId(q).ToArray();
+
+            if (nearest.Length <= M && nearest.Length > 1)
+            {
+                foreach (var l in nearest)
+                {
+                    if (l.Item1 == l.Item2)
+                    {
+                        _links.RemoveIndex(l.Item1, l.Item2);
+                    }
+                }
+            }
+            else if (nearest.Length > M)
+            {
+                var removeCount = nearest.Length - M;
+                foreach (var l in nearest.OrderByDescending(n => n.Item3).Take(removeCount))
+                {
+                    _links.RemoveIndex(l.Item1, l.Item2);
+                }
+            }
+        }
+
 
         /// <summary>
         /// Adding a node with a connection to itself
@@ -251,12 +283,12 @@ namespace ZeroLevel.HNSW
                 var toExpand = C.Pop();
                 if (W.Count > 0)
                 {
-                    if(W.TryPeek(out _, out var dist ))
-                    if (toExpand.Item2 > dist)
-                    {
-                        // the closest candidate is farther than farthest result
-                        break;
-                    }
+                    if (W.TryPeek(out _, out var dist))
+                        if (toExpand.Item2 > dist)
+                        {
+                            // the closest candidate is farther than farthest result
+                            break;
+                        }
                 }
 
                 // expand candidate
@@ -270,7 +302,7 @@ namespace ZeroLevel.HNSW
                         var neighbourDistance = targetCosts(neighbourId);
                         if (context.IsActiveNode(neighbourId))
                         {
-                            if (W.Count < ef || (W.Count > 0 && (W.TryPeek(out _, out var dist) &&  neighbourDistance < dist)))
+                            if (W.Count < ef || (W.Count > 0 && (W.TryPeek(out _, out var dist) && neighbourDistance < dist)))
                             {
                                 W.Push((neighbourId, neighbourDistance));
                                 if (W.Count > ef)

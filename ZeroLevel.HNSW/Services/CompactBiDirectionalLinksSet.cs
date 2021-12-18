@@ -184,6 +184,28 @@ namespace ZeroLevel.HNSW
             }
         }
 
+        internal void RemoveIndex(int id1, int id2)
+        {
+            long k1 = (((long)(id1)) << HALF_LONG_BITS) + id2;
+            long k2 = (((long)(id2)) << HALF_LONG_BITS) + id1;
+            _rwLock.EnterWriteLock();
+            try
+            {
+                if (_set.ContainsKey(k1))
+                {
+                    _set.Remove(k1);
+                }
+                if (_set.ContainsKey(k2))
+                {
+                    _set.Remove(k2);
+                }
+            }
+            finally
+            {
+                _rwLock.ExitWriteLock();
+            }
+        }
+
         internal bool Add(int id1, int id2, float distance)
         {
             _rwLock.EnterWriteLock();

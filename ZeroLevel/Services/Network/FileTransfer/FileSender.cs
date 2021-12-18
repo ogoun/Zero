@@ -10,7 +10,7 @@ namespace ZeroLevel.Network.FileTransfer
     public sealed class FileSender
     {
         private BlockingCollection<FileTransferTask> _tasks = new BlockingCollection<FileTransferTask>();
-        private ObjectPool<FileTransferTask> _taskPool = new ObjectPool<FileTransferTask>(() => new FileTransferTask(), 100);
+        private Pool<FileTransferTask> _taskPool = new Pool<FileTransferTask>(100, (p) => new FileTransferTask());
         private readonly Thread _uploadFileThread;
         private bool _resendWhenServerError = false;
         private bool _resendWhenClientError = false;
@@ -45,7 +45,7 @@ namespace ZeroLevel.Network.FileTransfer
             {
                 throw new FileNotFoundException(filePath);
             }
-            var task = _taskPool.Allocate();
+            var task = _taskPool.Acquire();
             task.CompletedHandler = completeHandler;
             task.ErrorHandler = errorHandler;
             task.FilePath = filePath;
@@ -69,7 +69,7 @@ namespace ZeroLevel.Network.FileTransfer
                 }
                 finally
                 {
-                    _taskPool.Free(task);
+                    _taskPool.Release(task);
                 }
             }
         }
