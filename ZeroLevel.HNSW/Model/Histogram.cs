@@ -21,12 +21,13 @@ namespace ZeroLevel.HNSW
         public float[] Bounds { get; }
         public int[] Values { get; }
 
-        public Histogram(HistogramMode mode, IList<float> data)
+        public Histogram(HistogramMode mode, IEnumerable<float> data)
         {
             Mode = mode;
             Min = data.Min();
             Max = data.Max();
-            int M = mode == HistogramMode.LOG ? (int)(1f + 3.2f * Math.Log(data.Count)) : (int)(Math.Sqrt(data.Count));
+            int count = data.Count();
+            int M = mode == HistogramMode.LOG ? (int)(1f + 3.2f * Math.Log(count)) : (int)(Math.Sqrt(count));
             BoundsPeriod = (Max - Min) / M;
             Bounds = new float[M - 1];
 

@@ -17,7 +17,6 @@ namespace ZeroLevel.HNSW
         private int MaxLayer = 0;
         private readonly ProbabilityLayerNumberGenerator _layerLevelGenerator;
         private ReaderWriterLockSlim _lockGraph = new ReaderWriterLockSlim();
-        internal SortedList<long, float> GetNSWLinks() => _layers[0].Links;
 
         public SmallWorld(NSWOptions<TItem> options)
         {
@@ -27,7 +26,7 @@ namespace ZeroLevel.HNSW
             _layerLevelGenerator = new ProbabilityLayerNumberGenerator(_options.LayersCount, _options.M);
             for (int i = 0; i < _options.LayersCount; i++)
             {
-                _layers[i] = new Layer<TItem>(_options, _vectors);
+                _layers[i] = new Layer<TItem>(_options, _vectors, i == 0);
             }
         }
 
@@ -51,7 +50,7 @@ namespace ZeroLevel.HNSW
                 yield return (pair.Item1, _vectors[pair.Item1], pair.Item2);
             }
         }
-
+        /*
         public IEnumerable<(int, TItem, float)> Search(TItem vector, int k, SearchContext context)
         {
             if (context == null)
@@ -84,6 +83,7 @@ namespace ZeroLevel.HNSW
                 }
             }
         }
+        */
 
         /// <summary>
         /// Adding vectors batch
@@ -119,21 +119,23 @@ namespace ZeroLevel.HNSW
             var W = new MinHeap(_options.EFConstruction + 1);
             // ep ← get enter point for hnsw
             var ep = _layers[MaxLayer].FindEntryPointAtLayer(distance);
-            if (ep == -1) ep = EntryPoint;
+            if (ep == -1)
+                ep = EntryPoint;
+
             var epDist = distance(ep);
             // L ← level of ep // top layer for hnsw
             var L = MaxLayer;
             // l ← ⌊-ln(unif(0..1))∙mL⌋ // new element’s level            
             int l = _layerLevelGenerator.GetRandomLayer();
-            // for lc ← L … l+1
+            
             // Проход с верхнего уровня до уровня где появляется элемент, для нахождения точки входа
-
             int id;
             float value;
+            // for lc ← L … l+1
             for (int lc = L; lc > l; --lc)
             {
                 // W ← SEARCH-LAYER(q, ep, ef = 1, lc)
-                foreach (var i in _layers[lc].KNearestAtLayer(ep, distance, W, 1))
+                foreach (var i in _layers[lc].KNearestAtLayer(ep, distance, 1))
                 {
                     W.Push(i);
                 }
@@ -143,7 +145,6 @@ namespace ZeroLevel.HNSW
                     ep = id;
                     epDist = value;
                 }
-                _layers[lc].TrimLinks(q, lc == 0);
                 W.Clear();
             }
             //for lc ← min(L, l) … 0
@@ -152,12 +153,12 @@ namespace ZeroLevel.HNSW
             {
                 if (_layers[lc].HasLinks == false)
                 {
-                    _layers[lc].Append(q);
+                    _layers[lc].AddBidirectionallConnections(q, q);
                 }
                 else
                 {
                     // W ← SEARCH - LAYER(q, ep, efConstruction, lc)
-                    foreach (var i in _layers[lc].KNearestAtLayer(ep, distance, W, _options.EFConstruction))
+                    foreach (var i in _layers[lc].KNearestAtLayer(ep, distance, _options.EFConstruction))
                     {
                         W.Push(i);
                     }
@@ -170,13 +171,13 @@ namespace ZeroLevel.HNSW
                     }
 
                     // neighbors ← SELECT-NEIGHBORS(q, W, M, lc) // alg. 3 or alg. 4
-                    var neighbors = SelectBestForConnecting(lc, distance, W);
+                    var neighbors = SelectBestForConnecting(lc, W);
                     // add bidirectionall connectionts from neighbors to q at layer lc
                     // for each e ∈ neighbors // shrink connections if needed
                     foreach (var e in neighbors)
                     {
                         // eConn ← neighbourhood(e) at layer lc
-                        _layers[lc].AddBidirectionallConnections(q, e.Item1, e.Item2);
+                        _layers[lc].AddBidirectionallConnections(q, e.Item1);
                         // if distance from newNode to newNeighbour is better than to bestPeer => update bestPeer
                         if (e.Item2 < epDist)
                         {
@@ -184,8 +185,6 @@ namespace ZeroLevel.HNSW
                             epDist = e.Item2;
                         }
                     }
-
-                    _layers[lc].TrimLinks(q, lc == 0);
                     W.Clear();
                 }
             }
@@ -218,11 +217,11 @@ namespace ZeroLevel.HNSW
             return layer == 0 ? 2 * _options.M : _options.M;
         }
 
-        private IEnumerable<(int, float)> SelectBestForConnecting(int layer, Func<int, float> distance, IEnumerable<(int, float)> candidates)
+        private IEnumerable<(int, float)> SelectBestForConnecting(int layer, MinHeap candidates)
         {
-            if (_options.SelectionHeuristic == NeighbourSelectionHeuristic.SelectSimple)
-                return _layers[layer].SELECT_NEIGHBORS_SIMPLE(candidates, GetM(layer));
-            return _layers[layer].SELECT_NEIGHBORS_HEURISTIC(distance, candidates, GetM(layer));
+            int count = GetM(layer);
+            while (count >= 0 && candidates.Count > 0)
+                yield return candidates.Pop();
         }
 
         /// <summary>
@@ -252,7 +251,7 @@ namespace ZeroLevel.HNSW
                 for (int layer = L; layer > 0; --layer)
                 {
                     // W ← SEARCH-LAYER(q, ep, ef = 1, lc)
-                    foreach (var i in _layers[layer].KNearestAtLayer(ep, distance, W, 1))
+                    foreach (var i in _layers[layer].KNearestAtLayer(ep, distance, 1))
                     {
                         W.Push(i);
                     }
@@ -264,7 +263,7 @@ namespace ZeroLevel.HNSW
                     W.Clear();
                 }
                 // W ← SEARCH-LAYER(q, ep, ef, lc =0)
-                foreach (var i in _layers[0].KNearestAtLayer(ep, distance, W, k))
+                foreach (var i in _layers[0].KNearestAtLayer(ep, distance, k))
                 {
                     W.Push(i);
                 }
@@ -276,7 +275,7 @@ namespace ZeroLevel.HNSW
                 _lockGraph.ExitReadLock();
             }
         }
-
+        /*
         private IEnumerable<(int, float)> KNearest(TItem q, int k, SearchContext context)
         {
             _lockGraph.EnterReadLock();
@@ -300,7 +299,7 @@ namespace ZeroLevel.HNSW
                 for (int layer = L; layer > 0; --layer)
                 {
                     // W ← SEARCH-LAYER(q, ep, ef = 1, lc)
-                    foreach (var i in _layers[layer].KNearestAtLayer(ep, distance, W, 1))
+                    foreach (var i in _layers[layer].KNearestAtLayer(ep, distance, 1))
                     {
                         W.Push(i);
                     }
@@ -312,7 +311,7 @@ namespace ZeroLevel.HNSW
                     W.Clear();
                 }
                 // W ← SEARCH-LAYER(q, ep, ef, lc =0)
-                foreach (var i in _layers[0].KNearestAtLayer(ep, distance, W, k, context))
+                foreach (var i in _layers[0].KNearestAtLayer(ep, distance, k, context))
                 {
                     W.Push(i);
                 }
@@ -324,7 +323,9 @@ namespace ZeroLevel.HNSW
                 _lockGraph.ExitReadLock();
             }
         }
+        */
 
+        /*
         private IEnumerable<(int, float)> KNearest(int k, SearchContext context)
         {
             _lockGraph.EnterReadLock();
@@ -349,6 +350,7 @@ namespace ZeroLevel.HNSW
                 _lockGraph.ExitReadLock();
             }
         }
+        */
         #endregion
 
         public void Serialize(Stream stream)
@@ -378,13 +380,13 @@ namespace ZeroLevel.HNSW
                 _layers = new Layer<TItem>[countLayers];
                 for (int i = 0; i < countLayers; i++)
                 {
-                    _layers[i] = new Layer<TItem>(_options, _vectors);
+                    _layers[i] = new Layer<TItem>(_options, _vectors, i == 0);
                     _layers[i].Deserialize(reader);
                 }
             }
         }
 
-        public Histogram GetHistogram(HistogramMode mode = HistogramMode.SQRT)
-            => _layers[0].GetHistogram(mode);
+        /*public Histogram GetHistogram(HistogramMode mode = HistogramMode.SQRT)
+            => _layers[0].GetHistogram(mode);*/
     }
 }

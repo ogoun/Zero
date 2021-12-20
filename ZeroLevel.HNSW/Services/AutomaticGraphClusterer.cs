@@ -6,7 +6,7 @@ namespace ZeroLevel.HNSW.Services
     {
         private const int HALF_LONG_BITS = 32;
 
-        public static List<HashSet<int>> DetectClusters<T>(SmallWorld<T> world)
+        /*public static List<HashSet<int>> DetectClusters<T>(SmallWorld<T> world)
         {
             var links = world.GetNSWLinks();
             // 1. Find R - bound between intra-cluster distances and out-of-cluster distances
@@ -60,6 +60,6 @@ namespace ZeroLevel.HNSW.Services
                 }
             }
             return clusters;
-        }
+        }*/
     }
 }

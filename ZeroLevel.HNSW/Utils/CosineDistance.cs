@@ -47,6 +47,121 @@ namespace ZeroLevel.HNSW
             return 1 - similarity;
         }
 
+        public static float NonOptimized(byte[] u, byte[] v)
+        {
+            if (u.Length != v.Length)
+            {
+                throw new ArgumentException("Vectors have non-matching dimensions");
+            }
+
+            float dot = 0.0f;
+            float nru = 0.0f;
+            float nrv = 0.0f;
+            for (int i = 0; i < u.Length; ++i)
+            {
+                dot += (float)(u[i] * v[i]);
+                nru += (float)(u[i] * u[i]);
+                nrv += (float)(v[i] * v[i]);
+            }
+
+            var similarity = dot / (float)(Math.Sqrt(nru) * Math.Sqrt(nrv));
+            return 1 - similarity;
+        }
+
+        public static float NonOptimized(int[] u, int[] v)
+        {
+            if (u.Length != v.Length)
+            {
+                throw new ArgumentException("Vectors have non-matching dimensions");
+            }
+
+            float dot = 0.0f;
+            float nru = 0.0f;
+            float nrv = 0.0f;
+            byte[] bu;
+            byte[] bv;
+
+            for (int i = 0; i < u.Length; ++i)
+            {
+                bu = BitConverter.GetBytes(u[i]);
+                bv = BitConverter.GetBytes(v[i]);
+
+                dot += (float)(bu[0] * bv[0]);
+                nru += (float)(bu[0] * bu[0]);
+                nrv += (float)(bv[0] * bv[0]);
+
+                dot += (float)(bu[1] * bv[1]);
+                nru += (float)(bu[1] * bu[1]);
+                nrv += (float)(bv[1] * bv[1]);
+
+                dot += (float)(bu[2] * bv[2]);
+                nru += (float)(bu[2] * bu[2]);
+                nrv += (float)(bv[2] * bv[2]);
+
+                dot += (float)(bu[3] * bv[3]);
+                nru += (float)(bu[3] * bu[3]);
+                nrv += (float)(bv[3] * bv[3]);
+            }
+
+            var similarity = dot / (float)(Math.Sqrt(nru) * Math.Sqrt(nrv));
+            return 1 - similarity;
+        }
+
+        public static float NonOptimized(long[] u, long[] v)
+        {
+            if (u.Length != v.Length)
+            {
+                throw new ArgumentException("Vectors have non-matching dimensions");
+            }
+
+            float dot = 0.0f;
+            float nru = 0.0f;
+            float nrv = 0.0f;
+            byte[] bu;
+            byte[] bv;
+
+            for (int i = 0; i < u.Length; ++i)
+            {
+                bu = BitConverter.GetBytes(u[i]);
+                bv = BitConverter.GetBytes(v[i]);
+
+                dot += (float)(bu[0] * bv[0]);
+                nru += (float)(bu[0] * bu[0]);
+                nrv += (float)(bv[0] * bv[0]);
+
+                dot += (float)(bu[1] * bv[1]);
+                nru += (float)(bu[1] * bu[1]);
+                nrv += (float)(bv[1] * bv[1]);
+
+                dot += (float)(bu[2] * bv[2]);
+                nru += (float)(bu[2] * bu[2]);
+                nrv += (float)(bv[2] * bv[2]);
+
+                dot += (float)(bu[3] * bv[3]);
+                nru += (float)(bu[3] * bu[3]);
+                nrv += (float)(bv[3] * bv[3]);
+
+                dot += (float)(bu[4] * bv[4]);
+                nru += (float)(bu[4] * bu[4]);
+                nrv += (float)(bv[4] * bv[4]);
+
+                dot += (float)(bu[5] * bv[5]);
+                nru += (float)(bu[5] * bu[5]);
+                nrv += (float)(bv[5] * bv[5]);
+
+                dot += (float)(bu[6] * bv[6]);
+                nru += (float)(bu[6] * bu[6]);
+                nrv += (float)(bv[6] * bv[6]);
+
+                dot += (float)(bu[7] * bv[7]);
+                nru += (float)(bu[7] * bu[7]);
+                nrv += (float)(bv[7] * bv[7]);
+            }
+
+            var similarity = dot / (float)(Math.Sqrt(nru) * Math.Sqrt(nrv));
+            return 1 - similarity;
+        }
+
         /// <summary>
         /// Calculates cosine distance with assumption that u and v are unit vectors.
         /// </summary>

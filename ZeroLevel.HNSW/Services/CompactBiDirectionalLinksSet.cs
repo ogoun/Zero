@@ -30,75 +30,6 @@ namespace ZeroLevel.HNSW
 
         internal int Count => _set.Count;
 
-        /// <summary>
-        /// Разрывает связи id1 - id2 и id2 - id1, и строит новые id1 - id, id - id1
-        /// </summary>
-        internal void Relink(int id1, int id2, int id, float distance)
-        {
-            long k1old = (((long)(id1)) << HALF_LONG_BITS) + id2;
-            long k2old = (((long)(id2)) << HALF_LONG_BITS) + id1;
-
-            long k1new = (((long)(id1)) << HALF_LONG_BITS) + id;
-            long k2new = (((long)(id)) << HALF_LONG_BITS) + id1;
-
-            _rwLock.EnterWriteLock();
-            try
-            {
-                _set.Remove(k1old);
-                _set.Remove(k2old);
-                if (!_set.ContainsKey(k1new))
-                    _set.Add(k1new, distance);
-                if (!_set.ContainsKey(k2new))
-                    _set.Add(k2new, distance);
-            }
-            finally
-            {
-                _rwLock.ExitWriteLock();
-            }
-        }
-
-        /// <summary>
-        /// Разрывает связи id1 - id2 и id2 - id1, и строит новые id1 - id, id - id1, id2 - id, id - id2
-        /// </summary>
-        internal void Relink(int id1, int id2, int id, float distanceToId1, float distanceToId2)
-        {
-            long k_id1_id2 = (((long)(id1)) << HALF_LONG_BITS) + id2;
-            long k_id2_id1 = (((long)(id2)) << HALF_LONG_BITS) + id1;
-
-            long k_id_id1 = (((long)(id)) << HALF_LONG_BITS) + id1;
-            long k_id1_id = (((long)(id1)) << HALF_LONG_BITS) + id;
-
-            long k_id_id2 = (((long)(id)) << HALF_LONG_BITS) + id2;
-            long k_id2_id = (((long)(id2)) << HALF_LONG_BITS) + id;
-
-            _rwLock.EnterWriteLock();
-            try
-            {
-                _set.Remove(k_id1_id2);
-                _set.Remove(k_id2_id1);
-                if (!_set.ContainsKey(k_id_id1))
-                {
-                    _set.Add(k_id_id1, distanceToId1);
-                }
-                if (!_set.ContainsKey(k_id1_id))
-                {
-                    _set.Add(k_id1_id, distanceToId1);
-                }
-                if (!_set.ContainsKey(k_id_id2))
-                {
-                    _set.Add(k_id_id2, distanceToId2);
-                }
-                if (!_set.ContainsKey(k_id2_id))
-                {
-                    _set.Add(k_id2_id, distanceToId2);
-                }
-            }
-            finally
-            {
-                _rwLock.ExitWriteLock();
-            }
-        }
-
         internal IEnumerable<(int, int, float)> FindLinksForId(int id)
         {
             _rwLock.EnterReadLock();
@@ -144,43 +75,6 @@ namespace ZeroLevel.HNSW
             finally
             {
                 _rwLock.ExitReadLock();
-            }
-        }
-
-        internal void RemoveIndex(int id)
-        {
-            long[] forward;
-            long[] backward;
-            _rwLock.EnterReadLock();
-            try
-            {
-                forward = Search(_set, id).Select(pair => pair.Item1).ToArray();
-                backward = forward.Select(k =>
-                {
-                    var id1 = k >> HALF_LONG_BITS;
-                    var id2 = k - (id1 << HALF_LONG_BITS);
-                    return (id2 << HALF_LONG_BITS) + id1;
-                }).ToArray();
-            }
-            finally
-            {
-                _rwLock.ExitReadLock();
-            }
-            _rwLock.EnterWriteLock();
-            try
-            {
-                foreach (var k in forward)
-                {
-                    _set.Remove(k);
-                }
-                foreach (var k in backward)
-                {
-                    _set.Remove(k);
-                }
-            }
-            finally
-            {
-                _rwLock.ExitWriteLock();
             }
         }
 
@@ -230,40 +124,46 @@ namespace ZeroLevel.HNSW
             return false;
         }
 
+        /*
+         
+function binary_search(A, n, T) is
+    L := 0
+    R := n − 1
+    while L ≤ R do
+        m := floor((L + R) / 2)
+        if A[m] < T then
+            L := m + 1
+        else if A[m] > T then
+            R := m − 1
+        else:
+            return m
+    return unsuccessful
+
+         */
+
         private static IEnumerable<(long, float)> Search(SortedList<long, float> set, int index)
         {
-            long k = ((long)index) << HALF_LONG_BITS;
+            long k = ((long)index) << HALF_LONG_BITS;   // T
             int left = 0;
             int right = set.Count - 1;
             int mid;
             long test;
-            while (left < right)
+            while (left <= right)
             {
-                mid = (right + left) / 2;
-                test = (set.Keys[mid] >> HALF_LONG_BITS) << HALF_LONG_BITS;
+                mid = (int)Math.Floor((right + left) / 2d);
+                test = (set.Keys[mid] >> HALF_LONG_BITS) << HALF_LONG_BITS; // A[m]
 
-                if (left == mid || right == mid)
-                {
-                    if (test == k)
-                    {
-                        return SearchByPosition(set, k, mid);
-                    }
-                    break;
-                }
                 if (test < k)
                 {
-                    left = mid;
+                    left = mid + 1;
+                }
+                else if (test > k)
+                {
+                    right = mid - 1;
                 }
                 else
                 {
-                    if (test == k)
-                    {
-                        return SearchByPosition(set, k, mid);
-                    }
-                    else
-                    {
-                        right = mid;
-                    }
+                    return SearchByPosition(set, k, mid);
                 }
             }
             return Enumerable.Empty<(long, float)>();
