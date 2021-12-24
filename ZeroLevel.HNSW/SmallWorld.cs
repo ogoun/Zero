@@ -18,12 +18,19 @@ namespace ZeroLevel.HNSW
         private readonly ProbabilityLayerNumberGenerator _layerLevelGenerator;
         private ReaderWriterLockSlim _lockGraph = new ReaderWriterLockSlim();
 
+        public readonly Func<int, int, float> DistanceFunction;
+        public TItem GetVector(int id) => _vectors[id];
+        public IDictionary<int, HashSet<int>> GetLinks() => _layers[0].Links;
+
         public SmallWorld(NSWOptions<TItem> options)
         {
             _options = options;
             _vectors = new VectorSet<TItem>();
             _layers = new Layer<TItem>[_options.LayersCount];
             _layerLevelGenerator = new ProbabilityLayerNumberGenerator(_options.LayersCount, _options.M);
+
+            DistanceFunction = new Func<int, int, float>((id1, id2) => _options.Distance(_vectors[id1], _vectors[id2]));
+
             for (int i = 0; i < _options.LayersCount; i++)
             {
                 _layers[i] = new Layer<TItem>(_options, _vectors, i == 0);
@@ -127,7 +134,7 @@ namespace ZeroLevel.HNSW
             var L = MaxLayer;
             // l ← ⌊-ln(unif(0..1))∙mL⌋ // new element’s level            
             int l = _layerLevelGenerator.GetRandomLayer();
-            
+
             // Проход с верхнего уровня до уровня где появляется элемент, для нахождения точки входа
             int id;
             float value;
@@ -151,42 +158,14 @@ namespace ZeroLevel.HNSW
             // connecting new node to the small world
             for (int lc = Math.Min(L, l); lc >= 0; --lc)
             {
-                if (_layers[lc].HasLinks == false)
+                _layers[lc].Push(q, ep, W, distance);
+                // ep ← W
+                if (W.TryPeek(out id, out value))
                 {
-                    _layers[lc].AddBidirectionallConnections(q, q);
+                    ep = id;
+                    epDist = value;
                 }
-                else
-                {
-                    // W ← SEARCH - LAYER(q, ep, efConstruction, lc)
-                    foreach (var i in _layers[lc].KNearestAtLayer(ep, distance, _options.EFConstruction))
-                    {
-                        W.Push(i);
-                    }
-
-                    // ep ← W
-                    if (W.TryPeek(out id, out value))
-                    {
-                        ep = id;
-                        epDist = value;
-                    }
-
-                    // neighbors ← SELECT-NEIGHBORS(q, W, M, lc) // alg. 3 or alg. 4
-                    var neighbors = SelectBestForConnecting(lc, W);
-                    // add bidirectionall connectionts from neighbors to q at layer lc
-                    // for each e ∈ neighbors // shrink connections if needed
-                    foreach (var e in neighbors)
-                    {
-                        // eConn ← neighbourhood(e) at layer lc
-                        _layers[lc].AddBidirectionallConnections(q, e.Item1);
-                        // if distance from newNode to newNeighbour is better than to bestPeer => update bestPeer
-                        if (e.Item2 < epDist)
-                        {
-                            ep = e.Item1;
-                            epDist = e.Item2;
-                        }
-                    }
-                    W.Clear();
-                }
+                W.Clear();
             }
             // if l > L
             if (l > L)
@@ -198,30 +177,37 @@ namespace ZeroLevel.HNSW
             }
         }
 
-        /// <summary>
-        /// Get maximum allowed connections for the given level.
-        /// </summary>
-        /// <remarks>
-        /// Article: Section 4.1:
-        /// "Selection of the Mmax0 (the maximum number of connections that an element can have in the zero layer) also
-        /// has a strong influence on the search performance, especially in case of high quality(high recall) search.
-        /// Simulations show that setting Mmax0 to M(this corresponds to kNN graphs on each layer if the neighbors
-        /// selection heuristic is not used) leads to a very strong performance penalty at high recall.
-        /// Simulations also suggest that 2∙M is a good choice for Mmax0;
-        /// setting the parameter higher leads to performance degradation and excessive memory usage."
-        /// </remarks>
-        /// <param name="layer">The level of the layer.</param>
-        /// <returns>The maximum number of connections.</returns>
-        private int GetM(int layer)
+        public void TestWorld()
         {
-            return layer == 0 ? 2 * _options.M : _options.M;
-        }
-
-        private IEnumerable<(int, float)> SelectBestForConnecting(int layer, MinHeap candidates)
-        {
-            int count = GetM(layer);
-            while (count >= 0 && candidates.Count > 0)
-                yield return candidates.Pop();
+            for (var v = 0; v < _vectors.Count; v++)
+            {
+                var nearest = _layers[0][v].ToArray();
+                if (nearest.Length > _layers[0].M)
+                {
+                    Console.WriteLine($"V{v}. Count of links ({nearest.Length}) more than max ({_layers[0].M})");
+                }
+            }
+            // coverage test
+            var ep = 0;
+            var visited = new HashSet<int>();
+            var next = new Stack<int>();
+            next.Push(ep);
+            while (next.Count > 0)
+            {
+                ep = next.Pop();
+                visited.Add(ep);
+                foreach (var n in _layers[0].GetNeighbors(ep))
+                {
+                    if (visited.Contains(n) == false)
+                    {
+                        next.Push(n);
+                    }
+                }
+            }
+            if (visited.Count != _vectors.Count)
+            {
+                Console.Write($"Vectors count ({_vectors.Count}) less than BFS visited nodes count ({visited.Count})");
+            }
         }
 
         /// <summary>
@@ -385,8 +371,5 @@ namespace ZeroLevel.HNSW
                 }
             }
         }
-
-        /*public Histogram GetHistogram(HistogramMode mode = HistogramMode.SQRT)
-            => _layers[0].GetHistogram(mode);*/
     }
 }

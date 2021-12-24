@@ -6,6 +6,19 @@ namespace ZeroLevel.HNSW
 {
     public static class VectorUtils
     {
+        public static List<float[]> RandomVectors(int vectorSize, int vectorsCount)
+        {
+            var vectors = new List<float[]>();
+            for (int i = 0; i < vectorsCount; i++)
+            {
+                var vector = new float[vectorSize];
+                DefaultRandomGenerator.Instance.NextFloats(vector);
+                VectorUtils.NormalizeSIMD(vector);
+                vectors.Add(vector);
+            }
+            return vectors;
+        }
+        
         public static float Magnitude(IList<float> vector)
         {
             float magnitude = 0.0f;

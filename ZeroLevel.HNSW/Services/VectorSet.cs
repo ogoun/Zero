@@ -1,11 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using System.Threading;
 using ZeroLevel.Services.Serialization;
 
 namespace ZeroLevel.HNSW
 {
     internal sealed class VectorSet<T>
-        : IBinarySerializable
+        : IEnumerable<T>, IBinarySerializable
     {
         private List<T> _set = new List<T>();
         private SpinLock _lock = new SpinLock();
@@ -72,6 +73,16 @@ namespace ZeroLevel.HNSW
             {
                 writer.WriteCompatible<T>(r);
             }
+        }
+
+        public IEnumerator<T> GetEnumerator()
+        {
+            return _set.GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return _set.GetEnumerator();
         }
     }
 }

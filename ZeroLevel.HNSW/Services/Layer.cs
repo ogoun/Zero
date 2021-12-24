@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using ZeroLevel.HNSW.Services;
-using ZeroLevel.Services.Pools;
 using ZeroLevel.Services.Serialization;
 
 namespace ZeroLevel.HNSW
@@ -16,20 +15,28 @@ namespace ZeroLevel.HNSW
         private readonly NSWOptions<TItem> _options;
         private readonly VectorSet<TItem> _vectors;
         private readonly LinksSet _links;
-        //internal SortedList<long, float> Links => _links.Links;
+        public readonly int M;
+        private readonly Dictionary<int, float> connections;
+        internal IDictionary<int, HashSet<int>> Links => _links.Links;
 
         /// <summary>
         /// There are links е the layer
         /// </summary>
         internal bool HasLinks => (_links.Count > 0);
 
-        private int GetM(bool nswLayer)
-        {
-            return nswLayer ? 2 * _options.M : _options.M;
-        }
+        internal IEnumerable<int> this[int vector_index] => _links.FindNeighbors(vector_index);
 
         /// <summary>
         /// HNSW layer
+        /// <remarks>
+        /// Article: Section 4.1:
+        /// "Selection of the Mmax0 (the maximum number of connections that an element can have in the zero layer) also
+        /// has a strong influence on the search performance, especially in case of high quality(high recall) search.
+        /// Simulations show that setting Mmax0 to M(this corresponds to kNN graphs on each layer if the neighbors
+        /// selection heuristic is not used) leads to a very strong performance penalty at high recall.
+        /// Simulations also suggest that 2∙M is a good choice for Mmax0;
+        /// setting the parameter higher leads to performance degradation and excessive memory usage."
+        /// </remarks>
         /// </summary>
         /// <param name="options">HNSW graph options</param>
         /// <param name="vectors">General vector set</param>
@@ -37,7 +44,9 @@ namespace ZeroLevel.HNSW
         {
             _options = options;
             _vectors = vectors;
-            _links = new LinksSet(GetM(nswLayer), (id1, id2) => options.Distance(_vectors[id1], _vectors[id2]));
+            M = nswLayer ? 2 * _options.M : _options.M;
+            _links = new LinksSet(M);
+            connections = new Dictionary<int, float>(M + 1);
         }
 
         internal int FindEntryPointAtLayer(Func<int, float> targetCosts)
@@ -58,13 +67,89 @@ namespace ZeroLevel.HNSW
             return minId;
         }
 
-        internal void AddBidirectionallConnections(int q, int p)
+        internal void Push(int q, int ep, MinHeap W, Func<int, float> distance)
+        {
+            if (HasLinks == false)
+            {
+                AddBidirectionallConnections(q, q);
+            }
+            else
+            {
+                // W ← SEARCH - LAYER(q, ep, efConstruction, lc)
+                foreach (var i in KNearestAtLayer(ep, distance, _options.EFConstruction))
+                {
+                    W.Push(i);
+                }
+
+                int count = 0;
+                connections.Clear();
+                while (count < M && W.Count > 0)
+                {
+                    var nearest = W.Pop();
+                    var nearest_nearest = GetNeighbors(nearest.Item1).ToArray();
+                    if (nearest_nearest.Length < M)
+                    {
+                        if (AddBidirectionallConnections(q, nearest.Item1))
+                        {
+                            connections.Add(nearest.Item1, nearest.Item2);
+                            count++;
+                        }
+                    }
+                    else
+                    {
+                        if ((M - count) < 2)
+                        {
+                            // remove link q - max_q
+                            var max = connections.OrderBy(pair => pair.Value).First();
+                            RemoveBidirectionallConnections(q, max.Key);
+                            connections.Remove(max.Key);
+                        }
+                        // get nearest_nearest candidate
+                        var mn_id = -1;
+                        var mn_d = float.MinValue;
+                        for (int i = 0; i < nearest_nearest.Length; i++)
+                        {
+                            var d = _options.Distance(_vectors[nearest.Item1], _vectors[nearest_nearest[i]]);
+                            if (q != nearest_nearest[i] && connections.ContainsKey(nearest_nearest[i]) == false)
+                            {
+                                if (mn_id == -1 || d > mn_d)
+                                {
+                                    mn_d = d;
+                                    mn_id = nearest_nearest[i];
+                                }
+                            }
+                        }
+                        // remove link neareset - nearest_nearest
+                        RemoveBidirectionallConnections(nearest.Item1, mn_id);
+                        // add link q - neareset
+                        if (AddBidirectionallConnections(q, nearest.Item1))
+                        {
+                            connections.Add(nearest.Item1, nearest.Item2);
+                            count++;
+                        }
+                        // add link q - max_nearest_nearest
+                        if (AddBidirectionallConnections(q, mn_id))
+                        {
+                            connections.Add(mn_id, mn_d);
+                            count++;
+                        }
+                    }
+                }
+            }
+        }
+
+        internal void RemoveBidirectionallConnections(int q, int p)
+        {
+            _links.RemoveIndex(q, p);
+        }
+
+        internal bool AddBidirectionallConnections(int q, int p)
         {
             if (q == p)
             {
                 if (EntryPoint >= 0)
                 {
-                    _links.Add(q, EntryPoint);
+                    return _links.Add(q, EntryPoint);
                 }
                 else
                 {
@@ -73,13 +158,12 @@ namespace ZeroLevel.HNSW
             }
             else
             {
-                _links.Add(q, p);
+                return _links.Add(q, p);
             }
+            return false;
         }
 
         private int EntryPoint = -1;
-
-        internal void Trim(int id) => _links.Trim(id);
 
         #region Implementation of https://arxiv.org/ftp/arxiv/papers/1603/1603.09320.pdf
         /// <summary>
@@ -349,7 +433,7 @@ namespace ZeroLevel.HNSW
         */
         #endregion
 
-        private IEnumerable<int> GetNeighbors(int id) => _links.FindNeighbors(id);
+        internal IEnumerable<int> GetNeighbors(int id) => _links.FindNeighbors(id);
 
         public void Serialize(IBinaryWriter writer)
         {

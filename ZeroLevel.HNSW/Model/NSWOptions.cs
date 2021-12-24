@@ -16,6 +16,12 @@ namespace ZeroLevel.HNSW
         /// Max search buffer for inserting
         /// </summary>
         public readonly int EFConstruction;
+
+        public static NSWOptions<float[]> Create(int v1, int v2, int v3, int v4, Func<float[], float[], float> l2Euclidean, object selectionHeuristic)
+        {
+            throw new NotImplementedException();
+        }
+
         /// <summary>
         /// Distance function beetween vectors
         /// </summary>

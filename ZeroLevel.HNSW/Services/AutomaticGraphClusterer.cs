@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace ZeroLevel.HNSW.Services
 {
@@ -6,11 +8,20 @@ namespace ZeroLevel.HNSW.Services
     {
         private const int HALF_LONG_BITS = 32;
 
-        /*public static List<HashSet<int>> DetectClusters<T>(SmallWorld<T> world)
+        private class Link
         {
-            var links = world.GetNSWLinks();
+            public int Id1;
+            public int Id2;
+            public float Distance;
+        }
+
+        public static List<HashSet<int>> DetectClusters<T>(SmallWorld<T> world)
+        {
+            var distance = world.DistanceFunction;
+            var links = world.GetLinks().SelectMany(pair => pair.Value.Select(id => new Link { Id1 = pair.Key, Id2 = id, Distance = distance(pair.Key, id) })).ToList();
+
             // 1. Find R - bound between intra-cluster distances and out-of-cluster distances
-            var histogram = new Histogram(HistogramMode.SQRT, links.Values);
+            var histogram = new Histogram(HistogramMode.SQRT, links.Select(l => l.Distance));
             int threshold = histogram.OTSU();
             var min = histogram.Bounds[threshold - 1];
             var max = histogram.Bounds[threshold];
@@ -18,23 +29,21 @@ namespace ZeroLevel.HNSW.Services
 
 
             // 2. Get links with distances less than R
-            var resultLinks = new SortedList<long, float>();
-            foreach (var pair in links)
+            var resultLinks = new List<Link>();
+            foreach (var l in links)
             {
-                if (pair.Value < R)
+                if (l.Distance < R)
                 {
-                    resultLinks.Add(pair.Key, pair.Value);
+                    resultLinks.Add(l);
                 }
             }
 
             // 3. Extract clusters
             List<HashSet<int>> clusters = new List<HashSet<int>>();
-            foreach (var pair in resultLinks)
+            foreach (var l in resultLinks)
             {
-                var k = pair.Key;
-                var id1 = (int)(k >> HALF_LONG_BITS);
-                var id2 = (int)(k - (((long)id1) << HALF_LONG_BITS));
-
+                var id1 = l.Id1;
+                var id2 = l.Id2;
                 bool found = false;
                 foreach (var c in clusters)
                 {
@@ -60,6 +69,6 @@ namespace ZeroLevel.HNSW.Services
                 }
             }
             return clusters;
-        }*/
+        }
     }
 }
