@@ -25,8 +25,8 @@ namespace HNSWDemo.Tests
 
             var sw = new Stopwatch();
 
-            var test = new VectorsDirectCompare(samples, CosineDistance.NonOptimized);
-            var world = new SmallWorld<float[]>(NSWOptions<float[]>.Create(8, 12, 100, 100, CosineDistance.NonOptimized));
+            var test = new VectorsDirectCompare(samples, Metrics.Cosine);
+            var world = new SmallWorld<float[]>(NSWOptions<float[]>.Create(8, 12, 100, 100, Metrics.Cosine));
 
             sw.Start();
             var ids = world.AddItems(samples.ToArray());

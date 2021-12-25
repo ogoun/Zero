@@ -75,7 +75,8 @@ namespace ZeroLevel.HNSW
         public void Serialize(IBinaryWriter writer)
         {
             writer.WriteBoolean(false); // true - set with weights
-            writer.WriteInt32(_set.Sum(pair => pair.Value.Count));
+            var count = _set.Sum(pair => pair.Value.Count);
+            writer.WriteInt32(count);
             foreach (var record in _set)
             {
                 var id = record.Key;
@@ -89,9 +90,9 @@ namespace ZeroLevel.HNSW
 
         public void Deserialize(IBinaryReader reader)
         {
-            if (reader.ReadBoolean() == false)
+            if (reader.ReadBoolean() != false)
             {
-                throw new InvalidOperationException("Incompatible data format. The set does not contain weights.");
+                throw new InvalidOperationException("Incompatible format");
             }
             _set.Clear();
             _set = null;

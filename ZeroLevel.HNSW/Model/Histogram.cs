@@ -150,7 +150,7 @@ namespace ZeroLevel.HNSW
 
             return (float)sum;
         }
-
+        /*
         public int OTSU()
         {
             float p1, p2, p12;
@@ -172,15 +172,108 @@ namespace ZeroLevel.HNSW
                     threshold = k;
                 }
             }
-            /*
-            var local_max = Values[threshold];
-            for (int i = threshold + 1; i < Values.Length; i++)
-            {
-                
-            }
-            */
             return threshold;
         }
+    */
+        /*
+1. Градиент V[I] - V[i-1]
+2. Походы окнами от 1 и выше, пока не сойдется к бимодальности
+3. Найти cutoff как минимум между пиками
+
+Modes =  0
+W = 1
+D = [V.count1]
+Maxes = []
+For I in [1..V.count] 
+    D= V[I] - V[i-1]
+do
+
+Modes =  0
+S = +1
+do
+    for wnd in D
+        if wnd.sum > 0 & S < 0
+            S = +1
+        Elif wnd.sum < 0 & S > 0
+            Maxes.push(wnd.maxindex)
+            Modes ++
+            S = -1
+W++
+while Modes > 2
+If Modes == 2
+Cutoff = Maxes[0]
+Min = V[I]
+For I=Maxes[0] to Maxes[1]
+    if V[I] < Min   
+        Min = V[I]
+        Cutoff = i         
+         */
+
+        public int CuttOff()
+        {
+            var grad = new int[Values.Length];
+            grad[0] = 0;
+            grad[1] = 0;
+            for (int k = 2; k < Values.Length; k++)
+            {
+                grad[k - 1] = Values[k] - Values[k - 1];
+            }
+            var modes = 0;
+            var window = 0;
+            var sign = 1;
+            var sum = 0;
+            var max = 0;
+            var maxInd = 0;
+            var maxes = new List<int>();
+            do
+            {
+                maxes.Clear();
+                window++;
+                modes = 0;
+                sum = 0;
+                for (int i = 0; i < grad.Length; i += window)
+                {
+                    sum = grad[i];
+                    max = Values[i];
+                    maxInd = i;
+                    for (var w = 1; w < window && (i + w) < grad.Length; w++)
+                    {
+                        sum += grad[i + w];
+                        if (Values[i + w] > max)
+                        {
+                            max = Values[i + w];
+                            maxInd = i + w;
+                        }
+                    }
+                    if (sum > 0 && sign < 0)
+                    {
+                        sign = 1;
+                    }
+                    else if (sum < 0 && sign > 0)
+                    {
+                        modes++;
+                        maxes.Add(maxInd);
+                        sign = -1;
+                    }
+                }
+            } while (modes > 2);
+            if (modes == 2)
+            {
+                var cutoff = maxes[0];
+                var min = Values[cutoff];
+                for (int i = maxes[0] + 1; i < maxes[1]; i++)
+                {
+                    if (Values[i] < min)
+                    {
+                        cutoff = i;
+                        min = Values[i];
+                    }
+                }
+                return cutoff;
+            }
+            return -1;
+        }
+
         #endregion
 
         static bool NumbersHasSameSign(int left, int right)

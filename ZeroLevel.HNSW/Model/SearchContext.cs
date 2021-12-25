@@ -5,19 +5,21 @@ using System.Runtime.CompilerServices;
 
 namespace ZeroLevel.HNSW
 {
+    public enum Mode
+    {
+        None,
+        ActiveCheck,
+        InactiveCheck,
+        ActiveInactiveCheck
+    }
+
     public sealed class SearchContext
     {
-        enum Mode
-        {
-            None,
-            ActiveCheck,
-            InactiveCheck,
-            ActiveInactiveCheck
-        }
-
         private HashSet<int> _activeNodes;
         private HashSet<int> _entryNodes;
         private Mode _mode;
+
+        public Mode NodeCheckMode => _mode;
 
         public SearchContext()
         {

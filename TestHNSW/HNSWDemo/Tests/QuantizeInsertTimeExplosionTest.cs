@@ -16,7 +16,7 @@ namespace HNSWDemo.Tests
         public void Run()
         {            
             var sw = new Stopwatch();
-            var world = new SmallWorld<long[]>(NSWOptions<long[]>.Create(6, 12, 100, 100, CosineDistance.NonOptimized));
+            var world = new SmallWorld<long[]>(NSWOptions<long[]>.Create(6, 12, 100, 100, Metrics.Cosine));
             var q = new Quantizator(-1f, 1f);
             for (int i = 0; i < IterationCount; i++)
             {

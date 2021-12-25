@@ -18,15 +18,15 @@ namespace HNSWDemo.Tests
         {
             var vectors = VectorUtils.RandomVectors(Dimensionality, Count);
             var q = new Quantizator(-1f, 1f);
-            var world = SmallWorld.CreateWorld<long[]>(NSWOptions<long[]>.Create(8, 16, 200, 200, CosineDistance.NonOptimized));
+            var world = SmallWorld.CreateWorld<long[]>(NSWOptions<long[]>.Create(8, 16, 200, 200, Metrics.Cosine));
             world.AddItems(vectors.Select(v => q.QuantizeToLong(v)).ToList());
 
-            var distance = new Func<int, int, float>((id1, id2) => CosineDistance.NonOptimized(world.GetVector(id1), world.GetVector(id2)));
+            var distance = new Func<int, int, float>((id1, id2) => Metrics.Cosine(world.GetVector(id1), world.GetVector(id2)));
             var weights = world.GetLinks().SelectMany(pair => pair.Value.Select(id => distance(pair.Key, id)));
             var histogram = new Histogram(HistogramMode.SQRT, weights);
             histogram.Smooth();
 
-            int threshold = histogram.OTSU();
+            int threshold = histogram.CuttOff();
             var min = histogram.Bounds[threshold - 1];
             var max = histogram.Bounds[threshold];
             var R = (max + min) / 2;
@@ -40,7 +40,7 @@ namespace HNSWDemo.Tests
             var k = ((float)Height) / (float)histogram.Values.Max();
 
             var maxes = histogram.GetMaximums().ToDictionary(m => m.Index, m => m);
-            int threshold = histogram.OTSU();
+            int threshold = histogram.CuttOff();
 
             using (var bmp = new Bitmap(Width, Height))
             {

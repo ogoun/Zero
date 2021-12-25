@@ -42,7 +42,7 @@ namespace HNSWDemo.Utils
 
             // 1. Find R - bound between intra-cluster distances and out-of-cluster distances
             var histogram = new Histogram(HistogramMode.SQRT, links.Values);
-            int threshold = histogram.OTSU();
+            int threshold = histogram.CuttOff();
             var min = histogram.Bounds[threshold - 1];
             var max = histogram.Bounds[threshold];
             var R = (max + min) / 2;

@@ -256,14 +256,80 @@ namespace ZeroLevel.HNSW
             return W;
         }
 
+        internal IEnumerable<(int, float)> KNearestAtLayer(int entryPointId, Func<int, float> targetCosts, int ef, SearchContext context)
+        {
+            int farthestId;
+            float farthestDistance;
+            var d = targetCosts(entryPointId);
+
+            var v = new VisitedBitSet(_vectors.Count, _options.M);
+            // * v ← ep // set of visited elements
+            v.Add(entryPointId);
+            // * C ← ep // set of candidates
+            var C = new MinHeap(ef);
+            C.Push((entryPointId, d));
+            // * W ← ep // dynamic list of found nearest neighbors
+            var W = new MaxHeap(ef + 1);
+            if (context.IsActiveNode(entryPointId))
+            {
+                W.Push((entryPointId, d));
+            }
+
+            // * while │C│ > 0
+            while (C.Count > 0)
+            {
+                // * c ← extract nearest element from C to q
+                var c = C.Pop();
+                // * f ← get furthest element from W to q
+                // * if distance(c, q) > distance(f, q)
+                if (W.TryPeek(out _, out farthestDistance) && c.Item2 > farthestDistance)
+                {
+                    // * break // all elements in W are evaluated
+                    break;
+                }
+
+                // * for each e ∈ neighbourhood(c) at layer lc // update C and W
+                foreach (var e in GetNeighbors(c.Item1))
+                {
+                    // * if e ∉ v
+                    if (!v.Contains(e))
+                    {
+                        // * v ← v ⋃ e
+                        v.Add(e);
+                        // * f ← get furthest element from W to q
+                        W.TryPeek(out farthestId, out farthestDistance);
+
+                        var eDistance = targetCosts(e);
+                        // * if distance(e, q) < distance(f, q) or │W│ < ef
+                        if (W.Count < ef || (farthestId >= 0 && eDistance < farthestDistance))
+                        {
+                            // * C ← C ⋃ e
+                            C.Push((e, eDistance));
+                            // * W ← W ⋃ e
+                            if (context.IsActiveNode(e))
+                            {
+                                W.Push((e, eDistance));
+                                if (W.Count > ef)
+                                {
+                                    W.Pop();
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            C.Clear();
+            v.Clear();
+            return W;
+        }
+
         /// <summary>
         /// Algorithm 2
         /// </summary>
         /// <param name="q">query element</param>
         /// <param name="ep">enter points ep</param>
         /// <returns>Output: ef closest neighbors to q</returns>
-        /*
-        internal IEnumerable<(int, float)> KNearestAtLayer(int entryPointId, Func<int, float> targetCosts, int ef, SearchContext context)
+        internal IEnumerable<(int, float)> KNearestAвtLayer(int entryPointId, Func<int, float> targetCosts, int ef, SearchContext context)
         {
             int farthestId;
             float farthestDistance;
@@ -326,7 +392,6 @@ namespace ZeroLevel.HNSW
             v.Clear();
             return W;
         }
-        */
 
         /// <summary>
         /// Algorithm 2, modified for LookAlike

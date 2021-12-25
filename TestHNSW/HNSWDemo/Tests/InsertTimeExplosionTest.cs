@@ -14,7 +14,7 @@ namespace HNSWDemo.Tests
         public void Run()
         {
             var sw = new Stopwatch();
-            var world = new SmallWorld<float[]>(NSWOptions<float[]>.Create(6, 12, 100, 100, CosineDistance.NonOptimized));
+            var world = new SmallWorld<float[]>(NSWOptions<float[]>.Create(6, 12, 100, 100, Metrics.Cosine));
             for (int i = 0; i < IterationCount; i++)
             {
                 var samples = VectorUtils.RandomVectors(Dimensionality, Count);

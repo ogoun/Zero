@@ -24,7 +24,7 @@ namespace HNSWDemo.Tests
             var histogram = new Histogram(HistogramMode.SQRT, weights);
             histogram.Smooth();
 
-            int threshold = histogram.OTSU();
+            int threshold = histogram.CuttOff();
             var min = histogram.Bounds[threshold - 1];
             var max = histogram.Bounds[threshold];
             var R = (max + min) / 2;
@@ -38,7 +38,7 @@ namespace HNSWDemo.Tests
             var k = ((float)Height) / (float)histogram.Values.Max();
 
             var maxes = histogram.GetMaximums().ToDictionary(m => m.Index, m => m);
-            int threshold = histogram.OTSU();
+            int threshold = histogram.CuttOff();
 
             using (var bmp = new Bitmap(Width, Height))
             {

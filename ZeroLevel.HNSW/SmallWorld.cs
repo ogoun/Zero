@@ -40,6 +40,8 @@ namespace ZeroLevel.HNSW
         public SmallWorld(NSWOptions<TItem> options, Stream stream)
         {
             _options = options;
+            _layerLevelGenerator = new ProbabilityLayerNumberGenerator(_options.LayersCount, _options.M);
+            DistanceFunction = new Func<int, int, float>((id1, id2) => _options.Distance(_vectors[id1], _vectors[id2]));
             Deserialize(stream);
         }
 
@@ -57,7 +59,7 @@ namespace ZeroLevel.HNSW
                 yield return (pair.Item1, _vectors[pair.Item1], pair.Item2);
             }
         }
-        /*
+
         public IEnumerable<(int, TItem, float)> Search(TItem vector, int k, SearchContext context)
         {
             if (context == null)
@@ -76,6 +78,7 @@ namespace ZeroLevel.HNSW
             }
         }
 
+        /*
         public IEnumerable<(int, TItem, float)> Search(int k, SearchContext context)
         {
             if (context == null)
@@ -261,7 +264,7 @@ namespace ZeroLevel.HNSW
                 _lockGraph.ExitReadLock();
             }
         }
-        /*
+        
         private IEnumerable<(int, float)> KNearest(TItem q, int k, SearchContext context)
         {
             _lockGraph.EnterReadLock();
@@ -271,6 +274,7 @@ namespace ZeroLevel.HNSW
                 {
                     return Enumerable.Empty<(int, float)>();
                 }
+
                 int id;
                 float value;
                 var distance = new Func<int, float>(candidate => _options.Distance(q, _vectors[candidate]));
@@ -309,7 +313,7 @@ namespace ZeroLevel.HNSW
                 _lockGraph.ExitReadLock();
             }
         }
-        */
+        
 
         /*
         private IEnumerable<(int, float)> KNearest(int k, SearchContext context)
