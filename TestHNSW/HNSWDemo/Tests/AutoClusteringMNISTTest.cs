@@ -81,13 +81,30 @@ namespace HNSWDemo.Tests
             var links = world.GetLinks().SelectMany(pair => pair.Value.Select(p=> distance(pair.Key, p))).ToList();
             var exists = links.Where(n => n > 0).ToArray();
             
-            var histogram = new Histogram(HistogramMode.SQRT, links);
+            var histogram = new Histogram(HistogramMode.LOG, links);
             DrawHistogram(histogram, @"D:\Mnist\histogram.jpg");
 
             var clusters = AutomaticGraphClusterer.DetectClusters(world);
             Console.WriteLine($"Found {clusters.Count} clusters");
-            
-            
+
+            while (clusters.Count > 10)
+            {
+                var last = clusters[clusters.Count - 1];
+                var testDistance = clusters[0].MinDistance(distance, last);
+                var index = 0;
+                for (int i = 1; i < clusters.Count - 1; i++)
+                { 
+                    var d = clusters[i].MinDistance(distance, last);
+                    if (d < testDistance)
+                    {
+                        testDistance = d;
+                        index = i;
+                    }
+                }
+                clusters[index].Merge(last);
+                clusters.RemoveAt(clusters.Count - 1);
+            }
+
             for (int i = 0; i < clusters.Count; i++)
             {
                 var ouput = Path.Combine(folder, i.ToString("D3"));
