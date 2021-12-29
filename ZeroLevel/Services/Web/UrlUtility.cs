@@ -124,13 +124,13 @@ namespace ZeroLevel.Services.Web
 
             // no % characters, so avoid the regex overhead
             if (!s.Contains("%"))
-                return Uri.EscapeUriString(s);
+                return Uri.EscapeDataString(s);
 
             // pick out all %-hex-hex matches and avoid double-encoding 
             return Regex.Replace(s, "(.*?)((%[0-9A-Fa-f]{2})|$)", c => {
                 var a = c.Groups[1].Value; // group 1 is a sequence with no %-encoding - encode illegal characters
                 var b = c.Groups[2].Value; // group 2 is a valid 3-character %-encoded sequence - leave it alone!
-                return Uri.EscapeUriString(a) + b;
+                return Uri.EscapeDataString(a) + b;
             });
         }
 

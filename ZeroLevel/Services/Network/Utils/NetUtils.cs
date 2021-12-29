@@ -39,7 +39,6 @@ namespace ZeroLevel.Network
             if (endpoint == null) return false;
             using (var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
             {
-                socket.SetIPProtectionLevel(IPProtectionLevel.Unrestricted);
                 socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.DontLinger, true);
                 socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive, false);
                 socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.NoDelay, true);

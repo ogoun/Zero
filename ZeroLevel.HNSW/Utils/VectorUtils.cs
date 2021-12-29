@@ -32,7 +32,7 @@ namespace ZeroLevel.HNSW
 
         public static void Normalize(IList<float> vector)
         {
-            float normFactor = 1 / Magnitude(vector);
+            float normFactor = 1f / Magnitude(vector);
             for (int i = 0; i < vector.Count; ++i)
             {
                 vector[i] *= normFactor;

@@ -399,103 +399,58 @@ namespace ZeroLevel.HNSW
         /// <param name="q">query element</param>
         /// <param name="ep">enter points ep</param>
         /// <returns>Output: ef closest neighbors to q</returns>
-        /*
-        internal IEnumerable<(int, float)> KNearestAtLayer(IEnumerable<(int, float)> w, int ef, SearchContext context)
+        internal IEnumerable<(int, float)> KNearestAtLayer(int ef, SearchContext context)
         {
+            var distance = new Func<int, int, float>((id1, id2) => _options.Distance(_vectors[id1], _vectors[id2]));
             // v ← ep // set of visited elements
             var v = new VisitedBitSet(_vectors.Count, _options.M);
             // C ← ep // set of candidates
             var C = new MinHeap(ef);
-            foreach (var ep in context.EntryPoints)
-            {
-                var neighboursIds = GetNeighbors(ep).ToArray();
-                for (int i = 0; i < neighboursIds.Length; ++i)
-                {
-                    C.Push((ep, _links.Distance(ep, neighboursIds[i])));
-                }
-                v.Add(ep);
-            }
-            // W ← ep // dynamic list of found nearest neighbors
+            float dist;
             var W = new MaxHeap(ef + 1);
-            foreach (var i in w) W.Push(i);
+            var entryPoints = context.EntryPoints;
 
-            // run bfs
-            while (C.Count > 0)
+            do
             {
-                // get next candidate to check and expand
-                var toExpand = C.Pop();
-                if (W.Count > 0)
+                foreach (var ep in entryPoints)
                 {
-                    if (W.TryPeek(out _, out var dist) && toExpand.Item2 > dist)
+                    var neighboursIds = GetNeighbors(ep).ToArray();
+                    for (int i = 0; i < neighboursIds.Length; ++i)
+                    {
+                        C.Push((ep, distance(ep, neighboursIds[i])));
+                    }
+                    v.Add(ep);
+                }
+                // run bfs
+                while (C.Count > 0)
+                {
+                    // get next candidate to check and expand
+                    var toExpand = C.Pop();
+                    if (W.TryPeek(out _, out dist) && toExpand.Item2 > dist)
                     {
                         // the closest candidate is farther than farthest result
                         break;
                     }
-                }
-                if (context.IsActiveNode(toExpand.Item1))
-                {
-                    if (W.Count < ef || W.Count == 0 || (W.Count > 0 && (W.TryPeek(out _, out var dist) && toExpand.Item2 < dist)))
+                    if (context.IsActiveNode(toExpand.Item1))
                     {
-                        W.Push((toExpand.Item1, toExpand.Item2));
-                        if (W.Count > ef)
+                        if (W.Count < ef || W.Count == 0 || (W.TryPeek(out _, out dist) && toExpand.Item2 < dist))
                         {
-                            W.Pop();
-                        }
-                    }
-                }
-            }
-            if (W.Count > ef)
-            {
-                while (W.Count > ef)
-                {
-                    W.Pop();
-                }
-                return W;
-            }
-            else
-            {
-                foreach (var c in W)
-                {
-                    C.Push((c.Item1, c.Item2));
-                }
-            }
-            while (C.Count > 0)
-            {
-                // get next candidate to check and expand
-                var toExpand = C.Pop();
-                // expand candidate
-                var neighboursIds = GetNeighbors(toExpand.Item1).ToArray();
-                for (int i = 0; i < neighboursIds.Length; ++i)
-                {
-                    int neighbourId = neighboursIds[i];
-                    if (!v.Contains(neighbourId))
-                    {
-                        // enqueue perspective neighbours to expansion list
-                        var neighbourDistance = _links.Distance(toExpand.Item1, neighbourId);
-                        if (context.IsActiveNode(neighbourId))
-                        {
-                            if (W.Count < ef || (W.Count > 0 && (W.TryPeek(out _, out var dist) && neighbourDistance < dist)))
+                            W.Push((toExpand.Item1, toExpand.Item2));
+                            if (W.Count > ef)
                             {
-                                W.Push((neighbourId, neighbourDistance));
-                                if (W.Count > ef)
-                                {
-                                    W.Pop();
-                                }
+                                W.Pop();
                             }
                         }
-                        if (W.Count < ef)
-                        {
-                            C.Push((neighbourId, neighbourDistance));
-                        }
-                        v.Add(neighbourId);
                     }
                 }
+
+                entryPoints = W.Select(p => p.Item1);
             }
+            while (W.Count < ef);
             C.Clear();
             v.Clear();
             return W;
         }
-        */
         #endregion
 
         internal IEnumerable<int> GetNeighbors(int id) => _links.FindNeighbors(id);

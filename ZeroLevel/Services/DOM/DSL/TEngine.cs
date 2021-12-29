@@ -72,7 +72,7 @@ namespace DOM.DSL
                 Log.Debug($"Fault transform document '{document.Id} by token list'. {ex.ToString()}");
                 if (ignore_fault == false)
                 {
-                    throw ex;
+                    throw;
                 }
             }
             return text.ToString();

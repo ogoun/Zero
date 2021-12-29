@@ -77,8 +77,7 @@ namespace ZeroLevel.HNSW
                 }
             }
         }
-
-        /*
+        
         public IEnumerable<(int, TItem, float)> Search(int k, SearchContext context)
         {
             if (context == null)
@@ -93,7 +92,6 @@ namespace ZeroLevel.HNSW
                 }
             }
         }
-        */
 
         /// <summary>
         /// Adding vectors batch
@@ -314,8 +312,6 @@ namespace ZeroLevel.HNSW
             }
         }
         
-
-        /*
         private IEnumerable<(int, float)> KNearest(int k, SearchContext context)
         {
             _lockGraph.EnterReadLock();
@@ -328,7 +324,7 @@ namespace ZeroLevel.HNSW
                 // W ← ∅ // set for the current nearest elements
                 var W = new MinHeap(k + 1);
                 // W ← SEARCH-LAYER(q, ep, ef, lc =0)
-                foreach (var i in _layers[0].KNearestAtLayer(W, k, context))
+                foreach (var i in _layers[0].KNearestAtLayer(k, context))
                 {
                     W.Push(i);
                 }
@@ -340,7 +336,7 @@ namespace ZeroLevel.HNSW
                 _lockGraph.ExitReadLock();
             }
         }
-        */
+        
         #endregion
 
         public void Serialize(Stream stream)
