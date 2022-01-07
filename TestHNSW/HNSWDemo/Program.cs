@@ -1,6 +1,7 @@
 ﻿using HNSWDemo.Tests;
 using System;
-using ZeroLevel.Services.Web;
+using System.IO;
+using ZeroLevel.HNSW;
 
 namespace HNSWDemo
 {
@@ -8,12 +9,29 @@ namespace HNSWDemo
     {
         static void Main(string[] args)
         {
-            var uri = new Uri("https://hack33d.ru/bpla/upload.php?path=128111&get=0J/QuNC70LjQv9C10L3QutC+INCS0LvQsNC00LjQvNC40YAg0JzQuNGF0LDQudC70L7QstC40Yc7MDQuMDkuMTk1NCAoNjYg0LvQtdGCKTvQnNC+0YHQutC+0LLRgdC60LDRjzsxMjgxMTE7TEFfUkVaVVM7RkxZXzAy");
-            var parts = UrlUtility.ParseQueryString(uri.Query);
-            new AutoClusteringMNISTTest().Run();
-            //new HistogramTest().Run();
+            
+
+            new LALTest().Run();
+            // new AutoClusteringMNISTTest().Run();
+            // new AccuracityTest().Run();
             Console.WriteLine("Completed");
             Console.ReadKey();
+        }
+
+        static int GetC(string file)
+        {
+            var name = Path.GetFileNameWithoutExtension(file);
+            var index = name.IndexOf("_M");
+            if (index > 0)
+            {
+                index = name.IndexOf("_", index + 2);
+                if (index > 0)
+                {
+                    var num = name.Substring(index + 1, name.Length - index - 1);
+                    return int.Parse(num);
+                }
+            }
+            return -1;
         }
     }
 }

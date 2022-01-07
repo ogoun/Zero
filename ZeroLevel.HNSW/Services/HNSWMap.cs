@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 using ZeroLevel.Services.Serialization;
 
 namespace ZeroLevel.HNSW
@@ -12,6 +13,7 @@ namespace ZeroLevel.HNSW
         private Dictionary<TFeature, int> _map;
         private Dictionary<int, TFeature> _reverse_map;
 
+        public int this[TFeature feature] => _map.GetValueOrDefault(feature);
         public HNSWMap(int capacity = -1)
         {
             if (capacity > 0)
@@ -24,6 +26,14 @@ namespace ZeroLevel.HNSW
                 _map = new Dictionary<TFeature, int>();
                 _reverse_map = new Dictionary<int, TFeature>();
 
+            }
+        }
+
+        public HNSWMap(Stream stream)
+        {
+            using (var reader = new MemoryStreamReader(stream))
+            {
+                Deserialize(reader);
             }
         }
 

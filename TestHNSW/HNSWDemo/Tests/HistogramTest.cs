@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using ZeroLevel.HNSW;
 
@@ -10,12 +11,23 @@ namespace HNSWDemo.Tests
     {
         private static int Count = 3000;
         private static int Dimensionality = 128;
-        private static int Width = 3000;
-        private static int Height = 3000;
+        private static int Width = 2440;
+        private static int Height = 1920;
 
         public void Run()
         {
-            var vectors = VectorUtils.RandomVectors(Dimensionality, Count);
+            Create(Dimensionality, @"D:\hist");
+            // Process.Start("explorer", $"D:\\hist{Dimensionality.ToString("D3")}.jpg");
+
+            /* for (int i = 12; i < 512; i++)
+             {
+                 Create(i, @"D:\hist");
+             }*/
+        }
+
+        private void Create(int dim, string output)
+        {
+            var vectors = VectorUtils.RandomVectors(dim, Count);
             var world = SmallWorld.CreateWorld<float[]>(NSWOptions<float[]>.Create(8, 16, 200, 200, Metrics.L2Euclidean));
             world.AddItems(vectors);
 
@@ -29,7 +41,7 @@ namespace HNSWDemo.Tests
             var max = histogram.Bounds[threshold];
             var R = (max + min) / 2;
 
-            DrawHistogram(histogram, @"D:\hist.jpg");
+            DrawHistogram(histogram, Path.Combine(output, $"hist{dim.ToString("D3")}.jpg"));
         }
 
         static void DrawHistogram(Histogram histogram, string filename)

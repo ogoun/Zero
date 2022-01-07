@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "HNSWDemo": {
+      "commandName": "Project",
+      "hotReloadEnabled": false,
+      "nativeDebugging": false
+    }
+  }
+}

@@ -13,12 +13,12 @@
     <PackageLicenseUrl></PackageLicenseUrl>
     <PackageIconUrl></PackageIconUrl>
     <RepositoryUrl>https://github.com/ogoun/Zero</RepositoryUrl>
-    <RepositoryType>GitHub</RepositoryType>
+    <RepositoryType>git</RepositoryType>
     <Version>3.3.5.7</Version>
     <FileVersion>3.3.5.7</FileVersion>
     <Platforms>AnyCPU;x64;x86</Platforms>
     <PackageIcon>zero.png</PackageIcon>
-    <DebugType>none</DebugType>
+    <DebugType>full</DebugType>
     <ErrorReport>none</ErrorReport>
     <ApplicationIcon>zero.ico</ApplicationIcon>
   </PropertyGroup>

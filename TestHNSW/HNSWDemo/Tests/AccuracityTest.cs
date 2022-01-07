@@ -11,7 +11,7 @@ namespace HNSWDemo.Tests
         : ITest
     {
         private static int K = 200;
-        private static int count = 3000;
+        private static int count = 10000;
         private static int testCount = 500;
         private static int dimensionality = 128;
 
