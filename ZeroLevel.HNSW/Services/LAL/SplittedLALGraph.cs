@@ -11,16 +11,17 @@ namespace ZeroLevel.HNSW
             _graphs.Add(c, graph);
         }
 
-        public IEnumerable<int> KNearest(int k, IDictionary<int, SearchContext> contexts)
+        public IDictionary<int, List<int>> KNearest(int k, IDictionary<int, SearchContext> contexts)
         {
             var partial_k = 1 + (k / _graphs.Count);
-            var result = new List<int>();
+            var result = new Dictionary<int, List<int>>();
             foreach (var graph in _graphs)
             {
+                result.Add(graph.Key, new List<int>());
                 var context = contexts[graph.Key];
                 if (context.EntryPoints != null)
                 {
-                    result.AddRange(graph.Value.KNearest(partial_k, context));
+                    result[graph.Key].AddRange(graph.Value.KNearest(partial_k, context));
                 }
             }
             return result;

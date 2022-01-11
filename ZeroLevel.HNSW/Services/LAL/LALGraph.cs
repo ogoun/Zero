@@ -28,7 +28,7 @@ namespace ZeroLevel.HNSW
         {
             var v = new VisitedBitSet(_links.Count, 1);
             var C = new Queue<int>();
-            var W = new List<int>();
+            var W = new HashSet<int>();
             var entryPoints = context.EntryPoints;
 
             do
@@ -55,7 +55,7 @@ namespace ZeroLevel.HNSW
                             if (W.Count > k)
                             {
                                 var loser_id = DefaultRandomGenerator.Instance.Next(0, W.Count - 1);
-                                W.RemoveAt(loser_id);
+                                W.Remove(W.First());
                             }
                         }
                     }

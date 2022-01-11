@@ -17,14 +17,11 @@ namespace ZeroLevel.HNSW
             _mappers.Add(c, map);
         }
 
-        public IEnumerable<TFeature> ConvertIdsToFeatures(IEnumerable<int> ids)
+        public IEnumerable<TFeature> ConvertIdsToFeatures(int c, IEnumerable<int> ids)
         {
-            foreach (var map in _mappers)
+            foreach (var feature in _mappers[c].ConvertIdsToFeatures(ids))
             {
-                foreach (var feature in map.Value.ConvertIdsToFeatures(ids))
-                {
-                    yield return feature;
-                }
+                yield return feature;
             }
         }
 

@@ -10,8 +10,7 @@ namespace HNSWDemo.Tests
     internal class LALTest
         : ITest
     {
-        private const int count = 5000;
-        private const int testCount = 100;
+        private const int count = 20000;
         private const int dimensionality = 128;
 
         public void Run()
@@ -83,19 +82,24 @@ namespace HNSWDemo.Tests
             }
 
             var contexts = mappers.CreateContext(null, entries);
-            var result = worlds.KNearest(10, contexts);
+            var result = worlds.KNearest(5000, contexts);
 
-            Console.WriteLine("Entries:");
+            Console.WriteLine($"Found: {result.Sum(r=>r.Value.Count)}");
+
+            /*Console.WriteLine("Entries:");
             foreach (var n in entries)
             {
                 Console.WriteLine($"\t{n}");
             }
 
             Console.WriteLine("Extensions:");
-            foreach (var n in mappers.ConvertIdsToFeatures(result))
+            foreach (var r in result)
             {
-                Console.WriteLine($"\t[{n}]");
-            }
+                foreach (var n in mappers.ConvertIdsToFeatures(r.Key, r.Value))
+                {
+                    Console.WriteLine($"\t[{n}]");
+                }
+            }*/
         }
     }
 }
