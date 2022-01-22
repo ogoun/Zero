@@ -15,14 +15,22 @@ namespace ZeroLevel.HNSW
         {
             var partial_k = 1 + (k / _graphs.Count);
             var result = new Dictionary<int, List<int>>();
+            int step = 1;
             foreach (var graph in _graphs)
             {
                 result.Add(graph.Key, new List<int>());
                 var context = contexts[graph.Key];
                 if (context.EntryPoints != null)
                 {
-                    result[graph.Key].AddRange(graph.Value.KNearest(partial_k, context));
+                    var r = graph.Value.KNearest(partial_k, context) as HashSet<int>;
+                    if (r.Count < partial_k)
+                    {
+                        var diff = partial_k - r.Count;
+                        partial_k += diff / (_graphs.Count - step);
+                    }
+                    result[graph.Key].AddRange(r);
                 }
+                step++;
             }
             return result;
         }

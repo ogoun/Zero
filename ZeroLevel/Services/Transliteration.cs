@@ -59,6 +59,15 @@ namespace ZeroLevel.Services
             return tdict;
         }
 
+        public static bool HasCyrillicSymbols(string line)
+        { 
+            foreach (var ch in line)
+            {
+                if(gost.ContainsKey(ch.ToString()) || iso.ContainsKey(ch.ToString())) return true;
+            }
+            return false;
+        }
+
         static Transliteration()
         {
             gost.Add("Є", "EH");

@@ -30,7 +30,7 @@ namespace ZeroLevel.HNSW
             var C = new Queue<int>();
             var W = new HashSet<int>();
             var entryPoints = context.EntryPoints;
-
+            var nextEntry = new HashSet<int>();
             do
             {
                 foreach (var ep in entryPoints)
@@ -38,7 +38,11 @@ namespace ZeroLevel.HNSW
                     var neighboursIds = _links.FindNeighbors(ep);
                     for (int i = 0; i < neighboursIds.Length; ++i)
                     {
-                        C.Enqueue(neighboursIds[i]);
+                        if (v.Contains(neighboursIds[i]) == false)
+                        {
+                            C.Enqueue(neighboursIds[i]);
+                            nextEntry.Add(neighboursIds[i]);
+                        }
                     }
                     v.Add(ep);
                 }
@@ -54,13 +58,13 @@ namespace ZeroLevel.HNSW
                             W.Add(toExpand);
                             if (W.Count > k)
                             {
-                                var loser_id = DefaultRandomGenerator.Instance.Next(0, W.Count - 1);
                                 W.Remove(W.First());
                             }
                         }
                     }
                 }
-                entryPoints = W.Select(id => id).ToList();
+                entryPoints = nextEntry.Select(id => id).ToList();
+                nextEntry.Clear();
             }
             while (W.Count < k && entryPoints.Any());
             C.Clear();
