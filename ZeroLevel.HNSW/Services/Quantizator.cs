@@ -27,13 +27,12 @@ namespace ZeroLevel.HNSW.Services
 
         public int[] QuantizeToInt(float[] v)
         {
-            if (v.Length % 4 != 0)
-            {
-                throw new ArgumentOutOfRangeException("v.Length % 4 must be zero!");
-            }
-            var result = new int[v.Length / 4];
+            var diff = v.Length % 4;
+            int count = (v.Length - diff) / 4;
+            var result = new int[((diff == 0) ? 0 : 1) + (v.Length / 4)];
             byte[] buf = new byte[4];
-            for (int i = 0; i < v.Length; i += 4)
+            int i = 0;
+            for (; i < count * 4; i += 4)
             {
                 buf[0] = _quantizeInRange(v[i]);
                 buf[1] = _quantizeInRange(v[i + 1]);
@@ -41,18 +40,29 @@ namespace ZeroLevel.HNSW.Services
                 buf[3] = _quantizeInRange(v[i + 3]);
                 result[(i >> 2)] = BitConverter.ToInt32(buf);
             }
+            if (diff != 0)
+            {
+                for (var j = 0; j < diff; j++)
+                {
+                    buf[j] = _quantizeInRange(v[i + j]);
+                }
+                for (var j = diff; j < 4; j++)
+                {
+                    buf[j] = 0;
+                }
+                result[(i >> 2)] = BitConverter.ToInt32(buf);
+            }
             return result;
         }
 
         public long[] QuantizeToLong(float[] v)
         {
-            if (v.Length % 8 != 0)
-            {
-                throw new ArgumentOutOfRangeException("v.Length % 8 must be zero!");
-            }
-            var result = new long[v.Length / 8];
+            var diff = v.Length % 8;
+            int count = (v.Length - diff) / 8;
+            var result = new long[((diff == 0) ? 0 : 1) + (v.Length / 8)];
             byte[] buf = new byte[8];
-            for (int i = 0; i < v.Length; i += 8)
+            int i = 0;
+            for (; i < count * 8; i += 8)
             {
                 buf[0] = _quantizeInRange(v[i + 0]);
                 buf[1] = _quantizeInRange(v[i + 1]);
@@ -63,6 +73,18 @@ namespace ZeroLevel.HNSW.Services
                 buf[6] = _quantizeInRange(v[i + 6]);
                 buf[7] = _quantizeInRange(v[i + 7]);
 
+                result[(i >> 3)] = BitConverter.ToInt64(buf);
+            }
+            if (diff != 0)
+            {
+                for (var j = 0; j < diff; j++)
+                {
+                    buf[j] = _quantizeInRange(v[i + j]);
+                }
+                for (var j = diff; j < 8; j++)
+                {
+                    buf[j] = 0;
+                }
                 result[(i >> 3)] = BitConverter.ToInt64(buf);
             }
             return result;

@@ -9,7 +9,7 @@ namespace HNSWDemo
     {
         static void Main(string[] args)
         {
-            new LALTest().Run();
+            new QuantizatorTest().Run();
             // new AutoClusteringMNISTTest().Run();
             // new AccuracityTest().Run();
             Console.WriteLine("Completed");

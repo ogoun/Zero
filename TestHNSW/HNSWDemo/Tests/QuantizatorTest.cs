@@ -10,7 +10,7 @@ namespace HNSWDemo.Tests
         : ITest
     {
         private static int Count = 500000;
-        private static int Dimensionality = 128;
+        private static int Dimensionality = 221;
 
         public void Run()
         {
@@ -18,7 +18,7 @@ namespace HNSWDemo.Tests
             var min = samples.SelectMany(s => s).Min();
             var max = samples.SelectMany(s => s).Max();
             var q = new Quantizator(min, max);
-            var q_samples = samples.Select(s => q.QuantizeToLong(s)).ToArray();
+            var q_samples = samples.Select(s => q.QuantizeToInt(s)).ToArray();
 
             // comparing
             var list = new List<float>();
