@@ -14,6 +14,8 @@ namespace ZeroLevel.HNSW
         private Dictionary<int, TFeature> _reverse_map;
 
         public int this[TFeature feature] => _map.GetValueOrDefault(feature);
+
+        public HNSWMap() { }
         public HNSWMap(int capacity = -1)
         {
             if (capacity > 0)

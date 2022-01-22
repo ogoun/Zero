@@ -777,7 +777,7 @@ namespace ZeroLevel.Services.Serialization
             }
         }
 
-        public void WriteDictionary<TKey, TValue>(Dictionary<TKey, TValue> collection)
+        public void WriteDictionary<TKey, TValue>(IDictionary<TKey, TValue> collection)
         {
             WriteInt32(collection?.Count() ?? 0);
             if (collection != null)

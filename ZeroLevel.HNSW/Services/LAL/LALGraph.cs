@@ -6,10 +6,11 @@ using ZeroLevel.Services.Serialization;
 namespace ZeroLevel.HNSW
 {
     public class LALGraph
+        : IBinarySerializable
     {
         private readonly LALLinks _links = new LALLinks();
 
-        private LALGraph() { }
+        public LALGraph() { }
         public static LALGraph FromLALGraph(Stream stream)
         {
             var l = new LALGraph();
@@ -76,7 +77,7 @@ namespace ZeroLevel.HNSW
         {
             using (var reader = new MemoryStreamReader(stream))
             {
-                _links.Deserialize(reader); // deserialize only base layer and skip another
+                _links.Deserialize(reader);
             }
         }
 
@@ -104,6 +105,16 @@ namespace ZeroLevel.HNSW
             {
                 _links.Serialize(writer);
             }
+        }
+
+        public void Serialize(IBinaryWriter writer)
+        {
+            _links.Serialize(writer);
+        }
+
+        public void Deserialize(IBinaryReader reader)
+        {
+            _links.Deserialize(reader);
         }
     }
 }

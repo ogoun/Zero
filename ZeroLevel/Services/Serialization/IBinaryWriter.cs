@@ -96,7 +96,7 @@ namespace ZeroLevel.Services.Serialization
         void WriteCollection(IEnumerable<IPAddress> collection);
         #endregion
 
-        void WriteDictionary<TKey, TValue>(Dictionary<TKey, TValue> collection);
+        void WriteDictionary<TKey, TValue>(IDictionary<TKey, TValue> collection);
         void WriteDictionary<TKey, TValue>(ConcurrentDictionary<TKey, TValue> collection);
 
         void Write<T>(T item)

@@ -6,6 +6,7 @@ using ZeroLevel.Services.Serialization;
 namespace ZeroLevel.HNSW
 {
     internal class LALLinks
+        : IBinarySerializable
     {
         private ConcurrentDictionary<int, int[]> _set = new ConcurrentDictionary<int, int[]>();
         internal IDictionary<int, int[]> Links => _set;
@@ -47,6 +48,7 @@ namespace ZeroLevel.HNSW
             _set.Clear();
             _set = null;
         }
+
         public void Serialize(IBinaryWriter writer)
         {
             writer.WriteInt32(_set.Count);
