@@ -38,6 +38,10 @@ namespace ZeroLevel.Services.Serialization
 
         DateTime? ReadDateTime();
 
+        TimeOnly? ReadTime();
+
+        DateOnly? ReadDate();
+
         decimal ReadDecimal();
 
         TimeSpan ReadTimeSpan();

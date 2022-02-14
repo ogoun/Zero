@@ -39,6 +39,10 @@ namespace ZeroLevel.Services.Serialization
 
         void WriteDateTime(DateTime? datetime);
 
+        void WriteTime(TimeOnly? time);
+
+        void WriteDate(DateOnly? date);
+
         void WriteDecimal(Decimal number);
 
         void WriteTimeSpan(TimeSpan period);

@@ -3,6 +3,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace ZeroLevel.Services.FileSystem
 {
@@ -255,6 +256,34 @@ namespace ZeroLevel.Services.FileSystem
                     Log.SystemError(ex, $"[FSUtils.RemoveFolder] Fault remove folder {path}");
                     try_counter++;
                     Thread.Sleep(fault_timeout_period);
+                }
+            } while (deleted == false && fault_retrying_count < 5);
+        }
+
+        public static async Task RemoveFolderAsync(string path, int fault_retrying_count = 5, int fault_timeout_period = 1000)
+        {
+            bool deleted = false;
+            int try_counter = 0;
+            do
+            {
+                try
+                {
+                    if (Directory.Exists(path) == false)
+                    {
+                        deleted = true;
+                        break;
+                    }
+                    else
+                    {
+                        await Task.Factory.StartNew(p => Directory.Delete((string)p, true), path);
+                        deleted = true;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Log.SystemError(ex, $"[FSUtils.RemoveFolderAsync] Fault remove folder {path}");
+                    try_counter++;
+                    await Task.Delay(fault_timeout_period);
                 }
             } while (deleted == false && fault_retrying_count < 5);
         }
