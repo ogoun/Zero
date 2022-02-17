@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
@@ -55,6 +56,94 @@ namespace ZeroLevel.Services.FileSystem
 
         private static string _invalid_path_characters = new string(Path.GetInvalidPathChars());
         private static string _invalid_filename_characters = new string(Path.GetInvalidFileNameChars());
+        private static HashSet<string> _invalidRootFileNames = new HashSet<string> { "$mft", "$mftmirr", "$logfile", "$volume", "$attrdef", "$bitmap", "$boot", "$badclus", "$secure", "$upcase", "$extend", "$quota", "$objid", "$reparse" };
+        private static bool StartWithInvalidWindowsPrefix(string name)
+        {
+            switch (name[0])
+            {
+                case 'a':
+                case 'A':
+                    switch (name[1])
+                    {
+                        case 'u':
+                        case 'U':
+                            switch (name[2])
+                            {
+                                case 'x':
+                                case 'X':
+                                    return name[3] == '.';  // AUX.
+                            }
+                            break;
+                    }
+                    break;
+                case 'c':
+                case 'C':
+                    switch (name[1])
+                    {
+                        case 'o':
+                        case 'O':
+                            switch (name[2])
+                            {
+                                case 'n':
+                                case 'N':
+                                    return name[3] == '.';  // CON.
+                                case 'm':
+                                case 'M':
+                                    return char.IsDigit(name[3]) && name[4] == '.'; // COM0 - COM9
+                            }
+                            break;
+                    }
+                    break;
+                case 'l':
+                case 'L':
+                    switch (name[1])
+                    {
+                        case 'p':
+                        case 'P':
+                            switch (name[2])
+                            {
+                                case 't':
+                                case 'T':
+                                    return char.IsDigit(name[3]) && name[4] == '.'; // LPT0 - LPT9
+                            }
+                            break;
+                    }
+                    break;
+                case 'p':
+                case 'P':
+                    switch (name[1])
+                    {
+                        case 'r':
+                        case 'R':
+                            switch (name[2])
+                            {
+                                case 'n':
+                                case 'N':
+                                    return name[3] == '.';  // PRN.
+                            }
+                            break;
+                    }
+                    break;
+                case 'n':
+                case 'N':
+                    switch (name[1])
+                    {
+                        case 'u':
+                        case 'U':
+                            switch (name[2])
+                            {
+                                case 'l':
+                                case 'L':
+                                    return name[3] == '.';  // NUL.
+                            }
+                            break;
+                    }
+                    break;
+            }
+            return false;
+        }
+
+        private static bool IsFilenameReserverForRootPath(string name) => _invalidRootFileNames.Contains(name.ToLowerInvariant());
 
         /// <summary>
         /// Removes invalid characters from the passed path
@@ -72,21 +161,30 @@ namespace ZeroLevel.Services.FileSystem
                 }
                 result[index] = c;
                 index++;
-            }
+            }            
             return new string(result, 0, index);
         }
 
         /// <summary>
         /// Removes invalid characters from the passed file name
         /// </summary>
-        /// <param name="path"></param>
-        /// <returns></returns>
-        public static string FileNameCorrection(string path)
+        public static string FileNameCorrection(string name, bool isRootPath = false)
         {
-            if (path == null) return string.Empty;
-            var result = new char[path.Length];
+            if (name == null) return string.Empty;
+            // The reserved filenames
+            if (StartWithInvalidWindowsPrefix(name))
+            {
+                name = $"@{name}";
+            }
+            // The reserved NTFS filenames for root path
+            if (isRootPath && IsFilenameReserverForRootPath(name))
+            {
+                name = $"@{name}";
+            }
+            // Invalid symbols
+            var result = new char[name.Length];
             var index = 0;
-            foreach (char c in path)
+            foreach (char c in name)
             {
                 if (_invalid_filename_characters.IndexOf(c) >= 0)
                 {
@@ -95,6 +193,50 @@ namespace ZeroLevel.Services.FileSystem
                 result[index] = c;
                 index++;
             }
+            // Filenames cannot end in a space or dot.
+            if (result[index - 1] == '.' || char.IsWhiteSpace(result[index - 1]))
+                index--;
+            return new string(result, 0, index);
+        }
+
+        /// <summary>
+        /// Replace invalid characters from the passed file name
+        /// </summary>
+        public static string FileNameCorrection(string name, char replacedSymbol, bool isRootPath = false)
+        {
+            if (name == null) return string.Empty;
+            if (_invalid_filename_characters.IndexOf(replacedSymbol) >= 0)
+            {
+                throw new ArgumentException($"The sybmol '{replacedSymbol}' is invalid for windows filenames");
+            }
+            // The reserved filenames
+            if (StartWithInvalidWindowsPrefix(name))
+            {
+                name = $"@{name}";
+            }
+            // The reserved NTFS filenames for root path
+            if (isRootPath && IsFilenameReserverForRootPath(name))
+            {
+                name = $"@{name}";
+            }
+            // Invalid symbols
+            var result = new char[name.Length];
+            var index = 0;
+            foreach (char c in name)
+            {
+                if (_invalid_filename_characters.IndexOf(c) >= 0)
+                {
+                    result[index] = replacedSymbol;
+                }
+                else
+                {
+                    result[index] = c;
+                }
+                index++;
+            }
+            // Filenames cannot end in a space or dot.
+            if (result[index - 1] == '.' || char.IsWhiteSpace(result[index - 1]))
+                index--;
             return new string(result, 0, index);
         }
 
