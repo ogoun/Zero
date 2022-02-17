@@ -59,86 +59,89 @@ namespace ZeroLevel.Services.FileSystem
         private static HashSet<string> _invalidRootFileNames = new HashSet<string> { "$mft", "$mftmirr", "$logfile", "$volume", "$attrdef", "$bitmap", "$boot", "$badclus", "$secure", "$upcase", "$extend", "$quota", "$objid", "$reparse" };
         private static bool StartWithInvalidWindowsPrefix(string name)
         {
-            switch (name[0])
+            if (name.Length >= 3)
             {
-                case 'a':
-                case 'A':
-                    switch (name[1])
-                    {
-                        case 'u':
-                        case 'U':
-                            switch (name[2])
-                            {
-                                case 'x':
-                                case 'X':
-                                    return name[3] == '.';  // AUX.
-                            }
-                            break;
-                    }
-                    break;
-                case 'c':
-                case 'C':
-                    switch (name[1])
-                    {
-                        case 'o':
-                        case 'O':
-                            switch (name[2])
-                            {
-                                case 'n':
-                                case 'N':
-                                    return name[3] == '.';  // CON.
-                                case 'm':
-                                case 'M':
-                                    return char.IsDigit(name[3]) && name[4] == '.'; // COM0 - COM9
-                            }
-                            break;
-                    }
-                    break;
-                case 'l':
-                case 'L':
-                    switch (name[1])
-                    {
-                        case 'p':
-                        case 'P':
-                            switch (name[2])
-                            {
-                                case 't':
-                                case 'T':
-                                    return char.IsDigit(name[3]) && name[4] == '.'; // LPT0 - LPT9
-                            }
-                            break;
-                    }
-                    break;
-                case 'p':
-                case 'P':
-                    switch (name[1])
-                    {
-                        case 'r':
-                        case 'R':
-                            switch (name[2])
-                            {
-                                case 'n':
-                                case 'N':
-                                    return name[3] == '.';  // PRN.
-                            }
-                            break;
-                    }
-                    break;
-                case 'n':
-                case 'N':
-                    switch (name[1])
-                    {
-                        case 'u':
-                        case 'U':
-                            switch (name[2])
-                            {
-                                case 'l':
-                                case 'L':
-                                    return name[3] == '.';  // NUL.
-                            }
-                            break;
-                    }
-                    break;
+                switch (name[0])
+                {
+                    case 'a':
+                    case 'A':
+                        switch (name[1])
+                        {
+                            case 'u':
+                            case 'U':
+                                switch (name[2])
+                                {
+                                    case 'x':
+                                    case 'X':
+                                        return name.Length == 3 || name[3] == '.';  // AUX.
+                                }
+                                break;
+                        }
+                        break;
+                    case 'c':
+                    case 'C':
+                        switch (name[1])
+                        {
+                            case 'o':
+                            case 'O':
+                                switch (name[2])
+                                {
+                                    case 'n':
+                                    case 'N':
+                                        return name.Length == 3 || name[3] == '.';  // CON.
+                                    case 'm':
+                                    case 'M':
+                                        return name.Length >= 4 && char.IsDigit(name[3]) && (name.Length == 4 || name[4] == '.'); // COM0 - COM9
+                                }
+                                break;
+                        }
+                        break;
+                    case 'l':
+                    case 'L':
+                        switch (name[1])
+                        {
+                            case 'p':
+                            case 'P':
+                                switch (name[2])
+                                {
+                                    case 't':
+                                    case 'T':
+                                        return name.Length >= 4 && char.IsDigit(name[3]) && (name.Length == 4 || name[4] == '.'); // LPT0 - LPT9
+                                }
+                                break;
+                        }
+                        break;
+                    case 'p':
+                    case 'P':
+                        switch (name[1])
+                        {
+                            case 'r':
+                            case 'R':
+                                switch (name[2])
+                                {
+                                    case 'n':
+                                    case 'N':
+                                        return name.Length == 3 || name[3] == '.';  // PRN.
+                                }
+                                break;
+                        }
+                        break;
+                    case 'n':
+                    case 'N':
+                        switch (name[1])
+                        {
+                            case 'u':
+                            case 'U':
+                                switch (name[2])
+                                {
+                                    case 'l':
+                                    case 'L':
+                                        return name.Length == 3 || name[3] == '.';  // NUL.
+                                }
+                                break;
+                        }
+                        break;
+                }
             }
             return false;
         }
