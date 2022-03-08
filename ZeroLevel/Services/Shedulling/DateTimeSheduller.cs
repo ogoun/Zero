@@ -44,7 +44,7 @@ namespace ZeroLevel.Services.Shedulling
             {
                 try
                 {
-                    result.Callback(result.Key);
+                    result.Callback.Invoke(result.Key);
                 }
                 catch (Exception ex)
                 {

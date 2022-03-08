@@ -586,7 +586,7 @@ namespace ZeroLevel.Services.Config
             if (string.IsNullOrWhiteSpace(line)) yield return StringToTypeConverter.TryConvert(line, elementType);
             foreach (var part in line.Split(','))
             {
-                if (part.IndexOf('-') >= 0)
+                if (TypeHelpers.IsNumericType(elementType) && part.IndexOf('-') >= 0)
                 {
                     var lr = part.Split('-');
                     if (lr.Length == 2)
