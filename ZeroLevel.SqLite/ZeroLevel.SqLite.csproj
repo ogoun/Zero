@@ -12,10 +12,10 @@ Based on System.Data.SQLite.Core</Description>
     <PackageIcon>zero.png</PackageIcon>
     <PackageIconUrl />
     <Platforms>AnyCPU;x64;x86</Platforms>
-    <PackageReleaseNotes>Fix bug</PackageReleaseNotes>
-    <AssemblyVersion>1.0.2.1</AssemblyVersion>
-    <FileVersion>1.0.2.1</FileVersion>
-    <Version>1.0.2.1</Version>
+    <PackageReleaseNotes>Move to new ZeroLevel version</PackageReleaseNotes>
+    <AssemblyVersion>1.0.3.0</AssemblyVersion>
+    <FileVersion>1.0.3.0</FileVersion>
+    <Version>1.0.3.0</Version>
     <OutputType>Library</OutputType>
   </PropertyGroup>
 
