@@ -5,6 +5,7 @@ using System.Threading;
 
 namespace ZeroLevel.Services.Pools
 {
+    /*
     public enum LoadingMode { Eager, Lazy, LazyExpanding };
 
     public enum AccessMode { FIFO, LIFO, Circular };
@@ -284,4 +285,5 @@ namespace ZeroLevel.Services.Pools
             get { return isDisposed; }
         }
     }
+    */
 }

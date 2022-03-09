@@ -1,16 +1,16 @@
-﻿using System;
+﻿using MemoryPools;
+using System;
 using System.Collections.Concurrent;
 using System.IO;
 using System.Threading;
 using ZeroLevel.Models;
-using ZeroLevel.Services.Pools;
 
 namespace ZeroLevel.Network.FileTransfer
 {
     public sealed class FileSender
     {
         private BlockingCollection<FileTransferTask> _tasks = new BlockingCollection<FileTransferTask>();
-        private Pool<FileTransferTask> _taskPool = new Pool<FileTransferTask>(100, (p) => new FileTransferTask());
+        private DefaultObjectPool<FileTransferTask> _taskPool = new DefaultObjectPool<FileTransferTask>(new DefaultPooledObjectPolicy<FileTransferTask>());
         private readonly Thread _uploadFileThread;
         private bool _resendWhenServerError = false;
         private bool _resendWhenClientError = false;
@@ -45,7 +45,7 @@ namespace ZeroLevel.Network.FileTransfer
             {
                 throw new FileNotFoundException(filePath);
             }
-            var task = _taskPool.Acquire();
+            var task = _taskPool.Get();
             task.CompletedHandler = completeHandler;
             task.ErrorHandler = errorHandler;
             task.FilePath = filePath;
@@ -69,7 +69,7 @@ namespace ZeroLevel.Network.FileTransfer
                 }
                 finally
                 {
-                    _taskPool.Release(task);
+                    _taskPool.Return(task);
                 }
             }
         }

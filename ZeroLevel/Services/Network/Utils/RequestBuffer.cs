@@ -1,18 +1,18 @@
-﻿using System;
+﻿using MemoryPools;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using ZeroLevel.Services.Pools;
 
 namespace ZeroLevel.Network
 {
     internal sealed class RequestBuffer
     {
         private ConcurrentDictionary<long, RequestInfo> _requests = new ConcurrentDictionary<long, RequestInfo>();
-        private static Pool<RequestInfo> _ri_pool = new Pool<RequestInfo>(128, (p) => new RequestInfo());
+        private static DefaultObjectPool<RequestInfo> _ri_pool = new DefaultObjectPool<RequestInfo>(new DefaultPooledObjectPolicy<RequestInfo>());
 
         public void RegisterForFrame(int identity, Action<byte[]> callback, Action<string> fail = null)
         {
-            var ri = _ri_pool.Acquire();
+            var ri = _ri_pool.Get();
             ri.Reset(callback, fail);
             _requests[identity] = ri;
         }
@@ -23,7 +23,7 @@ namespace ZeroLevel.Network
             if (_requests.TryRemove(frameId, out ri))
             {
                 ri.Fail(message);
-                _ri_pool.Release(ri);
+                _ri_pool.Return(ri);
             }
         }
 
@@ -33,7 +33,7 @@ namespace ZeroLevel.Network
             if (_requests.TryRemove(frameId, out ri))
             {
                 ri.Success(data);
-                _ri_pool.Release(ri);
+                _ri_pool.Return(ri);
             }
         }
 
@@ -53,7 +53,7 @@ namespace ZeroLevel.Network
             {
                 if (_requests.TryRemove(frameIds[i], out ri))
                 {
-                    _ri_pool.Release(ri);
+                    _ri_pool.Return(ri);
                 }
             }
         }

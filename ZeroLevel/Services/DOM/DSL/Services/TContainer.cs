@@ -83,8 +83,8 @@ namespace DOM.DSL.Services
 
         #endregion Private classes
 
-        private readonly TContainerFactory _factory;
-        private readonly TRender _render;
+        private TContainerFactory _factory;
+        private TRender _render;
 
         private object _current;
         public int Index { get; set; }
@@ -136,7 +136,9 @@ namespace DOM.DSL.Services
             }
         }
 
-        public TContainer(TContainerFactory factory, TRender render)
+        public TContainer() { }
+
+        public void Init(TContainerFactory factory, TRender render)
         {
             this._factory = factory;
             this._render = render;

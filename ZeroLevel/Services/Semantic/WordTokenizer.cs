@@ -1,18 +1,19 @@
 ﻿using System;
+using System.Buffers;
 using System.Collections.Generic;
-using ZeroLevel.Services.Pools;
 
 namespace ZeroLevel.Services.Semantic
 {
     public static class WordTokenizer
     {
-        static Pool<char[]> _pool = new Pool<char[]>(64 ,(p) => new char[2048]);
+        const int ARRAY_SIZE = 2048;
+        static ArrayPool<char> _pool = ArrayPool<char>.Create();
 
         public static IEnumerable<string> Tokenize(string text)
         {
             int index = 0;
             bool first = true;
-            var buffer = _pool.Acquire();
+            var buffer = _pool.Rent(ARRAY_SIZE);
             try
             {
                 for (int i = 0; i < text?.Length; i++)
@@ -40,7 +41,7 @@ namespace ZeroLevel.Services.Semantic
             }
             finally
             {
-                _pool.Release(buffer);
+                _pool.Return(buffer);
             }
         }
     }

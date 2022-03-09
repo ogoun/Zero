@@ -11,6 +11,8 @@ namespace ZeroLevel.Network
         private bool _sended;
         public bool Sended { get { return _sended; } }
 
+        public RequestInfo() { }
+
         public void Reset(Action<byte[]> handler, Action<string> failHandler)
         {
             _sended = false;

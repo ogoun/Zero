@@ -1,24 +1,26 @@
-﻿using System.Threading;
-using ZeroLevel.Services.Pools;
+﻿using MemoryPools;
+using System.Threading;
 
 namespace DOM.DSL.Services
 {
     public class TContainerFactory
     {
-        private readonly Pool<TContainer> _pool;
-
+        private readonly DefaultObjectPool<TContainer> _pool;
+        private readonly TRender _render;
         private static int _get_count = 0;
         private static int _release_count = 0;
 
         internal TContainerFactory(TRender render)
         {
-            _pool = new Pool<TContainer>(64, p => new TContainer(this, render));
+            _render = render;
+            _pool = new DefaultObjectPool<TContainer>(new DefaultPooledObjectPolicy<TContainer>());
         }
 
         internal TContainer Get(object value)
         {
             Interlocked.Increment(ref _get_count);
-            var c = _pool.Acquire();
+            var c = _pool.Get();
+            c.Init(this, _render);
             c.Reset(value);
             return c;
         }
@@ -26,7 +28,8 @@ namespace DOM.DSL.Services
         internal TContainer Get(object value, int index)
         {
             Interlocked.Increment(ref _get_count);
-            var c = _pool.Acquire();
+            var c = _pool.Get();
+            c.Init(this, _render);
             c.Reset(value);
             c.Index = index;
             return c;
@@ -37,7 +40,7 @@ namespace DOM.DSL.Services
             if (container != null)
             {
                 Interlocked.Increment(ref _release_count);
-                _pool.Release(container);
+                _pool.Return(container);
             }
         }
 
