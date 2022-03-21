@@ -1,0 +1,75 @@
+﻿public static void DrawTSNE(Dictionary<int, int> cluster_map, List<FaceEmbedding> faces)
+        {
+            double[][] t_snefit_vectors = faces.Select(f => f.Vector.Select(e => (double)e).ToArray()).ToArray();
+            TSNE tSNE = new TSNE()
+            {
+                NumberOfOutputs = 2,
+                Perplexity = 100
+            };
+            // Transform to a reduced dimensionality space
+            var embeddings = tSNE.Transform(t_snefit_vectors);
+            var xmin = double.MaxValue;
+            var xmax = double.MinValue;
+            var ymin = double.MaxValue;
+            var ymax = double.MinValue;
+            for (int i = 0; i < embeddings.Length; i++)
+            {
+                var lxmin = embeddings[i][0];
+                var lxmax = embeddings[i][0];
+                if (lxmin < xmin)
+                    xmin = lxmin;
+                if (lxmax > xmax)
+                    xmax = lxmax;
+
+                var lymin = embeddings[i][1];
+                var lymax = embeddings[i][1];
+                if (lymin < ymin)
+                    ymin = lymin;
+                if (lymax > ymax)
+                    ymax = lymax;
+            }
+
+            var norm_x_scale = 1.0f / (xmax - xmin);
+            var norm_y_scale = 1.0f / (xmax - xmin);
+            var xdiff = 0 - xmin;
+            var ydiff = 0 - ymin;
+            var centerx = (xmin + xmax) / 2.0f + xdiff;
+            var centery = (ymin + ymax) / 2.0f + ydiff;
+
+            var width = 2560;
+            var height = 1440;
+
+            var rnd = new Random((int)Environment.TickCount);
+
+            var clusterIds = cluster_map.Values.Distinct().ToArray();
+            var cluster_colors = new Dictionary<int, Color>();
+            foreach (var cid in clusterIds)
+            {
+                var color = Color.FromRgb((byte)rnd.Next(0, 255), (byte)rnd.Next(0, 255), (byte)rnd.Next(0, 255));
+                cluster_colors[cid] = color;
+            }
+
+            using (var image = new Image<Rgb24>(width, height))
+            {
+                for (int i = 0; i < embeddings.Length; i++)
+                {
+                    var cluster = cluster_map[i];
+                    var color = cluster_colors[cluster];
+
+                    var x = (int)((embeddings[i][0] + xdiff + centerx) * norm_x_scale * width) - width / 2;
+                    var y = (int)((embeddings[i][1] + ydiff + centery) * norm_y_scale * height) - height / 2;
+                    image.Mutate(im => im.DrawLines(
+                        color,
+                        4,
+                        new PointF[] {
+                                        new PointF(x - 1, y - 1),
+                                        new PointF(x + 1, y - 1),
+                                        new PointF(x + 1, y + 1),
+                                        new PointF(x - 1, y + 1),
+                                        new PointF(x - 1, y - 1)
+                            }
+                        ));
+                }
+                image.SaveAsJpeg(@"G:\FaceTest\tsne.jpeg");
+            }
+        }

@@ -1,10 +1,80 @@
 ﻿using System;
-using System.Linq;
 
-namespace ZeroLevel.HNSW
+namespace ZeroLevel.Services.Mathemathics
 {
+    public enum KnownMetrics
+    {
+        Cosine, Manhattanm, Euclide, Chebyshev
+    }
+
+
     public static class Metrics
     {
+        public static Func<float[], float[], double> CreateFloat(KnownMetrics metric)
+        {
+            switch (metric)
+            {
+                case KnownMetrics.Euclide:
+                    return new Func<float[], float[], double>((u, v) => L2EuclideanDistance(u, v));
+                case KnownMetrics.Cosine:
+                    return new Func<float[], float[], double>((u, v) => CosineDistance(u, v));
+                case KnownMetrics.Chebyshev:
+                    return new Func<float[], float[], double>((u, v) => ChebyshevDistance(u, v));
+                case KnownMetrics.Manhattanm:
+                    return new Func<float[], float[], double>((u, v) => L1ManhattanDistance(u, v));
+            }
+            throw new Exception($"Metric '{metric.ToString()}' not supported for Float type");
+        }
+
+        public static Func<byte[], byte[], double> CreateByte(KnownMetrics metric)
+        {
+            switch (metric)
+            {
+                case KnownMetrics.Euclide:
+                    return new Func<byte[], byte[], double>((u, v) => L2EuclideanDistance(u, v));
+                case KnownMetrics.Cosine:
+                    return new Func<byte[], byte[], double>((u, v) => CosineDistance(u, v));
+                case KnownMetrics.Chebyshev:
+                    return new Func<byte[], byte[], double>((u, v) => ChebyshevDistance(u, v));
+                case KnownMetrics.Manhattanm:
+                    return new Func<byte[], byte[], double>((u, v) => L1ManhattanDistance
+                    (u, v));
+            }
+            throw new Exception($"Metric '{metric.ToString()}' not supported for Byte type");
+        }
+
+        public static Func<long[], long[], double> CreateLong(KnownMetrics metric)
+        {
+            switch (metric)
+            {
+                case KnownMetrics.Euclide:
+                    return new Func<long[], long[], double>((u, v) => L2EuclideanDistance(u, v));
+                case KnownMetrics.Cosine:
+                    return new Func<long[], long[], double>((u, v) => CosineDistance(u, v));
+                case KnownMetrics.Chebyshev:
+                    return new Func<long[], long[], double>((u, v) => ChebyshevDistance(u, v));
+                case KnownMetrics.Manhattanm:
+                    return new Func<long[], long[], double>((u, v) => L1ManhattanDistance(u, v));
+            }
+            throw new Exception($"Metric '{metric.ToString()}' not supported for Long type");
+        }
+
+        public static Func<int[], int[], double> CreateInt(KnownMetrics metric)
+        {
+            switch (metric)
+            {
+                case KnownMetrics.Euclide:
+                    return new Func<int[], int[], double>((u, v) => L2EuclideanDistance(u, v));
+                case KnownMetrics.Cosine:
+                    return new Func<int[], int[], double>((u, v) => CosineDistance(u, v));
+                case KnownMetrics.Chebyshev:
+                    return new Func<int[], int[], double>((u, v) => ChebyshevDistance(u, v));
+                case KnownMetrics.Manhattanm:
+                    return new Func<int[], int[], double>((u, v) => L1ManhattanDistance(u, v));
+            }
+            throw new Exception($"Metric '{metric.ToString()}' not supported for Int type");
+        }
+
         /// <summary>
         /// The taxicab metric is also known as rectilinear distance, 
         /// L1 distance or L1 norm, city block distance, Manhattan distance, 
@@ -12,7 +82,7 @@ namespace ZeroLevel.HNSW
         /// It represents the distance between points in a city road grid. 
         /// It examines the absolute differences between the coordinates of a pair of objects.
         /// </summary>
-        public static float L1Manhattan(float[] v1, float[] v2)
+        public static float L1ManhattanDistance(float[] v1, float[] v2)
         {
             float res = 0;
             for (int i = 0; i < v1.Length; i++)
@@ -23,7 +93,7 @@ namespace ZeroLevel.HNSW
             return (res);
         }
 
-        public static float L1Manhattan(byte[] v1, byte[] v2)
+        public static float L1ManhattanDistance(byte[] v1, byte[] v2)
         {
             float res = 0;
             for (int i = 0; i < v1.Length; i++)
@@ -34,7 +104,7 @@ namespace ZeroLevel.HNSW
             return (res);
         }
 
-        public static float L1Manhattan(int[] v1, int[] v2)
+        public static float L1ManhattanDistance(int[] v1, int[] v2)
         {
             float res = 0;
             for (int i = 0; i < v1.Length; i++)
@@ -45,7 +115,7 @@ namespace ZeroLevel.HNSW
             return (res);
         }
 
-        public static float L1Manhattan(long[] v1, long[] v2)
+        public static float L1ManhattanDistance(long[] v1, long[] v2)
         {
             float res = 0;
             for (int i = 0; i < v1.Length; i++)
@@ -62,7 +132,7 @@ namespace ZeroLevel.HNSW
         /// examines the root of square differences between the coordinates of a pair of objects. 
         /// This is most generally known as the Pythagorean theorem.
         /// </summary>
-        public static float L2Euclidean(float[] v1, float[] v2)
+        public static float L2EuclideanDistance(float[] v1, float[] v2)
         {
             float res = 0;
             for (int i = 0; i < v1.Length; i++)
@@ -73,7 +143,7 @@ namespace ZeroLevel.HNSW
             return (float)Math.Sqrt(res);
         }
 
-        public static float L2Euclidean(byte[] v1, byte[] v2)
+        public static float L2EuclideanDistance(byte[] v1, byte[] v2)
         {
             float res = 0;
             for (int i = 0; i < v1.Length; i++)
@@ -84,7 +154,7 @@ namespace ZeroLevel.HNSW
             return (float)Math.Sqrt(res);
         }
 
-        public static float L2Euclidean(int[] v1, int[] v2)
+        public static float L2EuclideanDistance(int[] v1, int[] v2)
         {
             float res = 0;
             for (int i = 0; i < v1.Length; i++)
@@ -95,7 +165,7 @@ namespace ZeroLevel.HNSW
             return (float)Math.Sqrt(res);
         }
 
-        public static float L2Euclidean(long[] v1, long[] v2)
+        public static float L2EuclideanDistance(long[] v1, long[] v2)
         {
             float res = 0;
             for (int i = 0; i < v1.Length; i++)
@@ -228,7 +298,7 @@ namespace ZeroLevel.HNSW
             return max;
         }
 
-        public static float Cosine(float[] u, float[] v)
+        public static float CosineDistance(float[] u, float[] v)
         {
             if (u.Length != v.Length)
             {
@@ -249,7 +319,7 @@ namespace ZeroLevel.HNSW
             return 1 - similarity;
         }
 
-        public static float Cosine(byte[] u, byte[] v)
+        public static float CosineDistance(byte[] u, byte[] v)
         {
             if (u.Length != v.Length)
             {
@@ -270,7 +340,7 @@ namespace ZeroLevel.HNSW
             return 1 - similarity;
         }
 
-        public static float Cosine(int[] u, int[] v)
+        public static float CosineDistance(int[] u, int[] v)
         {
             if (u.Length != v.Length)
             {
@@ -309,7 +379,7 @@ namespace ZeroLevel.HNSW
             return 1 - similarity;
         }
 
-        public static float Cosine(long[] u, long[] v)
+        public static float CosineDistance(long[] u, long[] v)
         {
             if (u.Length != v.Length)
             {
@@ -362,6 +432,14 @@ namespace ZeroLevel.HNSW
 
             var similarity = dot / (float)(Math.Sqrt(nru) * Math.Sqrt(nrv));
             return 1 - similarity;
+        }
+
+        public static float CosineClipped(float[] u, float[] v, float min, float max)
+        {
+            var similarity = CosineDistance(u, v);
+            if (min > similarity) similarity = min;
+            if (max < similarity) similarity = max;
+            return similarity;
         }
     }
 }
