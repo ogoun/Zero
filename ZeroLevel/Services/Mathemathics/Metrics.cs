@@ -4,7 +4,7 @@ namespace ZeroLevel.Services.Mathemathics
 {
     public enum KnownMetrics
     {
-        Cosine, Manhattanm, Euclide, Chebyshev
+        Cosine, Manhattanm, Euclide, Chebyshev, DotProduct
     }
 
 
@@ -22,6 +22,8 @@ namespace ZeroLevel.Services.Mathemathics
                     return new Func<float[], float[], double>((u, v) => ChebyshevDistance(u, v));
                 case KnownMetrics.Manhattanm:
                     return new Func<float[], float[], double>((u, v) => L1ManhattanDistance(u, v));
+                case KnownMetrics.DotProduct:
+                    return new Func<float[], float[], double>((u, v) => DotProductDistance(u, v));
             }
             throw new Exception($"Metric '{metric.ToString()}' not supported for Float type");
         }
@@ -37,8 +39,9 @@ namespace ZeroLevel.Services.Mathemathics
                 case KnownMetrics.Chebyshev:
                     return new Func<byte[], byte[], double>((u, v) => ChebyshevDistance(u, v));
                 case KnownMetrics.Manhattanm:
-                    return new Func<byte[], byte[], double>((u, v) => L1ManhattanDistance
-                    (u, v));
+                    return new Func<byte[], byte[], double>((u, v) => L1ManhattanDistance(u, v));
+                case KnownMetrics.DotProduct:
+                    return new Func<byte[], byte[], double>((u, v) => DotProductDistance(u, v));
             }
             throw new Exception($"Metric '{metric.ToString()}' not supported for Byte type");
         }
@@ -55,6 +58,8 @@ namespace ZeroLevel.Services.Mathemathics
                     return new Func<long[], long[], double>((u, v) => ChebyshevDistance(u, v));
                 case KnownMetrics.Manhattanm:
                     return new Func<long[], long[], double>((u, v) => L1ManhattanDistance(u, v));
+                case KnownMetrics.DotProduct:
+                    return new Func<long[], long[], double>((u, v) => DotProductDistance(u, v));
             }
             throw new Exception($"Metric '{metric.ToString()}' not supported for Long type");
         }
@@ -71,6 +76,8 @@ namespace ZeroLevel.Services.Mathemathics
                     return new Func<int[], int[], double>((u, v) => ChebyshevDistance(u, v));
                 case KnownMetrics.Manhattanm:
                     return new Func<int[], int[], double>((u, v) => L1ManhattanDistance(u, v));
+                case KnownMetrics.DotProduct:
+                    return new Func<int[], int[], double>((u, v) => DotProductDistance(u, v));
             }
             throw new Exception($"Metric '{metric.ToString()}' not supported for Int type");
         }
@@ -434,12 +441,44 @@ namespace ZeroLevel.Services.Mathemathics
             return 1 - similarity;
         }
 
-        public static float CosineClipped(float[] u, float[] v, float min, float max)
+        public static double DotProductDistance(float[] e1, float[] e2)
         {
-            var similarity = CosineDistance(u, v);
-            if (min > similarity) similarity = min;
-            if (max < similarity) similarity = max;
-            return similarity;
+            var sim = 0f;
+            for (int i = 0; i < e1.Length; i++)
+            {
+                sim += e1[i] * e2[i];
+            }
+            return sim;
+        }
+
+        public static double DotProductDistance(byte[] e1, byte[] e2)
+        {
+            var sim = 0f;
+            for (int i = 0; i < e1.Length; i++)
+            {
+                sim += e1[i] * e2[i];
+            }
+            return sim;
+        }
+
+        public static double DotProductDistance(int[] e1, int[] e2)
+        {
+            var sim = 0f;
+            for (int i = 0; i < e1.Length; i++)
+            {
+                sim += e1[i] * e2[i];
+            }
+            return sim;
+        }
+
+        public static double DotProductDistance(long[] e1, long[] e2)
+        {
+            var sim = 0f;
+            for (int i = 0; i < e1.Length; i++)
+            {
+                sim += e1[i] * e2[i];
+            }
+            return sim;
         }
     }
 }

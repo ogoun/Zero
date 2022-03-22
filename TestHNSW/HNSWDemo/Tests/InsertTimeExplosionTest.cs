@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using ZeroLevel.HNSW;
+using ZeroLevel.Services.Mathemathics;
 
 namespace HNSWDemo.Tests
 {
@@ -14,7 +15,7 @@ namespace HNSWDemo.Tests
         public void Run()
         {
             var sw = new Stopwatch();
-            var world = new SmallWorld<float[]>(NSWOptions<float[]>.Create(6, 12, 100, 100, Metrics.Cosine));
+            var world = new SmallWorld<float[]>(NSWOptions<float[]>.Create(6, 12, 100, 100, Metrics.CosineDistance));
             for (int i = 0; i < IterationCount; i++)
             {
                 var samples = VectorUtils.RandomVectors(Dimensionality, Count);

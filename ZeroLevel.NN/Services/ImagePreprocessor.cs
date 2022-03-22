@@ -8,8 +8,6 @@ namespace ZeroLevel.NN
 {
     public static class ImagePreprocessor
     {
-        private const float NORMALIZATION_SCALE = 1f / 255f;
-
         private static Func<byte, int, float> PixelToTensorMethod(ImagePreprocessorOptions options)
         {
             if (options.Normalize)
@@ -18,16 +16,16 @@ namespace ZeroLevel.NN
                 {
                     if (options.CorrectionFunc == null)
                     {
-                        return new Func<byte, int, float>((b, i) => ((NORMALIZATION_SCALE * (float)b) - options.Mean[i]) / options.Std[i]);
+                        return new Func<byte, int, float>((b, i) => ((options.NormalizationMultiplier * (float)b) - options.Mean[i]) / options.Std[i]);
                     }
                     else
                     {
-                        return new Func<byte, int, float>((b, i) => options.CorrectionFunc.Invoke(i, NORMALIZATION_SCALE * (float)b));
+                        return new Func<byte, int, float>((b, i) => options.CorrectionFunc.Invoke(i, options.NormalizationMultiplier * (float)b));
                     }
                 }
                 else
                 {
-                    return new Func<byte, int, float>((b, i) => NORMALIZATION_SCALE * (float)b);
+                    return new Func<byte, int, float>((b, i) => options.NormalizationMultiplier * (float)b);
                 }
             }
             else if (options.Correction)
@@ -58,6 +56,7 @@ namespace ZeroLevel.NN
             }
             return count;
         }
+
         private static void FillTensor(Tensor<float> tensor, Image image, int index, ImagePreprocessorOptions options, Func<byte, int, float> pixToTensor)
         {
             var append = options.ChannelType == PredictorChannelType.ChannelFirst

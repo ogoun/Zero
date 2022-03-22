@@ -99,7 +99,11 @@ namespace ZeroLevel
             if (ReferenceEquals(first, second))
                 return true;
             if (first.Length != second.Length) return false;
-            return Array.Equals(first, second);
+            for (int i = 0; i < first.Length; i++)
+            {
+                if (first[i] != second[i]) return false;
+            }
+            return true;
         }
     }
 }

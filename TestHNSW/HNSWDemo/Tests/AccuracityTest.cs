@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using ZeroLevel.HNSW;
+using ZeroLevel.Services.Mathemathics;
 
 namespace HNSWDemo.Tests
 {
@@ -25,8 +26,8 @@ namespace HNSWDemo.Tests
 
             var sw = new Stopwatch();
 
-            var test = new VectorsDirectCompare(samples, Metrics.Cosine);
-            var world = new SmallWorld<float[]>(NSWOptions<float[]>.Create(8, 12, 100, 100, Metrics.Cosine));
+            var test = new VectorsDirectCompare(samples, Metrics.CosineDistance);
+            var world = new SmallWorld<float[]>(NSWOptions<float[]>.Create(8, 12, 100, 100, Metrics.CosineDistance));
 
             sw.Start();
             var ids = world.AddItems(samples.ToArray());

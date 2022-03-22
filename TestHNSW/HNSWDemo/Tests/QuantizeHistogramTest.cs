@@ -3,6 +3,7 @@ using System.Drawing;
 using System.Linq;
 using ZeroLevel.HNSW;
 using ZeroLevel.HNSW.Services;
+using ZeroLevel.Services.Mathemathics;
 
 namespace HNSWDemo.Tests
 {
@@ -18,10 +19,10 @@ namespace HNSWDemo.Tests
         {
             var vectors = VectorUtils.RandomVectors(Dimensionality, Count);
             var q = new Quantizator(-1f, 1f);
-            var world = SmallWorld.CreateWorld<long[]>(NSWOptions<long[]>.Create(8, 16, 200, 200, Metrics.Cosine));
+            var world = SmallWorld.CreateWorld<long[]>(NSWOptions<long[]>.Create(8, 16, 200, 200, Metrics.CosineDistance));
             world.AddItems(vectors.Select(v => q.QuantizeToLong(v)).ToList());
 
-            var distance = new Func<int, int, float>((id1, id2) => Metrics.Cosine(world.GetVector(id1), world.GetVector(id2)));
+            var distance = new Func<int, int, float>((id1, id2) => Metrics.CosineDistance(world.GetVector(id1), world.GetVector(id2)));
             var weights = world.GetLinks().SelectMany(pair => pair.Value.Select(id => distance(pair.Key, id)));
             var histogram = new Histogram(HistogramMode.SQRT, weights);
             histogram.Smooth();

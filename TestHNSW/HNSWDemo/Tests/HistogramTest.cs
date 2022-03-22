@@ -3,6 +3,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using ZeroLevel.HNSW;
+using ZeroLevel.Services.Mathemathics;
 
 namespace HNSWDemo.Tests
 {
@@ -28,10 +29,10 @@ namespace HNSWDemo.Tests
         private void Create(int dim, string output)
         {
             var vectors = VectorUtils.RandomVectors(dim, Count);
-            var world = SmallWorld.CreateWorld<float[]>(NSWOptions<float[]>.Create(8, 16, 200, 200, Metrics.L2Euclidean));
+            var world = SmallWorld.CreateWorld<float[]>(NSWOptions<float[]>.Create(8, 16, 200, 200, Metrics.L2EuclideanDistance));
             world.AddItems(vectors);
 
-            var distance = new Func<int, int, float>((id1, id2) => Metrics.L2Euclidean(world.GetVector(id1), world.GetVector(id2)));
+            var distance = new Func<int, int, float>((id1, id2) => Metrics.L2EuclideanDistance(world.GetVector(id1), world.GetVector(id2)));
             var weights = world.GetLinks().SelectMany(pair => pair.Value.Select(id => distance(pair.Key, id)));
             var histogram = new Histogram(HistogramMode.SQRT, weights);
             histogram.Smooth();

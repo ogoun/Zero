@@ -1,6 +1,7 @@
 ﻿using System;
 using ZeroLevel.HNSW;
 using ZeroLevel.HNSW.Services;
+using ZeroLevel.Services.Mathemathics;
 
 namespace HNSWDemo.Tests
 {
@@ -13,7 +14,7 @@ namespace HNSWDemo.Tests
         public void Run()
         {
             var vectors = VectorUtils.RandomVectors(Dimensionality, Count);
-            var world = SmallWorld.CreateWorld<float[]>(NSWOptions<float[]>.Create(8, 16, 200, 200, Metrics.L2Euclidean));
+            var world = SmallWorld.CreateWorld<float[]>(NSWOptions<float[]>.Create(8, 16, 200, 200, Metrics.L2EuclideanDistance));
             world.AddItems(vectors);
             var clusters = AutomaticGraphClusterer.DetectClusters(world);
             Console.WriteLine($"Found {clusters.Count} clusters");

@@ -2,6 +2,7 @@
 {
     public class ImagePreprocessorOptions
     {
+        private const float PIXEL_NORMALIZATION_SCALE = 1f / 255f;
         public ImagePreprocessorOptions(int inputWidth, int inputHeight, PredictorChannelType channelType)
         {
             this.InputWidth = inputWidth;
@@ -19,8 +20,12 @@
             return this;
         }
 
-        public ImagePreprocessorOptions ApplyNormilization()
+        public ImagePreprocessorOptions ApplyNormilization(float? multiplier = null)
         {
+            if (multiplier.HasValue)
+            {
+                NormalizationMultiplier = multiplier.Value;
+            }
             this.Normalize = true;
             return this;
         }
@@ -60,6 +65,8 @@
             return this;
         }
 
+
+        public float NormalizationMultiplier { get; private set; } = PIXEL_NORMALIZATION_SCALE;
         /// <summary>
         /// Channel type, if first tensor dims = [batch_index, channel, x, y], if last, dims = dims = [batch_index, x, y, channel]
         /// </summary>

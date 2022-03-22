@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using ZeroLevel.HNSW;
 using ZeroLevel.HNSW.Services;
+using ZeroLevel.Services.Mathemathics;
 
 namespace HNSWDemo.Tests
 {
@@ -26,11 +27,11 @@ namespace HNSWDemo.Tests
             {
                 var v1 = samples[i];
                 var v2 = samples[i + 1];
-                var dist = Metrics.Cosine(v1, v2);
+                var dist = Metrics.CosineDistance(v1, v2);
 
                 var qv1 = q_samples[i];
                 var qv2 = q_samples[i + 1];
-                var qdist = Metrics.Cosine(qv1, qv2);
+                var qdist = Metrics.CosineDistance(qv1, qv2);
 
                 list.Add(Math.Abs(dist - qdist));
             }

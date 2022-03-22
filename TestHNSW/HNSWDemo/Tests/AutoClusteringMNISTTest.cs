@@ -8,6 +8,7 @@ using System.Runtime.InteropServices;
 using ZeroLevel.HNSW;
 using ZeroLevel.HNSW.Services;
 using ZeroLevel.Services.FileSystem;
+using ZeroLevel.Services.Mathemathics;
 
 namespace HNSWDemo.Tests
 {
@@ -58,7 +59,7 @@ namespace HNSWDemo.Tests
                     vectors.Add(v);
                 }
             }
-            var options = NSWOptions<byte[]>.Create(8, 16, 200, 200, Metrics.L2Euclidean);
+            var options = NSWOptions<byte[]>.Create(8, 16, 200, 200, Metrics.L2EuclideanDistance);
             SmallWorld<byte[]> world;
             if (File.Exists("graph_mnist.bin"))
             {
@@ -77,7 +78,7 @@ namespace HNSWDemo.Tests
                 }
             }
 
-            var distance = new Func<int, int, float>((id1, id2) => Metrics.L2Euclidean(world.GetVector(id1), world.GetVector(id2)));
+            var distance = new Func<int, int, float>((id1, id2) => Metrics.L2EuclideanDistance(world.GetVector(id1), world.GetVector(id2)));
             var links = world.GetLinks().SelectMany(pair => pair.Value.Select(p=> distance(pair.Key, p))).ToList();
             var exists = links.Where(n => n > 0).ToArray();
             

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using ZeroLevel.HNSW;
+using ZeroLevel.Services.Mathemathics;
 
 namespace HNSWDemo.Tests
 {
@@ -20,7 +21,7 @@ namespace HNSWDemo.Tests
             var moda = 3;
             var persons = Person.GenerateRandom(dimensionality, count);
             var samples = new Dictionary<int, List<(float[], Person)>>();
-            var options = NSWOptions<float[]>.Create(6, 8, 100, 100, Metrics.Cosine);
+            var options = NSWOptions<float[]>.Create(6, 8, 100, 100, Metrics.CosineDistance);
 
             foreach (var p in persons)
             {
