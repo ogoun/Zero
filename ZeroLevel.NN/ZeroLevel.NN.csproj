@@ -3,14 +3,36 @@
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
+    <Nullable>disable</Nullable>
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+    <DebugType>embedded</DebugType>
+    <ErrorReport>none</ErrorReport>
+    <Version>1.0.0.0</Version>
+    <Company>Ogoun</Company>
+    <Authors>Ogoun</Authors>
+    <Copyright>Copyright Ogoun 2022</Copyright>
+    <PackageIcon>zero.png</PackageIcon>
+    <PackageProjectUrl>https://github.com/ogoun/Zero/wiki</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/ogoun/Zero</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
   </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <Optimize>False</Optimize>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\zero.png">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Aurigma.GraphicsMill.Core.x64" Version="10.5.308" />
     <PackageReference Include="Microsoft.ML.OnnxRuntime" Version="1.10.0" />
     <PackageReference Include="Microsoft.ML.OnnxRuntime.Managed" Version="1.10.0" />
-    <PackageReference Include="SixLabors.ImageSharp" Version="2.0.0" />
+    <PackageReference Include="SixLabors.ImageSharp" Version="2.1.0" />
   </ItemGroup>
 
   <ItemGroup>

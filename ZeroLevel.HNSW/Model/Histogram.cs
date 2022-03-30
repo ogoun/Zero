@@ -211,65 +211,68 @@ For I=Maxes[0] to Maxes[1]
 
         public int CuttOff()
         {
-            var grad = new int[Values.Length];
-            grad[0] = 0;
-            grad[1] = 0;
-            for (int k = 2; k < Values.Length; k++)
+            if (Values.Length > 1)
             {
-                grad[k - 1] = Values[k] - Values[k - 1];
-            }
-            var modes = 0;
-            var window = 0;
-            var sign = 1;
-            var sum = 0;
-            var max = 0;
-            var maxInd = 0;
-            var maxes = new List<int>();
-            do
-            {
-                maxes.Clear();
-                window++;
-                modes = 0;
-                sum = 0;
-                for (int i = 0; i < grad.Length; i += window)
+                var grad = new int[Values.Length];
+                grad[0] = 0;
+                grad[1] = 0;
+                for (int k = 2; k < Values.Length; k++)
                 {
-                    sum = grad[i];
-                    max = Values[i];
-                    maxInd = i;
-                    for (var w = 1; w < window && (i + w) < grad.Length; w++)
+                    grad[k - 1] = Values[k] - Values[k - 1];
+                }
+                var modes = 0;
+                var window = 0;
+                var sign = 1;
+                var sum = 0;
+                var max = 0;
+                var maxInd = 0;
+                var maxes = new List<int>();
+                do
+                {
+                    maxes.Clear();
+                    window++;
+                    modes = 0;
+                    sum = 0;
+                    for (int i = 0; i < grad.Length; i += window)
                     {
-                        sum += grad[i + w];
-                        if (Values[i + w] > max)
+                        sum = grad[i];
+                        max = Values[i];
+                        maxInd = i;
+                        for (var w = 1; w < window && (i + w) < grad.Length; w++)
                         {
-                            max = Values[i + w];
-                            maxInd = i + w;
+                            sum += grad[i + w];
+                            if (Values[i + w] > max)
+                            {
+                                max = Values[i + w];
+                                maxInd = i + w;
+                            }
+                        }
+                        if (sum > 0 && sign < 0)
+                        {
+                            sign = 1;
+                        }
+                        else if (sum < 0 && sign > 0)
+                        {
+                            modes++;
+                            maxes.Add(maxInd);
+                            sign = -1;
                         }
                     }
-                    if (sum > 0 && sign < 0)
-                    {
-                        sign = 1;
-                    }
-                    else if (sum < 0 && sign > 0)
-                    {
-                        modes++;
-                        maxes.Add(maxInd);
-                        sign = -1;
-                    }
-                }
-            } while (modes > 2);
-            if (modes == 2)
-            {
-                var cutoff = maxes[0];
-                var min = Values[cutoff];
-                for (int i = maxes[0] + 1; i < maxes[1]; i++)
+                } while (modes > 2);
+                if (modes == 2)
                 {
-                    if (Values[i] < min)
+                    var cutoff = maxes[0];
+                    var min = Values[cutoff];
+                    for (int i = maxes[0] + 1; i < maxes[1]; i++)
                     {
-                        cutoff = i;
-                        min = Values[i];
+                        if (Values[i] < min)
+                        {
+                            cutoff = i;
+                            min = Values[i];
+                        }
                     }
+                    return cutoff;
                 }
-                return cutoff;
             }
             return -1;
         }

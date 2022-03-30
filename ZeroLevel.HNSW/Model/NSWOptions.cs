@@ -5,7 +5,7 @@ namespace ZeroLevel.HNSW
     public sealed class NSWOptions<TItem>
     {
         /// <summary>
-        /// Mox node connections on Layer
+        /// Max node connections on Layer
         /// </summary>
         public readonly int M;
         /// <summary>

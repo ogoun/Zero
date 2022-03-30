@@ -11,9 +11,26 @@ namespace ZeroLevel.NN
     {
         private readonly InferenceSession _session;
 
-        public SSDNN(string path)
+        public SSDNN(string modelPath, bool gpu = false)
         {
-            _session = new InferenceSession(path);
+            if (gpu)
+            {
+                try
+                {
+                    var so = SessionOptions.MakeSessionOptionWithCudaProvider(0);
+                    so.GraphOptimizationLevel = GraphOptimizationLevel.ORT_ENABLE_ALL;
+                    _session = new InferenceSession(modelPath, so);
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex, "Fault create InferenceSession with CUDA");
+                    _session = new InferenceSession(modelPath);
+                }
+            }
+            else
+            {
+                _session = new InferenceSession(modelPath);
+            }
         }
 
         protected void Extract(IDictionary<string, Tensor<float>> input, Action<IDictionary<string, Tensor<float>>> inputHandler)

@@ -81,10 +81,10 @@ namespace ZeroLevel.HNSW
         }
         public void Deserialize(IBinaryReader reader)
         {
-            if (reader.ReadBoolean() != false)
+            /*if (reader.ReadBoolean() != false)
             {
                 throw new InvalidOperationException("Incompatible format");
-            }
+            }*/
             _set.Clear();
             _set = null;
             var count = reader.ReadInt32();
