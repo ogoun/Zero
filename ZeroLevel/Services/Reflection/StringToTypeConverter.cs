@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Globalization;
 
 namespace ZeroLevel.Services.Reflection
 {
@@ -14,6 +15,12 @@ namespace ZeroLevel.Services.Reflection
         {
             try
             {
+                if (TypeHelpers.IsNumericTypeWithFloating(to))
+                {
+                    input = input.
+                        Replace(",", CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator).
+                        Replace(".", CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator);
+                }
                 return TypeDescriptor.GetConverter(to).ConvertFromString(input);
             }
             catch

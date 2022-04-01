@@ -73,5 +73,27 @@ namespace ZeroLevel.UnitTests
             Assert.Equal("System", config.Service.ServiceGroup);
             Assert.Equal("service", config.Service.ServiceType);
         }
+        
+        [Fact]
+        public void NumbersTest()
+        {
+            // Arrange
+            var set = Configuration.CreateSet();
+            var d = 0.27;
+            var f = 0.5f;
+            var i = 12;
+
+            // Act
+            set.Default.Append("d", "0.27");
+            set.Default.Append("f", "0.5");
+            set.Default.Append("i", "12");
+
+            var td = set.Default.First<double>("d");
+
+            // Assert
+            Assert.Equal(d, td);
+            Assert.Equal(f, set.Default.First<float>("f"));
+            Assert.Equal(i, set.Default.First<int>("i"));
+        }
     }
 }

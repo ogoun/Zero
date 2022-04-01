@@ -2707,6 +2707,7 @@ namespace DOM.DSL.Services
         private static object ConvertTo(string line, Type type)
         {
             return StringToTypeConverter.TryConvert(line, type);
+
         }
 
         #endregion Conditions

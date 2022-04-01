@@ -49,6 +49,19 @@ namespace ZeroLevel.Services.Reflection
             }
         }
 
+        public static bool IsNumericTypeWithFloating(Type type)
+        {
+            switch (Type.GetTypeCode(type))
+            {
+                case TypeCode.Decimal:
+                case TypeCode.Double:
+                case TypeCode.Single:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
         public static bool IsEnum(Type type)
         {
             return type.Return(t => t.IsEnum, false);

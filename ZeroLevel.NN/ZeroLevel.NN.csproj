@@ -7,7 +7,7 @@
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
     <DebugType>embedded</DebugType>
     <ErrorReport>none</ErrorReport>
-    <Version>1.0.0.0</Version>
+    <Version>1.0.0.1</Version>
     <Company>Ogoun</Company>
     <Authors>Ogoun</Authors>
     <Copyright>Copyright Ogoun 2022</Copyright>
@@ -15,6 +15,7 @@
     <PackageProjectUrl>https://github.com/ogoun/Zero/wiki</PackageProjectUrl>
     <RepositoryUrl>https://github.com/ogoun/Zero</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
+    <PackageReleaseNotes>New architectures</PackageReleaseNotes>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

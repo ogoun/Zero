@@ -150,7 +150,9 @@ namespace ZeroLevel.Services.Config
             if (_keyValues.TryGetValue(GetKey(key), out result))
             {
                 if (result.Count > 0)
+                {
                     return (T)StringToTypeConverter.TryConvert(result[0], typeof(T));
+                }
                 return default(T);
             }
             throw new KeyNotFoundException("Parameter not found: " + key);
@@ -185,7 +187,9 @@ namespace ZeroLevel.Services.Config
             if (_keyValues.TryGetValue(GetKey(key), out result))
             {
                 if (result.Count > 0)
+                {
                     return (T)StringToTypeConverter.TryConvert(result[0], typeof(T));
+                }
             }
             return default(T);
         }
@@ -203,7 +207,9 @@ namespace ZeroLevel.Services.Config
             if (_keyValues.TryGetValue(GetKey(key), out result))
             {
                 if (result.Count > 0)
+                {
                     return (T)StringToTypeConverter.TryConvert(result[0], typeof(T));
+                }
             }
             return defaultValue;
         }
