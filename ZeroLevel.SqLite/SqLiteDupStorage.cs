@@ -1,6 +1,6 @@
-﻿using System;
+﻿using SQLite;
+using System;
 using System.Collections.Generic;
-using System.Data.SQLite;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
@@ -8,40 +8,37 @@ using System.Threading;
 
 namespace ZeroLevel.SqLite
 {
+    public sealed class DuplicateRecord
+    {
+        [PrimaryKey, AutoIncrement]
+        public long Id { get; set; }
+        [Indexed]
+        public string Hash { get; set; }
+        public long Timestamp { get; set; }
+        public byte[] Data { get; set; }
+    }
+
     /// <summary>
     /// Хранит данные указанное число дней, и позволяет выполнить проверку наличия данных, для отбрасывания дубликатов
     /// </summary>
     public sealed class SqLiteDupStorage
-        : BaseSqLiteDB, IDisposable
+        : BaseSqLiteDB<DuplicateRecord>
     {
         #region Fields
 
-        private const string DEFAUL_TABLE_NAME = "History";
-
-        private readonly SQLiteConnection _db;
         private readonly long _removeOldRecordsTaskKey;
         private readonly int _countDays;
-        private readonly string _table_name;
         private readonly ReaderWriterLockSlim _rwLock = new ReaderWriterLockSlim();
 
         #endregion Fields
 
         #region Private members
-
-        private sealed class DuplicationStorageRecord
-        {
-            public string Hash { get; set; }
-            public byte[] Body { get; set; }
-            public long Timestamp { get; set; }
-        }
-
         private void RemoveOldRecordsTask(long key)
         {
             _rwLock.EnterWriteLock();
             try
             {
-                Execute($"DELETE FROM {_table_name} WHERE timestamp < @limit", _db,
-                    new SQLiteParameter[] { new SQLiteParameter("limit", DateTime.Now.AddDays(-_countDays).Ticks) });
+                Delete(r => r.Timestamp < DateTime.Now.AddDays(-_countDays).Ticks);
             }
             catch (Exception ex)
             {
@@ -57,21 +54,10 @@ namespace ZeroLevel.SqLite
 
         #region Ctor
 
-        public SqLiteDupStorage(string database_file_path, string tableName, int period)
+        public SqLiteDupStorage(string database_file_path, int period)
+            : base(database_file_path)
         {
-            var path = PrepareDb(database_file_path);
-            if (string.IsNullOrWhiteSpace(tableName))
-            {
-                _table_name = DEFAUL_TABLE_NAME;
-            }
-            else
-            {
-                _table_name = tableName;
-            }
-            _db = new SQLiteConnection($"Data Source={path};Version=3;");
-            _db.Open();
-            Execute($"CREATE TABLE IF NOT EXISTS {_table_name} (id INTEGER PRIMARY KEY AUTOINCREMENT, hash TEXT, body BLOB, timestamp INTEGER)", _db);
-            Execute($"CREATE INDEX IF NOT EXISTS hash_index ON {_table_name} (hash)", _db);
+            CreateTable();
             _countDays = period > 0 ? period : 1;
             _removeOldRecordsTaskKey = Sheduller.RemindEvery(TimeSpan.FromMinutes(1), RemoveOldRecordsTask);
         }
@@ -87,17 +73,14 @@ namespace ZeroLevel.SqLite
         {
             var hash = GenerateSHA256String(body);
             var timestamp = DateTime.Now.Ticks;
-            SQLiteDataReader reader;
             _rwLock.EnterReadLock();
             var exists = new List<byte[]>();
             try
             {
-                reader = Read($"SELECT body FROM {_table_name} WHERE hash=@hash", _db, new SQLiteParameter[] { new SQLiteParameter("hash", hash) });
-                while (reader.Read())
+                foreach (var record in SelectBy(r => r.Hash == hash))
                 {
-                    exists.Add((byte[])reader.GetValue(0));
+                    exists.Add(record.Data);
                 }
-                reader.Close();
             }
             catch (Exception ex)
             {
@@ -108,7 +91,6 @@ namespace ZeroLevel.SqLite
             {
                 _rwLock.ExitReadLock();
             }
-            reader = null;
             if (exists.Any())
             {
                 foreach (var candidate in exists)
@@ -120,13 +102,12 @@ namespace ZeroLevel.SqLite
             _rwLock.EnterWriteLock();
             try
             {
-                Execute($"INSERT INTO {_table_name} ('hash', 'body', 'timestamp') values (@hash, @body, @timestamp)", _db,
-                    new SQLiteParameter[]
-                    {
-                        new SQLiteParameter("hash", hash),
-                        new SQLiteParameter("body", body),
-                        new SQLiteParameter("timestamp", timestamp)
-                    });
+                Append(new DuplicateRecord
+                {
+                    Data = body,
+                    Hash = hash,
+                    Timestamp = timestamp
+                });
             }
             catch (Exception ex)
             {
@@ -143,17 +124,9 @@ namespace ZeroLevel.SqLite
 
         #region IDisposable
 
-        public void Dispose()
+        protected override void DisposeStorageData()
         {
             Sheduller.Remove(_removeOldRecordsTaskKey);
-            try
-            {
-                _db?.Dispose();
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "[SQLiteDupStorage] Fault close db connection");
-            }
         }
 
         #endregion IDisposable

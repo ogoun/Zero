@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MemoryPools;
+using System;
 using System.Collections.Concurrent;
 using System.Net;
 using System.Net.Sockets;
@@ -19,8 +20,17 @@ namespace ZeroLevel.Network
             public int identity;
             public byte[] data;
         }
+        private struct OutcomingFrame
+        {
+            public bool is_request;
+            public int identity;
+            public byte[] data;
+        }
 
-        private BlockingCollection<IncomingFrame> _incoming_queue = new BlockingCollection<IncomingFrame>();
+        private readonly JetValPool<OutcomingFrame> _outcomingFramesPool = new JetValPool<OutcomingFrame>();
+        private ConcurrentQueue<IncomingFrame> _incoming_queue = new ConcurrentQueue<IncomingFrame>();
+        private ConcurrentQueue<OutcomingFrame> _outcoming_queue = new ConcurrentQueue<OutcomingFrame>();
+        private ManualResetEventSlim _outcomingFrameEvent = new ManualResetEventSlim(false);
         #endregion
 
         private Socket _clientSocket;
@@ -31,6 +41,7 @@ namespace ZeroLevel.Network
         private readonly object _reconnection_lock = new object();
         private long _heartbeat_key;
         private Thread _receiveThread;
+        private Thread _sendingThread;
 
         #endregion Private
 
@@ -41,7 +52,6 @@ namespace ZeroLevel.Network
             try
             {
                 _clientSocket = new Socket(ep.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-                _clientSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.DontLinger, true);
                 _clientSocket.Connect(ep);
                 OnConnect(this);
             }
@@ -81,6 +91,11 @@ namespace ZeroLevel.Network
             _receiveThread.IsBackground = true;
             _receiveThread.Start();
 
+            _sendingThread = new Thread(OutcomingFramesJob);
+            _sendingThread.IsBackground = true;
+            _sendingThread.Start();
+
+
             _heartbeat_key = Sheduller.RemindEvery(TimeSpan.FromMilliseconds(MINIMUM_HEARTBEAT_UPDATE_PERIOD_MS), Heartbeat);
         }
 
@@ -109,27 +124,26 @@ namespace ZeroLevel.Network
         public event Action<ISocketClient> OnDisconnect = (_) => { };
         public IPEndPoint Endpoint { get; }
 
-        public bool Request(Frame frame, Action<byte[]> callback, Action<string> fail = null)
+        public void Request(Frame frame, Action<byte[]> callback, Action<string> fail = null)
         {
-            if (Status != SocketClientStatus.Working) throw new Exception($"[SocketClient.Request] Socket status: {Status}");            
+            if (Status != SocketClientStatus.Working) throw new Exception($"[SocketClient.Request] Socket status: {Status}");
             var data = NetworkPacketFactory.Reqeust(MessageSerializer.Serialize(frame), out int id);
             _requests.RegisterForFrame(id, callback, fail);
-            return Send(id, true, data);
+            Send(id, true, data);
         }
 
-        public bool Send(Frame frame)
+        public void Send(Frame frame)
         {
             if (Status != SocketClientStatus.Working) throw new Exception($"[SocketClient.Send] Socket status: {Status}");
             var data = NetworkPacketFactory.Message(MessageSerializer.Serialize(frame));
-            return Send(0, false, data);
+            Send(0, false, data);
         }
 
-        public bool Response(byte[] data, int identity)
+        public void Response(byte[] data, int identity)
         {
             if (data == null) throw new ArgumentNullException(nameof(data));
             if (Status != SocketClientStatus.Working) throw new Exception($"[SocketClient.Response] Socket status: {Status}");
-
-            return Send(0, false, NetworkPacketFactory.Response(data, identity));
+            Send(0, false, NetworkPacketFactory.Response(data, identity));
         }
         #endregion
 
@@ -140,7 +154,7 @@ namespace ZeroLevel.Network
             try
             {
                 if (type == FrameType.KeepAlive) return;
-                _incoming_queue.Add(new IncomingFrame
+                _incoming_queue.Enqueue(new IncomingFrame
                 {
                     data = data,
                     type = type,
@@ -223,75 +237,94 @@ namespace ZeroLevel.Network
             IncomingFrame frame = default(IncomingFrame);
             while (Status != SocketClientStatus.Disposed)
             {
-                try
+                if (_incoming_queue.TryDequeue(out frame))
                 {
-                    if (_incoming_queue.TryTake(out frame, 100))
+                    try
                     {
-                        try
+                        switch (frame.type)
                         {
-                            switch (frame.type)
-                            {
-                                case FrameType.Message:
-                                    Router?.HandleMessage(MessageSerializer.Deserialize<Frame>(frame.data), this);
-                                    break;
-                                case FrameType.Request:
+                            case FrameType.Message:
+                                Router?.HandleMessage(MessageSerializer.Deserialize<Frame>(frame.data), this);
+                                break;
+                            case FrameType.Request:
+                                {
+                                    Router?.HandleRequest(MessageSerializer.Deserialize<Frame>(frame.data), this, frame.identity, (id, response) =>
                                     {
-                                        Router?.HandleRequest(MessageSerializer.Deserialize<Frame>(frame.data), this, frame.identity, (id, response) =>
+                                        if (response != null)
                                         {
-                                            if (response != null)
-                                            {
-                                                this.Response(response, id);
-                                            }
-                                        });
-                                    }
-                                    break;
-                                case FrameType.Response:
-                                    {
-                                        _requests.Success(frame.identity, frame.data);
-                                    }
-                                    break;
-                            }
+                                            this.Response(response, id);
+                                        }
+                                    });
+                                }
+                                break;
+                            case FrameType.Response:
+                                {
+                                    _requests.Success(frame.identity, frame.data);
+                                }
+                                break;
                         }
-                        catch (Exception ex)
-                        {
-                            Log.SystemError(ex, "[SocketClient.IncomingFramesJob] Handle frame");
-                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.SystemError(ex, "[SocketClient.IncomingFramesJob] Handle frame");
                     }
                 }
-                catch (Exception ex)
+                else
                 {
-                    Log.SystemError(ex, "[SocketClient.IncomingFramesJob] _incoming_queue.Take");
-                    if (Status != SocketClientStatus.Disposed)
-                    {
-                        _incoming_queue.Dispose();
-                        _incoming_queue = new BlockingCollection<IncomingFrame>();
-                    }
-                    continue;
+                    Thread.Sleep(100);
                 }
             }
         }
 
-        private bool Send(int id, bool is_request, byte[] data)
+        private void OutcomingFramesJob()
         {
-            if (Status == SocketClientStatus.Working)
+            while (Status != SocketClientStatus.Disposed)
             {
-                try
+                if (Status == SocketClientStatus.Working)
                 {
-                    if (is_request)
-                    {                        
-                        _requests.StartSend(id);
+                    if (_outcomingFrameEvent.Wait(100))
+                    {
+                        _outcomingFrameEvent.Reset();
                     }
-                    var sended = _clientSocket.Send(data, data.Length, SocketFlags.None);
-                    return sended == data.Length;
+                    while (_outcoming_queue.TryDequeue(out var frame))
+                    {
+                        try
+                        {
+                            if (frame.is_request)
+                            {
+                                _requests.StartSend(frame.identity);
+                            }
+                            _clientSocket.Send(frame.data, frame.data.Length, SocketFlags.None);
+                            //var sended = _clientSocket.Send(frame.data, frame.data.Length, SocketFlags.None);
+                            //return sended == frame.data.Length;
+                        }
+                        catch (Exception ex)
+                        {
+                            Log.SystemError(ex, $"[SocketClient.OutcomingFramesJob] _str_clientSocketeam.Send");
+                            Broken();
+                            OnDisconnect(this);
+                        }
+                        finally
+                        {
+                            _outcomingFramesPool.Return(frame);
+                        }
+                    }                    
                 }
-                catch (Exception ex)
+                else
                 {
-                    Log.SystemError(ex, $"[SocketClient.SendFramesJob] _str_clientSocketeam.Send");
-                    Broken();
-                    OnDisconnect(this);
+                    Thread.Sleep(400);
                 }
             }
-            return false;
+        }
+
+        private void Send(int id, bool is_request, byte[] data)
+        {
+            var frame = _outcomingFramesPool.Get();
+            frame.data = data;
+            frame.identity = id;
+            frame.is_request = is_request;
+            _outcoming_queue.Enqueue(frame);
+            _outcomingFrameEvent.Set();
         }
         #endregion
 

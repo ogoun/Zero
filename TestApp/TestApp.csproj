@@ -11,12 +11,16 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\ZeroLevel.NN\ZeroLevel.NN.csproj" />
     <ProjectReference Include="..\ZeroLevel\ZeroLevel.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <None Update="config.ini">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="nnmodels\Yolo5S\yolov5s327e.onnx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
 

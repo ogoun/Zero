@@ -8,6 +8,8 @@ namespace ZeroLevel.NN
 {
     public static class ImagePreprocessor
     {
+        private static Action<Tensor<float>, float, int, int, int, int> _precompiledChannelFirstAction = new Action<Tensor<float>, float, int, int, int, int>((t, v, ind, c, i, j) => { t[ind, c, i, j] = v; });
+        private static Action<Tensor<float>, float, int, int, int, int> _precompiledChannelLastAction = new Action<Tensor<float>, float, int, int, int, int>((t, v, ind, c, i, j) => { t[ind, i, j, c] = v; });
         private static Func<byte, int, float> PixelToTensorMethod(ImagePreprocessorOptions options)
         {
             if (options.Normalize)
@@ -42,26 +44,51 @@ namespace ZeroLevel.NN
             return new Func<byte, int, float>((b, _) => (float)b);
         }
 
+        //private static int CalculateFragmentsCount(Image image, ImagePreprocessorOptions options)
+        //{
+        //    int count = (options.Crop.SaveOriginal ? 1 : 0);
+        //    var Sw = image.Width;           // ширина оригинала
+        //    var Sh = image.Height;          // высота оригинала
+
+        //    var CRw = options.Crop.Width;   // ширина кропа
+        //    var CRh = options.Crop.Height;  // высота кропа
+
+        //    var Dx = options.Crop.Overlap ? (int)(options.Crop.OverlapKoefWidth * CRw) : CRw;   // сдвиг по OX к следующему кропу
+        //    var Dy = options.Crop.Overlap ? (int)(options.Crop.OverlapKoefHeight * CRh) : CRh;  // сдвиг по OY к следующему кропу
+
+        //    for (int x = 0; x < Sw; x += Dx)
+        //    {
+        //        for (int y = 0; y < Sh; y += Dy)
+        //        {
+        //            count++;
+        //        }
+        //    }
+        //    return count;
+        //}
         private static int CalculateFragmentsCount(Image image, ImagePreprocessorOptions options)
         {
-            int count = 0;
-            var xs = options.Crop.Overlap ? (int)(options.Crop.Width * options.Crop.OverlapKoefWidth) : options.Crop.Width;
-            var ys = options.Crop.Overlap ? (int)(options.Crop.Height * options.Crop.OverlapKoefHeight) : options.Crop.Height;
-            for (var x = 0; x < image.Width - xs; x += xs)
+            int count = (options.Crop.SaveOriginal ? 1 : 0);
+            var Sw = image.Width;           // ширина оригинала
+            var Sh = image.Height;          // высота оригинала
+
+            var CRw = options.InputWidth;   // ширина кропа (равна ширине входа, т.к. изображение отресайзено подобающим образом)
+            var CRh = options.InputHeight;  // высота кропа (равна высоте входа, т.к. изображение отресайзено подобающим образом)
+
+            var Dx = options.Crop.Overlap ? (int)(options.Crop.OverlapKoefWidth * CRw) : CRw;   // сдвиг по OX к следующему кропу
+            var Dy = options.Crop.Overlap ? (int)(options.Crop.OverlapKoefHeight * CRh) : CRh;  // сдвиг по OY к следующему кропу
+
+            for (int x = 0; x < Sw; x += Dx)
             {
-                for (var y = 0; y < image.Height - ys; y += ys)
+                for (int y = 0; y < Sh; y += Dy)
                 {
                     count++;
                 }
             }
             return count;
         }
-
         private static void FillTensor(Tensor<float> tensor, Image image, int index, ImagePreprocessorOptions options, Func<byte, int, float> pixToTensor)
         {
-            var append = options.ChannelType == PredictorChannelType.ChannelFirst
-                ? new Action<Tensor<float>, float, int, int, int, int>((t, v, ind, c, i, j) => { t[ind, c, i, j] = v; })
-                : new Action<Tensor<float>, float, int, int, int, int>((t, v, ind, c, i, j) => { t[ind, i, j, c] = v; });
+            var append = options.ChannelType == PredictorChannelType.ChannelFirst ? _precompiledChannelFirstAction : _precompiledChannelLastAction;
 
             ((Image<Rgb24>)image).ProcessPixelRows(pixels =>
             {
@@ -112,6 +139,59 @@ namespace ZeroLevel.NN
             });
         }
 
+        private static void FillTensor(Tensor<float> tensor, Image image, int startX, int startY, int w, int h, int index, ImagePreprocessorOptions options, Func<byte, int, float> pixToTensor)
+        {
+            var append = options.ChannelType == PredictorChannelType.ChannelFirst ? _precompiledChannelFirstAction : _precompiledChannelLastAction;
+
+            ((Image<Rgb24>)image).ProcessPixelRows(pixels =>
+            {
+                if (options.InvertXY)
+                {
+                    for (int y = startY; y < h; y++)
+                    {
+                        Span<Rgb24> pixelSpan = pixels.GetRowSpan(y);
+                        for (int x = startX; x < w; x++)
+                        {
+                            if (options.BGR)
+                            {
+                                append(tensor, pixToTensor(pixelSpan[x].B, 0), index, 0, y, x);
+                                append(tensor, pixToTensor(pixelSpan[x].G, 1), index, 1, y, x);
+                                append(tensor, pixToTensor(pixelSpan[x].R, 2), index, 2, y, x);
+                            }
+                            else
+                            {
+                                append(tensor, pixToTensor(pixelSpan[x].R, 0), index, 0, y, x);
+                                append(tensor, pixToTensor(pixelSpan[x].G, 1), index, 1, y, x);
+                                append(tensor, pixToTensor(pixelSpan[x].B, 2), index, 2, y, x);
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    for (int y = startY; y < h; y++)
+                    {
+                        Span<Rgb24> pixelSpan = pixels.GetRowSpan(y);
+                        for (int x = startX; x < w; x++)
+                        {
+                            if (options.BGR)
+                            {
+                                append(tensor, pixToTensor(pixelSpan[x].B, 0), index, 0, x, y);
+                                append(tensor, pixToTensor(pixelSpan[x].G, 1), index, 1, x, y);
+                                append(tensor, pixToTensor(pixelSpan[x].R, 2), index, 2, x, y);
+                            }
+                            else
+                            {
+                                append(tensor, pixToTensor(pixelSpan[x].R, 0), index, 0, x, y);
+                                append(tensor, pixToTensor(pixelSpan[x].G, 1), index, 1, x, y);
+                                append(tensor, pixToTensor(pixelSpan[x].B, 2), index, 2, x, y);
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
         private static Tensor<float> InitInputTensor(ImagePreprocessorOptions options, int batchSize = 1)
         {
             switch (options.ChannelType)
@@ -127,99 +207,137 @@ namespace ZeroLevel.NN
             }
         }
 
-        public static PredictionInput[] ToTensors(this Image image, ImagePreprocessorOptions options)
+
+        public static ImagePredictionInput[] ToTensors(this Image image, ImagePreprocessorOptions options)
         {
-            PredictionInput[] result = null;
+            ImagePredictionInput[] result = null;
             var pixToTensor = PixelToTensorMethod(options);
             options.Channels = image.PixelType.BitsPerPixel >> 3;
-
             if (options.Crop.Enabled)
             {
-                var fragments = CalculateFragmentsCount(image, options);
-                int count = CalculateFragmentsCount(image, options) + (options.Crop.SaveOriginal ? 1 : 0);
-                int offset = count % options.MaxBatchSize;
-                int count_tensors = count / options.MaxBatchSize + (offset == 0 ? 0 : 1);
-                var tensors = new PredictionInput[count_tensors];
-                for (int i = 0; i < count_tensors; i++)
-                {
-                    if (i < count_tensors - 1)
-                    {
-                        tensors[i] = new PredictionInput
-                        {
-                            Tensor = InitInputTensor(options, options.MaxBatchSize),
-                            Offsets = new OffsetBox[options.MaxBatchSize],
-                            Count = options.MaxBatchSize
-                        };
-                    }
-                    else
-                    {
-                        tensors[i] = new PredictionInput
-                        {
-                            Tensor = InitInputTensor(options, offset == 0 ? options.MaxBatchSize : offset),
-                            Offsets = new OffsetBox[offset == 0 ? options.MaxBatchSize : offset],
-                            Count = offset == 0 ? options.MaxBatchSize : offset
-                        };
-                    }
-                }
+                // Размеры оригинального изображения
+                var Sw = image.Width;
+                var Sh = image.Height;
 
-                int tensor_index = 0;
-                int tensor_part_index = 0;
-                var xs = options.Crop.Overlap ? (int)(options.Crop.Width * options.Crop.OverlapKoefWidth) : options.Crop.Width;
-                var ys = options.Crop.Overlap ? (int)(options.Crop.Height * options.Crop.OverlapKoefHeight) : options.Crop.Height;
+                // Создание ресайза для целочисленного прохода кропами шириной CRw и высотой CRh
+                var resizedForCropWidthKoef = options.InputWidth / (double)options.Crop.Width;
+                var resizedForCropHeightKoef = options.InputHeight / (double)options.Crop.Height;
 
-                if (options.Crop.SaveOriginal)
+                // Размеры для ресайза изображения к размеру по которому удобно идти кропами
+                var resizedForCropWidth = (int)Math.Round(Sw * resizedForCropWidthKoef, MidpointRounding.ToEven);
+                var resizedForCropHeight = (int)Math.Round(Sh * resizedForCropHeightKoef, MidpointRounding.ToEven);
+
+                // Размеры кропа, равны входу сети, а не (options.Crop.Width, options.Crop.Height), т.к. для оптимизации изображение будет предварительно отресайзено
+                var CRw = options.InputWidth;
+                var CRh = options.InputHeight;
+
+                // Расчет сдвигов между кропами
+                var Dx = options.Crop.Overlap ? (int)(options.Crop.OverlapKoefWidth * CRw) : CRw;
+                var Dy = options.Crop.Overlap ? (int)(options.Crop.OverlapKoefHeight * CRh) : CRh;
+
+                using (var source = image.Clone(img => img.Resize(resizedForCropWidth, resizedForCropHeight, KnownResamplers.Bicubic)))
                 {
-                    using (var copy = image.Clone(img => img.Resize(options.InputWidth, options.InputHeight, KnownResamplers.Bicubic)))
+                    // Количество тензоров всего, во всех батчах суммарно
+                    var count = CalculateFragmentsCount(source, options);
+
+                    // Проверка, укладывается ли количество тензоров поровну в батчи
+                    int offset = count % options.MaxBatchSize;
+
+                    // Количество батчей
+                    int count_tensor_batches = count / options.MaxBatchSize + (offset == 0 ? 0 : 1);
+
+                    // Батчи
+                    var tensors = new ImagePredictionInput[count_tensor_batches];
+
+                    // Инициализация батчей
+                    Parallel.For(0, count_tensor_batches, batch_index =>
                     {
-                        FillTensor(tensors[tensor_index].Tensor, copy, tensor_part_index, options, pixToTensor);
-                        tensors[tensor_index].Offsets[tensor_part_index] = new OffsetBox(0, 0, image.Width, image.Height);
+                        if (batch_index < count_tensor_batches - 1)
+                        {
+                            tensors[batch_index] = new ImagePredictionInput
+                            {
+                                Tensor = InitInputTensor(options, options.MaxBatchSize),
+                                Offsets = new OffsetBox[options.MaxBatchSize],
+                                Count = options.MaxBatchSize
+                            };
+                        }
+                        else
+                        {
+                            tensors[batch_index] = new ImagePredictionInput
+                            {
+                                Tensor = InitInputTensor(options, offset == 0 ? options.MaxBatchSize : offset),
+                                Offsets = new OffsetBox[offset == 0 ? options.MaxBatchSize : offset],
+                                Count = offset == 0 ? options.MaxBatchSize : offset
+                            };
+                        }
+                    });
+
+                    // Заполнение батчей
+                    int tensor_index = 0;
+
+                    // Если используется ресайз оригинала кроме кропов, пишется в первый батч в первый тензор
+                    if (options.Crop.SaveOriginal)
+                    {
+                        using (var copy = source.Clone(img => img.Resize(options.InputWidth, options.InputHeight, KnownResamplers.Bicubic)))
+                        {
+                            FillTensor(tensors[0].Tensor, copy, 0, options, pixToTensor);
+                            tensors[tensor_index].Offsets[0] = new OffsetBox(0, 0, image.Width, image.Height);
+                        }
+                        tensor_index++;
                     }
-                    tensor_part_index++;
+                    tensor_index--;
+                    Parallel.ForEach(SteppedIterator(0, source.Width, Dx), x =>
+                    {
+                        // Можно запараллелить и тут, но выигрыш дает малоощутимый
+                        for (int y = 0; y < source.Height; y += Dy)
+                        {
+                            var current_index = Interlocked.Increment(ref tensor_index);
+                            // Индекс тензора внутри батча
+                            var b_index = current_index % options.MaxBatchSize;
+                            // Индекс батча
+                            var p_index = (int)Math.Round((double)current_index / (double)options.MaxBatchSize, MidpointRounding.ToNegativeInfinity);
+                            int w = CRw;
+                            if ((x + CRw) > source.Width)
+                            {
+                                w = source.Width - x;
+                            }
+                            int h = CRh;
+                            if ((y + CRh) > source.Height)
+                            {
+                                h = source.Height - y;
+                            }
+                            // Заполнение b_index тензора в p_index батче
+                            FillTensor(tensors[p_index].Tensor, source, x, y, w, h, b_index, options, pixToTensor);
+                            // Указание смещений для данного тензора
+                            tensors[p_index].Offsets[b_index] = new OffsetBox(x, y, options.Crop.Width, options.Crop.Height);
+                        }
+                    });
+                    return tensors;
                 }
-                for (var x = 0; x < image.Width - xs; x += xs)
-                {
-                    var startx = x;
-                    var dx = (x + options.Crop.Width) - image.Width;
-                    if (dx > 0)
-                    {
-                        startx -= dx;
-                    }
-                    for (var y = 0; y < image.Height - ys; y += ys)
-                    {
-                        if (tensor_part_index > 0 && tensor_part_index % options.MaxBatchSize == 0)
-                        {
-                            tensor_index++;
-                            tensor_part_index = 0;
-                        }
-                        var starty = y;
-                        var dy = (y + options.Crop.Height) - image.Height;
-                        if (dy > 0)
-                        {
-                            starty -= dy;
-                        }
-                        using (var copy = image
-                            .Clone(img => img
-                                .Crop(new Rectangle(startx, starty, options.Crop.Width, options.Crop.Height))
-                                .Resize(options.InputWidth, options.InputHeight, KnownResamplers.Bicubic)))
-                        {
-                            FillTensor(tensors[tensor_index].Tensor, copy, tensor_part_index, options, pixToTensor);
-                            tensors[tensor_index].Offsets[tensor_part_index] = new OffsetBox(startx, starty, options.Crop.Width, options.Crop.Height);
-                        }
-                        tensor_part_index++;
-                    }
-                }
-                return tensors;
             }
-
             // if resize only
-            result = new PredictionInput[1];
+            result = new ImagePredictionInput[1];
             using (var copy = image.Clone(img => img.Resize(options.InputWidth, options.InputHeight, KnownResamplers.Bicubic)))
             {
                 Tensor<float> tensor = InitInputTensor(options);
                 FillTensor(tensor, copy, 0, options, pixToTensor);
-                result[0] = new PredictionInput { Count = 1, Offsets = null, Tensor = tensor };
+                result[0] = new ImagePredictionInput
+                {
+                    Count = 1,
+                    Offsets = null,
+                    Tensor = tensor
+                };
             }
             return result;
+        }
+
+
+        private static IEnumerable<int> SteppedIterator(int startIndex, int endIndex, int stepSize)
+        {
+            for (int i = startIndex; i < endIndex; i += stepSize)
+            {
+                yield return i;
+            }
         }
 
         public static Image Crop(Image source, float x1, float y1, float x2, float y2)

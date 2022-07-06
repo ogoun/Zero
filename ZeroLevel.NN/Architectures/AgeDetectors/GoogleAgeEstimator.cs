@@ -19,7 +19,7 @@ namespace ZeroLevel.NN
     /// <summary>
     /// Input tensor is 1 x 3 x height x width with mean values 104, 117, 123. Input image have to be previously resized to 224 x 224 pixels and converted to BGR format. 
     /// </summary>
-    public class GoogleAgeDetector
+    public class GoogleAgeEstimator
         : SSDNN
     {
         private const int INPUT_WIDTH = 224;
@@ -28,7 +28,7 @@ namespace ZeroLevel.NN
 
         private Age[] _ageList = new[] { Age.From0To2, Age.From4To6, Age.From8To12, Age.From15To20, Age.From25To32, Age.From38To43, Age.From48To53, Age.From60To100 };
 
-        public GoogleAgeDetector(string modelPath, bool gpu = false) : base(modelPath, gpu)
+        public GoogleAgeEstimator(string modelPath, bool gpu = false) : base(modelPath, gpu)
         {
         }
 
@@ -48,7 +48,7 @@ namespace ZeroLevel.NN
             {
                 variances = d.First().Value.ToArray();
             });
-            var (number, index) = variances.Select((n, i) => (n, i)).Max();
+            var index = Argmax(variances);
             return _ageList[index];
         }
     }

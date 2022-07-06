@@ -22,7 +22,7 @@ namespace ZeroLevel.Services
 
             output = Regex.Replace(output, @"\s|\.|\(", " ");
             output = Regex.Replace(output, @"\s+", " ");
-            output = Regex.Replace(output, @"[^\s\w\d-]", "");
+            //output = Regex.Replace(output, @"[^\s\w\d-]", "");
             output = output.Trim();
 
             Dictionary<string, string> tdict = GetDictionaryByType(type);
@@ -145,7 +145,7 @@ namespace ZeroLevel.Services
             gost.Add("«", "");
             gost.Add("»", "");
             gost.Add("—", "-");
-            gost.Add(" ", "-");
+            gost.Add(" ", " ");
 
             iso.Add("Є", "YE");
             iso.Add("І", "I");
@@ -223,7 +223,7 @@ namespace ZeroLevel.Services
             iso.Add("«", "");
             iso.Add("»", "");
             iso.Add("—", "-");
-            iso.Add(" ", "-");
+            iso.Add(" ", " ");
         }
     }
 }

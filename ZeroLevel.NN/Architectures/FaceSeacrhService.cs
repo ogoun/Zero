@@ -1,6 +1,7 @@
 ﻿using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
+using ZeroLevel;
 using ZeroLevel.NN;
 using ZeroLevel.NN.Models;
 
@@ -127,25 +128,36 @@ namespace Zero.NN.Services
                     var around_x2 = centerFaceX + radius;
                     var around_y1 = centerFaceY - radius;
                     var around_y2 = centerFaceY + radius;
-                    using (var faceImage = ImagePreprocessor.Crop(image, around_x1, around_y1, around_x2, around_y2))
+                    try
                     {
-                        var matrix = Face.GetTransformMatrix(face);
-                        var builder = new AffineTransformBuilder();
-                        builder.AppendMatrix(matrix);
-                        faceImage.Mutate(x => x.Transform(builder, KnownResamplers.Bicubic));
-                        vector = _encoder.Predict(faceImage);
-                        /*var aligned_faces = detector.Predict(faceImage);
-                        if (aligned_faces != null && aligned_faces.Count == 1)
+                        using (var faceImage = ImagePreprocessor.Crop(image, around_x1, around_y1, around_x2, around_y2))
                         {
-                            using (var ci = SpecialCrop(faceImage, aligned_faces[0]))
+                            var matrix = Face.GetTransformMatrix(face);
+                            var builder = new AffineTransformBuilder();
+                            builder.AppendMatrix(matrix);
+                            faceImage.Mutate(x => x.Transform(builder, KnownResamplers.Bicubic));
+                            vector = _encoder.Predict(faceImage);
+                            /*var aligned_faces = detector.Predict(faceImage);
+                            if (aligned_faces != null && aligned_faces.Count == 1)
+                            {
+                                using (var ci = SpecialCrop(faceImage, aligned_faces[0]))
+                                {
+                                    vector = encoder.Predict(faceImage);
+                                }
+                            }
+                            else
                             {
                                 vector = encoder.Predict(faceImage);
-                            }
+                            }*/
                         }
-                        else
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.SystemError(ex, "[FaceSeacrhService.GetEmbeddings]");
+                        using (var faceImage = ImagePreprocessor.Crop(image, face.X1, face.Y1, face.X2, face.Y2))
                         {
-                            vector = encoder.Predict(faceImage);
-                        }*/
+                            vector = _encoder.Predict(faceImage);
+                        }
                     }
                 }
                 else
@@ -160,6 +172,54 @@ namespace Zero.NN.Services
                     Face = face,
                     Vector = vector
                 };
+            }
+        }
+
+
+        public IEnumerable<(FaceEmbedding, Image)> GetEmbeddingsAndCrop(Image<Rgb24> image)
+        {
+            int width = image.Width;
+            int heigth = image.Height;
+            var faces = _detector.Predict(image);
+            foreach (var face in faces)
+            {
+                Face.FixInScreen(face, width, heigth);
+                float[] vector;
+                if (_useFaceAlign)
+                {
+                    int x = (int)face.X1;
+                    int y = (int)face.Y1;
+                    int w = (int)(face.X2 - face.X1);
+                    int h = (int)(face.Y2 - face.Y1);
+                    var radius = (float)Math.Sqrt(w * w + h * h) / 2f;
+                    var centerFaceX = (face.X2 + face.X1) / 2.0f;
+                    var centerFaceY = (face.Y2 + face.Y1) / 2.0f;
+                    var around_x1 = centerFaceX - radius;
+                    var around_x2 = centerFaceX + radius;
+                    var around_y1 = centerFaceY - radius;
+                    var around_y2 = centerFaceY + radius;
+                    var faceImage = ImagePreprocessor.Crop(image, around_x1, around_y1, around_x2, around_y2);
+                    var matrix = Face.GetTransformMatrix(face);
+                    var builder = new AffineTransformBuilder();
+                    builder.AppendMatrix(matrix);
+                    faceImage.Mutate(x => x.Transform(builder, KnownResamplers.Bicubic));
+                    vector = _encoder.Predict(faceImage);
+                    yield return (new FaceEmbedding
+                    {
+                        Face = face,
+                        Vector = vector
+                    }, faceImage);
+                }
+                else
+                {
+                    var faceImage = ImagePreprocessor.Crop(image, face.X1, face.Y1, face.X2, face.Y2);
+                    vector = _encoder.Predict(faceImage);
+                    yield return (new FaceEmbedding
+                    {
+                        Face = face,
+                        Vector = vector
+                    }, faceImage);
+                }
             }
         }
     }

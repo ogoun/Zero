@@ -13,8 +13,8 @@ namespace ZeroLevel.Network
 
         IRouter Router { get; }
 
-        bool Send(Frame data);
-        bool Request(Frame data, Action<byte[]> callback, Action<string> fail = null);
-        bool Response(byte[] data, int identity);
+        void Send(Frame data);
+        void Request(Frame data, Action<byte[]> callback, Action<string> fail = null);
+        void Response(byte[] data, int identity);
     }
 }

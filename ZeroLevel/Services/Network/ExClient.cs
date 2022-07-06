@@ -22,7 +22,8 @@ namespace ZeroLevel.Network
         {
             try
             {
-                return _client.Send(FrameFactory.Create(inbox));
+                _client.Send(FrameFactory.Create(inbox));
+                return true;
             }
             catch (Exception ex)
             {
@@ -35,7 +36,8 @@ namespace ZeroLevel.Network
         {
             try
             {
-                return _client.Send(FrameFactory.Create(inbox, data));
+                _client.Send(FrameFactory.Create(inbox, data));
+                return true;
             }
             catch (Exception ex)
             {
@@ -47,8 +49,9 @@ namespace ZeroLevel.Network
         public bool Send<T>(T message)
         {
             try
-            {
-                return _client.Send(FrameFactory.Create(BaseSocket.DEFAULT_MESSAGE_INBOX, MessageSerializer.SerializeCompatible<T>(message)));
+            {                
+                _client.Send(FrameFactory.Create(BaseSocket.DEFAULT_MESSAGE_INBOX, MessageSerializer.SerializeCompatible<T>(message)));
+                return true;
             }
             catch (Exception ex)
             {
@@ -60,8 +63,9 @@ namespace ZeroLevel.Network
         public bool Send<T>(string inbox, T message)
         {
             try
-            {
-                return _client.Send(FrameFactory.Create(inbox, MessageSerializer.SerializeCompatible<T>(message)));
+            {                
+                _client.Send(FrameFactory.Create(inbox, MessageSerializer.SerializeCompatible<T>(message)));
+                return true;
             }
             catch (Exception ex)
             {
@@ -73,8 +77,9 @@ namespace ZeroLevel.Network
         public bool Request(string inbox, Action<byte[]> callback)
         {
             try
-            {
-                return _client.Request(FrameFactory.Create(inbox), f => callback(f));
+            {                
+                _client.Request(FrameFactory.Create(inbox), f => callback(f));
+                return true;
             }
             catch (Exception ex)
             {
@@ -87,7 +92,8 @@ namespace ZeroLevel.Network
         {
             try
             {
-                return _client.Request(FrameFactory.Create(inbox, data), f => callback(f));
+                _client.Request(FrameFactory.Create(inbox, data), f => callback(f));
+                return true;
             }
             catch (Exception ex)
             {
@@ -100,7 +106,8 @@ namespace ZeroLevel.Network
         {
             try
             {
-                return _client.Request(FrameFactory.Create(inbox), f => callback(MessageSerializer.DeserializeCompatible<Tresponse>(f)));
+                _client.Request(FrameFactory.Create(inbox), f => callback(MessageSerializer.DeserializeCompatible<Tresponse>(f)));
+                return true;
             }
             catch (Exception ex)
             {
@@ -113,7 +120,8 @@ namespace ZeroLevel.Network
         {
             try
             {
-                return _client.Request(FrameFactory.Create(BaseSocket.DEFAULT_REQUEST_INBOX), f => callback(MessageSerializer.DeserializeCompatible<Tresponse>(f)));
+                _client.Request(FrameFactory.Create(BaseSocket.DEFAULT_REQUEST_INBOX), f => callback(MessageSerializer.DeserializeCompatible<Tresponse>(f)));
+                return true;
             }
             catch (Exception ex)
             {
@@ -126,8 +134,9 @@ namespace ZeroLevel.Network
         {
             try
             {
-                return _client.Request(FrameFactory.Create(inbox, MessageSerializer.SerializeCompatible<Trequest>(request)),
+                _client.Request(FrameFactory.Create(inbox, MessageSerializer.SerializeCompatible<Trequest>(request)),
                     f => callback(MessageSerializer.DeserializeCompatible<Tresponse>(f)));
+                return true;
             }
             catch (Exception ex)
             {
@@ -140,8 +149,9 @@ namespace ZeroLevel.Network
         {
             try
             {
-                return _client.Request(FrameFactory.Create(BaseSocket.DEFAULT_REQUEST_WITHOUT_ARGS_INBOX, MessageSerializer.SerializeCompatible<Trequest>(request)),
+                _client.Request(FrameFactory.Create(BaseSocket.DEFAULT_REQUEST_WITHOUT_ARGS_INBOX, MessageSerializer.SerializeCompatible<Trequest>(request)),
                     f => callback(MessageSerializer.DeserializeCompatible<Tresponse>(f)));
+                return true;
             }
             catch (Exception ex)
             {

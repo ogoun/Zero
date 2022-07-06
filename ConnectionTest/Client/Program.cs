@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
+﻿using System.Net;
 using ZeroLevel;
 using ZeroLevel.Network;
 using ZeroLevel.Services.HashFunctions;
@@ -60,6 +57,9 @@ namespace Client
     {
         private readonly static XXHashUnsafe _hash = new XXHashUnsafe(667);
 
+        private static long _successSend = 0;
+        private static long _faultSend = 0;
+
         static void Main(string[] args)
         {
             Log.AddConsoleLogger();
@@ -67,6 +67,12 @@ namespace Client
             var address = ReadIP();
             var port = ReadPort();
             ex.RoutesStorage.Set("server", new IPEndPoint(address, port));
+
+            Sheduller.RemindEvery(TimeSpan.FromMilliseconds(300), () => 
+            {
+                Console.SetCursorPosition(0, 0);
+                Console.WriteLine($"Success/Fault network: {_successSend} / {_faultSend}");
+            });
 
             uint index = 0;
             while (true)
@@ -99,7 +105,7 @@ namespace Client
             var info = new Info { Checksum = full_checksum, Id = id, Length = length };
             if (client.Request<Info, bool>("start", info, res =>
             {
-                Log.Info($"Success start sending packet '{id}'");
+                Interlocked.Increment(ref _successSend);
             }))
             {
                 uint size = 1;
@@ -111,11 +117,15 @@ namespace Client
                     {
                         if (!res)
                         {
-                            Log.Info($"Fault server incoming packet '{id}' fragment. Offset: '{offset}'. Size: '{size}' bytes.");
+                            Interlocked.Increment(ref _faultSend);
+                        }
+                        else
+                        {
+                            Interlocked.Increment(ref _successSend);
                         }
                     }))
                     {
-                        Log.Warning($"Can't start send packet '{id}' fragment. Offset: '{offset}'. Size: '{size}' bytes. No connection");
+                        Interlocked.Increment(ref _faultSend);
                     }
                     offset += size;
                     size += 1;
@@ -124,7 +134,7 @@ namespace Client
             }
             else
             {
-                Log.Warning($"Can't start send packet '{id}'. No connection");
+                Interlocked.Increment(ref _faultSend);
             }
         }
 
@@ -135,7 +145,7 @@ namespace Client
             var info = new Info { Checksum = full_checksum, Id = id, Length = length };
             if (exchange.Request<Info, bool>("server", "start", info))
             {
-                Log.Info($"Success start sending packet '{id}'");
+                Interlocked.Increment(ref _successSend);
                 uint size = 4096;
                 uint offset = 0;
                 while (offset < payload.Length)
@@ -143,7 +153,11 @@ namespace Client
                     var fragment = GetFragment(id, payload, offset, size);
                     if (!exchange.Request<Fragment, bool>("server", "part", fragment))
                     {
-                            Log.Info($"Fault server incoming packet '{id}' fragment. Offset: '{offset}'. Size: '{size}' bytes.");
+                        Interlocked.Increment(ref _faultSend);
+                    }
+                    else
+                    {
+                        Interlocked.Increment(ref _successSend);
                     }
                     offset += size;
                 }
@@ -151,7 +165,7 @@ namespace Client
             }
             else
             {
-                Log.Warning($"Can't start send packet '{id}'. No connection");
+                Interlocked.Increment(ref _faultSend);
             }
         }
 

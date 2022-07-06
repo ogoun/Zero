@@ -2,7 +2,7 @@
 
 namespace ZeroLevel.NN.Models
 {
-    public class PredictionInput
+    public class ImagePredictionInput
     {
         public Tensor<float> Tensor;
         public OffsetBox[] Offsets;

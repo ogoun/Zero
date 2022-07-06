@@ -39,9 +39,13 @@
 
         public void SkipBreaks()
         {
-            while (EOF == false && char.IsWhiteSpace(Current)) Move();
+            while (EOF == false && (Current == '\n' || Current == '\r')) Move();
         }
 
+        public bool IsBrackets() => EOF == false && (Current == '\'' || Current == '"' || Current == '”');
+        public bool IsBreak() => EOF == false && (Current == '\n' || Current == '\r');
+        public bool IsWhiteSpace() => EOF == false && char.IsWhiteSpace(Current);
+        
         public bool MoveBack()
         {
             _position = _position - 1;
@@ -84,7 +88,7 @@
                     index++;
                 identity = _template.Substring(offset, index - offset);
             }
-            return identity.ToLowerInvariant();
+            return identity;
         }
 
         public string ReadWord()

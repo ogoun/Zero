@@ -346,7 +346,7 @@ namespace ZeroLevel.Services.Web
                 if (cursor.Current == '&')
                 {
                     cursor.Move();
-                    var identity = cursor.ReadIdentity();
+                    var identity = cursor.ReadIdentity().ToLowerInvariant();
                     cursor.MoveBack();
                     if (_entityMap.ContainsKey(identity + ";"))
                     {

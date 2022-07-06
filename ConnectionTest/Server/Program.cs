@@ -6,6 +6,7 @@ using ZeroLevel.Services.Serialization;
 
 namespace Server
 {
+    //netsh advfirewall firewall add rule name="ClientTest" dir=in action=allow protocol=TCP localport=5016
     public class Info
         : IBinarySerializable
     {

@@ -341,6 +341,27 @@ namespace ZeroLevel.Services.FileSystem
             var zipFile = Path.Combine(tmp.FullName, "zip.zip");
             File.WriteAllBytes(zipFile, data);
             ZipFile.ExtractToDirectory(zipFile, targetFolder);
+            File.Delete(zipFile);
+        }
+
+        public static void UnPackFolder(string zipFile, string targetFolder)
+        {
+            if (Directory.Exists(targetFolder))
+            {
+                try
+                {
+                    FSUtils.RemoveFolder(targetFolder, 3, 3000);
+                }
+                catch (Exception ex)
+                {
+                    Log.SystemError(ex, $"[FSUtils] Fault clean folder '{Path.GetDirectoryName(targetFolder)}'");
+                }
+            }
+            if (Directory.Exists(targetFolder) == false)
+            {
+                Directory.CreateDirectory(targetFolder);
+            }
+            ZipFile.ExtractToDirectory(zipFile, targetFolder);
         }
 
         public static void CopyDir(string sourceFolder, string targetFolder)

@@ -1,24 +1,28 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data.SQLite;
-using System.IO;
-using System.Text;
+﻿using SQLite;
+using System;
 using System.Threading;
 using ZeroLevel.Services.Serialization;
 using ZeroLevel.Services.Shedulling;
 
 namespace ZeroLevel.SqLite
 {
+    public sealed class ExpirationRecord
+    {
+        [PrimaryKey, AutoIncrement]
+        public long Id { get; set; }
+        [Indexed]
+        public long Expiration { get; set; }
+        public byte[] Data { get; set; }
+    }
+
     public sealed class SqLiteDelayDataStorage<T>
-        : BaseSqLiteDB, IDisposable
-        where T : IBinarySerializable
+        : BaseSqLiteDB<ExpirationRecord>
+        where T : class, IBinarySerializable, new()
     {
         #region Fields
 
         private readonly IExpirationSheduller _sheduller;
         private readonly Func<T, DateTime> _expire_date_calc_func;
-        private readonly SQLiteConnection _db;
-        private readonly string _table_name;
         private readonly ReaderWriterLockSlim _rwLock = new ReaderWriterLockSlim();
 
         #endregion Fields
@@ -28,14 +32,10 @@ namespace ZeroLevel.SqLite
         public SqLiteDelayDataStorage(string database_file_path,
             Func<T, bool> expire_callback,
             Func<T, DateTime> expire_date_calc_func)
+            : base(database_file_path)
         {
             this._expire_date_calc_func = expire_date_calc_func;
-            var path = PrepareDb(database_file_path);
-            _table_name = "expiration";
-            _db = new SQLiteConnection($"Data Source={path};Version=3;");
-            _db.Open();
-            Execute($"CREATE TABLE IF NOT EXISTS {_table_name} (id INTEGER PRIMARY KEY AUTOINCREMENT, body BLOB, expirationtime INTEGER)", _db);
-            Execute($"CREATE INDEX IF NOT EXISTS expirationtime_index ON {_table_name} (expirationtime)", _db);
+            CreateTable();
             _sheduller = Sheduller.CreateExpirationSheduller();
             OnExpire += expire_callback;
             Preload();
@@ -64,13 +64,8 @@ namespace ZeroLevel.SqLite
             long id = -1;
             try
             {
-                Execute($"INSERT INTO {_table_name} ('body', 'expirationtime') values (@body, @expirationtime)", _db,
-                    new SQLiteParameter[]
-                    {
-                        new SQLiteParameter("body", MessageSerializer.Serialize(packet)),
-                        new SQLiteParameter("expirationtime", expirationTime)
-                    });
-                id = (long)ExecuteScalar("select last_insert_rowid();", _db);
+                var r = Append(new ExpirationRecord { Expiration = expirationTime, Data = MessageSerializer.Serialize(packet) });
+                id = r.Id;
             }
             catch (Exception ex)
             {
@@ -91,17 +86,13 @@ namespace ZeroLevel.SqLite
 
         private void Preload()
         {
-            SQLiteDataReader reader;
             _rwLock.EnterReadLock();
             try
             {
-                reader = Read($"SELECT id, expirationtime FROM {_table_name}", _db);
-                while (reader.Read())
+                foreach (var record in SelectAll())
                 {
-                    var id = reader.GetInt64(0);
-                    _sheduller.Push(new DateTime(reader.GetInt64(1), DateTimeKind.Local), (k) => Pop(id));
+                    _sheduller.Push(new DateTime(record.Expiration, DateTimeKind.Local), (k) => Pop(record.Id));
                 }
-                reader.Close();
             }
             catch (Exception ex)
             {
@@ -111,7 +102,6 @@ namespace ZeroLevel.SqLite
             {
                 _rwLock.ExitReadLock();
             }
-            reader = null;
         }
 
         private void Pop(long id)
@@ -122,7 +112,7 @@ namespace ZeroLevel.SqLite
                 _rwLock.EnterReadLock();
                 try
                 {
-                    body = (byte[])ExecuteScalar($"SELECT body FROM {_table_name} WHERE id=@id", _db, new SQLiteParameter[] { new SQLiteParameter("id", id) });
+                    body = Single(r=>r.Id == id)?.Data;
                 }
                 catch (Exception ex)
                 {
@@ -161,8 +151,7 @@ namespace ZeroLevel.SqLite
             _rwLock.EnterWriteLock();
             try
             {
-                Execute($"DELETE FROM {_table_name} WHERE id = @id", _db,
-                    new SQLiteParameter[] { new SQLiteParameter("id", id) });
+                Delete(r => r.Id == id);
             }
             catch (Exception ex)
             {
@@ -178,17 +167,8 @@ namespace ZeroLevel.SqLite
 
         #region IDisposable
 
-        public void Dispose()
+        protected override void DisposeStorageData()
         {
-            try
-            {
-                _db?.Close();
-                _db?.Dispose();
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "[SqLiteDelayDataStorage] Fault close db connection");
-            }
             _sheduller.Dispose();
         }
 

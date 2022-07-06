@@ -2,7 +2,7 @@
 {
     public class ImagePreprocessorOptions
     {
-        private const float PIXEL_NORMALIZATION_SCALE = 1f / 255f;
+        private const float PIXEL_NORMALIZATION_SCALE = 1.0f / 255.0f;
         public ImagePreprocessorOptions(int inputWidth, int inputHeight, PredictorChannelType channelType)
         {
             this.InputWidth = inputWidth;

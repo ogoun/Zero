@@ -1,7 +1,6 @@
 ﻿using Microsoft.ML.OnnxRuntime;
 using Microsoft.ML.OnnxRuntime.Tensors;
 using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.PixelFormats;
 using ZeroLevel.NN.Models;
 
 namespace ZeroLevel.NN
@@ -18,6 +17,7 @@ namespace ZeroLevel.NN
                 try
                 {
                     var so = SessionOptions.MakeSessionOptionWithCudaProvider(0);
+                    so.LogSeverityLevel = OrtLoggingLevel.ORT_LOGGING_LEVEL_VERBOSE;
                     so.GraphOptimizationLevel = GraphOptimizationLevel.ORT_ENABLE_ALL;
                     _session = new InferenceSession(modelPath, so);
                 }
@@ -64,7 +64,7 @@ namespace ZeroLevel.NN
                 vector[i] *= inverseLength;
             }
         }
-        protected PredictionInput[] MakeInputBatch(Image<Rgb24> image, ImagePreprocessorOptions options)
+        protected ImagePredictionInput[] MakeInputBatch(Image image, ImagePreprocessorOptions options)
         {
             return ImagePreprocessor.ToTensors(image, options);
         }
@@ -73,6 +73,22 @@ namespace ZeroLevel.NN
         {
             var input =  ImagePreprocessor.ToTensors(image, options);
             return input[0].Tensor;
+        }
+
+        protected int Argmax(float[] embedding)
+        {
+            if (embedding.Length == 0) return -1;
+            var im = 0;
+            var max = embedding[0];
+            for (var i = 1; i < embedding.Length; i++)
+            {
+                if (embedding[i] > max)
+                {
+                    im = i;
+                    max = embedding[i];
+                }
+            }
+            return im;
         }
 
         public void Dispose()

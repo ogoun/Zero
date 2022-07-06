@@ -1,77 +1,94 @@
-﻿using System;
-using System.Data.SQLite;
+﻿using SQLite;
+using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq.Expressions;
 using ZeroLevel.Services.FileSystem;
 
 namespace ZeroLevel.SqLite
 {
-    public abstract class BaseSqLiteDB
+    public abstract class BaseSqLiteDB<T>
+        : IDisposable
+        where T : class, new()
     {
-        #region Helpers
-        protected static bool HasColumn(SQLiteDataReader dr, string columnName)
+        protected SQLiteConnection _db;
+        public BaseSqLiteDB(string name)
         {
-            for (int i = 0; i < dr.FieldCount; i++)
-            {
-                if (dr.GetName(i).Equals(columnName, StringComparison.InvariantCultureIgnoreCase))
-                    return true;
-            }
-            return false;
-        }
-        protected static Tr Read<Tr>(SQLiteDataReader reader, int index)
-        {
-            if (reader == null || reader.FieldCount <= index || reader[index] == DBNull.Value) return default;
-            Type t;
-            if ((t = Nullable.GetUnderlyingType(typeof(Tr))) != null)
-            {
-                return (Tr)Convert.ChangeType(reader[index], t);
-            }
-            return (Tr)Convert.ChangeType(reader[index], typeof(Tr));
-        }
-        protected static Tr Read<Tr>(SQLiteDataReader reader, string name)
-        {
-            if (reader == null || !HasColumn(reader, name) || reader[name] == DBNull.Value) return default;
-            Type t;
-            if ((t = Nullable.GetUnderlyingType(typeof(Tr))) != null)
-            {
-                return (Tr)Convert.ChangeType(reader[name], t);
-            }
-            return (Tr)Convert.ChangeType(reader[name], typeof(Tr));
+            _db = new SQLiteConnection(PrepareDb(name));
         }
 
-        protected static void Execute(string query, SQLiteConnection connection, SQLiteParameter[] parameters = null)
+        public T Append(T record)
         {
-            using (var cmd = new SQLiteCommand(query, connection))
-            {
-                if (parameters != null && parameters.Length > 0)
-                {
-                    cmd.Parameters.AddRange(parameters);
-                }
-                cmd.ExecuteNonQuery();
-            }
+            _db.Insert(record);
+            return record;
         }
 
-        protected static object ExecuteScalar(string query, SQLiteConnection connection, SQLiteParameter[] parameters = null)
+        public void CreateTable()
         {
-            using (var cmd = new SQLiteCommand(query, connection))
-            {
-                if (parameters != null && parameters.Length > 0)
-                {
-                    cmd.Parameters.AddRange(parameters);
-                }
-                return cmd.ExecuteScalar();
-            }
+            _db.CreateTable<T>();
         }
 
-        protected static SQLiteDataReader Read(string query, SQLiteConnection connection, SQLiteParameter[] parameters = null)
+        public void DropTable()
         {
-            using (var cmd = new SQLiteCommand(query, connection))
+            _db.DropTable<T>();
+        }
+
+        public IEnumerable<T> SelectAll()
+        {
+            return _db.Table<T>();
+        }
+
+        public IEnumerable<T> SelectBy(Expression<Func<T, bool>> predicate)
+        {
+            return _db.Table<T>().Where(predicate);
+        }
+
+        public T Single(Expression<Func<T, bool>> predicate)
+        {
+            return _db.Table<T>().FirstOrDefault(predicate);
+        }
+
+        public T Single<U>(Expression<Func<T, bool>> predicate, Expression<Func<T, U>> orderBy, bool desc = false)
+        {
+            if (desc)
             {
-                if (parameters != null && parameters.Length > 0)
-                {
-                    cmd.Parameters.AddRange(parameters);
-                }
-                return cmd.ExecuteReader();
+                return _db.Table<T>().Where(predicate).OrderByDescending(orderBy).FirstOrDefault();
             }
+            return _db.Table<T>().Where(predicate).OrderBy(orderBy).FirstOrDefault();
+        }
+
+        public T Single<U>(Expression<Func<T, U>> orderBy, bool desc = false)
+        {
+            if (desc)
+            {
+                return _db.Table<T>().OrderByDescending(orderBy).FirstOrDefault();
+            }
+            return _db.Table<T>().OrderBy(orderBy).FirstOrDefault();
+        }
+
+        public IEnumerable<T> SelectBy(int N, Expression<Func<T, bool>> predicate)
+        {
+            return _db.Table<T>().Where(predicate).Take(N);
+        }
+
+        public long Count()
+        {
+            return _db.Table<T>().Count();
+        }
+
+        public long Count(Expression<Func<T, bool>> predicate)
+        {
+            return _db.Table<T>().Count(predicate);
+        }
+
+        public int Delete(Expression<Func<T, bool>> predicate)
+        {
+            return _db.Table<T>().Delete(predicate);
+        }
+
+        public void Update(T record)
+        {
+            _db.Update(record);
         }
 
         protected static string PrepareDb(string path)
@@ -80,13 +97,23 @@ namespace ZeroLevel.SqLite
             {
                 path = Path.Combine(FSUtils.GetAppLocalDbDirectory(), path);
             }
-            if (!File.Exists(path))
-            {
-                SQLiteConnection.CreateFile(path);
-            }
             return Path.GetFullPath(path);
         }
 
-        #endregion Helpers
+        protected abstract void DisposeStorageData();
+
+        public void Dispose()
+        {
+            DisposeStorageData();
+            try
+            {
+                _db?.Close();
+                _db?.Dispose();
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "[BaseSqLiteDB] Fault close db connection");
+            }            
+        }
     }
 }

@@ -13,9 +13,9 @@ Based on System.Data.SQLite.Core</Description>
     <PackageIconUrl />
     <Platforms>AnyCPU;x64;x86</Platforms>
     <PackageReleaseNotes>Move to new ZeroLevel version</PackageReleaseNotes>
-    <AssemblyVersion>1.0.3.0</AssemblyVersion>
-    <FileVersion>1.0.3.0</FileVersion>
-    <Version>1.0.3.0</Version>
+    <AssemblyVersion>1.0.4.0</AssemblyVersion>
+    <FileVersion>1.0.4.0</FileVersion>
+    <Version>1.0.4.0</Version>
     <OutputType>Library</OutputType>
   </PropertyGroup>
 
@@ -27,11 +27,17 @@ Based on System.Data.SQLite.Core</Description>
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Data.SQLite.Core" Version="1.0.115" />
+    <PackageReference Include="sqlite-net-static" Version="1.8.116" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\ZeroLevel\ZeroLevel.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="sqlite3.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>
