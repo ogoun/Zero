@@ -1,6 +1,4 @@
-﻿using System.Data.SQLite;
-using System.Threading;
-using ZeroLevel.SqLite;
+﻿using System.Threading;
 
 namespace ZeroLevel.EventServer
 {

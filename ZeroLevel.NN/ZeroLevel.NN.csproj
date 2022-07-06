@@ -7,7 +7,7 @@
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
     <DebugType>embedded</DebugType>
     <ErrorReport>none</ErrorReport>
-    <Version>1.0.0.2</Version>
+    <Version>1.0.0.3</Version>
     <Company>Ogoun</Company>
     <Authors>Ogoun</Authors>
     <Copyright>Copyright Ogoun 2022</Copyright>
