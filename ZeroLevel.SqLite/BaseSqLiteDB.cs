@@ -17,20 +17,19 @@ namespace ZeroLevel.SqLite
             _db = new SQLiteConnection(PrepareDb(name));
         }
 
-        public T Append(T record)
+        public int Append(T record)
         {
-            _db.Insert(record);
-            return record;
+            return _db.Insert(record);
         }
 
-        public void CreateTable()
+        public CreateTableResult CreateTable()
         {
-            _db.CreateTable<T>();
+            return _db.CreateTable<T>();
         }
 
-        public void DropTable()
+        public int DropTable()
         {
-            _db.DropTable<T>();
+            return _db.DropTable<T>();
         }
 
         public IEnumerable<T> SelectAll()
@@ -86,9 +85,9 @@ namespace ZeroLevel.SqLite
             return _db.Table<T>().Delete(predicate);
         }
 
-        public void Update(T record)
+        public int Update(T record)
         {
-            _db.Update(record);
+            return _db.Update(record);
         }
 
         protected static string PrepareDb(string path)

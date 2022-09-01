@@ -496,8 +496,6 @@ namespace ZeroLevel.DependencyInjection
 
         #endregion Register
 
-
-
         #region Register with parameters
 
         public void ParameterizedRegister<TContract, TImplementation>(object[] constructorParameters)
