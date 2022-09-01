@@ -50,7 +50,6 @@ namespace ZeroLevel.HNSW
 
         public IDictionary<int, List<int>> KNearest(int k, IDictionary<int, SearchContext> contexts)
         {
-            var partial_k = 1 + (k / _graphs.Count);
             var result = new Dictionary<int, List<int>>();
             int step = 1;
             foreach (var graph in _graphs)
@@ -59,12 +58,8 @@ namespace ZeroLevel.HNSW
                 var context = contexts[graph.Key];
                 if (context.EntryPoints != null)
                 {
+                    var partial_k = 1 + (int)(context.PercentInTotal * k);
                     var r = graph.Value.KNearest(partial_k, context) as HashSet<int>;
-                    if (r.Count < partial_k)
-                    {
-                        var diff = partial_k - r.Count;
-                        partial_k += diff / (_graphs.Count - step);
-                    }
                     result[graph.Key].AddRange(r);
                 }
                 step++;

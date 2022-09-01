@@ -20,10 +20,27 @@ namespace ZeroLevel.HNSW
         private Mode _mode;
 
         public Mode NodeCheckMode => _mode;
+        public double PercentInTotal { get; private set; } = 0;
+        public long AvaliableNodesCount => _activeNodes?.Count ?? 0;
 
         public SearchContext()
         {
             _mode = Mode.None;
+        }
+
+        public SearchContext CaclulatePercentage(long total)
+        {
+            if (total > 0)
+            {
+                PercentInTotal = ((_activeNodes.Count * 100d) / (double)total) / 100.0d;
+            }
+            return this;
+        }
+
+        public SearchContext SetPercentage(double percent)
+        {
+            PercentInTotal = percent;
+            return this;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

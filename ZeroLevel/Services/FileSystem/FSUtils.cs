@@ -243,6 +243,31 @@ namespace ZeroLevel.Services.FileSystem
             return new string(result, 0, index);
         }
 
+        /// <summary>
+        /// Removes invalid characters from the passed file name
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns></returns>
+        public static string FileNameCorrection(string path, char replaceChar)
+        {
+            if (path == null) return string.Empty;
+            var result = new char[path.Length];
+            var index = 0;
+            foreach (char c in path)
+            {
+                if (_invalid_filename_characters.IndexOf(c) >= 0)
+                {
+                    result[index] = replaceChar;
+                }
+                else
+                {
+                    result[index] = c;
+                }
+                index++;
+            }
+            return new string(result, 0, index);
+        }
+
         #endregion FileName & Path correction
 
         /// <summary>

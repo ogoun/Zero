@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using ZeroLevel.Services.Serialization;
 
 namespace ZeroLevel.HNSW
@@ -76,6 +77,10 @@ namespace ZeroLevel.HNSW
                         }
                         actives[c].Add(_mappers[c][node]);
                     }
+                    else
+                    {
+                        Log.Warning($"Active node {node} is not included in graphs!");
+                    }
                 }
             }
             if (entryPoints != null)
@@ -91,6 +96,10 @@ namespace ZeroLevel.HNSW
                         }
                         entries[c].Add(_mappers[c][entryPoint]);
                     }
+                    else
+                    {
+                        Log.Warning($"Entry point {entryPoint} is not included in graphs!");
+                    }
                 }
             }
             var result = new Dictionary<int, SearchContext>();
@@ -99,6 +108,23 @@ namespace ZeroLevel.HNSW
                 var active = actives.GetValueOrDefault(pair.Key);
                 var entry = entries.GetValueOrDefault(pair.Key);
                 result.Add(pair.Key, new SearchContext().SetActiveNodes(active).SetEntryPointsNodes(entry));
+            }
+            var total = result.Values.Sum(v => v.AvaliableNodesCount);
+            if (total > 0)
+            {
+                foreach (var pair in result)
+                {
+                    pair.Value.CaclulatePercentage(total);
+                }
+            }
+            else
+            {
+                //total = result.Values.Sum(v => v.EntryPoints.Count());
+                foreach (var pair in result)
+                {
+                    //var p = (double)pair.Value.EntryPoints.Count() / (double)total;
+                    pair.Value.SetPercentage(0.2d);
+                }
             }
             return result;
         }

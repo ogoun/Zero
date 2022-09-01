@@ -91,10 +91,10 @@ namespace ZeroLevel.HNSW
                 int count = reader.ReadInt32(); // Vectors count
                 for (int i = 0; i < count; i++)
                 {
-                    reader.ReadCompatible<TItem>(); //  Vector
+                    var v = reader.ReadCompatible<TItem[]>(); //  Vector
                 }
 
-                reader.ReadInt32(); //  countLayers
+                var lc = reader.ReadInt32(); //  countLayers
                 _links.Deserialize(reader); // deserialize only base layer and skip another
             }
         }
