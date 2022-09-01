@@ -49,11 +49,11 @@ namespace ZeroLevel.Qdrant
         /// <param name="distance">Cosine or Dot or Euclid</param>
         /// <param name="vector_size">Count of elements in vectors</param>
         /// <returns></returns>
-        public async Task<InvokeResult<OperationResponse>> CreateCollection(string name, string distance, int vector_size)
+        public async Task<InvokeResult<OperationResponse>> CreateCollection(string name, string distance, int vector_size, bool? on_disk_payload)
         {
             try
             {
-                var collection = new CreateCollectionReqeust(name, distance, vector_size);
+                var collection = new CreateCollectionReqeust(name, distance, vector_size, on_disk_payload);
                 var json = JsonConvert.SerializeObject(collection);
                 var data = new StringContent(json, Encoding.UTF8, "application/json");
                 var url = $"/collections";
