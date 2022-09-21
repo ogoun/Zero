@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading;
 
 namespace ZeroLevel.Services.FileSystem
 {
@@ -30,7 +31,7 @@ namespace ZeroLevel.Services.FileSystem
 
         }
 
-        public IEnumerable<IEnumerable<T>> ReadBatches(int batchSize)
+        public IEnumerable<T[]> ReadBatches(int batchSize)
         {
             var buffer = new T[batchSize];
             var buffer_index = 0;
@@ -48,6 +49,7 @@ namespace ZeroLevel.Services.FileSystem
                             if (buffer_index >= batchSize)
                             {
                                 buffer_index = 0;
+                                Thread.MemoryBarrier();
                                 yield return buffer;
                             }
                         }
