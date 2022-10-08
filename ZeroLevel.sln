@@ -19,10 +19,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ZeroLevel.SQL", "ZeroLevel.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ZeroLevel.Logger", "ZeroLevel.Logger\ZeroLevel.Logger.csproj", "{D1C061DB-3565-43C3-B8F3-628DE4908750}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ZeroLevel.SqLite", "ZeroLevel.SqLite\ZeroLevel.SqLite.csproj", "{5B545DD6-8573-4CDD-B32D-9B0AA2AC2F9A}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ZeroLevel.EventsServer", "ZeroLevel.EventsServer\ZeroLevel.EventsServer.csproj", "{04219F58-4D3A-4707-82A8-4DDDC9882969}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "WPFExamples", "WPFExamples", "{7CCA0125-7A96-48FA-9F0D-BCF7EAD8FF9D}"
 	ProjectSection(SolutionItems) = preProject
 		WPFExamples\Controls\AlignableWrapPanel.cs = WPFExamples\Controls\AlignableWrapPanel.cs
@@ -67,7 +63,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Client", "ConnectionTest\Cl
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "AutoLoader", "AutoLoader", "{2EF83101-63BC-4397-A005-A747189143D4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AppContainer", "AutoLoader\AppContainer\AppContainer.csproj", "{9DE345EA-955B-41A8-93AF-277C0B5A9AC5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AppContainer", "AutoLoader\AppContainer\AppContainer.csproj", "{9DE345EA-955B-41A8-93AF-277C0B5A9AC5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -151,30 +147,6 @@ Global
 		{D1C061DB-3565-43C3-B8F3-628DE4908750}.Release|x64.Build.0 = Release|x64
 		{D1C061DB-3565-43C3-B8F3-628DE4908750}.Release|x86.ActiveCfg = Release|x86
 		{D1C061DB-3565-43C3-B8F3-628DE4908750}.Release|x86.Build.0 = Release|x86
-		{5B545DD6-8573-4CDD-B32D-9B0AA2AC2F9A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{5B545DD6-8573-4CDD-B32D-9B0AA2AC2F9A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{5B545DD6-8573-4CDD-B32D-9B0AA2AC2F9A}.Debug|x64.ActiveCfg = Debug|x64
-		{5B545DD6-8573-4CDD-B32D-9B0AA2AC2F9A}.Debug|x64.Build.0 = Debug|x64
-		{5B545DD6-8573-4CDD-B32D-9B0AA2AC2F9A}.Debug|x86.ActiveCfg = Debug|x86
-		{5B545DD6-8573-4CDD-B32D-9B0AA2AC2F9A}.Debug|x86.Build.0 = Debug|x86
-		{5B545DD6-8573-4CDD-B32D-9B0AA2AC2F9A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{5B545DD6-8573-4CDD-B32D-9B0AA2AC2F9A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{5B545DD6-8573-4CDD-B32D-9B0AA2AC2F9A}.Release|x64.ActiveCfg = Release|x64
-		{5B545DD6-8573-4CDD-B32D-9B0AA2AC2F9A}.Release|x64.Build.0 = Release|x64
-		{5B545DD6-8573-4CDD-B32D-9B0AA2AC2F9A}.Release|x86.ActiveCfg = Release|x86
-		{5B545DD6-8573-4CDD-B32D-9B0AA2AC2F9A}.Release|x86.Build.0 = Release|x86
-		{04219F58-4D3A-4707-82A8-4DDDC9882969}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{04219F58-4D3A-4707-82A8-4DDDC9882969}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{04219F58-4D3A-4707-82A8-4DDDC9882969}.Debug|x64.ActiveCfg = Debug|x64
-		{04219F58-4D3A-4707-82A8-4DDDC9882969}.Debug|x64.Build.0 = Debug|x64
-		{04219F58-4D3A-4707-82A8-4DDDC9882969}.Debug|x86.ActiveCfg = Debug|x86
-		{04219F58-4D3A-4707-82A8-4DDDC9882969}.Debug|x86.Build.0 = Debug|x86
-		{04219F58-4D3A-4707-82A8-4DDDC9882969}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{04219F58-4D3A-4707-82A8-4DDDC9882969}.Release|Any CPU.Build.0 = Release|Any CPU
-		{04219F58-4D3A-4707-82A8-4DDDC9882969}.Release|x64.ActiveCfg = Release|x64
-		{04219F58-4D3A-4707-82A8-4DDDC9882969}.Release|x64.Build.0 = Release|x64
-		{04219F58-4D3A-4707-82A8-4DDDC9882969}.Release|x86.ActiveCfg = Release|x86
-		{04219F58-4D3A-4707-82A8-4DDDC9882969}.Release|x86.Build.0 = Release|x86
 		{3496A688-0749-48C2-BD60-ABB42A5C17C9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{3496A688-0749-48C2-BD60-ABB42A5C17C9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3496A688-0749-48C2-BD60-ABB42A5C17C9}.Debug|x64.ActiveCfg = Debug|x64

@@ -6,7 +6,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ZeroLevel.SqLite\ZeroLevel.SqLite.csproj" />
     <ProjectReference Include="..\ZeroLevel\ZeroLevel.csproj" />
   </ItemGroup>
 

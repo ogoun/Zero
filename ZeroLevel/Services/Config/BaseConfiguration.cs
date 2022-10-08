@@ -4,13 +4,32 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Net;
+using System.Reflection;
 using ZeroLevel.Services.Collections;
+using ZeroLevel.Services.Invokation;
 using ZeroLevel.Services.ObjectMapping;
 using ZeroLevel.Services.Reflection;
 using ZeroLevel.Services.Serialization;
 
 namespace ZeroLevel.Services.Config
 {
+    public interface IConfigRecordParser
+    {
+        object Parse(string line);
+    }
+
+    public class ConfigRecordParseAttribute
+        : Attribute
+    {
+        public IConfigRecordParser Parser { get; set; }
+
+        public ConfigRecordParseAttribute(Type parserType)
+        {
+            if (parserType == null) throw new ArgumentNullException(nameof(parserType));
+            Parser = (IConfigRecordParser)Activator.CreateInstance(parserType);
+        }
+    }
+
     /// <summary>
     /// Base configuration
     /// </summary>
@@ -477,119 +496,106 @@ namespace ZeroLevel.Services.Config
             var instance = TypeHelpers.CreateInitialState(type);
             mapper.TraversalMembers(member =>
             {
-                if (Contains(member.Name))
+                int count = Count(member.Name);
+                if (count > 0)
                 {
-                    int count = Count(member.Name);
-                    switch (count)
+                    var values = this.Items(member.Name);
+                    IConfigRecordParser parser = member.Original.GetCustomAttribute<ConfigRecordParseAttribute>()?.Parser;
+                    if (TypeHelpers.IsArray(member.ClrType) && member.ClrType.GetArrayRank() == 1)
                     {
-                        case 0: return;
-                        case 1: // field
-                            if (TypeHelpers.IsArray(member.ClrType)
-                                && member.ClrType.GetArrayRank() == 1)
+                        int index = 0;
+                        var itemType = member.ClrType.GetElementType();
+                        if (parser == null)
+                        {
+                            var elements = values.SelectMany(v => SplitRange(v, itemType)).ToArray();
+                            var arrayBuilder = CollectionFactory.CreateArray(itemType, elements.Length);
+                            foreach (var item in elements)
                             {
-                                var itemType = member.ClrType.GetElementType();
-                                var elements = SplitRange(First(member.Name), itemType).ToArray();
-                                var arrayBuilder = CollectionFactory.CreateArray(itemType, elements.Length);
-                                int index = 0;
-                                foreach (var item in elements)
-                                {
-                                    arrayBuilder.Set(item, index);
-                                    index++;
-                                }
-                                member.Setter(instance, arrayBuilder.Complete());
+                                arrayBuilder.Set(item, index);
+                                index++;
                             }
-                            else if (TypeHelpers.IsEnumerable(member.ClrType) && member.ClrType != typeof(string))
+                            member.Setter(instance, arrayBuilder.Complete());
+                        }
+                        else
+                        {
+                            var elements = values.Select(v => parser.Parse(v)).ToArray();
+                            var arrayBuilder = CollectionFactory.CreateArray(itemType, elements.Length);
+                            foreach (var item in elements)
                             {
-                                var itemType = member.ClrType.GenericTypeArguments.First();
-                                var collectionBuilder = CollectionFactory.Create(itemType);
-                                foreach (var item in SplitRange(First(member.Name), itemType))
-                                {
-                                    collectionBuilder.Append(item);
-                                }
-                                member.Setter(instance, collectionBuilder.Complete());
+                                arrayBuilder.Set(item, index);
+                                index++;
                             }
-                            else if (TypeHelpers.IsEnum(member.ClrType))
+                            member.Setter(instance, arrayBuilder.Complete());
+                        }
+                    }
+                    else if (TypeHelpers.IsEnumerable(member.ClrType) && member.ClrType != typeof(string))
+                    {
+                        var itemType = member.ClrType.GenericTypeArguments.First();
+                        var collectionBuilder = CollectionFactory.Create(itemType);
+                        if (parser == null)
+                        {
+                            var elements = values.SelectMany(v => SplitRange(v, itemType)).ToArray();
+                            foreach (var item in elements)
                             {
-                                var value = Enum.Parse(member.ClrType, First(member.Name));
+                                collectionBuilder.Append(item);
+                            }
+                        }
+                        else
+                        {
+                            var elements = values.Select(v => parser.Parse(v)).ToArray();
+                            foreach (var item in elements)
+                            {
+                                collectionBuilder.Append(item);
+                            }
+                        }
+                        member.Setter(instance, collectionBuilder.Complete());
+                    }
+                    else
+                    {
+                        var single = values.First();
+                        if (parser != null)
+                        {
+                            member.Setter(instance, parser.Parse(single));
+                        }
+                        else
+                        {
+                            if (TypeHelpers.IsEnum(member.ClrType))
+                            {
+                                var value = Enum.Parse(member.ClrType, single);
                                 member.Setter(instance, value);
                             }
                             else if (TypeHelpers.IsUri(member.ClrType))
                             {
-                                var uri = new Uri(First(member.Name));
+                                var uri = new Uri(single);
                                 member.Setter(instance, uri);
                             }
                             else if (TypeHelpers.IsIpEndPoint(member.ClrType))
                             {
-                                var ep = ZeroLevel.Network.NetUtils.CreateIPEndPoint(First(member.Name));
+                                var ep = ZeroLevel.Network.NetUtils.CreateIPEndPoint(single);
                                 member.Setter(instance, ep);
                             }
                             else if (member.ClrType == typeof(IPAddress))
                             {
-                                var ip = IPAddress.Parse(First(member.Name));
+                                var ip = IPAddress.Parse(single);
                                 member.Setter(instance, ip);
                             }
                             else
                             {
-                                var item = First(member.Name);
                                 var itemType = member.ClrType;
-                                member.Setter(instance, StringToTypeConverter.TryConvert(item, itemType));
+                                member.Setter(instance, StringToTypeConverter.TryConvert(single, itemType));
                             }
-                            break;
-                        default:    // array, or first
-                            if (TypeHelpers.IsArray(member.ClrType)
-                            && member.ClrType.GetArrayRank() == 1)
-                            {
-                                //throw new NotSupportedException("Multidimensions array not supported");
-                                var itemType = member.ClrType.GetElementType();
-                                if (itemType == typeof(string))
-                                {
-                                    var array = Items(member.Name).ToArray();
-                                    member.Setter(instance, array);
-                                }
-                                else
-                                {
-                                    var arrayBuilder = CollectionFactory.CreateArray(itemType, count);
-                                    int index = 0;
-                                    foreach (var item in Items(member.Name))
-                                    {
-                                        arrayBuilder.Set(StringToTypeConverter.TryConvert(item, itemType), index);
-                                        index++;
-                                    }
-                                    member.Setter(instance, arrayBuilder.Complete());
-                                }
-                            }
-                            else if (typeof(string) != member.ClrType && TypeHelpers.IsEnumerable(member.ClrType))
-                            {
-                                var itemType = member.ClrType.GenericTypeArguments.First();
-                                if (itemType == typeof(string))
-                                {
-                                    member.Setter(instance, Items(member.Name));
-                                }
-                                else
-                                {
-                                    var collectionBuilder = CollectionFactory.Create(itemType);
-                                    foreach (var item in Items(member.Name))
-                                    {
-                                        collectionBuilder.Append(StringToTypeConverter.TryConvert(item, itemType));
-                                    }
-                                    member.Setter(instance, collectionBuilder.Complete());
-                                }
-                            }
-                            else
-                            {
-                                var item = First(member.Name);
-                                var itemType = member.ClrType;
-                                member.Setter(instance, StringToTypeConverter.TryConvert(item, itemType));
-                            }
-                            break;
+                        }
                     }
                 }
             });
             return instance;
         }
+
+
         private static IEnumerable<object> SplitRange(string line, Type elementType)
         {
-            if (string.IsNullOrWhiteSpace(line)) yield return StringToTypeConverter.TryConvert(line, elementType);
+            if (string.IsNullOrWhiteSpace(line))
+                yield return StringToTypeConverter.TryConvert(line, elementType);
             foreach (var part in line.Split(','))
             {
                 if (TypeHelpers.IsNumericType(elementType) && part.IndexOf('-') >= 0)
@@ -597,6 +603,7 @@ namespace ZeroLevel.Services.Config
                     var lr = part.Split('-');
                     if (lr.Length == 2)
                     {
+                        // not use parser with range
                         long left = (long)Convert.ChangeType(StringToTypeConverter.TryConvert(lr[0], elementType), typeof(long));
                         long right = (long)Convert.ChangeType(StringToTypeConverter.TryConvert(lr[1], elementType), typeof(long));
                         for (; left <= right; left++)
