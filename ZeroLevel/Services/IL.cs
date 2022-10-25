@@ -311,4 +311,218 @@ namespace ZeroLevel.Services
         }
         #endregion
     }
+
+    public delegate object RemoteProcedureCallHandler(string contractName, string methodName, string returnTypeFullName, params object[] args);
+
+    internal static class DynamicProxyGenerator
+    {
+        #region Private Fields
+        private readonly static IDictionary<string, ModuleBuilder> _builders = new Dictionary<string, ModuleBuilder>();
+        private readonly static IDictionary<Type, Type> _types = new Dictionary<Type, Type>();
+        private readonly static object _lockObject = new object();
+        #endregion
+        /*
+        #region Public Methods
+        // Note that calling this method will cause any further
+        // attempts to generate an interface to fail
+        internal static void Save()
+        {
+            foreach (var builder in _builders.Select(b => b.Value))
+            {
+                var ass = (AssemblyBuilder)builder.Assembly;
+                try
+                {
+                    ass.Save(ass.GetName().Name + ".dll");
+                }
+                catch { }
+            }
+        }
+        #endregion
+        */
+        #region Private Methods
+        /// <summary>
+        /// Создание экземпляра прокси класса по интерфейсу <typeparamref name="T"/>
+        /// </summary>
+        /// <typeparam name="T">Интерфейс</typeparam>
+        /// <param name="rpcHandler">Обработчик вызова метода</param>
+        /// <returns>Экземпляр прокси класса</returns>
+        internal static T CreateInterfaceInstance<T>(RemoteProcedureCallHandler rpcHandler)
+        {
+            var destType = GenerateInterfaceType<T>(rpcHandler);
+            return (T)Activator.CreateInstance(destType);
+        }
+        /// <summary>
+        /// Проверка корректности начальных условий
+        /// </summary>
+        /// <param name="sourceType">Тип интерфейса</param>
+        /// <param name="mi">Метод-обработчик удаленного вызова</param>
+        private static void Validate(Type sourceType, MethodInfo mi)
+        {
+            if (!sourceType.IsInterface)
+                throw new ArgumentException("Type T is not an interface", "T");
+            if ((mi.Attributes & MethodAttributes.Public) != MethodAttributes.Public)
+                throw new ArgumentException("Method must be public.", "getter");
+        }
+        /// <summary>
+        /// Получение динамического сбощика модуля
+        /// </summary>
+        /// <param name="sourceType">Тип интерфейса</param>
+        /// <returns>ModuleBuilder</returns>
+        private static ModuleBuilder CreateModuleBuilder(Type sourceType)
+        {
+            var orginalAssemblyName = sourceType.Assembly.GetName().Name;
+            ModuleBuilder moduleBuilder;
+            if (!_builders.TryGetValue(orginalAssemblyName, out moduleBuilder))
+            {
+                var newAssemblyName = new AssemblyName(Guid.NewGuid() + "." + orginalAssemblyName);
+                var dynamicAssembly = AssemblyBuilder.DefineDynamicAssembly(newAssemblyName, AssemblyBuilderAccess.RunAndCollect);
+                moduleBuilder = dynamicAssembly.DefineDynamicModule(newAssemblyName.Name);
+                _builders.Add(orginalAssemblyName, moduleBuilder);
+            }
+            return moduleBuilder;
+        }
+        /// <summary>
+        /// Создание списка списка интерфейсов, по которому требуется создать прокси класс
+        /// В список входит указанный интерфейс <typeparamref name="T"/> и все интерфейсы от которых он унаследован
+        /// </summary>
+        /// <param name="sourceType">Тип интерфейса</param>
+        /// <returns>Список интерфейсов</returns>
+        internal static List<Type> GetDistinctInterfaces(Type sourceType)
+        {
+            var interfaces = new List<Type>();
+            IEnumerable<Type> subList = new[] { sourceType };
+            while (subList.Count() != 0)
+            {
+                interfaces.AddRange(subList);
+                subList = subList.SelectMany(i => i.GetInterfaces());
+            }
+            return interfaces.Distinct().ToList();
+        }
+        /// <summary>
+        /// Добавление нового метода в прокси тип
+        /// </summary>
+        /// <param name="typeBuilder">Сборщик типа</param>
+        /// <param name="method">Описание метода</param>
+        /// <param name="handler">Прокси метод</param>
+        /// <param name="contractName">Контракт к которому относится метод (Тип интерфейса)</param>
+        private static void AppendMethodToProxy(TypeBuilder typeBuilder, MethodInfo method, RemoteProcedureCallHandler handler, string contractName)
+        {
+            string methodName = method.Name;
+            Type retType = method.ReturnType;
+            bool hasReturnValue = retType != typeof(void);
+
+            var newMethod = typeBuilder.DefineMethod(methodName,
+                method.Attributes ^ MethodAttributes.Abstract,
+                method.CallingConvention,
+                retType,
+                method.ReturnParameter.GetRequiredCustomModifiers(),
+                method.ReturnParameter.GetOptionalCustomModifiers(),
+                method.GetParameters().Select(p => p.ParameterType).ToArray(),
+                method.GetParameters().Select(p => p.GetRequiredCustomModifiers()).ToArray(),
+                method.GetParameters().Select(p => p.GetOptionalCustomModifiers()).ToArray()
+                );
+
+            var il = newMethod.GetILGenerator();
+
+            /* Type exType = typeof(Exception);
+             ConstructorInfo exCtorInfo = exType.GetConstructor(new Type[] { typeof(string) });
+             MethodInfo exToStrMI = exType.GetMethod("ToString");
+             MethodInfo writeLineMI = typeof(Console).GetMethod("WriteLine", new Type[] { typeof(string), typeof(object) });
+             LocalBuilder tmp2 = il.DeclareLocal(exType);*/
+
+            ParameterInfo[] parameters = method.GetParameters();
+            // Массив для параметров оригинального метода
+            LocalBuilder argArray = il.DeclareLocal(typeof(object[]));
+            il.Emit(OpCodes.Ldc_I4, parameters.Length);
+            il.Emit(OpCodes.Newarr, typeof(object));
+            il.Emit(OpCodes.Stloc, argArray);
+            // Заполнение массива
+            for (int i = 0; i < parameters.Length; i++)
+            {
+                ParameterInfo info = parameters[i];
+                il.Emit(OpCodes.Ldloc, argArray);
+                il.Emit(OpCodes.Ldc_I4, i);
+                il.Emit(OpCodes.Ldarg_S, i + 1);
+                if (info.ParameterType.IsPrimitive || info.ParameterType.IsValueType)
+                    il.Emit(OpCodes.Box, info.ParameterType);
+                il.Emit(OpCodes.Stelem_Ref);
+            }
+            // Аргументы прокси-метода
+            il.Emit(OpCodes.Ldstr, contractName);
+            il.Emit(OpCodes.Ldstr, methodName);
+            if (hasReturnValue)
+            {
+                il.Emit(OpCodes.Ldstr, retType.FullName);
+            }
+            else
+            {
+                il.Emit(OpCodes.Ldstr, typeof(void).FullName);
+            }
+            il.Emit(OpCodes.Ldloc, argArray);
+            // Вызов прокси-метода
+
+            // Label exBlock = il.BeginExceptionBlock();
+            il.EmitCall(OpCodes.Call, handler.GetMethodInfo(), null);
+            /*
+            il.Emit(OpCodes.Stloc_S, tmp2);
+            il.Emit(OpCodes.Ldstr, "Caught {0}");
+            il.Emit(OpCodes.Ldloc_S, tmp2);
+            il.EmitCall(OpCodes.Callvirt, exToStrMI, null);
+            il.EmitCall(OpCodes.Call, writeLineMI, null);
+            il.Emit(OpCodes.Ldc_I4_M1);
+            il.EndExceptionBlock();   
+            */
+            // Возврат результата
+            if (hasReturnValue)
+            {
+                if (retType.IsValueType)
+                    il.Emit(OpCodes.Unbox_Any, retType);
+            }
+            else
+            {
+                il.Emit(OpCodes.Pop);
+            }
+            il.Emit(OpCodes.Ret);
+        }
+        /// <summary>
+        /// Создание прокси типа для интерфейса <typeparamref name="T"/>
+        /// </summary>
+        /// <typeparam name="T">Интерфейс</typeparam>
+        /// <param name="rpcHandler">Прокси метод, для обработки вызова реального метода</param>
+        /// <returns>Созданный тип</returns>
+        private static Type GenerateInterfaceType<T>(RemoteProcedureCallHandler rpcHandler)
+        {
+            var sourceType = typeof(T);
+            Type newType;
+            if (_types.TryGetValue(sourceType, out newType))
+                return newType;
+
+            string sourceContractFullName = sourceType.FullName;
+            // Make sure the same interface isn't implemented twice
+            lock (_lockObject)
+            {
+                if (_types.TryGetValue(sourceType, out newType))
+                    return newType;
+                // Validation
+                Validate(sourceType, rpcHandler.Method);
+                // Module and Assembly Creation
+                var moduleBuilder = CreateModuleBuilder(sourceType);
+                var assemblyName = moduleBuilder.Assembly.GetName();
+                // Create the TypeBuilder
+                var typeBuilder = moduleBuilder.DefineType(sourceType.FullName, TypeAttributes.Public | TypeAttributes.Class, typeof(object), new[] { sourceType });
+                // Enumerate interface inheritance hierarchy
+                var interfaces = GetDistinctInterfaces(sourceType);
+                // Create the methods
+                foreach (var method in interfaces.SelectMany(i => i.GetMethods()))
+                {
+                    AppendMethodToProxy(typeBuilder, method, rpcHandler, sourceContractFullName);
+                }
+                // Create and return the defined type
+                newType = typeBuilder.CreateType();
+                _types.Add(sourceType, newType);
+                return newType;
+            }
+        }
+        #endregion
+    }
 }
