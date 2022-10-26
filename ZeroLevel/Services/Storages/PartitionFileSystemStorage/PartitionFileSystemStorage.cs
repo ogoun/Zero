@@ -7,51 +7,14 @@ using System.Linq;
 using System.Threading.Tasks;
 using ZeroLevel.Services.FileSystem;
 
-namespace ZeroLevel.Services.Storages
+namespace ZeroLevel.Services.Storages.PartitionFileSystemStorage
 {
-    public class Partition<TKey>
-    {
-        public Partition(string name, Func<TKey, string> pathExtractor)
-        {
-            Name = name;
-            PathExtractor = pathExtractor;
-        }
-        public Func<TKey, string> PathExtractor { get; }
-        public string Name { get; }
-    }
-    /// <summary>
-    /// Write data to partitional data storage
-    /// </summary>
-    public interface IPartitionFileStorage<TKey, TRecord>
-    {
-        Task WriteAsync(TKey key, IEnumerable<TRecord> records);
-        Task<IEnumerable<TRecord>> CollectAsync(IEnumerable<TKey> keys);
-        void Drop(TKey key);
-    }
-
-    public interface IPartitionDataConverter<TRecord>
-    {
-        IEnumerable<TRecord> ConvertFromStorage(Stream stream);
-        void ConvertToStorage(Stream stream, IEnumerable<TRecord> data);
-    }
-
-    public class PartitionFileStorageOptions<TKey, TRecord>
-    {
-        public string RootFolder { get; set; }
-        public int MaxDegreeOfParallelism { get; set; } = Environment.ProcessorCount / 2;
-        public bool MergeFiles { get; set; } = false;
-        public int MergeFrequencyInMinutes { get; set; } = 180;
-        public bool UseCompression { get; set; } = false;
-        public IPartitionDataConverter<TRecord> DataConverter { get; set; }
-        public List<Partition<TKey>> Partitions { get; set; } = new List<Partition<TKey>>();
-    }
-
-    public class PartitionFileStorage<TKey, TRecord>
+    public class PartitionFileSystemStorage<TKey, TRecord>
         : IPartitionFileStorage<TKey, TRecord>
     {
 
-        private readonly PartitionFileStorageOptions<TKey, TRecord> _options;
-        public PartitionFileStorage(PartitionFileStorageOptions<TKey, TRecord> options)
+        private readonly PartitionFileSystemStorageOptions<TKey, TRecord> _options;
+        public PartitionFileSystemStorage(PartitionFileSystemStorageOptions<TKey, TRecord> options)
         {
             if (options.RootFolder == null)
                 throw new ArgumentNullException(nameof(options.RootFolder));
@@ -86,7 +49,7 @@ namespace ZeroLevel.Services.Storages
                 {
                     using (var stream = CreateReadStream(file))
                     {
-                        foreach (var item in _options.DataConverter.ConvertFromStorage(stream))
+                        foreach (var item in _options.DataConverter.ReadFromStorage(stream))
                         {
                             set.Add(item);
                         }
@@ -99,7 +62,7 @@ namespace ZeroLevel.Services.Storages
         {
             using (var stream = CreateWriteStream(key))
             {
-                _options.DataConverter.ConvertToStorage(stream, records);
+                _options.DataConverter.WriteToStorage(stream, records);
                 await stream.FlushAsync();
             }
         }
@@ -125,7 +88,7 @@ namespace ZeroLevel.Services.Storages
             var files = Directory.GetFiles(path);
             if (files != null && files.Length > 1)
             {
-                
+                // TODO
             }
         }
 
@@ -171,7 +134,7 @@ namespace ZeroLevel.Services.Storages
             {
                 var ms = new MemoryStream();
                 using (var compressed = new GZipStream(stream, CompressionMode.Decompress, false))
-                { 
+                {
                     compressed.CopyTo(ms);
                 }
                 ms.Position = 0;

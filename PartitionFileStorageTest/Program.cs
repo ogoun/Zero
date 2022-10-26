@@ -76,7 +76,7 @@ namespace PartitionFileStorageTest
         static void Main(string[] args)
         {
             var testDict = new Dictionary<ulong, Dictionary<DateTime, List<Record>>>();
-            var options = new PartitionFileStorageOptions<PartitionKey, Record>
+            var options = new PartitionFileSystemStorageOptions<PartitionKey, Record>
             {
                 MaxDegreeOfParallelism = 1,
                 DataConverter = new DataConverter(),
@@ -86,7 +86,7 @@ namespace PartitionFileStorageTest
             };
             options.Partitions.Add(new Partition<PartitionKey>("data", p => p.Date.ToString("yyyyMMdd")));
             options.Partitions.Add(new Partition<PartitionKey>("ctn", p => p.Ctn.ToString().PadLeft(COUNT_NUMBERS, '0')));
-            var storage = new PartitionFileStorage<PartitionKey, Record>(options);
+            var storage = new PartitionFileSystemStorage<PartitionKey, Record>(options);
 
             for (int i = 0; i < 50000; i++)
             {
