@@ -31,7 +31,7 @@ namespace ZeroLevel.Services.FileSystem
 
         }
 
-        public IEnumerable<T[]> ReadBatches(int batchSize)
+        public IEnumerable<T[]> ReadBatches(int batchSize, bool skipNull = false)
         {
             var buffer = new T[batchSize];
             var buffer_index = 0;
@@ -44,13 +44,15 @@ namespace ZeroLevel.Services.FileSystem
                         string line;
                         while ((line = sr.ReadLine()) != null)
                         {
-                            buffer[buffer_index] = _parser.Invoke(line);
+                            var value = _parser.Invoke(line);
+                            if (skipNull && value == null) continue;
+                            buffer[buffer_index] = value;
                             buffer_index++;
                             if (buffer_index >= batchSize)
-                            {
-                                buffer_index = 0;
+                            {                                
                                 Thread.MemoryBarrier();
                                 yield return buffer;
+                                buffer_index = 0;
                             }
                         }
                     }

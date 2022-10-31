@@ -37,8 +37,9 @@ namespace ZeroLevel.Services.Storages.PartitionFileSystemStorage
             FSUtils.RemoveFolder(path, 3, 500);
         }
 
-        public async Task<IEnumerable<TRecord>> CollectAsync(IEnumerable<TKey> keys)
+        public async Task<IEnumerable<TRecord>> CollectAsync(IEnumerable<TKey> keys, Func<TRecord, bool> filter = null)
         {
+            if (filter == null) filter = (_) => true;
             var pathes = keys.Safe().Select(k => GetDataPath(k));
             var files = pathes.Safe().SelectMany(p => Directory.GetFiles(p)).Where(n => n.StartsWith("__") == false);
             var set = new ConcurrentBag<TRecord>();
@@ -51,7 +52,10 @@ namespace ZeroLevel.Services.Storages.PartitionFileSystemStorage
                     {
                         foreach (var item in _options.DataConverter.ReadFromStorage(stream))
                         {
-                            set.Add(item);
+                            if (filter(item))
+                            {
+                                set.Add(item);
+                            }
                         }
                     }
                 });
@@ -68,13 +72,14 @@ namespace ZeroLevel.Services.Storages.PartitionFileSystemStorage
         }
 
         #region Private members
+        private ConcurrentDictionary<string, int> _processingPath = new ConcurrentDictionary<string, int>();
         private void MergeDataFiles()
         {
             var folders = new Stack<string>();
             folders.Push(_options.RootFolder);
             while (folders.Count > 0)
             {
-                var dir = folders.Pop();
+                var dir = folders.Pop();                
                 MergeFolder(dir);
                 foreach (var subdir in Directory.GetDirectories(dir, "*.*", SearchOption.TopDirectoryOnly))
                 {
@@ -85,6 +90,11 @@ namespace ZeroLevel.Services.Storages.PartitionFileSystemStorage
 
         private void MergeFolder(string path)
         {
+            var v = _processingPath.GetOrAdd(path, 0);
+            if (v != 0) // каталог обрабатывается в настоящий момент
+            {
+                return;
+            }
             var files = Directory.GetFiles(path);
             if (files != null && files.Length > 1)
             {

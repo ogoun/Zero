@@ -1,6 +1,7 @@
 ﻿using ZeroLevel;
 using ZeroLevel.Services.Serialization;
 using ZeroLevel.Services.Storages;
+using ZeroLevel.Services.Storages.PartitionFileSystemStorage;
 
 namespace PartitionFileStorageTest
 {
@@ -53,7 +54,7 @@ namespace PartitionFileStorageTest
         class DataConverter
             : IPartitionDataConverter<Record>
         {
-            public IEnumerable<Record> ConvertFromStorage(Stream stream)
+            public IEnumerable<Record> ReadFromStorage(Stream stream)
             {
                 var reader = new MemoryStreamReader(stream);
                 while (reader.EOS == false)
@@ -62,7 +63,7 @@ namespace PartitionFileStorageTest
                 }
             }
 
-            public void ConvertToStorage(Stream stream, IEnumerable<Record> data)
+            public void WriteToStorage(Stream stream, IEnumerable<Record> data)
             {
                 var writer = new MemoryStreamWriter(stream);
                 foreach (var record in data)
