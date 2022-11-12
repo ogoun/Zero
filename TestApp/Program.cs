@@ -1,11 +1,15 @@
-﻿namespace TestApp
+﻿using System;
+using System.Collections.Concurrent;
+
+namespace TestApp
 {
     internal static class Program
     {
         private static void Main(string[] args)
         {
-            var detector = new PersonDetector();
-            var predictions = detector.Detect(@"E:\Desktop\test\1.JPG");
+            var test = new ConcurrentDictionary<string, int>();
+            var v = test.GetOrAdd("sss", 1);
+            Console.ReadKey();
         }
     }
 }

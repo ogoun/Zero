@@ -51,6 +51,19 @@ namespace ZeroLevel.Services.Serialization
             }
         }
 
+        public static void SerializeCompatible(this MemoryStreamWriter writer, object obj)
+        {
+            var direct_seriazlizable = (obj as IBinarySerializable);
+            if (direct_seriazlizable != null)
+            {
+                direct_seriazlizable.Serialize(writer);
+            }
+            else
+            {
+                PrimitiveTypeSerializer.Serialize(writer, obj);
+            }
+        }
+
         public static byte[] SerializeCompatible<T>(T obj)
         {
             if (null == obj)

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Threading;
 
 namespace ZeroLevel.Services.FileSystem
 {
@@ -33,7 +32,7 @@ namespace ZeroLevel.Services.FileSystem
 
         public IEnumerable<T[]> ReadBatches(int batchSize, bool skipNull = false)
         {
-            var buffer = new T[batchSize];
+            T[] buffer;
             var buffer_index = 0;
             using (FileStream fs = File.Open(_filePath, FileMode.Open, FileAccess.Read, FileShare.None))
             {
@@ -42,6 +41,7 @@ namespace ZeroLevel.Services.FileSystem
                     using (StreamReader sr = new StreamReader(bs))
                     {
                         string line;
+                        buffer = new T[batchSize];
                         while ((line = sr.ReadLine()) != null)
                         {
                             var value = _parser.Invoke(line);
@@ -49,8 +49,7 @@ namespace ZeroLevel.Services.FileSystem
                             buffer[buffer_index] = value;
                             buffer_index++;
                             if (buffer_index >= batchSize)
-                            {                                
-                                Thread.MemoryBarrier();
+                            {
                                 yield return buffer;
                                 buffer_index = 0;
                             }
@@ -69,7 +68,7 @@ namespace ZeroLevel.Services.FileSystem
             }
         }
 
-        public IEnumerable<T> Read(int batchSize)
+        public IEnumerable<T> Read()
         {
             using (FileStream fs = File.Open(_filePath, FileMode.Open, FileAccess.Read, FileShare.None))
             {
