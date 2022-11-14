@@ -35,7 +35,8 @@ namespace ZeroLevel.Services.PartitionStorage
             if (searchRequest.PartitionSearchRequests?.Any() ?? false)
             {
                 var partitionsSearchInfo = searchRequest.PartitionSearchRequests.ToDictionary(r => r.Info, r => r.Keys);
-                var options = new ParallelOptions { MaxDegreeOfParallelism = _options.MaxDegreeOfParallelism };
+                //var options = new ParallelOptions { MaxDegreeOfParallelism = _options.MaxDegreeOfParallelism };
+                var options = new ParallelOptions { MaxDegreeOfParallelism = 1 };
                 await Parallel.ForEachAsync(partitionsSearchInfo, options, async (pair, _) =>
                 {
                     using (var accessor = CreateAccessor(pair.Key))

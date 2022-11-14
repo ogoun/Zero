@@ -1,7 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Text;
 using ZeroLevel.Services.PartitionStorage;
-using ZeroLevel.Services.Serialization;
 
 namespace PartitionFileStorageTest
 {
@@ -92,6 +91,7 @@ namespace PartitionFileStorageTest
         public string Msisdn;
         public HashSet<string> Msisdns;
     }
+
     internal class Program
     {
         private class Metadata
@@ -116,11 +116,12 @@ namespace PartitionFileStorageTest
                     new StoreCatalogPartition<Metadata>("Date", m => m.Date.ToString("yyyyMMdd")),
                     new StoreCatalogPartition<Metadata>("Date", m => m.Incoming ? "incoming" : "outcoming")
                 },
-                KeyComparer = (left, right) => left == right ? 0 : (left < right) ? 1 : -1
+                KeyComparer = (left, right) => left == right ? 0 : (left < right) ? -1 : 1,
             };
+            options.Index.Enabled = true;
             var store = new Store<ulong, ulong, byte[], Metadata>(options);
-            
-            
+
+
             var storeIncoming = store.CreateAccessor(new Metadata { Date = new DateTime(2022, 11, 08), Incoming = true });
             var storeOutcoming = store.CreateAccessor(new Metadata { Date = new DateTime(2022, 11, 08), Incoming = false });
             var parser = new CallRecordParser();
@@ -157,12 +158,22 @@ namespace PartitionFileStorageTest
             storeOutcoming.CompleteStoreAndRebuild();
             sw.Stop();
             Console.WriteLine($"Rebuild journal to store: {sw.ElapsedMilliseconds}ms");
+            sw.Restart();
+            storeIncoming.RebuildIndex();
+            storeOutcoming.RebuildIndex();
+            sw.Stop();
+            Console.WriteLine($"Rebuild indexes: {sw.ElapsedMilliseconds}ms");
         }
 
         private static void TestReading(string source, string root)
         {
             var options = new IStoreOptions<ulong, ulong, byte[], Metadata>
             {
+                Index = new IndexOptions
+                {
+                    Enabled = false,
+                    FileIndexCount = 64
+                },
                 RootFolder = root,
                 FilePartition = new StoreFilePartition<ulong, Metadata>("Last three digits", (ctn, date) => (ctn % 1000).ToString()),
                 MergeFunction = list =>
@@ -185,16 +196,15 @@ namespace PartitionFileStorageTest
                     new PartitionSearchRequest<ulong, Metadata>
                     {
                         Info = new Metadata { Date = new DateTime(2022, 11, 08), Incoming = true },
-                        Keys = new ulong[] { 79645090604 }
+                        Keys = new ulong[] { 79645090604, 79645100604, 79643090604 }
                     },
                     new PartitionSearchRequest<ulong, Metadata>
                     {
                         Info = new Metadata { Date = new DateTime(2022, 11, 08), Incoming = false },
-                        Keys = new ulong[] { 79645090604 }
+                        Keys = new ulong[] { 79645090604, 79645100604, 79643090604 }
                     }
                 }
             };
-
             var storeIncoming = store.CreateAccessor(new Metadata { Date = new DateTime(2022, 11, 08), Incoming = true });
             Console.WriteLine($"Incoming data files: {storeIncoming.CountDataFiles()}");
             var storeOutcoming = store.CreateAccessor(new Metadata { Date = new DateTime(2022, 11, 08), Incoming = false });
@@ -219,12 +229,77 @@ namespace PartitionFileStorageTest
             Console.WriteLine($"Search time: {sw.ElapsedMilliseconds}ms");
         }
 
+        private struct KeyIndex<TKey>
+        {
+            public TKey Key { get; set; }
+            public long Offset { get; set; }
+        }
+
+        static KeyIndex<long>[] Generate(int count)
+        {
+            var arr = new KeyIndex<long>[count];
+            for (int i = 0; i < count; i++)
+            {
+                arr[i] = new KeyIndex<long> { Key = i * 3, Offset = i * 17 };
+            }
+            return arr;
+        }
+
+        private static KeyIndex<long> BinarySearchInIndex(KeyIndex<long>[] index,
+            long key,
+            Func<long, long, int> keyComparer,
+            ref int position)
+        {
+            if (index == null || index.Length == 0)
+            {
+                return new KeyIndex<long> { Key = key, Offset = 0 };
+            }
+            int left = position;
+            int right = index.Length - 1;
+            int mid = 0;
+            long test;
+            while (left <= right)
+            {
+                mid = (int)Math.Floor((right + left) / 2d);
+                test = index[mid].Key;
+                var c = keyComparer(test, key);
+                if (c < 0)
+                {
+                    left = mid + 1;
+                }
+                else if (c > 0)
+                {
+                    right = mid - 1;
+                }
+                else
+                {
+                    position = mid;
+                    return index[mid];
+                }
+            }
+            position = mid;
+            return index[mid];
+        }
+
         static void Main(string[] args)
         {
             var root = @"H:\temp";
             var source = @"H:\319a9c31-d823-4dd1-89b0-7fb1bb9c4859.txt";
-            BuildStore(source, root);
+            //BuildStore(source, root);
             TestReading(source, root);
+
+            /*
+            Func<long, long, int> keyComparer =
+                (left, right) =>
+                    (left == right) ? 0 : (left < right) ? -1 : 1;
+            var indexes = Generate(77);
+            int position = 0;
+            for (long i = 65; i < 700; i++)
+            {
+                var ind = BinarySearchInIndex(indexes, i, keyComparer, ref position);
+                Console.WriteLine($"{i}: {ind.Offset}. [{ind.Key}]");
+            }
+            */
             Console.ReadKey();
         }
     }

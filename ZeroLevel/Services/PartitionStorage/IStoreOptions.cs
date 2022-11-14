@@ -5,6 +5,12 @@ using ZeroLevel.Services.FileSystem;
 
 namespace ZeroLevel.Services.PartitionStorage
 {
+    public class IndexOptions
+    {
+        public bool Enabled { get; set; }
+        public int FileIndexCount { get; set; } = 64;
+    }
+
     /// <summary>
     /// Options
     /// </summary>
@@ -26,7 +32,7 @@ namespace ZeroLevel.Services.PartitionStorage
         /// <summary>
         /// Maximum degree of parallelis
         /// </summary>
-        public int MaxDegreeOfParallelism { get; set; } = Environment.ProcessorCount / 2;
+        public int MaxDegreeOfParallelism { get; set; } = 64;
         /// <summary>
         /// Function for translating a list of TInput into one TValue
         /// </summary>
@@ -39,6 +45,8 @@ namespace ZeroLevel.Services.PartitionStorage
         /// File Partition
         /// </summary>
         public StoreFilePartition<TKey, TMeta> FilePartition { get; set; }
+
+        public IndexOptions Index { get; set; } = new IndexOptions { Enabled = false, FileIndexCount = 64 };
 
         internal string GetFileName(TKey key, TMeta info)
         {

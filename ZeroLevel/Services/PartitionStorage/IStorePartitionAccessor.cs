@@ -22,6 +22,10 @@ namespace ZeroLevel.Services.PartitionStorage
         /// </summary>
         void CompleteStoreAndRebuild();
         /// <summary>
+        /// Rebuild indexes
+        /// </summary>
+        void RebuildIndex();
+        /// <summary>
         /// Find in catalog partition by key
         /// </summary>
         StorePartitionKeyValueSearchResult<TKey, TValue> Find(TKey key);
@@ -29,6 +33,8 @@ namespace ZeroLevel.Services.PartitionStorage
         /// Find in catalog partition by keys
         /// </summary>
         IEnumerable<StorePartitionKeyValueSearchResult<TKey, TValue>> Find(IEnumerable<TKey> keys);
+        IEnumerable<StorePartitionKeyValueSearchResult<TKey, TValue>> Iterate();
+        IEnumerable<StorePartitionKeyValueSearchResult<TKey, TValue>> IterateKeyBacket(TKey key);
         /// <summary>
         /// Has any files
         /// </summary>
