@@ -32,13 +32,20 @@ namespace ZeroLevel.Services.PartitionStorage
             var results = new ConcurrentDictionary<TMeta, IEnumerable<StorePartitionKeyValueSearchResult<TKey, TValue>>>();
             if (searchRequest.PartitionSearchRequests?.Any() ?? false)
             {
-                var partitionsSearchInfo = searchRequest.PartitionSearchRequests.ToDictionary(r => r.Info, r => r.Keys);
-                var options = new ParallelOptions { MaxDegreeOfParallelism = _options.MaxDegreeOfParallelism };
+                var partitionsSearchInfo = searchRequest
+                    .PartitionSearchRequests
+                    .ToDictionary(r => r.Info, r => r.Keys);
+                var options = new ParallelOptions
+                {
+                    MaxDegreeOfParallelism = _options.MaxDegreeOfParallelism
+                };
                 await Parallel.ForEachAsync(partitionsSearchInfo, options, async (pair, _) =>
                 {
                     using (var accessor = CreateAccessor(pair.Key))
                     {
-                        results[pair.Key] = accessor.Find(pair.Value).ToArray();
+                        results[pair.Key] = accessor
+                            .Find(pair.Value)
+                            .ToArray();
                     }
                 });
             }

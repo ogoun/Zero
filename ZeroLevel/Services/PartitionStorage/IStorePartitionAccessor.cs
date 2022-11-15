@@ -12,6 +12,7 @@ namespace ZeroLevel.Services.PartitionStorage
     public interface IStorePartitionAccessor<TKey, TInput, TValue>
         : IDisposable
     {
+        string GetCatalogPath();
         /// <summary>
         /// Save one record
         /// </summary>
