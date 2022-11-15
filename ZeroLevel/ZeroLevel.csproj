@@ -15,7 +15,7 @@
     <RepositoryUrl>https://github.com/ogoun/Zero</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <Version>3.3.7.5</Version>
-    <FileVersion>3.3.7.4</FileVersion>
+    <FileVersion>3.3.7.5</FileVersion>
     <Platforms>AnyCPU;x64;x86</Platforms>
     <PackageIcon>zero.png</PackageIcon>
     <DebugType>full</DebugType>
