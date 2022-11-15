@@ -21,8 +21,6 @@ namespace ZeroLevel.Services.PartitionStorage
             }
         }
 
-
-
         public IStorePartitionAccessor<TKey, TInput, TValue> CreateAccessor(TMeta info)
         {
             return new StorePartitionAccessor<TKey, TInput, TValue, TMeta>(_options, info);
@@ -35,8 +33,7 @@ namespace ZeroLevel.Services.PartitionStorage
             if (searchRequest.PartitionSearchRequests?.Any() ?? false)
             {
                 var partitionsSearchInfo = searchRequest.PartitionSearchRequests.ToDictionary(r => r.Info, r => r.Keys);
-                //var options = new ParallelOptions { MaxDegreeOfParallelism = _options.MaxDegreeOfParallelism };
-                var options = new ParallelOptions { MaxDegreeOfParallelism = 1 };
+                var options = new ParallelOptions { MaxDegreeOfParallelism = _options.MaxDegreeOfParallelism };
                 await Parallel.ForEachAsync(partitionsSearchInfo, options, async (pair, _) =>
                 {
                     using (var accessor = CreateAccessor(pair.Key))
