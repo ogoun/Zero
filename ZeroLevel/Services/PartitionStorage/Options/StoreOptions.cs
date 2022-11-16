@@ -6,12 +6,6 @@ using ZeroLevel.Services.FileSystem;
 
 namespace ZeroLevel.Services.PartitionStorage
 {
-    public class IndexOptions
-    {
-        public bool Enabled { get; set; }
-        public int FileIndexCount { get; set; } = 64;
-    }
-
     /// <summary>
     /// Options
     /// </summary>
@@ -19,7 +13,7 @@ namespace ZeroLevel.Services.PartitionStorage
     /// <typeparam name="TInput">The value that is written in the stream</typeparam>
     /// <typeparam name="TValue">Value after compression of TInput values by duplicate keys (TInput list or similar)</typeparam>
     /// <typeparam name="TMeta">Meta information for partition search</typeparam>
-    public class IStoreOptions<TKey, TInput, TValue, TMeta>
+    public class StoreOptions<TKey, TInput, TValue, TMeta>
     {
         /// <summary>
         /// Method for key comparison
@@ -47,7 +41,17 @@ namespace ZeroLevel.Services.PartitionStorage
         /// </summary>
         public StoreFilePartition<TKey, TMeta> FilePartition { get; set; }
 
-        public IndexOptions Index { get; set; } = new IndexOptions { Enabled = false, FileIndexCount = 64 };
+        public IndexOptions Index { get; set; } = new IndexOptions
+        {
+            Enabled = false,
+            FileIndexCount = 64
+        };
+
+        public CacheOptions Cache { get; set; } = new CacheOptions
+        {
+            UseMemoryCache = false,
+            UsePersistentCache = false
+        };
 
         internal string GetFileName(TKey key, TMeta info)
         {
@@ -69,9 +73,9 @@ namespace ZeroLevel.Services.PartitionStorage
             return path;
         }
 
-        public IStoreOptions<TKey, TInput, TValue, TMeta> Clone()
+        public StoreOptions<TKey, TInput, TValue, TMeta> Clone()
         {
-            var options = new IStoreOptions<TKey, TInput, TValue, TMeta>
+            var options = new StoreOptions<TKey, TInput, TValue, TMeta>
             {
                 Index = new IndexOptions
                 {
@@ -85,7 +89,16 @@ namespace ZeroLevel.Services.PartitionStorage
                 Partitions = this.Partitions
                     .Select(p => new StoreCatalogPartition<TMeta>(p.Name, p.PathExtractor))
                     .ToList(),
-                RootFolder = this.RootFolder
+                RootFolder = this.RootFolder,
+                Cache = new CacheOptions
+                {
+                    MemoryCacheLimitInMb = this.Cache.MemoryCacheLimitInMb,
+                    MemoryCacheRemoveTimeoutInSeconds = this.Cache.MemoryCacheRemoveTimeoutInSeconds,
+                    PersistentCacheFolder = this.Cache.PersistentCacheFolder,
+                    PersistentCacheRemoveTimeoutInSeconds = this.Cache.PersistentCacheRemoveTimeoutInSeconds,
+                    UseMemoryCache = this.Cache.UseMemoryCache,
+                    UsePersistentCache = this.Cache.UsePersistentCache
+                }
             };
             return options;
         }

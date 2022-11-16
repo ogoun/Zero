@@ -13,7 +13,7 @@ namespace ZeroLevel.Services.PartitionStorage
     /// 
     /// </summary>
     public class StoreMergePartitionAccessor<TKey, TInput, TValue, TMeta>
-        : IStorePartitionAccessor<TKey, TInput, TValue>
+        : IStorePartitionBuilder<TKey, TInput, TValue>
     {
         private readonly Func<TValue, IEnumerable<TInput>> _decompress;
         /// <summary>
@@ -23,8 +23,8 @@ namespace ZeroLevel.Services.PartitionStorage
         /// <summary>
         /// Write catalog
         /// </summary>
-        private readonly IStorePartitionAccessor<TKey, TInput, TValue> _temporaryAccessor;
-        public StoreMergePartitionAccessor(IStoreOptions<TKey, TInput, TValue, TMeta> options,
+        private readonly IStorePartitionBuilder<TKey, TInput, TValue> _temporaryAccessor;
+        public StoreMergePartitionAccessor(StoreOptions<TKey, TInput, TValue, TMeta> options,
             TMeta info, Func<TValue, IEnumerable<TInput>> decompress)
         {
             if (decompress == null) throw new ArgumentNullException(nameof(decompress));
@@ -33,7 +33,7 @@ namespace ZeroLevel.Services.PartitionStorage
             var tempCatalog = Path.Combine(_accessor.GetCatalogPath(), Guid.NewGuid().ToString());
             var tempOptions = options.Clone();
             tempOptions.RootFolder = tempCatalog;
-            _temporaryAccessor = new StorePartitionAccessor<TKey, TInput, TValue, TMeta>(tempOptions, info);
+            _temporaryAccessor = new StorePartitionBuilder<TKey, TInput, TValue, TMeta>(tempOptions, info);
         }
 
         private IEnumerable<StorePartitionKeyValueSearchResult<TKey, IEnumerable<TInput>>>
@@ -86,7 +86,7 @@ namespace ZeroLevel.Services.PartitionStorage
                         }
                     }
                     // compress new file
-                    (_temporaryAccessor as StorePartitionAccessor<TKey, TInput, TValue, TMeta>)
+                    (_temporaryAccessor as StorePartitionBuilder<TKey, TInput, TValue, TMeta>)
                             .CompressFile(file);
                     
                     // replace old file by new
@@ -97,16 +97,6 @@ namespace ZeroLevel.Services.PartitionStorage
             _temporaryAccessor.DropData();
             Directory.Delete(_temporaryAccessor.GetCatalogPath(), true);
         }
-
-        public StorePartitionKeyValueSearchResult<TKey, TValue> Find(TKey key)
-            => _accessor.Find(key);
-
-        public IEnumerable<StorePartitionKeyValueSearchResult<TKey, TValue>> Find(IEnumerable<TKey> keys)
-            => _accessor.Find(keys);
-        public IEnumerable<StorePartitionKeyValueSearchResult<TKey, TValue>> Iterate()
-            => _accessor.Iterate();
-        public IEnumerable<StorePartitionKeyValueSearchResult<TKey, TValue>> IterateKeyBacket(TKey key)
-            => _accessor.IterateKeyBacket(key);
 
         /// <summary>
         /// Deletes only new entries. Existing entries remain unchanged.

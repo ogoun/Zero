@@ -13,9 +13,11 @@ namespace ZeroLevel.Services.PartitionStorage
     /// <typeparam name="TMeta">Meta information for partition search</typeparam>
     public interface IStore<TKey, TInput, TValue, TMeta>
     {
-        IStorePartitionAccessor<TKey, TInput, TValue> CreateAccessor(TMeta info);
+        IStorePartitionBuilder<TKey, TInput, TValue> CreateBuilder(TMeta info);
 
-        IStorePartitionAccessor<TKey, TInput, TValue> CreateMergeAccessor(TMeta info, Func<TValue, IEnumerable<TInput>> decompressor);
+        IStorePartitionBuilder<TKey, TInput, TValue> CreateMergeAccessor(TMeta info, Func<TValue, IEnumerable<TInput>> decompressor);
+
+        IStorePartitionAccessor<TKey, TInput, TValue> CreateAccessor(TMeta info);
 
         Task<StoreSearchResult<TKey, TValue, TMeta>> Search(StoreSearchRequest<TKey, TMeta> searchRequest);
     }

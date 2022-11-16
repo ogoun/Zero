@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 using ZeroLevel.Services.FileSystem;
 using ZeroLevel.Services.Serialization;
 
@@ -12,30 +10,23 @@ namespace ZeroLevel.Services.PartitionStorage
     public class StorePartitionAccessor<TKey, TInput, TValue, TMeta>
         : IStorePartitionAccessor<TKey, TInput, TValue>
     {
-        private readonly ConcurrentDictionary<string, MemoryStreamWriter> _writeStreams
-            = new ConcurrentDictionary<string, MemoryStreamWriter>();
-        private readonly IStoreOptions<TKey, TInput, TValue, TMeta> _options;
+        private readonly StoreOptions<TKey, TInput, TValue, TMeta> _options;
         private readonly string _catalog;
         private readonly TMeta _info;
 
         public string Catalog { get { return _catalog; } }
-        public StorePartitionAccessor(IStoreOptions<TKey, TInput, TValue, TMeta> options, TMeta info)
+        public StorePartitionAccessor(StoreOptions<TKey, TInput, TValue, TMeta> options, TMeta info)
         {
             if (options == null) throw new ArgumentNullException(nameof(options));
             _info = info;
             _options = options;
             _catalog = _options.GetCatalogPath(info);
-            if (Directory.Exists(_catalog) == false)
-            {
-                Directory.CreateDirectory(_catalog);
-            }
         }
 
         public int CountDataFiles() => Directory.GetFiles(_catalog)?.Length ?? 0;
         public string GetCatalogPath() => _catalog;
         public void DropData() => FSUtils.CleanAndTestFolder(_catalog);
 
-        #region API !only after data compression!
         public StorePartitionKeyValueSearchResult<TKey, TValue> Find(TKey key)
         {
             var fileName = _options.GetFileName(key, _info);
@@ -44,7 +35,7 @@ namespace ZeroLevel.Services.PartitionStorage
                 long startOffset = 0;
                 if (_options.Index.Enabled)
                 {
-                    var index = new StorePartitionIndex<TKey, TMeta>(_catalog, _info, _options.FilePartition, _options.KeyComparer);
+                    var index = new StorePartitionSparseIndex<TKey, TMeta>(_catalog, _info, _options.FilePartition, _options.KeyComparer);
                     var offset = index.GetOffset(key);
                     startOffset = offset.Offset;
                 }
@@ -171,35 +162,6 @@ namespace ZeroLevel.Services.PartitionStorage
                 }
             }
         }
-        #endregion
-
-
-        #region API !only before data compression!
-        public void Store(TKey key, TInput value)
-        {
-            var fileName = _options.GetFileName(key, _info);
-            var stream = GetWriteStream(fileName);
-            stream.SerializeCompatible(key);
-            stream.SerializeCompatible(value);
-        }
-        public void CompleteAddingAndCompress()
-        {
-            // Close all write streams
-            foreach (var s in _writeStreams)
-            {
-                try
-                {
-                    s.Value.Dispose();
-                }
-                catch { }
-            }
-            var files = Directory.GetFiles(_catalog);
-            if (files != null && files.Length > 1)
-            {
-                Parallel.ForEach(files, file => CompressFile(file));
-            }
-        }
-        #endregion
 
         #region Private methods
         private IEnumerable<StorePartitionKeyValueSearchResult<TKey, TValue>> Find(string fileName,
@@ -209,7 +171,7 @@ namespace ZeroLevel.Services.PartitionStorage
             {
                 if (_options.Index.Enabled)
                 {
-                    var index = new StorePartitionIndex<TKey, TMeta>(_catalog, _info, _options.FilePartition, _options.KeyComparer);
+                    var index = new StorePartitionSparseIndex<TKey, TMeta>(_catalog, _info, _options.FilePartition, _options.KeyComparer);
                     var offsets = index.GetOffset(keys, true);
                     using (var reader = GetReadStream(fileName))
                     {
@@ -278,46 +240,7 @@ namespace ZeroLevel.Services.PartitionStorage
                 }
             }
         }
-        internal void CompressFile(string file)
-        {
-            var dict = new Dictionary<TKey, HashSet<TInput>>();
-            using (var reader = new MemoryStreamReader(new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.None, 4096 * 1024)))
-            {
-                while (reader.EOS == false)
-                {
-                    TKey k = reader.ReadCompatible<TKey>();
-                    TInput v = reader.ReadCompatible<TInput>();
-                    if (false == dict.ContainsKey(k))
-                    {
-                        dict[k] = new HashSet<TInput>();
-                    }
-                    dict[k].Add(v);
-                }
-            }
-            var tempPath = Path.GetTempPath();
-            var tempFile = Path.Combine(tempPath, Path.GetTempFileName());
-            using (var writer = new MemoryStreamWriter(new FileStream(tempFile, FileMode.Create, FileAccess.Write, FileShare.None, 4096 * 1024)))
-            {
-                // sort for search acceleration
-                foreach (var pair in dict.OrderBy(p => p.Key))
-                {
-                    var v = _options.MergeFunction(pair.Value);
-                    writer.SerializeCompatible(pair.Key);
-                    writer.SerializeCompatible(v);
-                }
-            }
-            File.Delete(file);
-            File.Move(tempFile, file, true);
-        }        
-        private MemoryStreamWriter GetWriteStream(string fileName)
-        {
-            return _writeStreams.GetOrAdd(fileName, k =>
-            {
-                var filePath = Path.Combine(_catalog, k);
-                var stream = new FileStream(filePath, FileMode.Append, FileAccess.Write, FileShare.None, 4096 * 1024);
-                return new MemoryStreamWriter(stream);
-            });
-        }
+      
         private MemoryStreamReader GetReadStream(string fileName)
         {
             var filePath = Path.Combine(_catalog, fileName);
@@ -328,7 +251,5 @@ namespace ZeroLevel.Services.PartitionStorage
         public void Dispose()
         {
         }
-
-
     }
 }

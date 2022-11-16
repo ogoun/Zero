@@ -5,13 +5,7 @@ using ZeroLevel.Services.Serialization;
 
 namespace ZeroLevel.Services.PartitionStorage
 {
-    internal struct KeyIndex<TKey>
-    {
-        public TKey Key { get; set; }
-        public long Offset { get; set; }
-    }
-
-    internal class StorePartitionIndex<TKey, TMeta>
+    internal class StorePartitionSparseIndex<TKey, TMeta>
         : IStorePartitionIndex<TKey>
     {
         private readonly Dictionary<string, KeyIndex<TKey>[]> _indexCachee
@@ -22,7 +16,7 @@ namespace ZeroLevel.Services.PartitionStorage
         private readonly string _indexFolder;
         private readonly bool _indexExists = false;
         private readonly TMeta _meta;
-        public StorePartitionIndex(string partitionFolder, TMeta meta,
+        public StorePartitionSparseIndex(string partitionFolder, TMeta meta,
             StoreFilePartition<TKey, TMeta> filePartition,
             Func<TKey, TKey, int> keyComparer)
         {

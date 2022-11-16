@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace ZeroLevel.Services.PartitionStorage
+﻿namespace ZeroLevel.Services.PartitionStorage
 {
     internal interface IStorePartitionIndex<TKey>
     {

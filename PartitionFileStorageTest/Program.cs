@@ -102,10 +102,11 @@ namespace PartitionFileStorageTest
 
         private static void BuildStore(string source, string root)
         {
-            var options = new IStoreOptions<ulong, ulong, byte[], Metadata>
+            var options = new StoreOptions<ulong, ulong, byte[], Metadata>
             {
+                Index = new IndexOptions { Enabled = true, FileIndexCount = 256 },
                 RootFolder = root,
-                FilePartition = new StoreFilePartition<ulong, Metadata>("Last three digits", (ctn, date) => (ctn % 1000).ToString()),
+                FilePartition = new StoreFilePartition<ulong, Metadata>("Last three digits", (ctn, date) => (ctn % 512).ToString()),
                 MergeFunction = list =>
                 {
                     ulong s = 0;
@@ -118,12 +119,11 @@ namespace PartitionFileStorageTest
                 },
                 KeyComparer = (left, right) => left == right ? 0 : (left < right) ? -1 : 1,
             };
-            options.Index.Enabled = true;
             var store = new Store<ulong, ulong, byte[], Metadata>(options);
 
 
-            var storeIncoming = store.CreateAccessor(new Metadata { Date = new DateTime(2022, 11, 08), Incoming = true });
-            var storeOutcoming = store.CreateAccessor(new Metadata { Date = new DateTime(2022, 11, 08), Incoming = false });
+            var storeIncoming = store.CreateBuilder(new Metadata { Date = new DateTime(2022, 11, 08), Incoming = true });
+            var storeOutcoming = store.CreateBuilder(new Metadata { Date = new DateTime(2022, 11, 08), Incoming = false });
             var parser = new CallRecordParser();
             var sw = new Stopwatch();
             sw.Start();
@@ -165,17 +165,13 @@ namespace PartitionFileStorageTest
             Console.WriteLine($"Rebuild indexes: {sw.ElapsedMilliseconds}ms");
         }
 
-        private static void TestReading(string source, string root)
+        private static void TestReading(string root)
         {
-            var options = new IStoreOptions<ulong, ulong, byte[], Metadata>
+            var options = new StoreOptions<ulong, ulong, byte[], Metadata>
             {
-                Index = new IndexOptions
-                {
-                    Enabled = false,
-                    FileIndexCount = 64
-                },
+                Index = new IndexOptions { Enabled = true, FileIndexCount = 256 },
                 RootFolder = root,
-                FilePartition = new StoreFilePartition<ulong, Metadata>("Last three digits", (ctn, date) => (ctn % 1000).ToString()),
+                FilePartition = new StoreFilePartition<ulong, Metadata>("Last three digits", (ctn, date) => (ctn % 512).ToString()),
                 MergeFunction = list =>
                 {
                     ulong s = 0;
@@ -183,10 +179,10 @@ namespace PartitionFileStorageTest
                 },
                 Partitions = new List<StoreCatalogPartition<Metadata>>
                 {
-                    new StoreCatalogPartition<Metadata>("timestamp", m => m.Date.ToString("yyyyMMdd")),
-                    new StoreCatalogPartition<Metadata>("timestamp", m => m.Incoming ? "incoming" : "outcoming")
+                    new StoreCatalogPartition<Metadata>("Date", m => m.Date.ToString("yyyyMMdd")),
+                    new StoreCatalogPartition<Metadata>("Date", m => m.Incoming ? "incoming" : "outcoming")
                 },
-                KeyComparer = (left, right) => left == right ? 0 : (left < right) ? -1 : 1
+                KeyComparer = (left, right) => left == right ? 0 : (left < right) ? -1 : 1,
             };
             var store = new Store<ulong, ulong, byte[], Metadata>(options);
             var request = new StoreSearchRequest<ulong, Metadata>
@@ -245,61 +241,12 @@ namespace PartitionFileStorageTest
             return arr;
         }
 
-        private static KeyIndex<long> BinarySearchInIndex(KeyIndex<long>[] index,
-            long key,
-            Func<long, long, int> keyComparer,
-            ref int position)
-        {
-            if (index == null || index.Length == 0)
-            {
-                return new KeyIndex<long> { Key = key, Offset = 0 };
-            }
-            int left = position;
-            int right = index.Length - 1;
-            int mid = 0;
-            long test;
-            while (left <= right)
-            {
-                mid = (int)Math.Floor((right + left) / 2d);
-                test = index[mid].Key;
-                var c = keyComparer(test, key);
-                if (c < 0)
-                {
-                    left = mid + 1;
-                }
-                else if (c > 0)
-                {
-                    right = mid - 1;
-                }
-                else
-                {
-                    position = mid;
-                    return index[mid];
-                }
-            }
-            position = mid;
-            return index[mid];
-        }
-
         static void Main(string[] args)
         {
             var root = @"H:\temp";
             var source = @"H:\319a9c31-d823-4dd1-89b0-7fb1bb9c4859.txt";
             //BuildStore(source, root);
-            TestReading(source, root);
-
-            /*
-            Func<long, long, int> keyComparer =
-                (left, right) =>
-                    (left == right) ? 0 : (left < right) ? -1 : 1;
-            var indexes = Generate(77);
-            int position = 0;
-            for (long i = 65; i < 700; i++)
-            {
-                var ind = BinarySearchInIndex(indexes, i, keyComparer, ref position);
-                Console.WriteLine($"{i}: {ind.Offset}. [{ind.Key}]");
-            }
-            */
+            TestReading(root);
             Console.ReadKey();
         }
     }

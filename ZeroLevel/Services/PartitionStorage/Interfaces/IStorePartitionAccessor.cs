@@ -1,28 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace ZeroLevel.Services.PartitionStorage
 {
     /// <summary>
-    /// Provides read-write operations in catalog partition
+    /// Provides read/reindex operations in catalog partition
     /// </summary>
     /// <typeparam name="TKey">Key type</typeparam>
     /// <typeparam name="TInput">Type of one input value</typeparam>
     /// <typeparam name="TValue">Type of records aggregate</typeparam>
     public interface IStorePartitionAccessor<TKey, TInput, TValue>
-        : IDisposable
+        : IStorePartitionBase<TKey, TInput, TValue>
     {
-        string GetCatalogPath();
-        /// <summary>
-        /// Has any files
-        /// </summary>
-        int CountDataFiles();
-        /// <summary>
-        /// Remove all files
-        /// </summary>
-        void DropData();
-
-        #region API !only after data compression!
         /// <summary>
         /// Rebuild indexes
         /// </summary>
@@ -37,18 +25,5 @@ namespace ZeroLevel.Services.PartitionStorage
         IEnumerable<StorePartitionKeyValueSearchResult<TKey, TValue>> Find(IEnumerable<TKey> keys);
         IEnumerable<StorePartitionKeyValueSearchResult<TKey, TValue>> Iterate();
         IEnumerable<StorePartitionKeyValueSearchResult<TKey, TValue>> IterateKeyBacket(TKey key);
-        #endregion
-
-        #region API !only before data compression!
-        /// <summary>
-        /// Save one record
-        /// </summary>
-        void Store(TKey key, TInput value);
-        /// <summary>
-        /// Complete the recording and perform the conversion of the records from 
-        /// (TKey; TInput) to (TKey; TValue)
-        /// </summary>
-        void CompleteAddingAndCompress();
-        #endregion
     }
 }

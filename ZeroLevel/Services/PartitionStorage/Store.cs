@@ -10,8 +10,8 @@ namespace ZeroLevel.Services.PartitionStorage
     public class Store<TKey, TInput, TValue, TMeta> :
         IStore<TKey, TInput, TValue, TMeta>
     {
-        private readonly IStoreOptions<TKey, TInput, TValue, TMeta> _options;
-        public Store(IStoreOptions<TKey, TInput, TValue, TMeta> options)
+        private readonly StoreOptions<TKey, TInput, TValue, TMeta> _options;
+        public Store(StoreOptions<TKey, TInput, TValue, TMeta> options)
         {
             if (options == null) throw new ArgumentNullException(nameof(options));
             _options = options;
@@ -26,8 +26,12 @@ namespace ZeroLevel.Services.PartitionStorage
             return new StorePartitionAccessor<TKey, TInput, TValue, TMeta>(_options, info);
         }
 
-        public IStorePartitionAccessor<TKey, TInput, TValue> CreateMergeAccessor(TMeta info
-            , Func<TValue, IEnumerable<TInput>> decompressor)
+        public IStorePartitionBuilder<TKey, TInput, TValue> CreateBuilder(TMeta info)
+        {
+             return new StorePartitionBuilder<TKey, TInput, TValue, TMeta>(_options, info);
+        }
+
+        public IStorePartitionBuilder<TKey, TInput, TValue> CreateMergeAccessor(TMeta info, Func<TValue, IEnumerable<TInput>> decompressor)
         {
             return new StoreMergePartitionAccessor<TKey, TInput, TValue, TMeta>(_options, info, decompressor);
         }

@@ -7,8 +7,4 @@ namespace ZeroLevel.Services.PartitionStorage
         public TMeta Info { get; set; }
         public IEnumerable<TKey> Keys { get; set; }
     }
-    public class StoreSearchRequest<TKey, TMeta>
-    {
-        public IEnumerable<PartitionSearchRequest<TKey, TMeta>> PartitionSearchRequests { get; set; }
-    }
 }
