@@ -192,12 +192,12 @@ namespace PartitionFileStorageTest
                     new PartitionSearchRequest<ulong, Metadata>
                     {
                         Info = new Metadata { Date = new DateTime(2022, 11, 08), Incoming = true },
-                        Keys = new ulong[] { 79645090604, 79645100604, 79643090604 }
+                        Keys = new ulong[] {   }
                     },
                     new PartitionSearchRequest<ulong, Metadata>
                     {
                         Info = new Metadata { Date = new DateTime(2022, 11, 08), Incoming = false },
-                        Keys = new ulong[] { 79645090604, 79645100604, 79643090604 }
+                        Keys = new ulong[] {  }
                     }
                 }
             };
