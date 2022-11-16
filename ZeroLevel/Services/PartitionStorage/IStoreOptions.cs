@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using ZeroLevel.Services.FileSystem;
 
 namespace ZeroLevel.Services.PartitionStorage
@@ -66,6 +67,27 @@ namespace ZeroLevel.Services.PartitionStorage
                 path = Path.Combine(path, pathPart);
             }
             return path;
+        }
+
+        public IStoreOptions<TKey, TInput, TValue, TMeta> Clone()
+        {
+            var options = new IStoreOptions<TKey, TInput, TValue, TMeta>
+            {
+                Index = new IndexOptions
+                {
+                    Enabled = this.Index.Enabled,
+                    FileIndexCount = this.Index.FileIndexCount
+                },
+                FilePartition = this.FilePartition,
+                KeyComparer = this.KeyComparer,
+                MaxDegreeOfParallelism = this.MaxDegreeOfParallelism,
+                MergeFunction = this.MergeFunction,
+                Partitions = this.Partitions
+                    .Select(p => new StoreCatalogPartition<TMeta>(p.Name, p.PathExtractor))
+                    .ToList(),
+                RootFolder = this.RootFolder
+            };
+            return options;
         }
     }
 }

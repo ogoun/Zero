@@ -44,6 +44,7 @@ namespace ZeroLevel.Network
         /// Maximum size of data packet to transmit (serialized frame size)
         /// </summary>
         private const int DEFAULT_MAX_FRAME_PAYLOAD_SIZE = 1024 * 1024 * 32;
+
         public readonly static int MAX_FRAME_PAYLOAD_SIZE;
 
         /// <summary>

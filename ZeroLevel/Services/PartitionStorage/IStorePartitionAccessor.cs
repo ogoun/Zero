@@ -14,14 +14,15 @@ namespace ZeroLevel.Services.PartitionStorage
     {
         string GetCatalogPath();
         /// <summary>
-        /// Save one record
+        /// Has any files
         /// </summary>
-        void Store(TKey key, TInput value);
+        int CountDataFiles();
         /// <summary>
-        /// Complete the recording and perform the conversion of the records from 
-        /// (TKey; TInput) to (TKey; TValue)
+        /// Remove all files
         /// </summary>
-        void CompleteStoreAndRebuild();
+        void DropData();
+
+        #region API !only after data compression!
         /// <summary>
         /// Rebuild indexes
         /// </summary>
@@ -36,13 +37,18 @@ namespace ZeroLevel.Services.PartitionStorage
         IEnumerable<StorePartitionKeyValueSearchResult<TKey, TValue>> Find(IEnumerable<TKey> keys);
         IEnumerable<StorePartitionKeyValueSearchResult<TKey, TValue>> Iterate();
         IEnumerable<StorePartitionKeyValueSearchResult<TKey, TValue>> IterateKeyBacket(TKey key);
+        #endregion
+
+        #region API !only before data compression!
         /// <summary>
-        /// Has any files
+        /// Save one record
         /// </summary>
-        int CountDataFiles();
+        void Store(TKey key, TInput value);
         /// <summary>
-        /// Remove all files
+        /// Complete the recording and perform the conversion of the records from 
+        /// (TKey; TInput) to (TKey; TValue)
         /// </summary>
-        void DropData();
+        void CompleteAddingAndCompress();
+        #endregion
     }
 }

@@ -30,11 +30,12 @@ namespace ZeroLevel.Services.PartitionStorage
                 Directory.CreateDirectory(_catalog);
             }
         }
-        #region API
-        public string GetCatalogPath()
-        {
-            return _catalog;
-        }
+
+        public int CountDataFiles() => Directory.GetFiles(_catalog)?.Length ?? 0;
+        public string GetCatalogPath() => _catalog;
+        public void DropData() => FSUtils.CleanAndTestFolder(_catalog);
+
+        #region API !only after data compression!
         public StorePartitionKeyValueSearchResult<TKey, TValue> Find(TKey key)
         {
             var fileName = _options.GetFileName(key, _info);
@@ -91,39 +92,6 @@ namespace ZeroLevel.Services.PartitionStorage
                     yield return r;
                 }
             }
-        }
-        public void CompleteStoreAndRebuild()
-        {
-            // Close all write streams
-            foreach (var s in _writeStreams)
-            {
-                try
-                {
-                    s.Value.Dispose();
-                }
-                catch { }
-            }
-            var files = Directory.GetFiles(_catalog);
-            if (files != null && files.Length > 1)
-            {
-                Parallel.ForEach(files, file => CompressFile(file));
-            }
-        }
-        public void Store(TKey key, TInput value)
-        {
-            var fileName = _options.GetFileName(key, _info);
-            var stream = GetWriteStream(fileName);
-            stream.SerializeCompatible(key);
-            stream.SerializeCompatible(value);
-        }
-        public int CountDataFiles()
-        {
-            var files = Directory.GetFiles(_catalog);
-            return files?.Length ?? 0;
-        }
-        public void DropData()
-        {
-            FSUtils.CleanAndTestFolder(_catalog);
         }
         public IEnumerable<StorePartitionKeyValueSearchResult<TKey, TValue>> Iterate()
         {
@@ -205,6 +173,34 @@ namespace ZeroLevel.Services.PartitionStorage
         }
         #endregion
 
+
+        #region API !only before data compression!
+        public void Store(TKey key, TInput value)
+        {
+            var fileName = _options.GetFileName(key, _info);
+            var stream = GetWriteStream(fileName);
+            stream.SerializeCompatible(key);
+            stream.SerializeCompatible(value);
+        }
+        public void CompleteAddingAndCompress()
+        {
+            // Close all write streams
+            foreach (var s in _writeStreams)
+            {
+                try
+                {
+                    s.Value.Dispose();
+                }
+                catch { }
+            }
+            var files = Directory.GetFiles(_catalog);
+            if (files != null && files.Length > 1)
+            {
+                Parallel.ForEach(files, file => CompressFile(file));
+            }
+        }
+        #endregion
+
         #region Private methods
         private IEnumerable<StorePartitionKeyValueSearchResult<TKey, TValue>> Find(string fileName,
             TKey[] keys)
@@ -282,7 +278,7 @@ namespace ZeroLevel.Services.PartitionStorage
                 }
             }
         }
-        private void CompressFile(string file)
+        internal void CompressFile(string file)
         {
             var dict = new Dictionary<TKey, HashSet<TInput>>();
             using (var reader = new MemoryStreamReader(new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.None, 4096 * 1024)))
@@ -312,7 +308,7 @@ namespace ZeroLevel.Services.PartitionStorage
             }
             File.Delete(file);
             File.Move(tempFile, file, true);
-        }
+        }        
         private MemoryStreamWriter GetWriteStream(string fileName)
         {
             return _writeStreams.GetOrAdd(fileName, k =>

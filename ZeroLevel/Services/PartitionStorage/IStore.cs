@@ -1,4 +1,6 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace ZeroLevel.Services.PartitionStorage
 {
@@ -12,6 +14,8 @@ namespace ZeroLevel.Services.PartitionStorage
     public interface IStore<TKey, TInput, TValue, TMeta>
     {
         IStorePartitionAccessor<TKey, TInput, TValue> CreateAccessor(TMeta info);
+
+        IStorePartitionAccessor<TKey, TInput, TValue> CreateMergeAccessor(TMeta info, Func<TValue, IEnumerable<TInput>> decompressor);
 
         Task<StoreSearchResult<TKey, TValue, TMeta>> Search(StoreSearchRequest<TKey, TMeta> searchRequest);
     }

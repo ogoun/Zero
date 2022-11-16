@@ -154,8 +154,8 @@ namespace PartitionFileStorageTest
             sw.Stop();
             Console.WriteLine($"Fill journal: {sw.ElapsedMilliseconds}ms");
             sw.Restart();
-            storeIncoming.CompleteStoreAndRebuild();
-            storeOutcoming.CompleteStoreAndRebuild();
+            storeIncoming.CompleteAddingAndCompress();
+            storeOutcoming.CompleteAddingAndCompress();
             sw.Stop();
             Console.WriteLine($"Rebuild journal to store: {sw.ElapsedMilliseconds}ms");
             sw.Restart();

@@ -26,6 +26,12 @@ namespace ZeroLevel.Services.PartitionStorage
             return new StorePartitionAccessor<TKey, TInput, TValue, TMeta>(_options, info);
         }
 
+        public IStorePartitionAccessor<TKey, TInput, TValue> CreateMergeAccessor(TMeta info
+            , Func<TValue, IEnumerable<TInput>> decompressor)
+        {
+            return new StoreMergePartitionAccessor<TKey, TInput, TValue, TMeta>(_options, info, decompressor);
+        }
+
         public async Task<StoreSearchResult<TKey, TValue, TMeta>> Search(StoreSearchRequest<TKey, TMeta> searchRequest)
         {
             var result = new StoreSearchResult<TKey, TValue, TMeta>();
