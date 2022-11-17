@@ -47,12 +47,6 @@ namespace ZeroLevel.Services.PartitionStorage
             FileIndexCount = 64
         };
 
-        public CacheOptions Cache { get; set; } = new CacheOptions
-        {
-            UseMemoryCache = false,
-            UsePersistentCache = false
-        };
-
         internal string GetFileName(TKey key, TMeta info)
         {
             return FilePartition.PathExtractor(key, info);
@@ -89,16 +83,7 @@ namespace ZeroLevel.Services.PartitionStorage
                 Partitions = this.Partitions
                     .Select(p => new StoreCatalogPartition<TMeta>(p.Name, p.PathExtractor))
                     .ToList(),
-                RootFolder = this.RootFolder,
-                Cache = new CacheOptions
-                {
-                    MemoryCacheLimitInMb = this.Cache.MemoryCacheLimitInMb,
-                    MemoryCacheRemoveTimeoutInSeconds = this.Cache.MemoryCacheRemoveTimeoutInSeconds,
-                    PersistentCacheFolder = this.Cache.PersistentCacheFolder,
-                    PersistentCacheRemoveTimeoutInSeconds = this.Cache.PersistentCacheRemoveTimeoutInSeconds,
-                    UseMemoryCache = this.Cache.UseMemoryCache,
-                    UsePersistentCache = this.Cache.UsePersistentCache
-                }
+                RootFolder = this.RootFolder
             };
             return options;
         }

@@ -20,6 +20,9 @@ namespace ZeroLevel.Services.PartitionStorage
         /// Exists compressed catalog
         /// </summary>
         private readonly IStorePartitionAccessor<TKey, TInput, TValue> _accessor;
+
+        private readonly string _temporaryFolder;
+
         /// <summary>
         /// Write catalog
         /// </summary>
@@ -30,9 +33,9 @@ namespace ZeroLevel.Services.PartitionStorage
             if (decompress == null) throw new ArgumentNullException(nameof(decompress));
             _decompress = decompress;
             _accessor = new StorePartitionAccessor<TKey, TInput, TValue, TMeta>(options, info);
-            var tempCatalog = Path.Combine(_accessor.GetCatalogPath(), Guid.NewGuid().ToString());
+            _temporaryFolder = Path.Combine(_accessor.GetCatalogPath(), Guid.NewGuid().ToString());
             var tempOptions = options.Clone();
-            tempOptions.RootFolder = tempCatalog;
+            tempOptions.RootFolder = _temporaryFolder;
             _temporaryAccessor = new StorePartitionBuilder<TKey, TInput, TValue, TMeta>(tempOptions, info);
         }
 
@@ -64,7 +67,7 @@ namespace ZeroLevel.Services.PartitionStorage
         {
             var newFiles = Directory.GetFiles(_temporaryAccessor.GetCatalogPath());
 
-            if (newFiles != null && newFiles.Length > 1)
+            if (newFiles != null && newFiles.Length > 0)
             {
                 var folder = _accessor.GetCatalogPath();
                 var existsFiles = Directory.GetFiles(folder)
@@ -85,17 +88,27 @@ namespace ZeroLevel.Services.PartitionStorage
                             }
                         }
                     }
-                    // compress new file
+                }
+
+                (_temporaryAccessor as StorePartitionBuilder<TKey, TInput, TValue, TMeta>).CloseStreams();
+
+                // compress new file
+                foreach (var file in newFiles)
+                {
                     (_temporaryAccessor as StorePartitionBuilder<TKey, TInput, TValue, TMeta>)
                             .CompressFile(file);
-                    
-                    // replace old file by new
+                }
+
+                // replace old file by new
+                foreach (var file in newFiles)
+                {
+                    var name = Path.GetFileName(file);
                     File.Move(file, Path.Combine(folder, name), true);
                 }
             }
             // remove temporary files
             _temporaryAccessor.DropData();
-            Directory.Delete(_temporaryAccessor.GetCatalogPath(), true);
+            Directory.Delete(_temporaryFolder, true);
         }
 
         /// <summary>

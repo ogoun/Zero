@@ -1,5 +1,13 @@
-﻿namespace ZeroLevel.Services.PartitionStorage
+﻿using System.Collections.Generic;
+
+namespace ZeroLevel.Services.PartitionStorage
 {
+    public class InsertValue<TKey, TInput>
+    {
+        public TKey Key;
+        public TInput Value;
+    }
+
     /// <summary>
     /// Provides write operations in catalog partition
     /// </summary>

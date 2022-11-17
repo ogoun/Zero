@@ -25,5 +25,10 @@ namespace ZeroLevel.Services.PartitionStorage
         IEnumerable<StorePartitionKeyValueSearchResult<TKey, TValue>> Find(IEnumerable<TKey> keys);
         IEnumerable<StorePartitionKeyValueSearchResult<TKey, TValue>> Iterate();
         IEnumerable<StorePartitionKeyValueSearchResult<TKey, TValue>> IterateKeyBacket(TKey key);
+
+        void RemoveKey(TKey key);
+        void RemoveKeys(IEnumerable<TKey> keys);
+        void RemoveAllExceptKey(TKey key);
+        void RemoveAllExceptKeys(IEnumerable<TKey> keys);
     }
 }

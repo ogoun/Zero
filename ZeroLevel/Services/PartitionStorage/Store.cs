@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using ZeroLevel.Services.FileSystem;
 
 namespace ZeroLevel.Services.PartitionStorage
 {
@@ -19,6 +20,13 @@ namespace ZeroLevel.Services.PartitionStorage
             {
                 Directory.CreateDirectory(_options.RootFolder);
             }
+        }
+
+        public void RemovePartition(TMeta info)
+        {
+            var partition = CreateAccessor(info);
+            partition.DropData();
+            FSUtils.RemoveFolder(partition.GetCatalogPath());
         }
 
         public IStorePartitionAccessor<TKey, TInput, TValue> CreateAccessor(TMeta info)

@@ -14,6 +14,7 @@ namespace ZeroLevel.Services.PartitionStorage
     {
         private readonly ConcurrentDictionary<string, MemoryStreamWriter> _writeStreams
             = new ConcurrentDictionary<string, MemoryStreamWriter>();
+
         private readonly StoreOptions<TKey, TInput, TValue, TMeta> _options;
         private readonly string _catalog;
         private readonly TMeta _info;
@@ -44,17 +45,9 @@ namespace ZeroLevel.Services.PartitionStorage
         }
         public void CompleteAddingAndCompress()
         {
-            // Close all write streams
-            foreach (var s in _writeStreams)
-            {
-                try
-                {
-                    s.Value.Dispose();
-                }
-                catch { }
-            }
+            CloseStreams();
             var files = Directory.GetFiles(_catalog);
-            if (files != null && files.Length > 1)
+            if (files != null && files.Length > 0)
             {
                 Parallel.ForEach(files, file => CompressFile(file));
             }
@@ -66,7 +59,7 @@ namespace ZeroLevel.Services.PartitionStorage
                 var indexFolder = Path.Combine(_catalog, "__indexes__");
                 FSUtils.CleanAndTestFolder(indexFolder);
                 var files = Directory.GetFiles(_catalog);
-                if (files != null && files.Length > 1)
+                if (files != null && files.Length > 0)
                 {
                     var dict = new Dictionary<TKey, long>();
                     foreach (var file in files)
@@ -104,6 +97,19 @@ namespace ZeroLevel.Services.PartitionStorage
         }
 
         #region Private methods
+
+        internal void CloseStreams()
+        {
+            // Close all write streams
+            foreach (var s in _writeStreams)
+            {
+                try
+                {
+                    s.Value.Dispose();
+                }
+                catch { }
+            }
+        }
         internal void CompressFile(string file)
         {
             var dict = new Dictionary<TKey, HashSet<TInput>>();
@@ -154,7 +160,5 @@ namespace ZeroLevel.Services.PartitionStorage
         public void Dispose()
         {
         }
-
-
     }
 }

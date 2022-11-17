@@ -20,5 +20,7 @@ namespace ZeroLevel.Services.PartitionStorage
         IStorePartitionAccessor<TKey, TInput, TValue> CreateAccessor(TMeta info);
 
         Task<StoreSearchResult<TKey, TValue, TMeta>> Search(StoreSearchRequest<TKey, TMeta> searchRequest);
+
+        void RemovePartition(TMeta info);
     }
 }
