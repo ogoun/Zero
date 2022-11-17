@@ -22,6 +22,8 @@
     <ErrorReport>none</ErrorReport>
     <ApplicationIcon>zero.ico</ApplicationIcon>
     <PlatformTarget>AnyCPU</PlatformTarget>
+    <Title>ZeroLevel</Title>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
