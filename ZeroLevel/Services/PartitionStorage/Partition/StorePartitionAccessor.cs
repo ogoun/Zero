@@ -12,6 +12,7 @@ namespace ZeroLevel.Services.PartitionStorage
     {
         private readonly StoreOptions<TKey, TInput, TValue, TMeta> _options;
         private readonly string _catalog;
+        private readonly string _indexCatalog;
         private readonly TMeta _info;
 
         public string Catalog { get { return _catalog; } }
@@ -21,6 +22,10 @@ namespace ZeroLevel.Services.PartitionStorage
             _info = info;
             _options = options;
             _catalog = _options.GetCatalogPath(info);
+            if (_options.Index.Enabled)
+            {
+                _indexCatalog = Path.Combine(_catalog, "__indexes__");
+            }
         }
 
         public int CountDataFiles() => Directory.GetFiles(_catalog)?.Length ?? 0;
@@ -72,7 +77,7 @@ namespace ZeroLevel.Services.PartitionStorage
         }
         public IEnumerable<StorePartitionKeyValueSearchResult<TKey, TValue>> Find(IEnumerable<TKey> keys)
         {
-            var results = keys
+            var results = keys.Distinct()
                 .GroupBy(
                     k => _options.GetFileName(k, _info),
                     k => k, (key, g) => new { FileName = key, Keys = g.ToArray() });
@@ -123,41 +128,48 @@ namespace ZeroLevel.Services.PartitionStorage
         {
             if (_options.Index.Enabled)
             {
-                var indexFolder = Path.Combine(_catalog, "__indexes__");
-                FSUtils.CleanAndTestFolder(indexFolder);
+                FSUtils.CleanAndTestFolder(_indexCatalog);
                 var files = Directory.GetFiles(_catalog);
                 if (files != null && files.Length > 0)
                 {
-                    var dict = new Dictionary<TKey, long>();
                     foreach (var file in files)
                     {
-                        dict.Clear();
-                        using (var reader = GetReadStream(Path.GetFileName(file)))
-                        {
-                            while (reader.EOS == false)
-                            {
-                                var pos = reader.Stream.Position;
-                                var k = reader.ReadCompatible<TKey>();
-                                dict[k] = pos;
-                                reader.ReadCompatible<TValue>();
-                            }
-                        }
-                        if (dict.Count > _options.Index.FileIndexCount * 8)
-                        {
-                            var step = (int)Math.Round(((float)dict.Count / (float)_options.Index.FileIndexCount), MidpointRounding.ToZero);
-                            var index_file = Path.Combine(indexFolder, Path.GetFileName(file));
-                            var d_arr = dict.OrderBy(p => p.Key).ToArray();
-                            using (var writer = new MemoryStreamWriter(
-                                new FileStream(index_file, FileMode.Create, FileAccess.Write, FileShare.None)))
-                            {
-                                for (int i = 0; i < _options.Index.FileIndexCount; i++)
-                                {
-                                    var pair = d_arr[i * step];
-                                    writer.WriteCompatible(pair.Key);
-                                    writer.WriteLong(pair.Value);
-                                }
-                            }
-                        }
+                        RebuildFileIndex(file);
+                    }
+                }
+            }
+        }
+
+        private void RebuildFileIndex(string file)
+        {
+            if (false == Directory.Exists(_indexCatalog))
+            {
+                Directory.CreateDirectory(_indexCatalog);
+            }
+            var dict = new Dictionary<TKey, long>();
+            using (var reader = GetReadStream(Path.GetFileName(file)))
+            {
+                while (reader.EOS == false)
+                {
+                    var pos = reader.Stream.Position;
+                    var k = reader.ReadCompatible<TKey>();
+                    dict[k] = pos;
+                    reader.ReadCompatible<TValue>();
+                }
+            }
+            if (dict.Count > _options.Index.FileIndexCount * 8)
+            {
+                var step = (int)Math.Round(((float)dict.Count / (float)_options.Index.FileIndexCount), MidpointRounding.ToZero);
+                var index_file = Path.Combine(_indexCatalog, Path.GetFileName(file));
+                var d_arr = dict.OrderBy(p => p.Key).ToArray();
+                using (var writer = new MemoryStreamWriter(
+                    new FileStream(index_file, FileMode.Create, FileAccess.Write, FileShare.None)))
+                {
+                    for (int i = 0; i < _options.Index.FileIndexCount; i++)
+                    {
+                        var pair = d_arr[i * step];
+                        writer.WriteCompatible(pair.Key);
+                        writer.WriteLong(pair.Value);
                     }
                 }
             }
@@ -259,10 +271,10 @@ namespace ZeroLevel.Services.PartitionStorage
 
         public void RemoveAllExceptKeys(IEnumerable<TKey> keys)
         {
-            var results = keys
+            var results = keys.Distinct()
                 .GroupBy(
                     k => _options.GetFileName(k, _info),
-                    k => k, (key, g) => new { FileName = key, Keys = g.ToArray() });
+                    k => k, (key, g) => new { FileName = key, Keys = g.OrderBy(k => k).ToArray() });
             foreach (var group in results)
             {
                 RemoveKeyGroup(group.FileName, group.Keys, false);
@@ -276,10 +288,10 @@ namespace ZeroLevel.Services.PartitionStorage
 
         public void RemoveKeys(IEnumerable<TKey> keys)
         {
-            var results = keys
+            var results = keys.Distinct()
                 .GroupBy(
                     k => _options.GetFileName(k, _info),
-                    k => k, (key, g) => new { FileName = key, Keys = g.ToArray() });
+                    k => k, (key, g) => new { FileName = key, Keys = g.OrderBy(k => k).ToArray() });
             foreach (var group in results)
             {
                 RemoveKeyGroup(group.FileName, group.Keys, true);
@@ -388,6 +400,12 @@ namespace ZeroLevel.Services.PartitionStorage
 
                 // 3. Replace from temporary to original
                 File.Move(tempFile, filePath, true);
+
+                // Rebuild index if needs
+                if (_options.Index.Enabled)
+                {
+                    RebuildFileIndex(filePath);
+                }
             }
         }
 

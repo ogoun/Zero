@@ -171,11 +171,11 @@ namespace PartitionFileStorageTest
                     var t = Generate(r);
                     storePart.Store(s, t);
                 }
-                if (s % 11217 == 0)
+                if (s % 177 == 0)
                 {
                     testKeys1.Add(s);
                 }
-                if (s % 11219 == 0)
+                if (s % 223 == 0)
                 {
                     testKeys2.Add(s);
                 }
@@ -228,10 +228,7 @@ namespace PartitionFileStorageTest
             Console.WriteLine("Test #1 remove by keys");
             for (int i = 0; i < testKeys1.Count; i++)
             {
-                if (i % 100 == 0)
-                {
-                    readPart.RemoveKey(testKeys1[i]);
-                }
+                readPart.RemoveKey(testKeys1[i]);
             }
             Console.WriteLine("Test #1 reading after remove");
             foreach (var key in testKeys1)
@@ -359,8 +356,8 @@ namespace PartitionFileStorageTest
         static void Main(string[] args)
         {
             var root = @"H:\temp";
-            SmallFullTest(root);
-            //TestBuildRemoveStore(root);
+            //SmallFullTest(root);
+            TestBuildRemoveStore(root);
             //BuildStore(root);
             //TestReading(root);
             //TestIterations(root);
@@ -371,20 +368,15 @@ namespace PartitionFileStorageTest
         private static void TestRangeCompressionAndInversion()
         {
             var list = new List<FilePositionRange>();
-            list.Add(new FilePositionRange { Start = 1, End = 36 });
-            list.Add(new FilePositionRange { Start = 36, End = 63 });
-            list.Add(new FilePositionRange { Start = 63, End = 89 });
-            list.Add(new FilePositionRange { Start = 93, End = 118 });
-            list.Add(new FilePositionRange { Start = 126, End = 199 });
-            list.Add(new FilePositionRange { Start = 199, End = 216 });
-            list.Add(new FilePositionRange { Start = 277, End = 500 });
+            list.Add(new FilePositionRange { Start = 5, End = 12 });
+            list.Add(new FilePositionRange { Start = 16, End = 21 });
             RangeCompression(list);
             foreach (var r in list)
             {
                 Console.WriteLine($"{r.Start}: {r.End}");
             }
             Console.WriteLine("Invert ranges");
-            var inverted = RangeInversion(list, 500);
+            var inverted = RangeInversion(list, 21);
             foreach (var r in inverted)
             {
                 Console.WriteLine($"{r.Start}: {r.End}");
