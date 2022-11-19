@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using ZeroLevel.Services.FileSystem;
+using ZeroLevel.Services.PartitionStorage.Interfaces;
 
 namespace ZeroLevel.Services.PartitionStorage
 {
@@ -39,7 +40,7 @@ namespace ZeroLevel.Services.PartitionStorage
              return new StorePartitionBuilder<TKey, TInput, TValue, TMeta>(_options, info);
         }
 
-        public IStorePartitionBuilder<TKey, TInput, TValue> CreateMergeAccessor(TMeta info, Func<TValue, IEnumerable<TInput>> decompressor)
+        public IStorePartitionMergeBuilder<TKey, TInput, TValue> CreateMergeAccessor(TMeta info, Func<TValue, IEnumerable<TInput>> decompressor)
         {
             return new StoreMergePartitionAccessor<TKey, TInput, TValue, TMeta>(_options, info, decompressor);
         }

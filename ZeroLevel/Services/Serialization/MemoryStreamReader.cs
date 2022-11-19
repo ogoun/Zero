@@ -48,6 +48,13 @@ namespace ZeroLevel.Services.Serialization
             _stream = reader._stream;
         }
 
+        public void Seek(long offset, SeekOrigin origin)
+        {
+            _stream.Seek(offset, origin);
+        }
+
+        public long Position => _stream.Position;
+
         /// <summary>
         /// Flag reading
         /// </summary>

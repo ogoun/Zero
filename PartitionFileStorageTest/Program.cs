@@ -1,5 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Text;
+using ZeroLevel;
+using ZeroLevel.Services.FileSystem;
 using ZeroLevel.Services.PartitionStorage;
 
 namespace PartitionFileStorageTest
@@ -20,68 +22,7 @@ namespace PartitionFileStorageTest
             return ulong.Parse(num.ToString());
         }
 
-        private static void BuildStore(string root)
-        {
-            var options = new StoreOptions<ulong, ulong, byte[], Metadata>
-            {
-                Index = new IndexOptions { Enabled = true, FileIndexCount = 64 },
-                RootFolder = root,
-                FilePartition = new StoreFilePartition<ulong, Metadata>("Last three digits", (ctn, date) => (ctn % 128).ToString()),
-                MergeFunction = list =>
-                {
-                    ulong s = 0;
-                    return Compressor.GetEncodedBytes(list.OrderBy(c => c), ref s);
-                },
-                Partitions = new List<StoreCatalogPartition<Metadata>>
-                {
-                    new StoreCatalogPartition<Metadata>("Date", m => m.Date.ToString("yyyyMMdd"))
-                },
-                KeyComparer = (left, right) => left == right ? 0 : (left < right) ? -1 : 1,
-            };
-            var store = new Store<ulong, ulong, byte[], Metadata>(options);
-            var storePart1 = store.CreateBuilder(new Metadata { Date = new DateTime(2022, 11, 08) });
-            var storePart2 = store.CreateBuilder(new Metadata { Date = new DateTime(2022, 11, 09) });
-
-            var sw = new Stopwatch();
-            sw.Start();
-
-            var r = new Random(Environment.TickCount);
-            for (int i = 0; i < 1000000; i++)
-            {
-                var s = Generate(r);
-                var count = r.Next(300);
-                for (int j = 0; j < count; j++)
-                {
-                    var t = Generate(r);
-                    storePart1.Store(s, t);
-                }
-            }
-            for (int i = 0; i < 1000000; i++)
-            {
-                var s = Generate(r);
-                var count = r.Next(300);
-                for (int j = 0; j < count; j++)
-                {
-                    var t = Generate(r);
-                    storePart2.Store(s, t);
-                }
-            }
-
-            sw.Stop();
-            Console.WriteLine($"Fill journal: {sw.ElapsedMilliseconds}ms");
-            sw.Restart();
-            storePart1.CompleteAddingAndCompress();
-            storePart2.CompleteAddingAndCompress();
-            sw.Stop();
-            Console.WriteLine($"Rebuild journal to store: {sw.ElapsedMilliseconds}ms");
-            sw.Restart();
-            storePart1.RebuildIndex();
-            storePart2.RebuildIndex();
-            sw.Stop();
-            Console.WriteLine($"Rebuild indexes: {sw.ElapsedMilliseconds}ms");
-        }
-
-        private static void SmallFullTest(string root)
+        private static void FastTest(string root)
         {
             var r = new Random(Environment.TickCount);
             var options = new StoreOptions<ulong, ulong, byte[], Metadata>
@@ -119,7 +60,8 @@ namespace PartitionFileStorageTest
             storePart.Store(c3, Generate(r));
             storePart.Store(c3, Generate(r));
             storePart.Store(c3, Generate(r));
-            storePart.CompleteAddingAndCompress();
+            storePart.CompleteAdding();
+            storePart.Compress();
             var readPart = store.CreateAccessor(new Metadata { Date = new DateTime(2022, 11, 08) });
             Console.WriteLine("Data:");
             foreach (var e in readPart.Iterate())
@@ -134,7 +76,7 @@ namespace PartitionFileStorageTest
             }
         }
 
-        private static void TestBuildRemoveStore(string root)
+        private static void FullStoreTest(string root)
         {
             var r = new Random(Environment.TickCount);
             var options = new StoreOptions<ulong, ulong, byte[], Metadata>
@@ -153,8 +95,53 @@ namespace PartitionFileStorageTest
                 },
                 KeyComparer = (left, right) => left == right ? 0 : (left < right) ? -1 : 1,
             };
+            FSUtils.CleanAndTestFolder(root);
+
             var store = new Store<ulong, ulong, byte[], Metadata>(options);
             var storePart = store.CreateBuilder(new Metadata { Date = new DateTime(2022, 11, 08) });
+                       
+            Log.Info("Fill start");
+            for (int i = 0; i < 30000000; i++)
+            {
+                var s = Generate(r);
+                var count = r.Next(200);
+                for (int j = 0; j < count; j++)
+                {
+                    var t = Generate(r);
+                    storePart.Store(s, t);
+                }
+            }
+            storePart.CompleteAdding();
+            Log.Info("Fill complete");
+
+            long cnt = 0;
+            foreach (var p in storePart.Iterate())
+            {
+                if (p.Key % 2 == 0) cnt++;
+            }
+            Log.Info(cnt.ToString());
+
+            Log.Info("Fill test complete");
+
+            storePart.Compress();
+            Log.Info("Compress complete");
+
+            var reader = store.CreateAccessor(new Metadata { Date = new DateTime(2022, 11, 08) });
+            cnt = 0;
+            foreach (var p in reader.Iterate())
+            {
+                if (p.Key % 2 == 0) cnt++;
+            }
+            Log.Info(cnt.ToString());
+            Log.Info("Compress test complete");
+
+            storePart.DropData();
+
+            Log.Info("Complete#1");
+            Console.ReadKey();
+
+            FSUtils.CleanAndTestFolder(root);
+            
 
             var sw = new Stopwatch();
             sw.Start();
@@ -162,14 +149,22 @@ namespace PartitionFileStorageTest
             var testKeys1 = new List<ulong>();
             var testKeys2 = new List<ulong>();
 
-            for (int i = 0; i < 1000000; i++)
+            var testData = new Dictionary<ulong, HashSet<ulong>>();
+
+            var total = 0L;
+
+            for (int i = 0; i < 2000000; i++)
             {
                 var s = Generate(r);
+                if (testData.ContainsKey(s) == false) testData[s] = new HashSet<ulong>();
                 var count = r.Next(300);
+                total++;
                 for (int j = 0; j < count; j++)
                 {
+                    total++;
                     var t = Generate(r);
                     storePart.Store(s, t);
+                    testData[s].Add(t);
                 }
                 if (s % 177 == 0)
                 {
@@ -182,184 +177,134 @@ namespace PartitionFileStorageTest
             }
 
             sw.Stop();
-            Console.WriteLine($"Fill journal: {sw.ElapsedMilliseconds}ms");
+            Log.Info($"Fill journal: {sw.ElapsedMilliseconds}ms");
             sw.Restart();
-            storePart.CompleteAddingAndCompress();
+            storePart.CompleteAdding();
+            storePart.Compress();
             sw.Stop();
-            Console.WriteLine($"Compress: {sw.ElapsedMilliseconds}ms");
+            Log.Info($"Compress: {sw.ElapsedMilliseconds}ms");
             sw.Restart();
             storePart.RebuildIndex();
             sw.Stop();
-            Console.WriteLine($"Rebuild indexes: {sw.ElapsedMilliseconds}ms");
+            Log.Info($"Rebuild indexes: {sw.ElapsedMilliseconds}ms");
 
-            Console.WriteLine("Start merge test");
+            Log.Info("Start merge test");
             sw.Restart();
             var merger = store.CreateMergeAccessor(new Metadata { Date = new DateTime(2022, 11, 08) }, data => Compressor.DecodeBytesContent(data));
-            for (int i = 0; i < 1000000; i++)
+            for (int i = 0; i < 2300000; i++)
             {
+                total++;
                 var s = Generate(r);
+                if (testData.ContainsKey(s) == false) testData[s] = new HashSet<ulong>();
                 var count = r.Next(300);
                 for (int j = 0; j < count; j++)
                 {
+                    total++;
                     var t = Generate(r);
                     merger.Store(s, t);
+                    testData[s].Add(t);
                 }
             }
-            Console.WriteLine($"Merge journal filled: {sw.ElapsedMilliseconds}ms");
-            merger.CompleteAddingAndCompress();
+            Log.Info($"Merge journal filled: {sw.ElapsedMilliseconds}ms. Total data count: {total}");
+            merger.Compress(); // auto reindex
             sw.Stop();
-            Console.WriteLine($"Compress after merge: {sw.ElapsedMilliseconds}ms");
-            sw.Restart();
-            merger.RebuildIndex();
-            sw.Stop();
-            Console.WriteLine($"Rebuild indexes after merge: {sw.ElapsedMilliseconds}ms");
+            Log.Info($"Compress after merge: {sw.ElapsedMilliseconds}ms");
 
-
-            Console.WriteLine("Test #1 reading");
+            Log.Info("Test #1 reading");
             var readPart = store.CreateAccessor(new Metadata { Date = new DateTime(2022, 11, 08) });
+            ulong totalData = 0;
+            ulong totalKeys = 0;
             foreach (var key in testKeys1)
             {
-                Console.WriteLine($"\tKey: {key}");
                 var result = readPart.Find(key);
-                Console.WriteLine($"\t\tFound: {result.Found}. {result.Value?.Length ?? 0} bytes");
+                totalData += (ulong)(result.Value?.Length ?? 0);
+                totalKeys++;
             }
-            Console.WriteLine("Press to continue");
-            Console.ReadKey();
-            Console.WriteLine("Test #1 remove by keys");
+            Log.Info($"\t\tFound: {totalKeys} keys. {totalData} bytes");
+            totalData = 0;
+            totalKeys = 0;
+            Log.Info("Test #1 remove by keys");
             for (int i = 0; i < testKeys1.Count; i++)
             {
-                readPart.RemoveKey(testKeys1[i]);
+                readPart.RemoveKey(testKeys1[i], false);
             }
-            Console.WriteLine("Test #1 reading after remove");
+            sw.Restart();
+            readPart.RebuildIndex();
+            sw.Stop();
+            Log.Info($"Rebuild indexes after remove: {sw.ElapsedMilliseconds}ms");
+            Log.Info("Test #1 reading after remove");
             foreach (var key in testKeys1)
             {
-                Console.WriteLine($"\tKey: {key}");
                 var result = readPart.Find(key);
-                Console.WriteLine($"\t\tFound: {result.Found}. {result.Value?.Length ?? 0} bytes");
+                totalData += (ulong)(result.Value?.Length ?? 0);
+                totalKeys++;
             }
-            Console.WriteLine("Press to continue");
-            Console.ReadKey();
-            Console.WriteLine();
-            Console.WriteLine("---------------------------------------");
-            Console.WriteLine();
-            Console.WriteLine("Test #2 reading");
+            Log.Info($"\t\tFound: {totalKeys} keys. {totalData} bytes");
+            totalData = 0;
+            totalKeys = 0;
+            Log.Info("Test #2 reading");
             foreach (var key in testKeys2)
             {
-                Console.WriteLine($"\tKey: {key}");
                 var result = readPart.Find(key);
-                Console.WriteLine($"\t\tFound: {result.Found}. {result.Value?.Length ?? 0} bytes");
+                totalData += (ulong)(result.Value?.Length ?? 0);
+                totalKeys++;
             }
-            Console.WriteLine("Press to continue");
-            Console.ReadKey();
-            Console.WriteLine("Test #2 remove keys batch");
+            Log.Info($"\t\tFound: {totalKeys} keys. {totalData} bytes");
+            totalData = 0;
+            totalKeys = 0;
+            Log.Info("Test #2 remove keys batch");
             readPart.RemoveKeys(testKeys2);
-            Console.WriteLine("Test #2 reading after remove");
+            Log.Info("Test #2 reading after remove");
             foreach (var key in testKeys2)
             {
-                Console.WriteLine($"\tKey: {key}");
                 var result = readPart.Find(key);
-                Console.WriteLine($"\t\tFound: {result.Found}. {result.Value?.Length ?? 0} bytes");
+                totalData += (ulong)(result.Value?.Length ?? 0);
+                totalKeys++;
             }
+            Log.Info($"\t\tFound: {totalKeys} keys. {totalData} bytes");
+            totalData = 0;
+            totalKeys = 0;
 
-            Console.WriteLine("Press to continue for iteration");
-            Console.ReadKey();
+            Log.Info("Iterator test");
             foreach (var e in readPart.Iterate())
             {
-                Console.WriteLine($"{e.Key}: {e.Value.Length}");
+                totalData += (ulong)(e.Value?.Length ?? 0);
+                totalKeys++;
             }
-        }
+            Log.Info($"\t\tFound: {totalKeys} keys. {totalData} bytes");
+            totalData = 0;
+            totalKeys = 0;
+            Log.Info("Test stored data");
 
-        private static void TestReading(string root)
-        {
-            var options = new StoreOptions<ulong, ulong, byte[], Metadata>
+            foreach (var test in testData)
             {
-                Index = new IndexOptions { Enabled = true, FileIndexCount = 256 },
-                RootFolder = root,
-                FilePartition = new StoreFilePartition<ulong, Metadata>("Last three digits", (ctn, date) => (ctn % 512).ToString()),
-                MergeFunction = list =>
+                if (test.Value.Count > 0 && testKeys1.Contains(test.Key) == false && testKeys2.Contains(test.Key) == false)
                 {
-                    ulong s = 0;
-                    return Compressor.GetEncodedBytes(list.OrderBy(c => c), ref s);
-                },
-                Partitions = new List<StoreCatalogPartition<Metadata>>
-                {
-                    new StoreCatalogPartition<Metadata>("Date", m => m.Date.ToString("yyyyMMdd"))
-                },
-                KeyComparer = (left, right) => left == right ? 0 : (left < right) ? -1 : 1,
-            };
-            var store = new Store<ulong, ulong, byte[], Metadata>(options);
-            var request = new StoreSearchRequest<ulong, Metadata>
-            {
-                PartitionSearchRequests = new List<PartitionSearchRequest<ulong, Metadata>>
-                {
-                    new PartitionSearchRequest<ulong, Metadata>
+                    var result = Compressor.DecodeBytesContent(readPart.Find(test.Key).Value).ToHashSet();
+                    if (test.Value.Count != result.Count)
                     {
-                        Info = new Metadata { Date = new DateTime(2022, 11, 08) },
-                        Keys = new ulong[] {   }
-                    },
-                    new PartitionSearchRequest<ulong, Metadata>
-                    {
-                        Info = new Metadata { Date = new DateTime(2022, 11, 09) },
-                        Keys = new ulong[] {  }
+                        Log.Info($"Key '{test.Key}' not found!");
+                        continue;
                     }
-                }
-            };
-            var storeIncoming = store.CreateAccessor(new Metadata { Date = new DateTime(2022, 11, 08) });
-            Console.WriteLine($"Incoming data files: {storeIncoming.CountDataFiles()}");
-            var storeOutcoming = store.CreateAccessor(new Metadata { Date = new DateTime(2022, 11, 09) });
-            Console.WriteLine($"Outcoming data files: {storeOutcoming.CountDataFiles()}");
-            var sw = new Stopwatch();
-            sw.Start();
-            var result = store.Search(request).Result;
-            foreach (var r in result.Results)
-            {
-                foreach (var mr in r.Value)
-                {
-                    Console.WriteLine($"\tKey: {mr.Key}. Sucess: {mr.Found}");
-                    if (mr.Found && mr.Value.Length > 0)
+                    foreach (var t in test.Value)
                     {
-                        var ctns = Compressor.DecodeBytesContent(mr.Value);
-                        Console.WriteLine($"\t\t{string.Join(';', ctns)}");
+                        if (result.Contains(t) == false)
+                        {
+                            Log.Info($"Value '{t}' from test data missed in base");
+                        }
                     }
                 }
             }
-            sw.Stop();
-            Console.WriteLine($"Search time: {sw.ElapsedMilliseconds}ms");
+            Log.Info("Completed");
         }
 
-        private static void TestIterations(string root)
-        {
-            var options = new StoreOptions<ulong, ulong, byte[], Metadata>
-            {
-                Index = new IndexOptions { Enabled = true, FileIndexCount = 256 },
-                RootFolder = root,
-                FilePartition = new StoreFilePartition<ulong, Metadata>("Last three digits", (ctn, date) => (ctn % 512).ToString()),
-                MergeFunction = list =>
-                {
-                    ulong s = 0;
-                    return Compressor.GetEncodedBytes(list.OrderBy(c => c), ref s);
-                },
-                Partitions = new List<StoreCatalogPartition<Metadata>>
-                {
-                    new StoreCatalogPartition<Metadata>("Date", m => m.Date.ToString("yyyyMMdd"))
-                },
-                KeyComparer = (left, right) => left == right ? 0 : (left < right) ? -1 : 1,
-            };
-            var store = new Store<ulong, ulong, byte[], Metadata>(options);
-            var storeIncoming = store.CreateAccessor(new Metadata { Date = new DateTime(2022, 11, 08) });
-            foreach (var r in storeIncoming.Iterate())
-            {
-                Console.WriteLine($"{r.Key}: {r.Value.Length}");
-            }
-        }
 
         static void Main(string[] args)
         {
+            Log.AddConsoleLogger(ZeroLevel.Logging.LogLevel.FullDebug);
             var root = @"H:\temp";
-            //SmallFullTest(root);
-            TestBuildRemoveStore(root);
-            //BuildStore(root);
-            //TestReading(root);
+            //FastTest(root);
+            FullStoreTest(root);
             //TestIterations(root);
             //TestRangeCompressionAndInversion();
             Console.ReadKey();

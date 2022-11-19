@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using ZeroLevel.Services.FileSystem;
 using ZeroLevel.Services.Serialization;
@@ -18,7 +19,12 @@ namespace ZeroLevel.Services.PartitionStorage
         private readonly StoreOptions<TKey, TInput, TValue, TMeta> _options;
         private readonly string _catalog;
         private readonly TMeta _info;
+        private readonly Action<MemoryStreamWriter, TKey> _keySerializer;
+        private readonly Action<MemoryStreamWriter, TInput> _inputSerializer;
 
+        private readonly Func<MemoryStreamReader, TKey> _keyDeserializer;
+        private readonly Func<MemoryStreamReader, TInput> _inputDeserializer;
+        private readonly Func<MemoryStreamReader, TValue> _valueDeserializer;
         public string Catalog { get { return _catalog; } }
         public StorePartitionBuilder(StoreOptions<TKey, TInput, TValue, TMeta> options, TMeta info)
         {
@@ -30,26 +36,71 @@ namespace ZeroLevel.Services.PartitionStorage
             {
                 Directory.CreateDirectory(_catalog);
             }
+
+            _keySerializer = MessageSerializer.GetSerializer<TKey>();
+            _inputSerializer = MessageSerializer.GetSerializer<TInput>();
+
+            _keyDeserializer = MessageSerializer.GetDeserializer<TKey>();
+            _inputDeserializer = MessageSerializer.GetDeserializer<TInput>();
+            _valueDeserializer = MessageSerializer.GetDeserializer<TValue>();
         }
 
+        #region API methods
         public int CountDataFiles() => Directory.GetFiles(_catalog)?.Length ?? 0;
         public string GetCatalogPath() => _catalog;
         public void DropData() => FSUtils.CleanAndTestFolder(_catalog);
-
         public void Store(TKey key, TInput value)
         {
             var fileName = _options.GetFileName(key, _info);
             var stream = GetWriteStream(fileName);
-            stream.SerializeCompatible(key);
-            stream.SerializeCompatible(value);
+            _keySerializer.Invoke(stream, key);
+            Thread.MemoryBarrier();
+            _inputSerializer.Invoke(stream, value);
         }
-        public void CompleteAddingAndCompress()
+        public void CompleteAdding()
         {
-            CloseStreams();
+            // Close all write streams
+            foreach (var s in _writeStreams)
+            {
+                try
+                {
+                    s.Value.Stream.Flush();
+                    s.Value.Dispose();
+                }
+                catch { }
+            }
+            _writeStreams.Clear();
+        }
+        public void Compress()
+        {
             var files = Directory.GetFiles(_catalog);
             if (files != null && files.Length > 0)
             {
                 Parallel.ForEach(files, file => CompressFile(file));
+            }
+        }
+        public IEnumerable<StorePartitionKeyValueSearchResult<TKey, TInput>> Iterate()
+        {
+            var files = Directory.GetFiles(_catalog);
+            if (files != null && files.Length > 0)
+            {
+                foreach (var file in files)
+                {
+                    using (var reader = GetReadStream(Path.GetFileName(file)))
+                    {
+                        while (reader.EOS == false)
+                        {
+                            var key = _keyDeserializer.Invoke(reader);
+                            if (reader.EOS)
+                            {
+                                yield return new StorePartitionKeyValueSearchResult<TKey, TInput> { Key = key, Value = default, Found = true };
+                                break;
+                            }
+                            var val = _inputDeserializer.Invoke(reader);
+                            yield return new StorePartitionKeyValueSearchResult<TKey, TInput> { Key = key, Value = val, Found = true };
+                        }
+                    }
+                }
             }
         }
         public void RebuildIndex()
@@ -70,9 +121,10 @@ namespace ZeroLevel.Services.PartitionStorage
                             while (reader.EOS == false)
                             {
                                 var pos = reader.Stream.Position;
-                                var k = reader.ReadCompatible<TKey>();
-                                dict[k] = pos;
-                                reader.ReadCompatible<TValue>();
+                                var key = _keyDeserializer.Invoke(reader);
+                                dict[key] = pos;
+                                if (reader.EOS) break;
+                                _valueDeserializer.Invoke(reader);
                             }
                         }
                         if (dict.Count > _options.Index.FileIndexCount * 8)
@@ -95,21 +147,9 @@ namespace ZeroLevel.Services.PartitionStorage
                 }
             }
         }
+        #endregion
 
         #region Private methods
-
-        internal void CloseStreams()
-        {
-            // Close all write streams
-            foreach (var s in _writeStreams)
-            {
-                try
-                {
-                    s.Value.Dispose();
-                }
-                catch { }
-            }
-        }
         internal void CompressFile(string file)
         {
             var dict = new Dictionary<TKey, HashSet<TInput>>();
@@ -117,13 +157,17 @@ namespace ZeroLevel.Services.PartitionStorage
             {
                 while (reader.EOS == false)
                 {
-                    TKey k = reader.ReadCompatible<TKey>();
-                    TInput v = reader.ReadCompatible<TInput>();
-                    if (false == dict.ContainsKey(k))
+                    var key = _keyDeserializer.Invoke(reader);
+                    if (false == dict.ContainsKey(key))
                     {
-                        dict[k] = new HashSet<TInput>();
+                        dict[key] = new HashSet<TInput>();
                     }
-                    dict[k].Add(v);
+                    if (reader.EOS)
+                    {
+                        break;
+                    }
+                    var input = _inputDeserializer.Invoke(reader);
+                    dict[key].Add(input);
                 }
             }
             var tempPath = Path.GetTempPath();
@@ -157,6 +201,7 @@ namespace ZeroLevel.Services.PartitionStorage
             return new MemoryStreamReader(stream);
         }
         #endregion
+
         public void Dispose()
         {
         }

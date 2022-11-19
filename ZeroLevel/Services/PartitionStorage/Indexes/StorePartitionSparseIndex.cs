@@ -15,6 +15,7 @@ namespace ZeroLevel.Services.PartitionStorage
         private readonly Func<TKey, TKey, int> _keyComparer;
         private readonly string _indexFolder;
         private readonly bool _indexExists = false;
+        private readonly Func<MemoryStreamReader, TKey> _keyDeserializer;
         private readonly TMeta _meta;
         public StorePartitionSparseIndex(string partitionFolder, TMeta meta,
             StoreFilePartition<TKey, TMeta> filePartition,
@@ -25,6 +26,7 @@ namespace ZeroLevel.Services.PartitionStorage
             _meta = meta;
             _keyComparer = keyComparer;
             _filePartition = filePartition;
+            _keyDeserializer = MessageSerializer.GetDeserializer<TKey>();
         }
 
         public KeyIndex<TKey> GetOffset(TKey key)
@@ -110,7 +112,7 @@ namespace ZeroLevel.Services.PartitionStorage
                 {
                     while (reader.EOS == false)
                     {
-                        var k = reader.ReadCompatible<TKey>();
+                        var k = _keyDeserializer.Invoke(reader);
                         var o = reader.ReadLong();
                         list.Add(new KeyIndex<TKey> { Key = k, Offset = o });
                     }

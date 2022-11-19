@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.Serialization;
 
 namespace ZeroLevel.Services.Serialization
 {
@@ -27,6 +28,30 @@ namespace ZeroLevel.Services.Serialization
                 writer.WriteCollection<T>(items);
                 return writer.Complete();
             }
+        }
+
+        public static Action<MemoryStreamWriter, T> GetSerializer<T>()
+        {
+            var t = typeof(T);
+            if (t.IsAssignableTo(typeof(IBinarySerializable)))
+            {
+                return (w, o) => ((IBinarySerializable)o).Serialize(w);
+            }
+            return (w, o) => PrimitiveTypeSerializer.Serialize<T>(w, o);
+        }
+
+        public static Func<IBinaryReader, T> GetDeserializer<T>()
+        {
+            if (typeof(IBinarySerializable).IsAssignableFrom(typeof(T)))
+            {
+                return (r) =>
+                {
+                    var o = (IBinarySerializable)FormatterServices.GetUninitializedObject(typeof(T));
+                    o.Deserialize(r);
+                    return (T)o;
+                };
+            }
+            return (r) => PrimitiveTypeSerializer.Deserialize<T>(r);
         }
 
         public static byte[] SerializeCompatible(object obj)
