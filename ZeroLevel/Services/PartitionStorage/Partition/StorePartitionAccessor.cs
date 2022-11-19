@@ -34,7 +34,7 @@ namespace ZeroLevel.Services.PartitionStorage
         }
 
         #region API methods
-        public int CountDataFiles() => Directory.GetFiles(_catalog)?.Length ?? 0;
+        public int CountDataFiles() => Directory.Exists(_catalog) ? (Directory.GetFiles(_catalog)?.Length ?? 0) : 0;
         public string GetCatalogPath() => _catalog;
         public void DropData() => FSUtils.CleanAndTestFolder(_catalog);
         public StorePartitionKeyValueSearchResult<TKey, TValue> Find(TKey key)
