@@ -100,8 +100,8 @@ namespace PartitionFileStorageTest
             var store = new Store<ulong, ulong, byte[], Metadata>(options);
             var storePart = store.CreateBuilder(new Metadata { Date = new DateTime(2022, 11, 08) });
                        
-            Log.Info("Fill start");
-            for (int i = 0; i < 30000000; i++)
+            /*Log.Info("Fill start");
+            for (int i = 0; i < 10000000; i++)
             {
                 var s = Generate(r);
                 var count = r.Next(200);
@@ -138,9 +138,9 @@ namespace PartitionFileStorageTest
             storePart.DropData();
 
             Log.Info("Complete#1");
-            Console.ReadKey();
+            //Console.ReadKey();
 
-            FSUtils.CleanAndTestFolder(root);
+            FSUtils.CleanAndTestFolder(root);*/
             
 
             var sw = new Stopwatch();
