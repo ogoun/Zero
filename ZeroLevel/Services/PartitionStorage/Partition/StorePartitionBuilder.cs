@@ -52,10 +52,12 @@ namespace ZeroLevel.Services.PartitionStorage
         public void Store(TKey key, TInput value)
         {
             var fileName = _options.GetFileName(key, _info);
-            var stream = GetWriteStream(fileName);
-            _keySerializer.Invoke(stream, key);
-            Thread.MemoryBarrier();
-            _inputSerializer.Invoke(stream, value);
+            if (TryGetWriteStream(fileName, out var stream))
+            {
+                _keySerializer.Invoke(stream, key);
+                Thread.MemoryBarrier();
+                _inputSerializer.Invoke(stream, value);
+            }
         }
         public void CompleteAdding()
         {
@@ -86,18 +88,16 @@ namespace ZeroLevel.Services.PartitionStorage
             {
                 foreach (var file in files)
                 {
-                    using (var reader = GetReadStream(Path.GetFileName(file)))
+                    if (TryGetReadStream(file, out var reader))
                     {
-                        while (reader.EOS == false)
+                        using (reader)
                         {
-                            var key = _keyDeserializer.Invoke(reader);
-                            if (reader.EOS)
+                            while (reader.EOS == false)
                             {
-                                yield return new StorePartitionKeyValueSearchResult<TKey, TInput> { Key = key, Value = default, Found = true };
-                                break;
+                                var key = _keyDeserializer.Invoke(reader);
+                                var val = _inputDeserializer.Invoke(reader);
+                                yield return new StorePartitionKeyValueSearchResult<TKey, TInput> { Key = key, Value = val, Status = SearchResult.Success };
                             }
-                            var val = _inputDeserializer.Invoke(reader);
-                            yield return new StorePartitionKeyValueSearchResult<TKey, TInput> { Key = key, Value = val, Found = true };
                         }
                     }
                 }
@@ -115,34 +115,37 @@ namespace ZeroLevel.Services.PartitionStorage
                     var dict = new Dictionary<TKey, long>();
                     foreach (var file in files)
                     {
-                        dict.Clear();
-                        using (var reader = GetReadStream(Path.GetFileName(file)))
+                        if (TryGetReadStream(file, out var reader))
                         {
-                            while (reader.EOS == false)
+                            using (reader)
                             {
-                                var pos = reader.Stream.Position;
-                                var key = _keyDeserializer.Invoke(reader);
-                                dict[key] = pos;
-                                if (reader.EOS) break;
-                                _valueDeserializer.Invoke(reader);
-                            }
-                        }
-                        if (dict.Count > _options.Index.FileIndexCount * 8)
-                        {
-                            var step = (int)Math.Round(((float)dict.Count / (float)_options.Index.FileIndexCount), MidpointRounding.ToZero);
-                            var index_file = Path.Combine(indexFolder, Path.GetFileName(file));
-                            var d_arr = dict.OrderBy(p => p.Key).ToArray();
-                            using (var writer = new MemoryStreamWriter(
-                                new FileStream(index_file, FileMode.Create, FileAccess.Write, FileShare.None)))
-                            {
-                                for (int i = 0; i < _options.Index.FileIndexCount; i++)
+                                while (reader.EOS == false)
                                 {
-                                    var pair = d_arr[i * step];
-                                    writer.WriteCompatible(pair.Key);
-                                    writer.WriteLong(pair.Value);
+                                    var pos = reader.Stream.Position;
+                                    var key = _keyDeserializer.Invoke(reader);
+                                    dict[key] = pos;
+                                    if (reader.EOS) break;
+                                    _valueDeserializer.Invoke(reader);
+                                }
+                            }
+                            if (dict.Count > _options.Index.FileIndexCount * 8)
+                            {
+                                var step = (int)Math.Round(((float)dict.Count / (float)_options.Index.FileIndexCount), MidpointRounding.ToZero);
+                                var index_file = Path.Combine(indexFolder, Path.GetFileName(file));
+                                var d_arr = dict.OrderBy(p => p.Key).ToArray();
+                                using (var writer = new MemoryStreamWriter(
+                                    new FileStream(index_file, FileMode.Create, FileAccess.Write, FileShare.None)))
+                                {
+                                    for (int i = 0; i < _options.Index.FileIndexCount; i++)
+                                    {
+                                        var pair = d_arr[i * step];
+                                        writer.WriteCompatible(pair.Key);
+                                        writer.WriteLong(pair.Value);
+                                    }
                                 }
                             }
                         }
+                        dict.Clear();
                     }
                 }
             }
@@ -185,20 +188,40 @@ namespace ZeroLevel.Services.PartitionStorage
             File.Delete(file);
             File.Move(tempFile, file, true);
         }
-        private MemoryStreamWriter GetWriteStream(string fileName)
+        private bool TryGetWriteStream(string fileName, out MemoryStreamWriter writer)
         {
-            return _writeStreams.GetOrAdd(fileName, k =>
+            try
             {
-                var filePath = Path.Combine(_catalog, k);
-                var stream = new FileStream(filePath, FileMode.Append, FileAccess.Write, FileShare.None, 4096 * 1024);
-                return new MemoryStreamWriter(stream);
-            });
+                writer = _writeStreams.GetOrAdd(fileName, k =>
+                {
+                    var filePath = Path.Combine(_catalog, k);
+                    var stream = new FileStream(filePath, FileMode.Append, FileAccess.Write, FileShare.None, 4096 * 1024);
+                    return new MemoryStreamWriter(stream);
+                });
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Log.SystemError(ex, "[StorePartitionBuilder.TryGetWriteStream]");
+            }
+            writer = null;
+            return false;
         }
-        private MemoryStreamReader GetReadStream(string fileName)
+        private bool TryGetReadStream(string fileName, out MemoryStreamReader reader)
         {
-            var filePath = Path.Combine(_catalog, fileName);
-            var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite, 4096 * 1024);
-            return new MemoryStreamReader(stream);
+            try
+            {
+                var filePath = Path.Combine(_catalog, fileName);
+                var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite, 4096 * 1024);
+                reader = new MemoryStreamReader(stream);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Log.SystemError(ex, "[StorePartitionBuilder.TryGetReadStream]");
+            }
+            reader = null;
+            return false;
         }
         #endregion
 

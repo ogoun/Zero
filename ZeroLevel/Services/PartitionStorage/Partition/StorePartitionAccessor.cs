@@ -49,34 +49,46 @@ namespace ZeroLevel.Services.PartitionStorage
                     var offset = index.GetOffset(key);
                     startOffset = offset.Offset;
                 }
-                using (var reader = GetReadStream(fileName))
+                if (TryGetReadStream(fileName, out var reader))
                 {
-                    if (startOffset > 0)
+                    using (reader)
                     {
-                        reader.Seek(startOffset, SeekOrigin.Begin);
-                    }
-                    while (reader.EOS == false)
-                    {
-                        var k = _keyDeserializer.Invoke(reader);
-                        var v = _valueDeserializer.Invoke(reader);
-                        var c = _options.KeyComparer(key, k);
-                        if (c == 0) return new StorePartitionKeyValueSearchResult<TKey, TValue>
+                        if (startOffset > 0)
                         {
-                            Key = key,
-                            Value = v,
-                            Found = true
-                        };
-                        if (c == -1)
+                            reader.Seek(startOffset, SeekOrigin.Begin);
+                        }
+                        while (reader.EOS == false)
                         {
-                            break;
+                            var k = _keyDeserializer.Invoke(reader);
+                            var v = _valueDeserializer.Invoke(reader);
+                            var c = _options.KeyComparer(key, k);
+                            if (c == 0) return new StorePartitionKeyValueSearchResult<TKey, TValue>
+                            {
+                                Key = key,
+                                Value = v,
+                                Status = SearchResult.Success
+                            };
+                            if (c == -1)
+                            {
+                                break;
+                            }
                         }
                     }
+                }
+                else
+                {
+                    return new StorePartitionKeyValueSearchResult<TKey, TValue>
+                    {
+                        Key = key,
+                        Status = SearchResult.FileLocked,
+                        Value = default
+                    };
                 }
             }
             return new StorePartitionKeyValueSearchResult<TKey, TValue>
             {
                 Key = key,
-                Found = false,
+                Status = SearchResult.NotFound,
                 Value = default
             };
         }
@@ -101,13 +113,16 @@ namespace ZeroLevel.Services.PartitionStorage
             {
                 foreach (var file in files)
                 {
-                    using (var reader = GetReadStream(Path.GetFileName(file)))
+                    if (TryGetReadStream(file, out var reader))
                     {
-                        while (reader.EOS == false)
+                        using (reader)
                         {
-                            var k = _keyDeserializer.Invoke(reader);
-                            var v = _valueDeserializer.Invoke(reader);
-                            yield return new StorePartitionKeyValueSearchResult<TKey, TValue> { Key = k, Value = v, Found = true };
+                            while (reader.EOS == false)
+                            {
+                                var k = _keyDeserializer.Invoke(reader);
+                                var v = _valueDeserializer.Invoke(reader);
+                                yield return new StorePartitionKeyValueSearchResult<TKey, TValue> { Key = k, Value = v, Status = SearchResult.Success };
+                            }
                         }
                     }
                 }
@@ -118,13 +133,16 @@ namespace ZeroLevel.Services.PartitionStorage
             var fileName = _options.GetFileName(key, _info);
             if (File.Exists(Path.Combine(_catalog, fileName)))
             {
-                using (var reader = GetReadStream(fileName))
+                if (TryGetReadStream(fileName, out var reader))
                 {
-                    while (reader.EOS == false)
+                    using (reader)
                     {
-                        var k = _keyDeserializer.Invoke(reader);
-                        var v = _valueDeserializer.Invoke(reader);
-                        yield return new StorePartitionKeyValueSearchResult<TKey, TValue> { Key = k, Value = v, Found = true };
+                        while (reader.EOS == false)
+                        {
+                            var k = _keyDeserializer.Invoke(reader);
+                            var v = _valueDeserializer.Invoke(reader);
+                            yield return new StorePartitionKeyValueSearchResult<TKey, TValue> { Key = k, Value = v, Status = SearchResult.Success };
+                        }
                     }
                 }
             }
@@ -197,14 +215,17 @@ namespace ZeroLevel.Services.PartitionStorage
                     Directory.CreateDirectory(_indexCatalog);
                 }
                 var dict = new Dictionary<TKey, long>();
-                using (var reader = GetReadStream(Path.GetFileName(file)))
+                if (TryGetReadStream(file, out var reader))
                 {
-                    while (reader.EOS == false)
+                    using (reader)
                     {
-                        var pos = reader.Position;
-                        var k = _keyDeserializer.Invoke(reader);
-                        dict[k] = pos;
-                        _valueDeserializer.Invoke(reader);
+                        while (reader.EOS == false)
+                        {
+                            var pos = reader.Position;
+                            var k = _keyDeserializer.Invoke(reader);
+                            dict[k] = pos;
+                            _valueDeserializer.Invoke(reader);
+                        }
                     }
                 }
                 if (dict.Count > _options.Index.FileIndexCount * 8)
@@ -237,31 +258,34 @@ namespace ZeroLevel.Services.PartitionStorage
                 {
                     var index = new StorePartitionSparseIndex<TKey, TMeta>(_catalog, _info, _options.FilePartition, _options.KeyComparer);
                     var offsets = index.GetOffset(keys, true);
-                    using (var reader = GetReadStream(fileName))
+                    if (TryGetReadStream(fileName, out var reader))
                     {
-                        for (int i = 0; i < keys.Length; i++)
+                        using (reader)
                         {
-                            var searchKey = keys[i];
-                            var off = offsets[i];
-                            reader.Seek(off.Offset, SeekOrigin.Begin);
-                            while (reader.EOS == false)
+                            for (int i = 0; i < keys.Length; i++)
                             {
-                                var k = _keyDeserializer.Invoke(reader);
-                                var v = _valueDeserializer.Invoke(reader);
-                                var c = _options.KeyComparer(searchKey, k);
-                                if (c == 0)
+                                var searchKey = keys[i];
+                                var off = offsets[i];
+                                reader.Seek(off.Offset, SeekOrigin.Begin);
+                                while (reader.EOS == false)
                                 {
-                                    yield return new StorePartitionKeyValueSearchResult<TKey, TValue>
+                                    var k = _keyDeserializer.Invoke(reader);
+                                    var v = _valueDeserializer.Invoke(reader);
+                                    var c = _options.KeyComparer(searchKey, k);
+                                    if (c == 0)
                                     {
-                                        Key = searchKey,
-                                        Value = v,
-                                        Found = true
-                                    };
-                                    break;
-                                }
-                                else if (c == -1)
-                                {
-                                    break;
+                                        yield return new StorePartitionKeyValueSearchResult<TKey, TValue>
+                                        {
+                                            Key = searchKey,
+                                            Value = v,
+                                            Status = SearchResult.Success
+                                        };
+                                        break;
+                                    }
+                                    else if (c == -1)
+                                    {
+                                        break;
+                                    }
                                 }
                             }
                         }
@@ -269,35 +293,38 @@ namespace ZeroLevel.Services.PartitionStorage
                 }
                 else
                 {
-                    using (var reader = GetReadStream(fileName))
+                    if (TryGetReadStream(fileName, out var reader))
                     {
-                        int index = 0;
-                        var keys_arr = keys.OrderBy(k => k).ToArray();
-                        while (reader.EOS == false && index < keys_arr.Length)
+                        using (reader)
                         {
-                            var k = _keyDeserializer.Invoke(reader);
-                            var v = _valueDeserializer.Invoke(reader);
-                            var c = _options.KeyComparer(keys_arr[index], k);
-                            if (c == 0)
+                            int index = 0;
+                            var keys_arr = keys.OrderBy(k => k).ToArray();
+                            while (reader.EOS == false && index < keys_arr.Length)
                             {
-                                yield return new StorePartitionKeyValueSearchResult<TKey, TValue>
+                                var k = _keyDeserializer.Invoke(reader);
+                                var v = _valueDeserializer.Invoke(reader);
+                                var c = _options.KeyComparer(keys_arr[index], k);
+                                if (c == 0)
                                 {
-                                    Key = keys_arr[index],
-                                    Value = v,
-                                    Found = true
-                                };
-                                index++;
-                            }
-                            else if (c == -1)
-                            {
-                                do
-                                {
-                                    index++;
-                                    if (index < keys_arr.Length)
+                                    yield return new StorePartitionKeyValueSearchResult<TKey, TValue>
                                     {
-                                        c = _options.KeyComparer(keys_arr[index], k);
-                                    }
-                                } while (index < keys_arr.Length && c == -1);
+                                        Key = keys_arr[index],
+                                        Value = v,
+                                        Status = SearchResult.Success
+                                    };
+                                    index++;
+                                }
+                                else if (c == -1)
+                                {
+                                    do
+                                    {
+                                        index++;
+                                        if (index < keys_arr.Length)
+                                        {
+                                            c = _options.KeyComparer(keys_arr[index], k);
+                                        }
+                                    } while (index < keys_arr.Length && c == -1);
+                                }
                             }
                         }
                     }
@@ -316,27 +343,30 @@ namespace ZeroLevel.Services.PartitionStorage
                 {
                     var index = new StorePartitionSparseIndex<TKey, TMeta>(_catalog, _info, _options.FilePartition, _options.KeyComparer);
                     var offsets = index.GetOffset(keys, true);
-                    using (var reader = GetReadStream(fileName))
+                    if (TryGetReadStream(fileName, out var reader))
                     {
-                        for (int i = 0; i < keys.Length; i++)
+                        using (reader)
                         {
-                            var searchKey = keys[i];
-                            var off = offsets[i];
-                            reader.Seek(off.Offset, SeekOrigin.Begin);
-                            while (reader.EOS == false)
+                            for (int i = 0; i < keys.Length; i++)
                             {
-                                var startPosition = reader.Position;
-                                var k = _keyDeserializer.Invoke(reader);
-                                _valueDeserializer.Invoke(reader);
-                                var endPosition = reader.Position;
-                                var c = _options.KeyComparer(searchKey, k);
-                                if (c == 0)
+                                var searchKey = keys[i];
+                                var off = offsets[i];
+                                reader.Seek(off.Offset, SeekOrigin.Begin);
+                                while (reader.EOS == false)
                                 {
-                                    ranges.Add(new FilePositionRange { Start = startPosition, End = endPosition });
-                                }
-                                else if (c == -1)
-                                {
-                                    break;
+                                    var startPosition = reader.Position;
+                                    var k = _keyDeserializer.Invoke(reader);
+                                    _valueDeserializer.Invoke(reader);
+                                    var endPosition = reader.Position;
+                                    var c = _options.KeyComparer(searchKey, k);
+                                    if (c == 0)
+                                    {
+                                        ranges.Add(new FilePositionRange { Start = startPosition, End = endPosition });
+                                    }
+                                    else if (c == -1)
+                                    {
+                                        break;
+                                    }
                                 }
                             }
                         }
@@ -344,32 +374,35 @@ namespace ZeroLevel.Services.PartitionStorage
                 }
                 else
                 {
-                    using (var reader = GetReadStream(fileName))
+                    if (TryGetReadStream(fileName, out var reader))
                     {
-                        int index = 0;
-                        var keys_arr = keys.OrderBy(k => k).ToArray();
-                        while (reader.EOS == false && index < keys_arr.Length)
+                        using (reader)
                         {
-                            var startPosition = reader.Position;
-                            var k = _keyDeserializer.Invoke(reader);
-                            _valueDeserializer.Invoke(reader);
-                            var endPosition = reader.Position;
-                            var c = _options.KeyComparer(keys_arr[index], k);
-                            if (c == 0)
+                            int index = 0;
+                            var keys_arr = keys.OrderBy(k => k).ToArray();
+                            while (reader.EOS == false && index < keys_arr.Length)
                             {
-                                ranges.Add(new FilePositionRange { Start = startPosition, End = endPosition });
-                                index++;
-                            }
-                            else if (c == -1)
-                            {
-                                do
+                                var startPosition = reader.Position;
+                                var k = _keyDeserializer.Invoke(reader);
+                                _valueDeserializer.Invoke(reader);
+                                var endPosition = reader.Position;
+                                var c = _options.KeyComparer(keys_arr[index], k);
+                                if (c == 0)
                                 {
+                                    ranges.Add(new FilePositionRange { Start = startPosition, End = endPosition });
                                     index++;
-                                    if (index < keys_arr.Length)
+                                }
+                                else if (c == -1)
+                                {
+                                    do
                                     {
-                                        c = _options.KeyComparer(keys_arr[index], k);
-                                    }
-                                } while (index < keys_arr.Length && c == -1);
+                                        index++;
+                                        if (index < keys_arr.Length)
+                                        {
+                                            c = _options.KeyComparer(keys_arr[index], k);
+                                        }
+                                    } while (index < keys_arr.Length && c == -1);
+                                }
                             }
                         }
                     }
@@ -414,11 +447,21 @@ namespace ZeroLevel.Services.PartitionStorage
             }
         }
 
-        private MemoryStreamReader GetReadStream(string fileName)
+        private bool TryGetReadStream(string fileName, out MemoryStreamReader reader)
         {
-            var filePath = Path.Combine(_catalog, fileName);
-            var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite, 4096 * 1024);
-            return new MemoryStreamReader(stream);
+            try
+            {
+                var filePath = Path.Combine(_catalog, fileName);
+                var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite, 4096 * 1024);
+                reader = new MemoryStreamReader(stream);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Log.SystemError(ex, "[StorePartitionAccessor.TryGetReadStream]");
+            }
+            reader = null;
+            return false;
         }
         #endregion
 

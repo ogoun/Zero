@@ -126,13 +126,12 @@ namespace ZeroLevel.Services.PartitionStorage
                         var k = _keyDeserializer.Invoke(reader);
                         var v = _valueDeserializer.Invoke(reader);
                         var input = _decompress(v);
-                        yield return
-                            new StorePartitionKeyValueSearchResult<TKey, IEnumerable<TInput>>
-                            {
-                                Key = k,
-                                Value = input,
-                                Found = true
-                            };
+                        yield return new StorePartitionKeyValueSearchResult<TKey, IEnumerable<TInput>>
+                        {
+                            Key = k,
+                            Value = input,
+                            Status = SearchResult.Success
+                        };
                     }
                 }
             }
