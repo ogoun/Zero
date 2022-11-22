@@ -6,16 +6,16 @@
 </Description>
     <Authors>ogoun</Authors>
     <Company>ogoun</Company>
-    <AssemblyVersion>3.3.8.1</AssemblyVersion>
-    <PackageReleaseNotes>PartitionStorage optimizations</PackageReleaseNotes>
+    <AssemblyVersion>3.3.8.2</AssemblyVersion>
+    <PackageReleaseNotes>PartitionStorage. New way to index</PackageReleaseNotes>
     <PackageProjectUrl>https://github.com/ogoun/Zero/wiki</PackageProjectUrl>
     <Copyright>Copyright Ogoun 2022</Copyright>
     <PackageLicenseUrl></PackageLicenseUrl>
     <PackageIconUrl></PackageIconUrl>
     <RepositoryUrl>https://github.com/ogoun/Zero</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <Version>3.3.8.1</Version>
-    <FileVersion>3.3.8.1</FileVersion>
+    <Version>3.3.8.2</Version>
+    <FileVersion>3.3.8.2</FileVersion>
     <Platforms>AnyCPU;x64;x86</Platforms>
     <PackageIcon>zero.png</PackageIcon>
     <DebugType>full</DebugType>
