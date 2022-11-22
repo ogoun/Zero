@@ -12,23 +12,48 @@ namespace ZeroLevel.Services.PartitionStorage
         : IStorePartitionBase<TKey, TInput, TValue>
     {
         /// <summary>
-        /// Rebuild indexes
+        /// Rebuilds indexes for data in a partition
         /// </summary>
         void RebuildIndex();
         /// <summary>
-        /// Find in catalog partition by key
+        /// Search in a partition for a specified key
         /// </summary>
         StorePartitionKeyValueSearchResult<TKey, TValue> Find(TKey key);
         /// <summary>
-        /// Find in catalog partition by keys
+        /// Search in a partition for a specified keys
         /// </summary>
         IEnumerable<StorePartitionKeyValueSearchResult<TKey, TValue>> Find(IEnumerable<TKey> keys);
+        /// <summary>
+        /// Iterating over all recorded data
+        /// </summary>
         IEnumerable<StorePartitionKeyValueSearchResult<TKey, TValue>> Iterate();
+        /// <summary>
+        /// Iterating over all recorded data of the file with the specified key
+        /// </summary>
         IEnumerable<StorePartitionKeyValueSearchResult<TKey, TValue>> IterateKeyBacket(TKey key);
-
+        /// <summary>
+        /// Deleting the specified key and associated data
+        /// </summary>
+        /// <param name="key">Key</param>
+        /// <param name="autoReindex">true - automatically rebuild the index of the file from which data was deleted (default = false)</param>
         void RemoveKey(TKey key, bool autoReindex = false);
+        /// <summary>
+        /// Deleting the specified keys and associated data
+        /// </summary>
+        /// <param name="keys">Keys</param>
+        /// <param name="autoReindex">true - automatically rebuild the index of the file from which data was deleted (default = true)</param>
         void RemoveKeys(IEnumerable<TKey> keys, bool autoReindex = true);
-        void RemoveAllExceptKey(TKey key, bool autoReindex = false);
+        /// <summary>
+        /// Delete all keys with data except the specified key
+        /// </summary>
+        /// <param name="key">Key</param>
+        /// <param name="autoReindex">true - automatically rebuild the index of the file from which data was deleted (default = true)</param>
+        void RemoveAllExceptKey(TKey key, bool autoReindex = true);
+        /// <summary>
+        /// Delete all keys with data other than the specified ones
+        /// </summary>
+        /// <param name="keys">Keys</param>
+        /// <param name="autoReindex">true - automatically rebuild the index of the file from which data was deleted (default = true)</param>
         void RemoveAllExceptKeys(IEnumerable<TKey> keys, bool autoReindex = true);
     }
 }

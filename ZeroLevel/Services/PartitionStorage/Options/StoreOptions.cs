@@ -44,12 +44,13 @@ namespace ZeroLevel.Services.PartitionStorage
         public IndexOptions Index { get; set; } = new IndexOptions
         {
             Enabled = false,
-            FileIndexCount = 64
+            StepValue = 64,
+            StepType = IndexStepType.AbsoluteCount
         };
 
         internal string GetFileName(TKey key, TMeta info)
         {
-            return FilePartition.PathExtractor(key, info);
+            return FilePartition.FileNameExtractor(key, info);
         }
         internal string GetCatalogPath(TMeta info)
         {
@@ -74,7 +75,8 @@ namespace ZeroLevel.Services.PartitionStorage
                 Index = new IndexOptions
                 {
                     Enabled = this.Index.Enabled,
-                    FileIndexCount = this.Index.FileIndexCount
+                    StepValue = 64,
+                    StepType = IndexStepType.AbsoluteCount
                 },
                 FilePartition = this.FilePartition,
                 KeyComparer = this.KeyComparer,

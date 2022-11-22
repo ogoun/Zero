@@ -3,17 +3,15 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using ZeroLevel.Services.PartitionStorage.Interfaces;
+using ZeroLevel.Services.PartitionStorage.Partition;
 using ZeroLevel.Services.Serialization;
 
 namespace ZeroLevel.Services.PartitionStorage
 {
     /// <summary>
-    /// For writing new values in exist partition
-    /// 
-    /// ORDER: Store -> CompleteAddingAndCompress -> RebuildIndex
-    /// 
+    /// Performs merging of new data with existing data in the partition
     /// </summary>
-    public class StoreMergePartitionAccessor<TKey, TInput, TValue, TMeta>
+    internal sealed class StoreMergePartitionAccessor<TKey, TInput, TValue, TMeta>
         : IStorePartitionMergeBuilder<TKey, TInput, TValue>
     {
         private readonly Func<TValue, IEnumerable<TInput>> _decompress;
@@ -30,16 +28,19 @@ namespace ZeroLevel.Services.PartitionStorage
         /// Write catalog
         /// </summary>
         private readonly IStorePartitionBuilder<TKey, TInput, TValue> _temporaryAccessor;
+        
         public StoreMergePartitionAccessor(StoreOptions<TKey, TInput, TValue, TMeta> options,
-            TMeta info, Func<TValue, IEnumerable<TInput>> decompress)
+            TMeta info, 
+            Func<TValue, IEnumerable<TInput>> decompress,
+            IStoreSerializer<TKey, TInput, TValue> serializer)
         {
             if (decompress == null) throw new ArgumentNullException(nameof(decompress));
             _decompress = decompress;
-            _accessor = new StorePartitionAccessor<TKey, TInput, TValue, TMeta>(options, info);
+            _accessor = new StorePartitionAccessor<TKey, TInput, TValue, TMeta>(options, info, serializer);
             _temporaryFolder = Path.Combine(_accessor.GetCatalogPath(), Guid.NewGuid().ToString());
             var tempOptions = options.Clone();
             tempOptions.RootFolder = _temporaryFolder;
-            _temporaryAccessor = new StorePartitionBuilder<TKey, TInput, TValue, TMeta>(tempOptions, info);
+            _temporaryAccessor = new StorePartitionBuilder<TKey, TInput, TValue, TMeta>(tempOptions, info, serializer);
 
             _keyDeserializer = MessageSerializer.GetDeserializer<TKey>();
             _valueDeserializer = MessageSerializer.GetDeserializer<TValue>();
@@ -54,6 +55,10 @@ namespace ZeroLevel.Services.PartitionStorage
         public void Store(TKey key, TInput value) => _temporaryAccessor.Store(key, value);
         public int CountDataFiles() => Math.Max(_accessor.CountDataFiles(),
                 _temporaryAccessor.CountDataFiles());
+
+        /// <summary>
+        /// Performs compression/grouping of recorded data in a partition
+        /// </summary>
         public void Compress()
         {
             var newFiles = Directory.GetFiles(_temporaryAccessor.GetCatalogPath());
@@ -102,8 +107,7 @@ namespace ZeroLevel.Services.PartitionStorage
                     File.Move(file, Path.Combine(folder, name), true);
 
                     // 3. Rebuil index
-                    (_accessor as StorePartitionAccessor<TKey, TInput, TValue, TMeta>)
-                            .RebuildFileIndex(file);
+                    (_accessor as BasePartition<TKey, TInput, TValue, TMeta>).RebuildFileIndex(name);
                 }
             }
             // remove temporary files

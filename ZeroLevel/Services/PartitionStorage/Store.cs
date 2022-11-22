@@ -13,10 +13,20 @@ namespace ZeroLevel.Services.PartitionStorage
         IStore<TKey, TInput, TValue, TMeta>
     {
         private readonly StoreOptions<TKey, TInput, TValue, TMeta> _options;
-        public Store(StoreOptions<TKey, TInput, TValue, TMeta> options)
+        private readonly IStoreSerializer<TKey, TInput, TValue> _serializer;
+        public Store(StoreOptions<TKey, TInput, TValue, TMeta> options,
+            IStoreSerializer<TKey, TInput, TValue> serializer = null)
         {
             if (options == null) throw new ArgumentNullException(nameof(options));
             _options = options;
+            if (serializer == null)
+            {
+                _serializer = new StoreStandartSerializer<TKey, TInput, TValue>();
+            }
+            else
+            {
+                _serializer = serializer;
+            }
             if (Directory.Exists(_options.RootFolder) == false)
             {
                 Directory.CreateDirectory(_options.RootFolder);
@@ -32,17 +42,17 @@ namespace ZeroLevel.Services.PartitionStorage
 
         public IStorePartitionAccessor<TKey, TInput, TValue> CreateAccessor(TMeta info)
         {
-            return new StorePartitionAccessor<TKey, TInput, TValue, TMeta>(_options, info);
+            return new StorePartitionAccessor<TKey, TInput, TValue, TMeta>(_options, info, _serializer);
         }
 
         public IStorePartitionBuilder<TKey, TInput, TValue> CreateBuilder(TMeta info)
         {
-             return new StorePartitionBuilder<TKey, TInput, TValue, TMeta>(_options, info);
+             return new StorePartitionBuilder<TKey, TInput, TValue, TMeta>(_options, info, _serializer);
         }
 
         public IStorePartitionMergeBuilder<TKey, TInput, TValue> CreateMergeAccessor(TMeta info, Func<TValue, IEnumerable<TInput>> decompressor)
         {
-            return new StoreMergePartitionAccessor<TKey, TInput, TValue, TMeta>(_options, info, decompressor);
+            return new StoreMergePartitionAccessor<TKey, TInput, TValue, TMeta>(_options, info, decompressor, _serializer);
         }
 
         public async Task<StoreSearchResult<TKey, TValue, TMeta>> Search(StoreSearchRequest<TKey, TMeta> searchRequest)

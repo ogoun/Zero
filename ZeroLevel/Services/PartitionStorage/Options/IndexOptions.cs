@@ -1,8 +1,16 @@
 ﻿namespace ZeroLevel.Services.PartitionStorage
 {
+    public enum IndexStepType
+    {
+        AbsoluteCount,
+        Step
+    }
+
     public class IndexOptions
     {
         public bool Enabled { get; set; }
-        public int FileIndexCount { get; set; } = 64;
+
+        public IndexStepType StepType { get; set; } = IndexStepType.AbsoluteCount;
+        public int StepValue { get; set; } = 64;
     }
 }

@@ -1,12 +1,5 @@
 ﻿namespace ZeroLevel.Services.PartitionStorage
 {
-    public enum SearchResult
-    {
-        Success,
-        NotFound,
-        FileLocked
-    }
-
     public class StorePartitionKeyValueSearchResult<TKey, TValue>
     {
         public SearchResult Status { get; set; }

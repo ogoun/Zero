@@ -5,7 +5,7 @@ using ZeroLevel.Services.Serialization;
 
 namespace ZeroLevel.Services.PartitionStorage
 {
-    internal class StorePartitionSparseIndex<TKey, TMeta>
+    internal sealed class StorePartitionSparseIndex<TKey, TMeta>
         : IStorePartitionIndex<TKey>
     {
         private readonly Dictionary<string, KeyIndex<TKey>[]> _indexCachee
@@ -101,7 +101,7 @@ namespace ZeroLevel.Services.PartitionStorage
 
         private KeyIndex<TKey>[] GetFileIndex(TKey key)
         {
-            var indexName = _filePartition.PathExtractor.Invoke(key, _meta);
+            var indexName = _filePartition.FileNameExtractor.Invoke(key, _meta);
             if (_indexCachee.TryGetValue(indexName, out var index)) return index;
 
             var file = Path.Combine(_indexFolder, indexName);

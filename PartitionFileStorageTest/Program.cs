@@ -27,7 +27,11 @@ namespace PartitionFileStorageTest
             var r = new Random(Environment.TickCount);
             var options = new StoreOptions<ulong, ulong, byte[], Metadata>
             {
-                Index = new IndexOptions { Enabled = true, FileIndexCount = 64 },
+                Index = new IndexOptions 
+                {
+                    Enabled = true, 
+                    StepType = IndexStepType.AbsoluteCount,
+                    StepValue = 64 },
                 RootFolder = root,
                 FilePartition = new StoreFilePartition<ulong, Metadata>("Last three digits", (ctn, date) => (ctn % 128).ToString()),
                 MergeFunction = list =>
@@ -81,7 +85,12 @@ namespace PartitionFileStorageTest
             var r = new Random(Environment.TickCount);
             var options = new StoreOptions<ulong, ulong, byte[], Metadata>
             {
-                Index = new IndexOptions { Enabled = true, FileIndexCount = 64 },
+                Index = new IndexOptions
+                {
+                    Enabled = true,
+                    StepType = IndexStepType.Step,
+                    StepValue = 1
+                },
                 RootFolder = root,
                 FilePartition = new StoreFilePartition<ulong, Metadata>("Last three digits", (ctn, date) => (ctn % 128).ToString()),
                 MergeFunction = list =>
@@ -99,7 +108,7 @@ namespace PartitionFileStorageTest
 
             var store = new Store<ulong, ulong, byte[], Metadata>(options);
             var storePart = store.CreateBuilder(new Metadata { Date = new DateTime(2022, 11, 08) });
-                       
+
             /*Log.Info("Fill start");
             for (int i = 0; i < 10000000; i++)
             {
@@ -141,7 +150,7 @@ namespace PartitionFileStorageTest
             //Console.ReadKey();
 
             FSUtils.CleanAndTestFolder(root);*/
-            
+
 
             var sw = new Stopwatch();
             sw.Start();
@@ -179,7 +188,7 @@ namespace PartitionFileStorageTest
             sw.Stop();
             Log.Info($"Fill journal: {sw.ElapsedMilliseconds}ms");
             sw.Restart();
-            storePart.CompleteAdding();
+            storePart.CompleteAdding(); 
             storePart.Compress();
             sw.Stop();
             Log.Info($"Compress: {sw.ElapsedMilliseconds}ms");
@@ -308,63 +317,6 @@ namespace PartitionFileStorageTest
             //TestIterations(root);
             //TestRangeCompressionAndInversion();
             Console.ReadKey();
-        }
-
-        private static void TestRangeCompressionAndInversion()
-        {
-            var list = new List<FilePositionRange>();
-            list.Add(new FilePositionRange { Start = 5, End = 12 });
-            list.Add(new FilePositionRange { Start = 16, End = 21 });
-            RangeCompression(list);
-            foreach (var r in list)
-            {
-                Console.WriteLine($"{r.Start}: {r.End}");
-            }
-            Console.WriteLine("Invert ranges");
-            var inverted = RangeInversion(list, 21);
-            foreach (var r in inverted)
-            {
-                Console.WriteLine($"{r.Start}: {r.End}");
-            }
-        }
-
-        private static void RangeCompression(List<FilePositionRange> ranges)
-        {
-            for (var i = 0; i < ranges.Count - 1; i++)
-            {
-                var current = ranges[i];
-                var next = ranges[i + 1];
-                if (current.End == next.Start)
-                {
-                    current.End = next.End;
-                    ranges.RemoveAt(i + 1);
-                    i--;
-                }
-            }
-        }
-
-        private static List<FilePositionRange> RangeInversion(List<FilePositionRange> ranges, long length)
-        {
-            if ((ranges?.Count ?? 0) == 0) return new List<FilePositionRange> { new FilePositionRange { Start = 0, End = length } };
-            var inverted = new List<FilePositionRange>();
-            var current = new FilePositionRange { Start = 0, End = ranges[0].Start };
-            for (var i = 0; i < ranges.Count; i++)
-            {
-                current.End = ranges[i].Start;
-                if (current.Start != current.End)
-                {
-                    inverted.Add(new FilePositionRange { Start = current.Start, End = current.End });
-                }
-                current.Start = ranges[i].End;
-            }
-            if (current.End != length)
-            {
-                if (current.Start != length)
-                {
-                    inverted.Add(new FilePositionRange { Start = current.Start, End = length });
-                }
-            }
-            return inverted;
         }
     }
 }

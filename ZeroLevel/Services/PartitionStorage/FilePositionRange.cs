@@ -1,6 +1,6 @@
 ﻿namespace ZeroLevel.Services.PartitionStorage
 {
-    public class FilePositionRange
+    internal sealed class FilePositionRange
     {
         public long Start;
         public long End;

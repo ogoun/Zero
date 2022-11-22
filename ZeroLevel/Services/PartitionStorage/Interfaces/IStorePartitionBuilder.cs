@@ -9,7 +9,7 @@ namespace ZeroLevel.Services.PartitionStorage
     /// <typeparam name="TInput">Type of one input value</typeparam>
     /// <typeparam name="TValue">Type of records aggregate</typeparam>
     public interface IStorePartitionBuilder<TKey, TInput, TValue>
-       : IStorePartitionBase<TKey, TInput, TValue>
+        : IStorePartitionBase<TKey, TInput, TValue>
     {
         IEnumerable<StorePartitionKeyValueSearchResult<TKey, TInput>> Iterate();
         /// <summary>
@@ -21,11 +21,11 @@ namespace ZeroLevel.Services.PartitionStorage
         /// </summary>
         void CompleteAdding();
         /// <summary>
-        /// Perform the conversion of the records from (TKey; TInput) to (TKey; TValue). Called after CompleteAdding
+        /// Performs compression/grouping of recorded data in a partition
         /// </summary>
         void Compress();
         /// <summary>
-        /// Rebuilds index files. Only for compressed data. 
+        /// Rebuilds indexes for data in a partition
         /// </summary>
         void RebuildIndex();
     }
