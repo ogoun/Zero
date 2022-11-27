@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using ZeroLevel.Services.PartitionStorage.Interfaces;
@@ -13,24 +14,30 @@ namespace ZeroLevel.Services.PartitionStorage
     internal sealed class StorePartitionBuilder<TKey, TInput, TValue, TMeta>
         : BasePartition<TKey, TInput, TValue, TMeta>, IStorePartitionBuilder<TKey, TInput, TValue>
     {
-        public StorePartitionBuilder(StoreOptions<TKey, TInput, TValue, TMeta> options, 
+        private readonly Action<TKey, TInput> _storeMethod;
+
+        public StorePartitionBuilder(StoreOptions<TKey, TInput, TValue, TMeta> options,
             TMeta info,
             IStoreSerializer<TKey, TInput, TValue> serializer)
             : base(options, info, serializer)
         {
             if (options == null) throw new ArgumentNullException(nameof(options));
+            if (options.ThreadSafeWriting)
+            {
+                _storeMethod = StoreDirectSafe;
+            }
+            else
+            {
+                _storeMethod = StoreDirect;
+            }
         }
 
         #region IStorePartitionBuilder
+
+
         public void Store(TKey key, TInput value)
         {
-            var fileName = _options.GetFileName(key, _info);
-            if (TryGetWriteStream(fileName, out var stream))
-            {
-                Serializer.KeySerializer.Invoke(stream, key);
-                Thread.MemoryBarrier();
-                Serializer.InputSerializer.Invoke(stream, value);
-            }
+            _storeMethod.Invoke(key, value);
         }
         public void CompleteAdding()
         {
@@ -70,6 +77,39 @@ namespace ZeroLevel.Services.PartitionStorage
         #endregion
 
         #region Private methods
+        private void StoreDirect(TKey key, TInput value)
+        {
+            var groupKey = _options.GetFileName(key, _info);
+            if (TryGetWriteStream(groupKey, out var stream))
+            {
+                Serializer.KeySerializer.Invoke(stream, key);
+                Thread.MemoryBarrier();
+                Serializer.InputSerializer.Invoke(stream, value);
+            }
+        }
+        private void StoreDirectSafe(TKey key, TInput value)
+        {
+            var groupKey = _options.GetFileName(key, _info);
+            bool lockTaken = false;
+            if (TryGetWriteStream(groupKey, out var stream))
+            {
+                Monitor.Enter(stream, ref lockTaken);
+                try
+                {
+                    Serializer.KeySerializer.Invoke(stream, key);
+                    Thread.MemoryBarrier();
+                    Serializer.InputSerializer.Invoke(stream, value);
+                }
+                finally
+                {
+                    if (lockTaken)
+                    {
+                        Monitor.Exit(stream);
+                    }
+                }
+            }
+        }
+
         internal void CompressFile(string file)
         {
             var dict = new Dictionary<TKey, HashSet<TInput>>();

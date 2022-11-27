@@ -22,14 +22,6 @@ namespace ZeroLevel.HNSW
     public static class CosineDistance
     {
         /// <summary>
-        /// Calculates cosine distance without making any optimizations.
-        /// </summary>
-        /// <param name="u">Left vector.</param>
-        /// <param name="v">Right vector.</param>
-        /// <returns>Cosine distance between u and v.</returns>
-        
-
-        /// <summary>
         /// Calculates cosine distance with assumption that u and v are unit vectors.
         /// </summary>
         /// <param name="u">Left vector.</param>

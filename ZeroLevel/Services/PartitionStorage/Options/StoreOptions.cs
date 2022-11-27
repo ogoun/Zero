@@ -19,7 +19,6 @@ namespace ZeroLevel.Services.PartitionStorage
         /// Method for key comparison
         /// </summary>
         public Func<TKey, TKey, int> KeyComparer { get; set; }
-
         /// <summary>
         /// Storage root directory
         /// </summary>
@@ -40,6 +39,10 @@ namespace ZeroLevel.Services.PartitionStorage
         /// File Partition
         /// </summary>
         public StoreFilePartition<TKey, TMeta> FilePartition { get; set; }
+        /// <summary>
+        /// Uses a thread-safe mechanism for writing to files during multi-threaded writes
+        /// </summary>
+        public bool ThreadSafeWriting { get; set; } = false;
 
         public IndexOptions Index { get; set; } = new IndexOptions
         {
@@ -85,7 +88,8 @@ namespace ZeroLevel.Services.PartitionStorage
                 Partitions = this.Partitions
                     .Select(p => new StoreCatalogPartition<TMeta>(p.Name, p.PathExtractor))
                     .ToList(),
-                RootFolder = this.RootFolder
+                RootFolder = this.RootFolder,
+                ThreadSafeWriting = this.ThreadSafeWriting
             };
             return options;
         }

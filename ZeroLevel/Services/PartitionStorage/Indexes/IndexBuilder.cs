@@ -93,7 +93,7 @@ namespace ZeroLevel.Services.PartitionStorage
             }
             if (dict.Count > _stepValue)
             {
-                var step = (int)Math.Round(((float)dict.Count / (float)_stepValue), MidpointRounding.ToZero);
+                var step = (int)Math.Round(dict.Count / (float)_stepValue, MidpointRounding.ToZero);
                 var index_file = Path.Combine(_indexCatalog, Path.GetFileName(file));
                 var d_arr = dict.OrderBy(p => p.Key).ToArray();
                 using (var writer = new MemoryStreamWriter(new FileStream(index_file, FileMode.Create, FileAccess.Write, FileShare.None)))
@@ -123,7 +123,7 @@ namespace ZeroLevel.Services.PartitionStorage
                     var index_file = Path.Combine(_indexCatalog, Path.GetFileName(file));
                     using (var writer = new MemoryStreamWriter(new FileStream(index_file, FileMode.Create, FileAccess.Write, FileShare.None)))
                     {
-                        var counter = _stepValue;
+                        var counter = 1;
                         while (reader.EOS == false)
                         {
                             counter--;

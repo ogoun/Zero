@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Text;
 using ZeroLevel;
 using ZeroLevel.Services.FileSystem;
@@ -8,6 +9,8 @@ namespace PartitionFileStorageTest
 {
     internal class Program
     {
+        const int PAIRS_COUNT = 200_000_000;
+
         private class Metadata
         {
             public DateTime Date { get; set; }
@@ -18,33 +21,13 @@ namespace PartitionFileStorageTest
             var num = new StringBuilder();
             num.Append("79");
             num.Append(r.Next(99).ToString("D2"));
-            num.Append(r.Next(999).ToString("D7"));
+            num.Append(r.Next(9999).ToString("D7"));
             return ulong.Parse(num.ToString());
         }
 
-        private static void FastTest(string root)
+        private static void FastTest(StoreOptions<ulong, ulong, byte[], Metadata> options)
         {
             var r = new Random(Environment.TickCount);
-            var options = new StoreOptions<ulong, ulong, byte[], Metadata>
-            {
-                Index = new IndexOptions 
-                {
-                    Enabled = true, 
-                    StepType = IndexStepType.AbsoluteCount,
-                    StepValue = 64 },
-                RootFolder = root,
-                FilePartition = new StoreFilePartition<ulong, Metadata>("Last three digits", (ctn, date) => (ctn % 128).ToString()),
-                MergeFunction = list =>
-                {
-                    ulong s = 0;
-                    return Compressor.GetEncodedBytes(list.OrderBy(c => c), ref s);
-                },
-                Partitions = new List<StoreCatalogPartition<Metadata>>
-                {
-                    new StoreCatalogPartition<Metadata>("Date", m => m.Date.ToString("yyyyMMdd"))
-                },
-                KeyComparer = (left, right) => left == right ? 0 : (left < right) ? -1 : 1,
-            };
             var store = new Store<ulong, ulong, byte[], Metadata>(options);
             var storePart = store.CreateBuilder(new Metadata { Date = new DateTime(2022, 11, 08) });
 
@@ -80,115 +63,44 @@ namespace PartitionFileStorageTest
             }
         }
 
-        private static void FullStoreTest(string root)
+        private static void FullStoreTest(StoreOptions<ulong, ulong, byte[], Metadata> options,
+            List<(ulong, ulong)> pairs)
         {
+            var meta = new Metadata { Date = new DateTime(2022, 11, 08) };
             var r = new Random(Environment.TickCount);
-            var options = new StoreOptions<ulong, ulong, byte[], Metadata>
-            {
-                Index = new IndexOptions
-                {
-                    Enabled = true,
-                    StepType = IndexStepType.Step,
-                    StepValue = 1
-                },
-                RootFolder = root,
-                FilePartition = new StoreFilePartition<ulong, Metadata>("Last three digits", (ctn, date) => (ctn % 128).ToString()),
-                MergeFunction = list =>
-                {
-                    ulong s = 0;
-                    return Compressor.GetEncodedBytes(list.OrderBy(c => c), ref s);
-                },
-                Partitions = new List<StoreCatalogPartition<Metadata>>
-                {
-                    new StoreCatalogPartition<Metadata>("Date", m => m.Date.ToString("yyyyMMdd"))
-                },
-                KeyComparer = (left, right) => left == right ? 0 : (left < right) ? -1 : 1,
-            };
-            FSUtils.CleanAndTestFolder(root);
-
             var store = new Store<ulong, ulong, byte[], Metadata>(options);
-            var storePart = store.CreateBuilder(new Metadata { Date = new DateTime(2022, 11, 08) });
-
-            /*Log.Info("Fill start");
-            for (int i = 0; i < 10000000; i++)
-            {
-                var s = Generate(r);
-                var count = r.Next(200);
-                for (int j = 0; j < count; j++)
-                {
-                    var t = Generate(r);
-                    storePart.Store(s, t);
-                }
-            }
-            storePart.CompleteAdding();
-            Log.Info("Fill complete");
-
-            long cnt = 0;
-            foreach (var p in storePart.Iterate())
-            {
-                if (p.Key % 2 == 0) cnt++;
-            }
-            Log.Info(cnt.ToString());
-
-            Log.Info("Fill test complete");
-
-            storePart.Compress();
-            Log.Info("Compress complete");
-
-            var reader = store.CreateAccessor(new Metadata { Date = new DateTime(2022, 11, 08) });
-            cnt = 0;
-            foreach (var p in reader.Iterate())
-            {
-                if (p.Key % 2 == 0) cnt++;
-            }
-            Log.Info(cnt.ToString());
-            Log.Info("Compress test complete");
-
-            storePart.DropData();
-
-            Log.Info("Complete#1");
-            //Console.ReadKey();
-
-            FSUtils.CleanAndTestFolder(root);*/
-
-
+            var storePart = store.CreateBuilder(meta);
             var sw = new Stopwatch();
             sw.Start();
-
             var testKeys1 = new List<ulong>();
             var testKeys2 = new List<ulong>();
-
             var testData = new Dictionary<ulong, HashSet<ulong>>();
-
             var total = 0L;
 
-            for (int i = 0; i < 2000000; i++)
+            var insertCount = (int)(0.7 * pairs.Count);
+
+            for (int i = 0; i < insertCount; i++)
             {
-                var s = Generate(r);
-                if (testData.ContainsKey(s) == false) testData[s] = new HashSet<ulong>();
-                var count = r.Next(300);
+                var key = pairs[i].Item1;
+                var val = pairs[i].Item2;
+                if (testData.ContainsKey(key) == false) testData[key] = new HashSet<ulong>();
+                testData[key].Add(val);
+                storePart.Store(key, val);
                 total++;
-                for (int j = 0; j < count; j++)
+                if (key % 717 == 0)
                 {
-                    total++;
-                    var t = Generate(r);
-                    storePart.Store(s, t);
-                    testData[s].Add(t);
+                    testKeys1.Add(key);
                 }
-                if (s % 177 == 0)
+                if (key % 117 == 0)
                 {
-                    testKeys1.Add(s);
-                }
-                if (s % 223 == 0)
-                {
-                    testKeys2.Add(s);
+                    testKeys2.Add(key);
                 }
             }
 
             sw.Stop();
             Log.Info($"Fill journal: {sw.ElapsedMilliseconds}ms");
             sw.Restart();
-            storePart.CompleteAdding(); 
+            storePart.CompleteAdding();
             storePart.Compress();
             sw.Stop();
             Log.Info($"Compress: {sw.ElapsedMilliseconds}ms");
@@ -199,20 +111,15 @@ namespace PartitionFileStorageTest
 
             Log.Info("Start merge test");
             sw.Restart();
-            var merger = store.CreateMergeAccessor(new Metadata { Date = new DateTime(2022, 11, 08) }, data => Compressor.DecodeBytesContent(data));
-            for (int i = 0; i < 2300000; i++)
+            var merger = store.CreateMergeAccessor(meta, data => Compressor.DecodeBytesContent(data));
+            for (int i = insertCount; i < pairs.Count; i++)
             {
+                var key = pairs[i].Item1;
+                var val = pairs[i].Item2;
                 total++;
-                var s = Generate(r);
-                if (testData.ContainsKey(s) == false) testData[s] = new HashSet<ulong>();
-                var count = r.Next(300);
-                for (int j = 0; j < count; j++)
-                {
-                    total++;
-                    var t = Generate(r);
-                    merger.Store(s, t);
-                    testData[s].Add(t);
-                }
+                if (testData.ContainsKey(key) == false) testData[key] = new HashSet<ulong>();
+                testData[key].Add(val);
+                merger.Store(key, val);
             }
             Log.Info($"Merge journal filled: {sw.ElapsedMilliseconds}ms. Total data count: {total}");
             merger.Compress(); // auto reindex
@@ -220,7 +127,7 @@ namespace PartitionFileStorageTest
             Log.Info($"Compress after merge: {sw.ElapsedMilliseconds}ms");
 
             Log.Info("Test #1 reading");
-            var readPart = store.CreateAccessor(new Metadata { Date = new DateTime(2022, 11, 08) });
+            var readPart = store.CreateAccessor(meta);
             ulong totalData = 0;
             ulong totalKeys = 0;
             foreach (var key in testKeys1)
@@ -307,15 +214,190 @@ namespace PartitionFileStorageTest
             Log.Info("Completed");
         }
 
+        private static void FullStoreMultithreadTest(StoreOptions<ulong, ulong, byte[], Metadata> options,
+            List<(ulong, ulong)> pairs)
+        {
+            var meta = new Metadata { Date = new DateTime(2022, 11, 08) };
+            var r = new Random(Environment.TickCount);
+            var store = new Store<ulong, ulong, byte[], Metadata>(options);
+            var storePart = store.CreateBuilder(meta);
+            var sw = new Stopwatch();
+            sw.Start();
+            var insertCount = (int)(0.7 * pairs.Count);
+            var testKeys1 = new ConcurrentBag<ulong>();
+            var testKeys2 = new ConcurrentBag<ulong>();
+            var parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = 24 };
+
+            Parallel.ForEach(pairs.Take(insertCount).ToArray(), parallelOptions, pair =>
+            {
+                var key = pair.Item1;
+                var val = pair.Item2;
+                storePart.Store(key, val);
+                if (key % 717 == 0)
+                {
+                    testKeys1.Add(key);
+                }
+                if (key % 117 == 0)
+                {
+                    testKeys2.Add(key);
+                }
+            });
+
+            sw.Stop();
+            Log.Info($"Fill journal: {sw.ElapsedMilliseconds}ms");
+            sw.Restart();
+            storePart.CompleteAdding();
+            storePart.Compress();
+            sw.Stop();
+            Log.Info($"Compress: {sw.ElapsedMilliseconds}ms");
+            sw.Restart();
+            storePart.RebuildIndex();
+            sw.Stop();
+            Log.Info($"Rebuild indexes: {sw.ElapsedMilliseconds}ms");
+
+            Log.Info("Start merge test");
+            sw.Restart();
+            var merger = store.CreateMergeAccessor(meta, data => Compressor.DecodeBytesContent(data));
+
+            Parallel.ForEach(pairs.Skip(insertCount).ToArray(), parallelOptions, pair =>
+            {
+                var key = pair.Item1;
+                var val = pair.Item2;
+                merger.Store(key, val);
+            });
+
+            Log.Info($"Merge journal filled: {sw.ElapsedMilliseconds}ms. Total data count: {pairs.Count}");
+            merger.Compress(); // auto reindex
+            sw.Stop();
+            Log.Info($"Compress after merge: {sw.ElapsedMilliseconds}ms");
+
+            Log.Info("Test #1 reading");
+            var readPart = store.CreateAccessor(meta);
+            ulong totalData = 0;
+            ulong totalKeys = 0;
+            foreach (var key in testKeys1)
+            {
+                var result = readPart.Find(key);
+                totalData += (ulong)(result.Value?.Length ?? 0);
+                totalKeys++;
+            }
+            Log.Info($"\t\tFound: {totalKeys} keys. {totalData} bytes");
+            totalData = 0;
+            totalKeys = 0;
+            Log.Info("Test #1 remove by keys");
+            foreach (var key in testKeys1)
+            {
+                readPart.RemoveKey(key, false);
+            }
+            sw.Restart();
+            readPart.RebuildIndex();
+            sw.Stop();
+            Log.Info($"Rebuild indexes after remove: {sw.ElapsedMilliseconds}ms");
+            Log.Info("Test #1 reading after remove");
+            foreach (var key in testKeys1)
+            {
+                var result = readPart.Find(key);
+                totalData += (ulong)(result.Value?.Length ?? 0);
+                totalKeys++;
+            }
+            Log.Info($"\t\tFound: {totalKeys} keys. {totalData} bytes");
+            totalData = 0;
+            totalKeys = 0;
+            Log.Info("Test #2 reading");
+            foreach (var key in testKeys2)
+            {
+                var result = readPart.Find(key);
+                totalData += (ulong)(result.Value?.Length ?? 0);
+                totalKeys++;
+            }
+            Log.Info($"\t\tFound: {totalKeys} keys. {totalData} bytes");
+            totalData = 0;
+            totalKeys = 0;
+            Log.Info("Test #2 remove keys batch");
+            readPart.RemoveKeys(testKeys2);
+            Log.Info("Test #2 reading after remove");
+            foreach (var key in testKeys2)
+            {
+                var result = readPart.Find(key);
+                totalData += (ulong)(result.Value?.Length ?? 0);
+                totalKeys++;
+            }
+            Log.Info($"\t\tFound: {totalKeys} keys. {totalData} bytes");
+            totalData = 0;
+            totalKeys = 0;
+
+            Log.Info("Iterator test");
+            foreach (var e in readPart.Iterate())
+            {
+                totalData += (ulong)(e.Value?.Length ?? 0);
+                totalKeys++;
+            }
+            Log.Info($"\t\tFound: {totalKeys} keys. {totalData} bytes");
+            Log.Info("Completed");
+        }
 
         static void Main(string[] args)
         {
+            var root = @"H:\temp";            
+            var options = new StoreOptions<ulong, ulong, byte[], Metadata>
+            {
+                Index = new IndexOptions
+                {
+                    Enabled = true,
+                    StepType = IndexStepType.Step,
+                    StepValue = 16
+                },
+                RootFolder = root,
+                FilePartition = new StoreFilePartition<ulong, Metadata>("Last three digits", (ctn, date) => (ctn % 128).ToString()),
+                MergeFunction = list =>
+                {
+                    ulong s = 0;
+                    return Compressor.GetEncodedBytes(list.OrderBy(c => c), ref s);
+                },
+                Partitions = new List<StoreCatalogPartition<Metadata>>
+                {
+                    new StoreCatalogPartition<Metadata>("Date", m => m.Date.ToString("yyyyMMdd"))
+                },
+                KeyComparer = (left, right) => left == right ? 0 : (left < right) ? -1 : 1,
+                ThreadSafeWriting = false
+            };
+            var optionsMultiThread = new StoreOptions<ulong, ulong, byte[], Metadata>
+            {
+                Index = new IndexOptions
+                {
+                    Enabled = true,
+                    StepType = IndexStepType.Step,
+                    StepValue = 16
+                },
+                RootFolder = root,
+                FilePartition = new StoreFilePartition<ulong, Metadata>("Last three digits", (ctn, date) => (ctn % 128).ToString()),
+                MergeFunction = list =>
+                {
+                    ulong s = 0;
+                    return Compressor.GetEncodedBytes(list.OrderBy(c => c), ref s);
+                },
+                Partitions = new List<StoreCatalogPartition<Metadata>>
+                {
+                    new StoreCatalogPartition<Metadata>("Date", m => m.Date.ToString("yyyyMMdd"))
+                },
+                KeyComparer = (left, right) => left == right ? 0 : (left < right) ? -1 : 1,
+                ThreadSafeWriting = true
+            };
             Log.AddConsoleLogger(ZeroLevel.Logging.LogLevel.FullDebug);
-            var root = @"H:\temp";
-            //FastTest(root);
-            FullStoreTest(root);
-            //TestIterations(root);
-            //TestRangeCompressionAndInversion();
+            Log.Info("Start");
+
+            var pairs = new List<(ulong, ulong)>(PAIRS_COUNT);
+            var r = new Random(Environment.TickCount);
+            for (int i = 0; i < PAIRS_COUNT; i++)
+            {
+                pairs.Add((Generate(r), Generate(r)));
+            }
+
+            // FastTest(options);
+            FSUtils.CleanAndTestFolder(root);
+            FullStoreTest(options, pairs);
+            FSUtils.CleanAndTestFolder(root);
+            FullStoreMultithreadTest(optionsMultiThread, pairs);
             Console.ReadKey();
         }
     }

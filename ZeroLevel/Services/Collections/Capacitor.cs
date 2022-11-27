@@ -15,11 +15,11 @@ namespace ZeroLevel.Services.Collections
         private readonly Action<T[], int> _dischargeAction;
 
         public int Count => _count;
-        public Capacitor(int volume, Action<T[], int> dischargeAction)
+        public Capacitor(int dischargeValue, Action<T[], int> dischargeAction)
         {
-            if (volume < 1) volume = 16;
+            if (dischargeValue < 1) dischargeValue = 16;
             if (dischargeAction == null) throw new ArgumentNullException(nameof(dischargeAction));
-            _buffer = new T[volume];
+            _buffer = new T[dischargeValue];
             _dischargeAction = dischargeAction;
         }
         public void Add(T val)
