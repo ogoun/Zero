@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using ZeroLevel.Services.PartitionStorage.Interfaces;
@@ -15,6 +14,10 @@ namespace ZeroLevel.Services.PartitionStorage
         : BasePartition<TKey, TInput, TValue, TMeta>, IStorePartitionBuilder<TKey, TInput, TValue>
     {
         private readonly Action<TKey, TInput> _storeMethod;
+
+        private long _totalRecords = 0;
+
+        public long TotalRecords { get { return _totalRecords; } }
 
         public StorePartitionBuilder(StoreOptions<TKey, TInput, TValue, TMeta> options,
             TMeta info,
@@ -38,11 +41,14 @@ namespace ZeroLevel.Services.PartitionStorage
         public void Store(TKey key, TInput value)
         {
             _storeMethod.Invoke(key, value);
+            Interlocked.Increment(ref _totalRecords);
         }
+
         public void CompleteAdding()
         {
             CloseWriteStreams();
         }
+
         public void Compress()
         {
             var files = Directory.GetFiles(_catalog);

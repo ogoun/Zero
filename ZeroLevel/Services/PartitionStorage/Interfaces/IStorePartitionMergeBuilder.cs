@@ -9,6 +9,10 @@
     public interface IStorePartitionMergeBuilder<TKey, TInput, TValue>
        : IStorePartitionBase<TKey, TInput, TValue>
     {
+        long TotalRecords
+        {
+            get;
+        }
         /// <summary>
         /// Writing a key-value pair
         /// </summary>

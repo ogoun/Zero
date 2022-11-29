@@ -9,7 +9,8 @@ namespace PartitionFileStorageTest
 {
     internal class Program
     {
-        const int PAIRS_COUNT = 200_000_000;
+//        const int PAIRS_COUNT = 200_000_000;
+        const int PAIRS_COUNT = 200_000;
 
         private class Metadata
         {
@@ -75,7 +76,6 @@ namespace PartitionFileStorageTest
             var testKeys1 = new List<ulong>();
             var testKeys2 = new List<ulong>();
             var testData = new Dictionary<ulong, HashSet<ulong>>();
-            var total = 0L;
 
             var insertCount = (int)(0.7 * pairs.Count);
 
@@ -86,7 +86,6 @@ namespace PartitionFileStorageTest
                 if (testData.ContainsKey(key) == false) testData[key] = new HashSet<ulong>();
                 testData[key].Add(val);
                 storePart.Store(key, val);
-                total++;
                 if (key % 717 == 0)
                 {
                     testKeys1.Add(key);
@@ -98,7 +97,7 @@ namespace PartitionFileStorageTest
             }
 
             sw.Stop();
-            Log.Info($"Fill journal: {sw.ElapsedMilliseconds}ms");
+            Log.Info($"Fill journal: {sw.ElapsedMilliseconds}ms. Records writed: {storePart.TotalRecords}");
             sw.Restart();
             storePart.CompleteAdding();
             storePart.Compress();
@@ -116,12 +115,11 @@ namespace PartitionFileStorageTest
             {
                 var key = pairs[i].Item1;
                 var val = pairs[i].Item2;
-                total++;
                 if (testData.ContainsKey(key) == false) testData[key] = new HashSet<ulong>();
                 testData[key].Add(val);
                 merger.Store(key, val);
             }
-            Log.Info($"Merge journal filled: {sw.ElapsedMilliseconds}ms. Total data count: {total}");
+            Log.Info($"Merge journal filled: {sw.ElapsedMilliseconds}ms. New records merged: {merger.TotalRecords}");
             merger.Compress(); // auto reindex
             sw.Stop();
             Log.Info($"Compress after merge: {sw.ElapsedMilliseconds}ms");
@@ -396,8 +394,10 @@ namespace PartitionFileStorageTest
             // FastTest(options);
             FSUtils.CleanAndTestFolder(root);
             FullStoreTest(options, pairs);
+            /*
             FSUtils.CleanAndTestFolder(root);
             FullStoreMultithreadTest(optionsMultiThread, pairs);
+            */
             Console.ReadKey();
         }
     }

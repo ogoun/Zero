@@ -24,6 +24,11 @@ namespace ZeroLevel.Services.PartitionStorage
         private readonly Func<MemoryStreamReader, TKey> _keyDeserializer;
         private readonly Func<MemoryStreamReader, TValue> _valueDeserializer;
 
+        public long TotalRecords
+        {
+            get { return _temporaryAccessor.TotalRecords; }
+        }
+
         /// <summary>
         /// Write catalog
         /// </summary>

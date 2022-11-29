@@ -11,6 +11,10 @@ namespace ZeroLevel.Services.PartitionStorage
     public interface IStorePartitionBuilder<TKey, TInput, TValue>
         : IStorePartitionBase<TKey, TInput, TValue>
     {
+        long TotalRecords
+        {
+            get;
+        }
         IEnumerable<StorePartitionKeyValueSearchResult<TKey, TInput>> Iterate();
         /// <summary>
         /// Writing a key-value pair
