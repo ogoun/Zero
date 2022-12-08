@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using ZeroLevel.Services.FileSystem;
 using ZeroLevel.Services.PartitionStorage.Interfaces;
 using ZeroLevel.Services.PartitionStorage.Partition;
 
@@ -324,8 +325,7 @@ namespace ZeroLevel.Services.PartitionStorage
                 }
 
                 // 2. Temporary file from ranges
-                var tempPath = Path.GetTempPath();
-                var tempFile = Path.Combine(tempPath, Path.GetTempFileName());
+                var tempFile = FSUtils.GetAppLocalTemporaryFile();
 
                 using (var readStream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite, 4096 * 1024))
                 {

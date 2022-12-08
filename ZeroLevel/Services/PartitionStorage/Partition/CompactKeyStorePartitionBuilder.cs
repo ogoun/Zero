@@ -2,17 +2,17 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using ZeroLevel.Services.FileSystem;
 using ZeroLevel.Services.PartitionStorage.Interfaces;
-using ZeroLevel.Services.PartitionStorage.Partition;
 using ZeroLevel.Services.Serialization;
 
-namespace ZeroLevel.Services.PartitionStorage
+namespace ZeroLevel.Services.PartitionStorage.Partition
 {
-    internal sealed class StorePartitionBuilder<TKey, TInput, TValue, TMeta>
-        : BasePartition<TKey, TInput, TValue, TMeta>, IStorePartitionBuilder<TKey, TInput, TValue>
+    internal sealed class CompactKeyStorePartitionBuilder<TKey, TInput, TValue, TMeta>
+         : BasePartition<TKey, TInput, TValue, TMeta>, IStorePartitionBuilder<TKey, TInput, TValue>
     {
         private readonly Action<TKey, TInput> _storeMethod;
 
@@ -20,7 +20,7 @@ namespace ZeroLevel.Services.PartitionStorage
 
         public long TotalRecords { get { return _totalRecords; } }
 
-        public StorePartitionBuilder(StoreOptions<TKey, TInput, TValue, TMeta> options,
+        public CompactKeyStorePartitionBuilder(StoreOptions<TKey, TInput, TValue, TMeta> options,
             TMeta info,
             IStoreSerializer<TKey, TInput, TValue> serializer)
             : base(options, info, serializer)

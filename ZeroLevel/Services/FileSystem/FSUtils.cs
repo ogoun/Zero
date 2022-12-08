@@ -321,7 +321,7 @@ namespace ZeroLevel.Services.FileSystem
 
         public static void PackFolder(string sourceFolder, string zipPath, Func<FileInfo, bool> selector = null)
         {
-            var tmp = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+            var tmp = FSUtils.GetAppLocalTemporaryDirectory();
             var tmpDir = Directory.CreateDirectory(tmp);
             var files = new DirectoryInfo(sourceFolder)
                 .GetFiles("*.*", SearchOption.AllDirectories)
