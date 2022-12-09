@@ -15,8 +15,17 @@ namespace ZeroLevel.HNSW
 
     public sealed class SearchContext
     {
+        /// <summary>
+        /// Список номеров которые разрешены к добавлению итогового результата, если поиск ведется в ограниченном наборе точек (например, после предварительной фильтрации)
+        /// </summary>
         private HashSet<int> _activeNodes;
+        /// <summary>
+        /// Список точек с которых начинается поиск в графе для расширения
+        /// </summary>
         private HashSet<int> _entryNodes;
+        /// <summary>
+        /// Режим работы алгоритма расширения, зависящий от того заданы ли ограничения в точках, и заданы ли точки начала поиска
+        /// </summary>
         private Mode _mode;
 
         public Mode NodeCheckMode => _mode;
@@ -28,11 +37,14 @@ namespace ZeroLevel.HNSW
             _mode = Mode.None;
         }
 
+        /// <summary>
+        /// Расчет процентного содержания точек доступных для использования в данном контексте, по отношению к общему количеству точек
+        /// </summary>
         public SearchContext CaclulatePercentage(long total)
         {
-            if (total > 0)
+            if ((_mode == Mode.ActiveCheck || _mode == Mode.ActiveInactiveCheck) && total > 0)
             {
-                PercentInTotal = ((_activeNodes.Count * 100d) / (double)total) / 100.0d;
+                PercentInTotal = ((_activeNodes?.Count ?? 0 * 100d) / (double)total) / 100.0d;
             }
             return this;
         }
@@ -44,13 +56,25 @@ namespace ZeroLevel.HNSW
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private bool _isActiveNode(int nodeId) => _activeNodes?.Contains(nodeId) ?? false;
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private bool _isEntryNode(int nodeId) => _entryNodes?.Contains(nodeId) ?? false;
+
+
+        /// <summary>
+        /// Проверка, подходит ли указанная точка для включения в набор расширения
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal bool IsActiveNode(int nodeId)
         {
             switch (_mode)
             {
-                case Mode.ActiveCheck: return _activeNodes.Contains(nodeId);
-                case Mode.InactiveCheck: return _entryNodes.Contains(nodeId) == false;
-                case Mode.ActiveInactiveCheck: return _entryNodes.Contains(nodeId) == false && _activeNodes.Contains(nodeId);
+                // Если задан набор разрешенных к использованию точек, проверяется вхождение в него
+                case Mode.ActiveCheck: return _isActiveNode(nodeId);
+                // Если задан набор точек начала поиска, проверка невхождения точки в него
+                case Mode.InactiveCheck: return _isEntryNode(nodeId) == false;
+                // Если задан и ограничивающий и начальный наборы точек, проверка и на ограничение и на невхождение в начальный набор
+                case Mode.ActiveInactiveCheck: return false == _isEntryNode(nodeId) && _isActiveNode(nodeId);
             }
             return nodeId >= 0;
         }

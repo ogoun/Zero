@@ -3,7 +3,7 @@
     public sealed class ScoredPoint
     {
         public long id { get; set; }
-        public double score { get; set; }
+        public float score { get; set; }
     }
     public sealed class SearchResponse
     {

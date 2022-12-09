@@ -20,6 +20,7 @@ namespace ZeroLevel.Qdrant
     /// </summary>
     public class QdrantClient
     {
+        private const int DEFAULT_OPERATION_TIMEOUT_S = 30;
         private HttpClient CreateClient()
         {
             var handler = new HttpClientHandler
@@ -41,7 +42,7 @@ namespace ZeroLevel.Qdrant
 
         #region API
 
-        #region Collection https://qdrant.tech/documentation/collections/
+        #region Collection https://qdrant.github.io/qdrant/redoc/index.html#tag/collections
         /// <summary>
         /// Create collection
         /// </summary>
@@ -53,12 +54,12 @@ namespace ZeroLevel.Qdrant
         {
             try
             {
-                var collection = new CreateCollectionReqeust(name, distance, vector_size, on_disk_payload);
+                var collection = new CreateCollectionReqeust(distance, vector_size, on_disk_payload);
                 var json = JsonConvert.SerializeObject(collection);
                 var data = new StringContent(json, Encoding.UTF8, "application/json");
-                var url = $"/collections";
+                var url = $"/collections/{name}";
 
-                var response = await _request<OperationResponse>(url, new HttpMethod("POST"), data);
+                var response = await _request<OperationResponse>(url, new HttpMethod("PUT"), data);
                 return InvokeResult.Succeeding<OperationResponse>(response);
             }
             catch (Exception ex)
@@ -71,16 +72,12 @@ namespace ZeroLevel.Qdrant
         /// Delete collection by name
         /// </summary>
         /// <param name="name">Collection name</param>
-        public async Task<InvokeResult<OperationResponse>> DeleteCollection(string name)
+        public async Task<InvokeResult<OperationResponse>> DeleteCollection(string name, int timeout = DEFAULT_OPERATION_TIMEOUT_S)
         {
             try
             {
-                var collection = new DeleteCollectionRequest(name);
-                var json = JsonConvert.SerializeObject(collection);
-                var data = new StringContent(json, Encoding.UTF8, "application/json");
-                var url = $"/collections";
-
-                var response = await _request<OperationResponse>(url, new HttpMethod("POST"), data);
+                var url = $"/collections/{name}?timeout={timeout}";
+                var response = await _request<OperationResponse>(url, new HttpMethod("DELETE"), null);
                 return InvokeResult.Succeeding<OperationResponse>(response);
             }
             catch (Exception ex)
@@ -95,16 +92,16 @@ namespace ZeroLevel.Qdrant
         /// <summary>
         /// For indexing, it is recommended to choose the field that limits the search result the most. As a rule, the more different values a payload value has, the more efficient the index will be used. You should not create an index for Boolean fields and fields with only a few possible values.
         /// </summary>
-        public async Task<InvokeResult<CreateIndexResponse>> CreateIndex(string collection_name, string field_name)
+        public async Task<InvokeResult<CreateIndexResponse>> CreateIndex(string collection_name, string field_name, IndexFieldType field_type)
         {
             try
             {
-                var index = new CreateIndexRequest(field_name);
+                var index = new CreateIndexRequest(field_name, field_type);
                 var json = JsonConvert.SerializeObject(index);
                 var data = new StringContent(json, Encoding.UTF8, "application/json");
-                var url = $"/collections/{collection_name}";
+                var url = $"/collections/{collection_name}/index";
 
-                var response = await _request<CreateIndexResponse>(url, new HttpMethod("POST"), data);
+                var response = await _request<CreateIndexResponse>(url, new HttpMethod("PUT"), data);
                 return InvokeResult.Succeeding<CreateIndexResponse>(response);
             }
             catch (Exception ex)
@@ -164,7 +161,25 @@ namespace ZeroLevel.Qdrant
         /// <summary>
         /// There is a method for retrieving points by their ids.
         /// </summary>
-        public async Task<InvokeResult<PointResponse>> Points(string collection_name, long[] ids)
+        public async Task<InvokeResult<PointResponse>> GetPoint(string collection_name, long id)
+        {
+            try
+            {
+                string url = $"/collections/{collection_name}/points/{id}";
+                var response = await _request<PointResponse>(url, new HttpMethod("GET"), null);
+                return InvokeResult.Succeeding<PointResponse>(response);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, $"[QdrantClient.Points] Collection name: {collection_name}.");
+                return InvokeResult.Fault<PointResponse>($"[QdrantClient.GetPoint]  Collection name: {collection_name}. Point ID: {id}\r\n{ex.ToString()}");
+            }
+        }
+
+        /// <summary>
+        /// There is a method for retrieving points by their ids.
+        /// </summary>
+        public async Task<InvokeResult<PointsResponse>> GetPoints(string collection_name, long[] ids)
         {
             try
             {
@@ -172,13 +187,13 @@ namespace ZeroLevel.Qdrant
                 var json = JsonConvert.SerializeObject(points);
                 var data = new StringContent(json, Encoding.UTF8, "application/json");
                 string url = $"/collections/{collection_name}/points";
-                var response = await _request<PointResponse>(url, new HttpMethod("POST"), data);
-                return InvokeResult.Succeeding<PointResponse>(response);
+                var response = await _request<PointsResponse>(url, new HttpMethod("POST"), data);
+                return InvokeResult.Succeeding<PointsResponse>(response);
             }
             catch (Exception ex)
             {
                 Log.Error(ex, $"[QdrantClient.Points] Collection name: {collection_name}.");
-                return InvokeResult.Fault<PointResponse>($"[QdrantClient.Points]  Collection name: {collection_name}.\r\n{ex.ToString()}");
+                return InvokeResult.Fault<PointsResponse>($"[QdrantClient.GetPoints]  Collection name: {collection_name}.\r\n{ex.ToString()}");
             }
         }
 
@@ -208,43 +223,20 @@ namespace ZeroLevel.Qdrant
         /// <summary>
         /// Record-oriented of creating batches
         /// </summary>
-        public async Task<InvokeResult<PointsOperationResponse>> PointsUpload<T>(string collection_name, UpsertPoint<T>[] points)
+        public async Task<InvokeResult<PointsOperationResponse>> UpsertPoints<T>(string collection_name, PointsUpsertRequest<T> points)
         {
             try
             {
-                var points_request = new PointsUploadRequest<T> { upsert_points = new UpsertPoints<T> { points = points } };
-                var json = points_request.ToJSON();
+                var json = points.ToJSON();
                 var data = new StringContent(json, Encoding.UTF8, "application/json");
-                var url = $"/collections/{collection_name}";
-
-                var response = await _request<PointsOperationResponse>(url, new HttpMethod("POST"), data);
+                var url = $"/collections/{collection_name}/points";
+                var response = await _request<PointsOperationResponse>(url, new HttpMethod("PUT"), data);
                 return InvokeResult.Succeeding<PointsOperationResponse>(response);
             }
             catch (Exception ex)
             {
-                Log.Error(ex, $"[QdrantClient.Points] Collection name: {collection_name}.");
-                return InvokeResult.Fault<PointsOperationResponse>($"[QdrantClient.Points]  Collection name: {collection_name}.\r\n{ex.ToString()}");
-            }
-        }
-        /// <summary>
-        /// Column-oriented of creating batches
-        /// </summary>
-        public async Task<InvokeResult<PointsOperationResponse>> PointsColumnUpload<T>(string collection_name, ColumnPoints<T> points)
-        {
-            try
-            {
-                var points_request = new PointsColumnUploadRequest<T> { upsert_points = new UpsertColumnPoints<T> { batch = points } };
-                var json = points_request.ToJSON();
-                var data = new StringContent(json, Encoding.UTF8, "application/json");
-                var url = $"/collections/{collection_name}";
-
-                var response = await _request<PointsOperationResponse>(url, new HttpMethod("POST"), data);
-                return InvokeResult.Succeeding<PointsOperationResponse>(response);
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, $"[QdrantClient.Points] Collection name: {collection_name}.");
-                return InvokeResult.Fault<PointsOperationResponse>($"[QdrantClient.Points]  Collection name: {collection_name}.\r\n{ex.ToString()}");
+                Log.Error(ex, $"[QdrantClient.UpsertPoints] Collection name: {collection_name}.");
+                return InvokeResult.Fault<PointsOperationResponse>($"[QdrantClient.UpsertPoints]  Collection name: {collection_name}.\r\n{ex.ToString()}");
             }
         }
         /// <summary>

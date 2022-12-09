@@ -47,6 +47,10 @@ namespace ZeroLevel.Services.Reflection
                     return false;
             }
         }
+<<<<<<< Updated upstream
+=======
+
+>>>>>>> Stashed changes
         public static bool IsNumericTypeWithFloating(Type type)
         {
             switch (Type.GetTypeCode(type))

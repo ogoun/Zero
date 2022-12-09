@@ -11,7 +11,7 @@ using ZeroLevel.Services.Serialization;
 
 namespace ZeroLevel.Qdrant.Services
 {
-    public class QdrantJsonConverter<T>
+    public static class QdrantJsonConverter<T>
     {
         private static string KeywordToString(IMemberInfo member, object v)
         {
@@ -36,7 +36,12 @@ namespace ZeroLevel.Qdrant.Services
         private const string GEO_TYPE = "geo";
         private const string FLOAT_TYPE = "float";
         private const string INTEGER_TYPE = "integer";
-        public string ToJson(T value)
+
+        public static string ConvertToJson(float[] vector)
+        {
+            return "[" + string.Join(", ", vector.Select(f => f.ConvertToString())) + "]";
+        }
+        public static string ConvertToJson(T value)
         {
             var json = new StringBuilder();
 
@@ -154,7 +159,7 @@ namespace ZeroLevel.Qdrant.Services
             return json.ToString();
         }
 
-        public IEnumerable<object> E(IEnumerable e)
+        private static IEnumerable<object> E(IEnumerable e)
         {
             if (e != null)
             {

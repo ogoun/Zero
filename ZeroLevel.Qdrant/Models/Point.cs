@@ -4,6 +4,6 @@
     {
         public long id { get; set; }
         public dynamic payload;
-        public double[] vector;
+        public float[] vector;
     }
 }
