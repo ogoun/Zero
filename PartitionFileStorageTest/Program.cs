@@ -383,10 +383,45 @@ namespace PartitionFileStorageTest
             }
         }
 
+        private static void FaultUncompressedReadTest(string filePath)
+        {
+            var serializer = new StoreStandartSerializer<ulong, ulong, byte[]>();
+            // 1 build index
+            var dict = new Dictionary<ulong, HashSet<ulong>>();
+            using (var reader = new MemoryStreamReader(new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.None, 4096 * 1024)))
+            {
+                while (reader.EOS == false)
+                {
+                    try
+                    {
+                        var key = serializer.KeyDeserializer.Invoke(reader);
+                        if (false == dict.ContainsKey(key))
+                        {
+                            dict[key] = new HashSet<ulong>();
+                        }
+                        if (reader.EOS)
+                        {
+                            break;
+                        }
+                        var input = serializer.InputDeserializer.Invoke(reader);
+                        dict[key].Add(input);
+                    }
+                    catch (Exception ex)
+                    {
+                        
+                    }
+                }
+            }
+        }
+
         static void Main(string[] args)
         {
             /*FaultIndexTest(@"H:\temp\85");
             return;*/
+            /*
+            FaultUncompressedReadTest(@"H:\temp\107");
+            return;
+            */
 
             var root = @"H:\temp";
             var options = new StoreOptions<ulong, ulong, byte[], Metadata>
@@ -396,7 +431,7 @@ namespace PartitionFileStorageTest
                     Enabled = true,
                     StepType = IndexStepType.Step,
                     StepValue = 16,
-                    EnableIndexInMemoryCachee= true
+                    EnableIndexInMemoryCachee = true
                 },
                 RootFolder = root,
                 FilePartition = new StoreFilePartition<ulong, Metadata>("Last three digits", (ctn, date) => (ctn % 128).ToString()),
@@ -446,9 +481,10 @@ namespace PartitionFileStorageTest
             }
 
             // FastTest(options);
-            FSUtils.CleanAndTestFolder(root);
+           /* FSUtils.CleanAndTestFolder(root);
+            FullStoreMultithreadTest(optionsMultiThread, pairs);*/
 
-            FullStoreMultithreadTest(optionsMultiThread, pairs);
+            FSUtils.CleanAndTestFolder(root);
             FullStoreTest(options, pairs);
 
             /*
