@@ -144,6 +144,10 @@ namespace ZeroLevel.Services.PartitionStorage
                     }
                 }
             }
+            else
+            {
+                Log.SystemError($"File not found '{filePath}'");
+            }
         }
         #endregion
 

@@ -1,6 +1,7 @@
 ﻿using System;
-using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.IO;
+using System.Threading;
 using ZeroLevel.Services.FileSystem;
 using ZeroLevel.Services.PartitionStorage.Interfaces;
 using ZeroLevel.Services.Serialization;
@@ -14,16 +15,16 @@ namespace ZeroLevel.Services.PartitionStorage.Partition
         : IStorePartitionBase<TKey, TInput, TValue>
     {
         public string Catalog { get { return _catalog; } }
-        
+
         protected readonly TMeta _info;
         protected readonly string _catalog;
         protected IStoreSerializer<TKey, TInput, TValue> Serializer { get; }
         protected readonly StoreOptions<TKey, TInput, TValue, TMeta> _options;
 
         private readonly IndexBuilder<TKey, TValue> _indexBuilder;
-        private readonly ConcurrentDictionary<string, MemoryStreamWriter> _writeStreams = new ConcurrentDictionary<string, MemoryStreamWriter>();
+        private readonly Dictionary<string, MemoryStreamWriter> _writeStreams = new Dictionary<string, MemoryStreamWriter>();
 
-        internal BasePartition(StoreOptions<TKey, TInput, TValue, TMeta> options, 
+        internal BasePartition(StoreOptions<TKey, TInput, TValue, TMeta> options,
             TMeta info,
             IStoreSerializer<TKey, TInput, TValue> serializer)
         {
@@ -101,13 +102,32 @@ namespace ZeroLevel.Services.PartitionStorage.Partition
         {
             try
             {
-                writer = _writeStreams.GetOrAdd(fileName, k =>
+                bool taken = false;
+                Monitor.Enter(_writeStreams, ref taken);
+                try
                 {
-                    var filePath = Path.Combine(_catalog, k);
-                    var stream = new FileStream(filePath, FileMode.Append, FileAccess.Write, FileShare.None, 4096 * 1024);
-                    return new MemoryStreamWriter(stream);
-                });
-                return true;
+                    if (_writeStreams.TryGetValue(fileName, out var w))
+                    {
+                        writer = w;
+                        return true;
+                    }
+                    else
+                    {
+                        var filePath = Path.Combine(_catalog, fileName);
+                        var stream = new FileStream(filePath, FileMode.Append, FileAccess.Write, FileShare.None, 4096 * 1024);
+                        var new_w = new MemoryStreamWriter(stream);
+                        _writeStreams[fileName] = new_w;
+                        writer = new_w;
+                        return true;
+                    }
+                }
+                finally
+                {
+                    if (taken)
+                    {
+                        Monitor.Exit(_writeStreams);
+                    }
+                }
             }
             catch (Exception ex)
             {

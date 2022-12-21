@@ -4,7 +4,8 @@ using ZeroLevel.Services.Serialization;
 
 namespace ZeroLevel.Services.PartitionStorage
 {
-    internal sealed class StoreStandartSerializer<TKey, TInput, TValue>
+    // TODO INTERNAL
+    public sealed class StoreStandartSerializer<TKey, TInput, TValue>
         : IStoreSerializer<TKey, TInput, TValue>
     {
         private readonly Action<MemoryStreamWriter, TKey> _keySerializer;

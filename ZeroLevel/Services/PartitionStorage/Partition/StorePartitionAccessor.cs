@@ -11,12 +11,18 @@ namespace ZeroLevel.Services.PartitionStorage
     internal sealed class StorePartitionAccessor<TKey, TInput, TValue, TMeta>
         : BasePartition<TKey, TInput, TValue, TMeta>, IStorePartitionAccessor<TKey, TInput, TValue>
     {
+        private readonly StorePartitionSparseIndex<TKey, TMeta> Indexes;
+
         public StorePartitionAccessor(StoreOptions<TKey, TInput, TValue, TMeta> options,
             TMeta info,
             IStoreSerializer<TKey, TInput, TValue> serializer)
             : base(options, info, serializer)
         {
             if (options == null) throw new ArgumentNullException(nameof(options));
+            if (options.Index.Enabled)
+            {
+                Indexes = new StorePartitionSparseIndex<TKey, TMeta>(_catalog, _info, options.FilePartition, options.KeyComparer, options.Index.EnableIndexInMemoryCachee);
+            }
         }
 
         #region IStorePartitionAccessor
@@ -28,8 +34,7 @@ namespace ZeroLevel.Services.PartitionStorage
                 long startOffset = 0;
                 if (_options.Index.Enabled)
                 {
-                    var index = new StorePartitionSparseIndex<TKey, TMeta>(_catalog, _info, _options.FilePartition, _options.KeyComparer);
-                    var offset = index.GetOffset(key);
+                    var offset = Indexes.GetOffset(key);
                     startOffset = offset.Offset;
                 }
                 if (TryGetReadStream(fileName, out var reader))
@@ -130,7 +135,14 @@ namespace ZeroLevel.Services.PartitionStorage
                 }
             }
         }
-        public void RebuildIndex() => RebuildIndexes();
+        public void RebuildIndex()
+        {
+            RebuildIndexes();
+            if (_options.Index.Enabled)
+            {
+                Indexes.ResetCachee();
+            }
+        }
         public void RemoveAllExceptKey(TKey key, bool autoReindex = true)
         {
             RemoveAllExceptKeys(new[] { key }, autoReindex);
@@ -144,6 +156,10 @@ namespace ZeroLevel.Services.PartitionStorage
             foreach (var group in results)
             {
                 RemoveKeyGroup(group.FileName, group.Keys, false, autoReindex);
+                if (_options.Index.Enabled)
+                {
+                    Indexes.RemoveCacheeItem(group.FileName);
+                }
             }
         }
         public void RemoveKey(TKey key, bool autoReindex = false)
@@ -159,6 +175,10 @@ namespace ZeroLevel.Services.PartitionStorage
             foreach (var group in results)
             {
                 RemoveKeyGroup(group.FileName, group.Keys, true, autoReindex);
+                if (_options.Index.Enabled)
+                {
+                    Indexes.RemoveCacheeItem(group.FileName);
+                }
             }
         }
         #endregion
@@ -172,8 +192,7 @@ namespace ZeroLevel.Services.PartitionStorage
             {
                 if (_options.Index.Enabled)
                 {
-                    var index = new StorePartitionSparseIndex<TKey, TMeta>(_catalog, _info, _options.FilePartition, _options.KeyComparer);
-                    var offsets = index.GetOffset(keys, true);
+                    var offsets = Indexes.GetOffset(keys, true);
                     if (TryGetReadStream(fileName, out var reader))
                     {
                         using (reader)
@@ -257,8 +276,7 @@ namespace ZeroLevel.Services.PartitionStorage
                 var ranges = new List<FilePositionRange>();
                 if (_options.Index.Enabled && autoReindex)
                 {
-                    var index = new StorePartitionSparseIndex<TKey, TMeta>(_catalog, _info, _options.FilePartition, _options.KeyComparer);
-                    var offsets = index.GetOffset(keys, true);
+                    var offsets = Indexes.GetOffset(keys, true);
                     if (TryGetReadStream(fileName, out var reader))
                     {
                         using (reader)

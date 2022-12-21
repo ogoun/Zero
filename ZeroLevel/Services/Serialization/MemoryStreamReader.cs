@@ -262,7 +262,7 @@ namespace ZeroLevel.Services.Serialization
         /// </summary>
         public bool CheckOutOfRange(int offset)
         {
-            return (_stream.Position + offset) > _stream.Length;
+            return offset < 0 || (_stream.Position + offset) > _stream.Length;
         }
 
         #region Extensions

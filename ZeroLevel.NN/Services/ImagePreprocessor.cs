@@ -143,6 +143,13 @@ namespace ZeroLevel.NN
         {
             var append = options.ChannelType == PredictorChannelType.ChannelFirst ? _precompiledChannelFirstAction : _precompiledChannelLastAction;
 
+            if (image.PixelType.BitsPerPixel != 24)
+            {
+                var i = image;
+                image = i.CloneAs<Rgb24>();
+                i.Dispose();
+            }
+
             ((Image<Rgb24>)image).ProcessPixelRows(pixels =>
             {
                 if (options.InvertXY)

@@ -14,7 +14,7 @@ namespace ZeroLevel.Services.PartitionStorage
     internal sealed class StorePartitionBuilder<TKey, TInput, TValue, TMeta>
         : BasePartition<TKey, TInput, TValue, TMeta>, IStorePartitionBuilder<TKey, TInput, TValue>
     {
-        private readonly Action<TKey, TInput> _storeMethod;
+        private readonly Func<TKey, TInput, bool> _storeMethod;
 
         private long _totalRecords = 0;
 
@@ -41,8 +41,10 @@ namespace ZeroLevel.Services.PartitionStorage
 
         public void Store(TKey key, TInput value)
         {
-            _storeMethod.Invoke(key, value);
-            Interlocked.Increment(ref _totalRecords);
+            if (_storeMethod.Invoke(key, value))
+            {
+                Interlocked.Increment(ref _totalRecords);
+            }
         }
 
         public void CompleteAdding()
@@ -84,7 +86,7 @@ namespace ZeroLevel.Services.PartitionStorage
         #endregion
 
         #region Private methods
-        private void StoreDirect(TKey key, TInput value)
+        private bool StoreDirect(TKey key, TInput value)
         {
             var groupKey = _options.GetFileName(key, _info);
             if (TryGetWriteStream(groupKey, out var stream))
@@ -92,9 +94,15 @@ namespace ZeroLevel.Services.PartitionStorage
                 Serializer.KeySerializer.Invoke(stream, key);
                 Thread.MemoryBarrier();
                 Serializer.InputSerializer.Invoke(stream, value);
+                return true;
             }
+            else
+            {
+                Log.SystemError($"Fault create write stream for key '{groupKey}'");
+            }
+            return false;
         }
-        private void StoreDirectSafe(TKey key, TInput value)
+        private bool StoreDirectSafe(TKey key, TInput value)
         {
             var groupKey = _options.GetFileName(key, _info);
             bool lockTaken = false;
@@ -106,6 +114,7 @@ namespace ZeroLevel.Services.PartitionStorage
                     Serializer.KeySerializer.Invoke(stream, key);
                     Thread.MemoryBarrier();
                     Serializer.InputSerializer.Invoke(stream, value);
+                    return true;
                 }
                 finally
                 {
@@ -115,6 +124,11 @@ namespace ZeroLevel.Services.PartitionStorage
                     }
                 }
             }
+            else
+            {
+                Log.SystemError($"Fault create write stream for key '{groupKey}'");
+            }
+            return false;
         }
 
         internal void CompressFile(string file)
@@ -145,6 +159,7 @@ namespace ZeroLevel.Services.PartitionStorage
                 {
                     var v = _options.MergeFunction(pair.Value);
                     writer.SerializeCompatible(pair.Key);
+                    Thread.MemoryBarrier();
                     writer.SerializeCompatible(v);
                 }
             }

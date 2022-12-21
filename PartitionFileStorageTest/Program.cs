@@ -4,13 +4,14 @@ using System.Text;
 using ZeroLevel;
 using ZeroLevel.Services.FileSystem;
 using ZeroLevel.Services.PartitionStorage;
+using ZeroLevel.Services.Serialization;
 
 namespace PartitionFileStorageTest
 {
     internal class Program
     {
-//        const int PAIRS_COUNT = 200_000_000;
-        const int PAIRS_COUNT = 200_000;
+        //        const int PAIRS_COUNT = 200_000_000;
+        const int PAIRS_COUNT = 2000_000;
 
         private class Metadata
         {
@@ -241,6 +242,11 @@ namespace PartitionFileStorageTest
                 }
             });
 
+            if (storePart.TotalRecords != insertCount)
+            {
+                Log.Error($"Count of stored record no equals expected. Recorded: {storePart.TotalRecords}. Expected: {insertCount}");
+            }
+
             sw.Stop();
             Log.Info($"Fill journal: {sw.ElapsedMilliseconds}ms");
             sw.Restart();
@@ -263,6 +269,11 @@ namespace PartitionFileStorageTest
                 var val = pair.Item2;
                 merger.Store(key, val);
             });
+
+            if (merger.TotalRecords != (pairs.Count - insertCount))
+            {
+                Log.Error($"Count of stored record no equals expected. Recorded: {merger.TotalRecords}. Expected: {(pairs.Count - insertCount)}");
+            }
 
             Log.Info($"Merge journal filled: {sw.ElapsedMilliseconds}ms. Total data count: {pairs.Count}");
             merger.Compress(); // auto reindex
@@ -334,16 +345,58 @@ namespace PartitionFileStorageTest
             Log.Info("Completed");
         }
 
+        private static void FaultIndexTest(string filePath)
+        {
+            var serializer = new StoreStandartSerializer<ulong, ulong, byte[]>();
+            // 1 build index
+            var index = new Dictionary<ulong, long>();
+            using (var reader = new MemoryStreamReader(new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite, 4096 * 1024)))
+            {
+                var counter = 1;
+                while (reader.EOS == false)
+                {
+                    counter--;
+                    var pos = reader.Position;
+                    var k = serializer.KeyDeserializer.Invoke(reader);
+                    serializer.ValueDeserializer.Invoke(reader);
+                    if (counter == 0)
+                    {
+                        index[k] = pos;
+                        counter = 16;
+                    }
+                }
+            }
+
+            // 2 Test index
+            using (var reader = new MemoryStreamReader(new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite, 4096 * 1024)))
+            {
+                foreach (var pair in index)
+                {
+                    reader.Stream.Seek(pair.Value, SeekOrigin.Begin);
+                    var k = serializer.KeyDeserializer.Invoke(reader);
+                    if (k != pair.Key)
+                    {
+                        Log.Warning("Broken index");
+                    }
+                    var v = serializer.ValueDeserializer.Invoke(reader);
+                }
+            }
+        }
+
         static void Main(string[] args)
         {
-            var root = @"H:\temp";            
+            /*FaultIndexTest(@"H:\temp\85");
+            return;*/
+
+            var root = @"H:\temp";
             var options = new StoreOptions<ulong, ulong, byte[], Metadata>
             {
                 Index = new IndexOptions
                 {
                     Enabled = true,
                     StepType = IndexStepType.Step,
-                    StepValue = 16
+                    StepValue = 16,
+                    EnableIndexInMemoryCachee= true
                 },
                 RootFolder = root,
                 FilePartition = new StoreFilePartition<ulong, Metadata>("Last three digits", (ctn, date) => (ctn % 128).ToString()),
@@ -365,7 +418,8 @@ namespace PartitionFileStorageTest
                 {
                     Enabled = true,
                     StepType = IndexStepType.Step,
-                    StepValue = 16
+                    StepValue = 16,
+                    EnableIndexInMemoryCachee = true
                 },
                 RootFolder = root,
                 FilePartition = new StoreFilePartition<ulong, Metadata>("Last three digits", (ctn, date) => (ctn % 128).ToString()),
@@ -393,10 +447,14 @@ namespace PartitionFileStorageTest
 
             // FastTest(options);
             FSUtils.CleanAndTestFolder(root);
-            FullStoreTest(options, pairs);
-            /*
-            FSUtils.CleanAndTestFolder(root);
+
             FullStoreMultithreadTest(optionsMultiThread, pairs);
+            FullStoreTest(options, pairs);
+
+            /*
+            
+            FSUtils.CleanAndTestFolder(root);
+            
             */
             Console.ReadKey();
         }

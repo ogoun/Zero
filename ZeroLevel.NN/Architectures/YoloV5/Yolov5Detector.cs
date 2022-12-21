@@ -9,8 +9,8 @@ namespace ZeroLevel.NN.Architectures.YoloV5
     {
         private int INPUT_WIDTH = 640;
         private int INPUT_HEIGHT = 640;
-        private int CROP_WIDTH = 1440;
-        private int CROP_HEIGHT = 1440;
+        private int CROP_WIDTH = 1280;
+        private int CROP_HEIGHT = 1280;
 
         public Yolov5Detector(string modelPath, int inputWidth = 640, int inputHeight = 640, bool gpu = false)
             : base(modelPath, gpu)
@@ -43,7 +43,15 @@ namespace ZeroLevel.NN.Architectures.YoloV5
             var result = new List<YoloPrediction>();
             Extract(new Dictionary<string, Tensor<float>> { { "images", input } }, d =>
             {
-                var output = d["output"];
+                Tensor<float> output;
+                if (d.ContainsKey("output"))
+                {
+                    output = d["output"];
+                }
+                else
+                {
+                    output = d.First().Value;
+                }
                 /*
                 var output350 = d["350"];
                 var output498 = d["498"];
@@ -93,7 +101,16 @@ namespace ZeroLevel.NN.Architectures.YoloV5
             {
                 Extract(new Dictionary<string, Tensor<float>> { { "images", input.Tensor } }, d =>
                 {
-                    var output = d["output"];
+                    Tensor<float> output;
+                    if (d.ContainsKey("output"))
+                    {
+                        output = d["output"];
+                    }
+                    else
+                    {
+                        output = d.First().Value;
+                    }
+                    
                     /*
                     var output350 = d["350"];
                     var output498 = d["498"];

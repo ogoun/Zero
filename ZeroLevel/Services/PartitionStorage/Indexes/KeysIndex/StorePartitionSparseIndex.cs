@@ -8,18 +8,20 @@ namespace ZeroLevel.Services.PartitionStorage
     internal sealed class StorePartitionSparseIndex<TKey, TMeta>
         : IStorePartitionIndex<TKey>
     {
-        private readonly Dictionary<string, KeyIndex<TKey>[]> _indexCachee
-            = new Dictionary<string, KeyIndex<TKey>[]>(1024);
-
         private readonly StoreFilePartition<TKey, TMeta> _filePartition;
         private readonly Func<TKey, TKey, int> _keyComparer;
         private readonly string _indexFolder;
         private readonly bool _indexExists = false;
+        private readonly bool _enableIndexInMemoryCachee;
         private readonly Func<MemoryStreamReader, TKey> _keyDeserializer;
         private readonly TMeta _meta;
+
+        private readonly Dictionary<string, KeyIndex<TKey>[]> _indexCachee = null;
+
         public StorePartitionSparseIndex(string partitionFolder, TMeta meta,
             StoreFilePartition<TKey, TMeta> filePartition,
-            Func<TKey, TKey, int> keyComparer)
+            Func<TKey, TKey, int> keyComparer,
+            bool enableIndexInMemoryCachee)
         {
             _indexFolder = Path.Combine(partitionFolder, "__indexes__");
             _indexExists = Directory.Exists(_indexFolder);
@@ -27,6 +29,11 @@ namespace ZeroLevel.Services.PartitionStorage
             _keyComparer = keyComparer;
             _filePartition = filePartition;
             _keyDeserializer = MessageSerializer.GetDeserializer<TKey>();
+            _enableIndexInMemoryCachee = enableIndexInMemoryCachee;
+            if (_enableIndexInMemoryCachee)
+            {
+                _indexCachee = new Dictionary<string, KeyIndex<TKey>[]>(1024);
+            }
         }
 
         public KeyIndex<TKey> GetOffset(TKey key)
@@ -99,11 +106,60 @@ namespace ZeroLevel.Services.PartitionStorage
             return index[position];
         }
 
+        public void ResetCachee()
+        {
+            if (_enableIndexInMemoryCachee)
+            {
+                lock (_casheupdatelock)
+                {
+                    _indexCachee.Clear();
+                }
+            }
+        }
+
+        public void RemoveCacheeItem(string name)
+        {
+            if (_enableIndexInMemoryCachee)
+            {
+                lock (_casheupdatelock)
+                {
+                    _indexCachee.Remove(name);
+                }
+            }
+        }
+
+        private readonly object _casheupdatelock = new object();
         private KeyIndex<TKey>[] GetFileIndex(TKey key)
         {
             var indexName = _filePartition.FileNameExtractor.Invoke(key, _meta);
-            if (_indexCachee.TryGetValue(indexName, out var index)) return index;
+            try
+            {
+                if (_enableIndexInMemoryCachee)
+                {
+                    if (_indexCachee.TryGetValue(indexName, out var index))
+                    {
+                        return index;
+                    }
+                    lock (_casheupdatelock)
+                    {
+                        _indexCachee[indexName] = ReadIndexesFromIndexFile(indexName);
+                        return _indexCachee[indexName];
+                    }
+                }
+                else
+                {
+                    return ReadIndexesFromIndexFile(indexName);
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.SystemError(ex, "[StorePartitionSparseIndex.GetFileIndex] No cachee");
+            }
+            return null;
+        }
 
+        private KeyIndex<TKey>[] ReadIndexesFromIndexFile(string indexName)
+        {
             var file = Path.Combine(_indexFolder, indexName);
             if (File.Exists(file))
             {
@@ -117,8 +173,7 @@ namespace ZeroLevel.Services.PartitionStorage
                         list.Add(new KeyIndex<TKey> { Key = k, Offset = o });
                     }
                 }
-                _indexCachee[indexName] = list.ToArray();
-                return _indexCachee[indexName];
+                return list.ToArray();
             }
             return null;
         }
