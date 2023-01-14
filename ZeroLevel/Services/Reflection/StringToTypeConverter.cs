@@ -15,7 +15,7 @@ namespace ZeroLevel.Services.Reflection
         {
             try
             {
-                if (TypeHelpers.IsNumericTypeWithFloating(to))
+                if (TypeHelpers.IsFloatingNumericType(to))
                 {
                     input = input.
                         Replace(",", CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator).

@@ -48,7 +48,25 @@ namespace ZeroLevel.Services.Reflection
             }
         }
 
-        public static bool IsNumericTypeWithFloating(Type type)
+        public static bool IsIntegerNumericType(Type type)
+        {
+            switch (Type.GetTypeCode(type))
+            {
+                case TypeCode.Byte:
+                case TypeCode.SByte:
+                case TypeCode.UInt16:
+                case TypeCode.UInt32:
+                case TypeCode.UInt64:
+                case TypeCode.Int16:
+                case TypeCode.Int32:
+                case TypeCode.Int64:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        public static bool IsFloatingNumericType(Type type)
         {
             switch (Type.GetTypeCode(type))
             {

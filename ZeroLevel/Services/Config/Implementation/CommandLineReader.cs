@@ -27,7 +27,7 @@ namespace ZeroLevel.Services.Config.Implementation
                         string value;
                         if (index >= 0)
                         {
-                            key = arg.Substring(0, index).TrimStart('/').Trim().ToLower(CultureInfo.CurrentCulture);
+                            key = arg.Substring(0, index).TrimStart('-', '/').Trim().ToLower(CultureInfo.CurrentCulture);
                             value = arg.Substring(index + 1, arg.Length - index - 1).Trim(' ', '"');
                         }
                         else
