@@ -6,16 +6,16 @@
 </Description>
     <Authors>ogoun</Authors>
     <Company>ogoun</Company>
-    <AssemblyVersion>3.3.8.7</AssemblyVersion>
-    <PackageReleaseNotes>Fix build configuration from commandf line args.</PackageReleaseNotes>
+    <AssemblyVersion>3.3.8.8</AssemblyVersion>
+    <PackageReleaseNotes>MMF for partition storage</PackageReleaseNotes>
     <PackageProjectUrl>https://github.com/ogoun/Zero/wiki</PackageProjectUrl>
-    <Copyright>Copyright Ogoun 2022</Copyright>
+    <Copyright>Copyright Ogoun 2023</Copyright>
     <PackageLicenseUrl></PackageLicenseUrl>
     <PackageIconUrl></PackageIconUrl>
     <RepositoryUrl>https://github.com/ogoun/Zero</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <Version>3.3.8.7</Version>
-    <FileVersion>3.3.8.7</FileVersion>
+    <Version>3.3.8.8</Version>
+    <FileVersion>3.3.8.8</FileVersion>
     <Platforms>AnyCPU;x64;x86</Platforms>
     <PackageIcon>zero.png</PackageIcon>
     <DebugType>full</DebugType>

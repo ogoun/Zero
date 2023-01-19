@@ -10,10 +10,12 @@ using ZeroLevel.Services.PartitionStorage.Interfaces;
 namespace ZeroLevel.Services.PartitionStorage
 {
     public class Store<TKey, TInput, TValue, TMeta> :
-        IStore<TKey, TInput, TValue, TMeta>
+        IStore<TKey, TInput, TValue, TMeta>, IDisposable
     {
         private readonly StoreOptions<TKey, TInput, TValue, TMeta> _options;
         private readonly IStoreSerializer<TKey, TInput, TValue> _serializer;
+        private readonly PhisicalFileAccessorCachee _fileAccessorCachee;
+
         public Store(StoreOptions<TKey, TInput, TValue, TMeta> options,
             IStoreSerializer<TKey, TInput, TValue> serializer = null)
         {
@@ -31,6 +33,7 @@ namespace ZeroLevel.Services.PartitionStorage
             {
                 Directory.CreateDirectory(_options.RootFolder);
             }
+            _fileAccessorCachee = new PhisicalFileAccessorCachee(options.PhisicalFileAccessorExpirationPeriod, TimeSpan.FromHours(2));
         }
 
         public void RemovePartition(TMeta info)
@@ -42,17 +45,17 @@ namespace ZeroLevel.Services.PartitionStorage
 
         public IStorePartitionAccessor<TKey, TInput, TValue> CreateAccessor(TMeta info)
         {
-            return new StorePartitionAccessor<TKey, TInput, TValue, TMeta>(_options, info, _serializer);
+            return new StorePartitionAccessor<TKey, TInput, TValue, TMeta>(_options, info, _serializer, _fileAccessorCachee);
         }
 
         public IStorePartitionBuilder<TKey, TInput, TValue> CreateBuilder(TMeta info)
         {
-             return new StorePartitionBuilder<TKey, TInput, TValue, TMeta>(_options, info, _serializer);
+            return new StorePartitionBuilder<TKey, TInput, TValue, TMeta>(_options, info, _serializer, _fileAccessorCachee);
         }
 
         public IStorePartitionMergeBuilder<TKey, TInput, TValue> CreateMergeAccessor(TMeta info, Func<TValue, IEnumerable<TInput>> decompressor)
         {
-            return new StoreMergePartitionAccessor<TKey, TInput, TValue, TMeta>(_options, info, decompressor, _serializer);
+            return new StoreMergePartitionAccessor<TKey, TInput, TValue, TMeta>(_options, info, decompressor, _serializer, _fileAccessorCachee);
         }
 
         public async Task<StoreSearchResult<TKey, TValue, TMeta>> Search(StoreSearchRequest<TKey, TMeta> searchRequest)
@@ -80,6 +83,11 @@ namespace ZeroLevel.Services.PartitionStorage
             }
             result.Results = results;
             return result;
+        }
+
+        public void Dispose()
+        {
+            _fileAccessorCachee.Dispose();
         }
     }
 }

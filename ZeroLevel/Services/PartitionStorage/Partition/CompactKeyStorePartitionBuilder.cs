@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using ZeroLevel.Services.FileSystem;
@@ -22,8 +21,9 @@ namespace ZeroLevel.Services.PartitionStorage.Partition
 
         public CompactKeyStorePartitionBuilder(StoreOptions<TKey, TInput, TValue, TMeta> options,
             TMeta info,
-            IStoreSerializer<TKey, TInput, TValue> serializer)
-            : base(options, info, serializer)
+            IStoreSerializer<TKey, TInput, TValue> serializer,
+            PhisicalFileAccessorCachee fileAccessorCachee)
+            : base(options, info, serializer, fileAccessorCachee)
         {
             if (options == null) throw new ArgumentNullException(nameof(options));
             if (options.ThreadSafeWriting)

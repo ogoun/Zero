@@ -19,7 +19,7 @@ namespace ZeroLevel.Services.PartitionStorage
         /// Exists compressed catalog
         /// </summary>
         private readonly IStorePartitionAccessor<TKey, TInput, TValue> _accessor;
-
+        private readonly PhisicalFileAccessorCachee _phisicalFileAccessor;
         private readonly string _temporaryFolder;
         private readonly Func<MemoryStreamReader, TKey> _keyDeserializer;
         private readonly Func<MemoryStreamReader, TValue> _valueDeserializer;
@@ -33,19 +33,22 @@ namespace ZeroLevel.Services.PartitionStorage
         /// Write catalog
         /// </summary>
         private readonly IStorePartitionBuilder<TKey, TInput, TValue> _temporaryAccessor;
-        
+
         public StoreMergePartitionAccessor(StoreOptions<TKey, TInput, TValue, TMeta> options,
-            TMeta info, 
+            TMeta info,
             Func<TValue, IEnumerable<TInput>> decompress,
-            IStoreSerializer<TKey, TInput, TValue> serializer)
+            IStoreSerializer<TKey, TInput, TValue> serializer,
+            PhisicalFileAccessorCachee cachee)
         {
             if (decompress == null) throw new ArgumentNullException(nameof(decompress));
             _decompress = decompress;
-            _accessor = new StorePartitionAccessor<TKey, TInput, TValue, TMeta>(options, info, serializer);
+            _accessor = new StorePartitionAccessor<TKey, TInput, TValue, TMeta>(options, info, serializer, cachee);
             _temporaryFolder = Path.Combine(_accessor.GetCatalogPath(), Guid.NewGuid().ToString());
             var tempOptions = options.Clone();
             tempOptions.RootFolder = _temporaryFolder;
-            _temporaryAccessor = new StorePartitionBuilder<TKey, TInput, TValue, TMeta>(tempOptions, info, serializer);
+            _temporaryAccessor = new StorePartitionBuilder<TKey, TInput, TValue, TMeta>(tempOptions, info, serializer, cachee);
+
+            _phisicalFileAccessor = cachee;
 
             _keyDeserializer = MessageSerializer.GetDeserializer<TKey>();
             _valueDeserializer = MessageSerializer.GetDeserializer<TValue>();
@@ -103,13 +106,21 @@ namespace ZeroLevel.Services.PartitionStorage
                 // replace old file by new
                 foreach (var file in newFiles)
                 {
+                    _phisicalFileAccessor.DropDataReader(file);
+
                     // 1. Remove index file
                     (_accessor as StorePartitionAccessor<TKey, TInput, TValue, TMeta>)
                             .DropFileIndex(file);
 
                     // 2. Replace source
                     var name = Path.GetFileName(file);
-                    File.Move(file, Path.Combine(folder, name), true);
+                    var updateFilePath = Path.Combine(folder, name);
+                    if (File.Exists(updateFilePath))
+                    {
+                        _phisicalFileAccessor.DropDataReader(updateFilePath);
+                        File.Delete(updateFilePath);
+                    }
+                    File.Move(file, updateFilePath, true);
 
                     // 3. Rebuil index
                     (_accessor as BasePartition<TKey, TInput, TValue, TMeta>).RebuildFileIndex(name);

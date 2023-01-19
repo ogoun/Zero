@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.IO;
 using System.Net;
 
 namespace ZeroLevel.Services.Serialization
@@ -130,9 +129,9 @@ namespace ZeroLevel.Services.Serialization
         Dictionary<TKey, TValue> ReadDictionary<TKey, TValue>();
 
         ConcurrentDictionary<TKey, TValue> ReadDictionaryAsConcurrent<TKey, TValue>();
-        
+
         #endregion Extensions
 
-        Stream Stream { get; }
+        void SetPosition(long position);
     }
 }

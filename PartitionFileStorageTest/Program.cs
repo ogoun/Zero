@@ -1,8 +1,9 @@
 ﻿using System.Collections.Concurrent;
 using System.Diagnostics;
-using System.Text;
 using ZeroLevel;
+using ZeroLevel.Collections;
 using ZeroLevel.Services.FileSystem;
+using ZeroLevel.Services.Memory;
 using ZeroLevel.Services.PartitionStorage;
 using ZeroLevel.Services.Serialization;
 
@@ -11,20 +12,18 @@ namespace PartitionFileStorageTest
     internal class Program
     {
         //        const int PAIRS_COUNT = 200_000_000;
-        const int PAIRS_COUNT = 2000_000;
+        const long PAIRS_COUNT = 100_000_000;
 
         private class Metadata
         {
             public DateTime Date { get; set; }
         }
 
+        const ulong num_base = 79770000000;
+
         private static ulong Generate(Random r)
         {
-            var num = new StringBuilder();
-            num.Append("79");
-            num.Append(r.Next(99).ToString("D2"));
-            num.Append(r.Next(9999).ToString("D7"));
-            return ulong.Parse(num.ToString());
+            return num_base + (uint)r.Next(999999);
         }
 
         private static void FastTest(StoreOptions<ulong, ulong, byte[], Metadata> options)
@@ -210,11 +209,20 @@ namespace PartitionFileStorageTest
                     }
                 }
             }
+            store.Dispose();
             Log.Info("Completed");
         }
 
-        private static void FullStoreMultithreadTest(StoreOptions<ulong, ulong, byte[], Metadata> options,
-            List<(ulong, ulong)> pairs)
+        private static IEnumerable<(ulong, ulong)> MassGenerator(long count)
+        {
+            var r = new Random(Environment.TickCount);
+            for (long i = 0; i < count; i++)
+            {
+                yield return (Generate(r), Generate(r));
+            }
+        }
+
+        private static void FullStoreMultithreadTest(StoreOptions<ulong, ulong, byte[], Metadata> options)
         {
             var meta = new Metadata { Date = new DateTime(2022, 11, 08) };
             var r = new Random(Environment.TickCount);
@@ -222,12 +230,13 @@ namespace PartitionFileStorageTest
             var storePart = store.CreateBuilder(meta);
             var sw = new Stopwatch();
             sw.Start();
-            var insertCount = (int)(0.7 * pairs.Count);
+            var insertCount = (long)(0.7 * PAIRS_COUNT);
             var testKeys1 = new ConcurrentBag<ulong>();
             var testKeys2 = new ConcurrentBag<ulong>();
             var parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = 24 };
+            var Keys = new ConcurrentHashSet<ulong>();
 
-            Parallel.ForEach(pairs.Take(insertCount).ToArray(), parallelOptions, pair =>
+            Parallel.ForEach(MassGenerator((long)(0.7 * PAIRS_COUNT)), parallelOptions, pair =>
             {
                 var key = pair.Item1;
                 var val = pair.Item2;
@@ -240,11 +249,12 @@ namespace PartitionFileStorageTest
                 {
                     testKeys2.Add(key);
                 }
+                Keys.Add(key);
             });
 
             if (storePart.TotalRecords != insertCount)
             {
-                Log.Error($"Count of stored record no equals expected. Recorded: {storePart.TotalRecords}. Expected: {insertCount}");
+                Log.Error($"Count of stored record no equals expected. Recorded: {storePart.TotalRecords}. Expected: {insertCount}. Unique keys: {Keys.Count}");
             }
 
             sw.Stop();
@@ -263,27 +273,29 @@ namespace PartitionFileStorageTest
             sw.Restart();
             var merger = store.CreateMergeAccessor(meta, data => Compressor.DecodeBytesContent(data));
 
-            Parallel.ForEach(pairs.Skip(insertCount).ToArray(), parallelOptions, pair =>
+            Parallel.ForEach(MassGenerator((long)(0.3 * PAIRS_COUNT)), parallelOptions, pair =>
             {
                 var key = pair.Item1;
                 var val = pair.Item2;
                 merger.Store(key, val);
+                Keys.Add(key);
             });
 
-            if (merger.TotalRecords != (pairs.Count - insertCount))
+            if (merger.TotalRecords != ((long)(0.3 * PAIRS_COUNT)))
             {
-                Log.Error($"Count of stored record no equals expected. Recorded: {merger.TotalRecords}. Expected: {(pairs.Count - insertCount)}");
+                Log.Error($"Count of stored record no equals expected. Recorded: {merger.TotalRecords}. Expected: {((long)(0.3 * PAIRS_COUNT))}");
             }
 
-            Log.Info($"Merge journal filled: {sw.ElapsedMilliseconds}ms. Total data count: {pairs.Count}");
+            Log.Info($"Merge journal filled: {sw.ElapsedMilliseconds}ms. Total data count: {PAIRS_COUNT}. Unique keys: {Keys.Count}");
             merger.Compress(); // auto reindex
             sw.Stop();
             Log.Info($"Compress after merge: {sw.ElapsedMilliseconds}ms");
 
-            Log.Info("Test #1 reading");
-            var readPart = store.CreateAccessor(meta);
             ulong totalData = 0;
             ulong totalKeys = 0;
+            var readPart = store.CreateAccessor(meta);
+            /*
+            Log.Info("Test #1 reading");
             foreach (var key in testKeys1)
             {
                 var result = readPart.Find(key);
@@ -312,6 +324,7 @@ namespace PartitionFileStorageTest
             Log.Info($"\t\tFound: {totalKeys} keys. {totalData} bytes");
             totalData = 0;
             totalKeys = 0;
+            */
             Log.Info("Test #2 reading");
             foreach (var key in testKeys2)
             {
@@ -319,11 +332,15 @@ namespace PartitionFileStorageTest
                 totalData += (ulong)(result.Value?.Length ?? 0);
                 totalKeys++;
             }
-            Log.Info($"\t\tFound: {totalKeys} keys. {totalData} bytes");
+            Log.Info($"\t\tFound: {totalKeys}/{Keys.Count} keys. {totalData} bytes");
             totalData = 0;
             totalKeys = 0;
             Log.Info("Test #2 remove keys batch");
             readPart.RemoveKeys(testKeys2);
+            foreach (var k in testKeys2)
+            {
+                Keys.TryRemove(k);
+            }
             Log.Info("Test #2 reading after remove");
             foreach (var key in testKeys2)
             {
@@ -341,7 +358,8 @@ namespace PartitionFileStorageTest
                 totalData += (ulong)(e.Value?.Length ?? 0);
                 totalKeys++;
             }
-            Log.Info($"\t\tFound: {totalKeys} keys. {totalData} bytes");
+            Log.Info($"\t\tFound: {totalKeys}/{Keys.Count} keys. {totalData} bytes");
+            store.Dispose();
             Log.Info("Completed");
         }
 
@@ -368,6 +386,23 @@ namespace PartitionFileStorageTest
             }
 
             // 2 Test index
+            var fileReader = new ParallelFileReader(filePath);
+            foreach (var pair in index)
+            {
+                var accessor = fileReader.GetAccessor(pair.Value);
+                using (var reader = new MemoryStreamReader(accessor))
+                {
+                    var k = serializer.KeyDeserializer.Invoke(reader);
+                    if (k != pair.Key)
+                    {
+                        Log.Warning("Broken index");
+                    }
+                    var v = serializer.ValueDeserializer.Invoke(reader);
+                }
+            }
+
+
+            /*
             using (var reader = new MemoryStreamReader(new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite, 4096 * 1024)))
             {
                 foreach (var pair in index)
@@ -381,6 +416,7 @@ namespace PartitionFileStorageTest
                     var v = serializer.ValueDeserializer.Invoke(reader);
                 }
             }
+            */
         }
 
         private static void FaultUncompressedReadTest(string filePath)
@@ -408,7 +444,7 @@ namespace PartitionFileStorageTest
                     }
                     catch (Exception ex)
                     {
-                        
+
                     }
                 }
             }
@@ -416,13 +452,6 @@ namespace PartitionFileStorageTest
 
         static void Main(string[] args)
         {
-            /*FaultIndexTest(@"H:\temp\85");
-            return;*/
-            /*
-            FaultUncompressedReadTest(@"H:\temp\107");
-            return;
-            */
-
             var root = @"H:\temp";
             var options = new StoreOptions<ulong, ulong, byte[], Metadata>
             {
@@ -430,7 +459,7 @@ namespace PartitionFileStorageTest
                 {
                     Enabled = true,
                     StepType = IndexStepType.Step,
-                    StepValue = 16,
+                    StepValue = 32,
                     EnableIndexInMemoryCachee = true
                 },
                 RootFolder = root,
@@ -453,7 +482,7 @@ namespace PartitionFileStorageTest
                 {
                     Enabled = true,
                     StepType = IndexStepType.Step,
-                    StepValue = 16,
+                    StepValue = 32,
                     EnableIndexInMemoryCachee = true
                 },
                 RootFolder = root,
@@ -468,24 +497,30 @@ namespace PartitionFileStorageTest
                     new StoreCatalogPartition<Metadata>("Date", m => m.Date.ToString("yyyyMMdd"))
                 },
                 KeyComparer = (left, right) => left == right ? 0 : (left < right) ? -1 : 1,
-                ThreadSafeWriting = true
+                ThreadSafeWriting = true,
+                MaxDegreeOfParallelism = 16
             };
             Log.AddConsoleLogger(ZeroLevel.Logging.LogLevel.FullDebug);
-            Log.Info("Start");
-
+            /*
             var pairs = new List<(ulong, ulong)>(PAIRS_COUNT);
             var r = new Random(Environment.TickCount);
+            Log.Info("Start create dataset");
             for (int i = 0; i < PAIRS_COUNT; i++)
             {
                 pairs.Add((Generate(r), Generate(r)));
             }
-
+            */
+            Log.Info("Start test");
             // FastTest(options);
-           /* FSUtils.CleanAndTestFolder(root);
-            FullStoreMultithreadTest(optionsMultiThread, pairs);*/
-
             FSUtils.CleanAndTestFolder(root);
-            FullStoreTest(options, pairs);
+            FullStoreMultithreadTest(optionsMultiThread);
+
+
+            /*  
+          FSUtils.CleanAndTestFolder(root);
+          FullStoreTest(options, pairs);
+            */
+            //TestParallelFileReadingMMF();
 
             /*
             
@@ -493,6 +528,84 @@ namespace PartitionFileStorageTest
             
             */
             Console.ReadKey();
+        }
+
+
+        static void TestParallelFileReading()
+        {
+            var path = @"C:\Users\Ogoun\Downloads\Lego_super_hero.iso";
+            var threads = new List<Thread>();
+            for (int i = 0; i < 100; i++)
+            {
+                var k = i;
+                var reader = GetReadStream(path);
+                var t = new Thread(() => PartReader(reader, 1000000 + k * 1000));
+                t.IsBackground = true;
+                threads.Add(t);
+            }
+            foreach (var t in threads)
+            {
+                t.Start();
+            }
+        }
+
+        static void TestParallelFileReadingMMF()
+        {
+            var filereader = new ParallelFileReader(@"C:\Users\Ogoun\Downloads\Lego_super_hero.iso");
+            var threads = new List<Thread>();
+            for (int i = 0; i < 100; i++)
+            {
+                var k = i;
+                var t = new Thread(() => PartReaderMMF(filereader.GetAccessor(1000000 + k * 1000)));
+                t.IsBackground = true;
+                threads.Add(t);
+            }
+
+            foreach (var t in threads)
+            {
+                t.Start();
+            }
+
+        }
+
+        static MemoryStreamReader GetReadStream(string filePath)
+        {
+            var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite, 4096 * 1024);
+            return new MemoryStreamReader(stream);
+        }
+
+        static void PartReader(MemoryStreamReader reader, long offset)
+        {
+            var count = 0;
+            using (reader)
+            {
+                reader.SetPosition(offset);
+                for (int i = 0; i < 1000000; i++)
+                {
+                    if (reader.ReadByte() == 127) count++;
+                }
+            }
+            Console.WriteLine($"Thread: {Thread.CurrentThread.ManagedThreadId}: {count}");
+        }
+
+        static void PartReaderMMF(IViewAccessor accessor)
+        {
+            var count = 0;
+            var lastPosition = accessor.Position;
+            using (var reader = new MemoryStreamReader(accessor))
+            {
+                for (int i = 0; i < 1000000; i++)
+                {
+                    if (reader.ReadByte() == 127) count++;
+                    if (lastPosition > reader.Position)
+                    {
+                        // Test for correct absolute position
+                        Console.WriteLine("Fock!");
+                    }
+                    lastPosition = reader.Position;
+                }
+            }
+            Console.WriteLine($"Thread: {Thread.CurrentThread.ManagedThreadId}: {count}");
         }
     }
 }

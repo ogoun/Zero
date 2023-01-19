@@ -4,6 +4,6 @@
     {
         Success,
         NotFound,
-        FileLocked
+        FileLockedOrUnavaliable
     }
 }

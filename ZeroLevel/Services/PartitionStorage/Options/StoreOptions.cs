@@ -43,6 +43,10 @@ namespace ZeroLevel.Services.PartitionStorage
         /// Uses a thread-safe mechanism for writing to files during multi-threaded writes
         /// </summary>
         public bool ThreadSafeWriting { get; set; } = false;
+        /// <summary>
+        /// Period before memory mapped file was closed, after last access time
+        /// </summary>
+        public TimeSpan PhisicalFileAccessorExpirationPeriod { get; set; } = TimeSpan.FromMinutes(30);
 
         public IndexOptions Index { get; set; } = new IndexOptions
         {

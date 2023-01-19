@@ -22,8 +22,9 @@ namespace ZeroLevel.Services.PartitionStorage
 
         public StorePartitionBuilder(StoreOptions<TKey, TInput, TValue, TMeta> options,
             TMeta info,
-            IStoreSerializer<TKey, TInput, TValue> serializer)
-            : base(options, info, serializer)
+            IStoreSerializer<TKey, TInput, TValue> serializer,
+            PhisicalFileAccessorCachee fileAccessorCachee)
+            : base(options, info, serializer, fileAccessorCachee)
         {
             if (options == null) throw new ArgumentNullException(nameof(options));
             if (options.ThreadSafeWriting)
@@ -67,9 +68,10 @@ namespace ZeroLevel.Services.PartitionStorage
             {
                 foreach (var file in files)
                 {
-                    if (TryGetReadStream(file, out var reader))
+                    var accessor = GetViewAccessor(file, 0);
+                    if (accessor != null)
                     {
-                        using (reader)
+                        using (var reader = new MemoryStreamReader(accessor))
                         {
                             while (reader.EOS == false)
                             {
@@ -134,21 +136,25 @@ namespace ZeroLevel.Services.PartitionStorage
         internal void CompressFile(string file)
         {
             var dict = new Dictionary<TKey, HashSet<TInput>>();
-            using (var reader = new MemoryStreamReader(new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.None, 4096 * 1024)))
+            var accessor = PhisicalFileAccessorCachee.GetDataAccessor(file, 0);
+            if (accessor != null)
             {
-                while (reader.EOS == false)
+                using (var reader = new MemoryStreamReader(accessor))
                 {
-                    var key = Serializer.KeyDeserializer.Invoke(reader);
-                    if (false == dict.ContainsKey(key))
+                    while (reader.EOS == false)
                     {
-                        dict[key] = new HashSet<TInput>();
+                        var key = Serializer.KeyDeserializer.Invoke(reader);
+                        if (false == dict.ContainsKey(key))
+                        {
+                            dict[key] = new HashSet<TInput>();
+                        }
+                        if (reader.EOS)
+                        {
+                            break;
+                        }
+                        var input = Serializer.InputDeserializer.Invoke(reader);
+                        dict[key].Add(input);
                     }
-                    if (reader.EOS)
-                    {
-                        break;
-                    }
-                    var input = Serializer.InputDeserializer.Invoke(reader);
-                    dict[key].Add(input);
                 }
             }
             var tempFile = FSUtils.GetAppLocalTemporaryFile();
@@ -163,6 +169,7 @@ namespace ZeroLevel.Services.PartitionStorage
                     writer.SerializeCompatible(v);
                 }
             }
+            PhisicalFileAccessorCachee.DropDataReader(file);
             File.Delete(file);
             File.Move(tempFile, file, true);
         }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using ZeroLevel.Services.FileSystem;
+using ZeroLevel.Services.Memory;
 using ZeroLevel.Services.PartitionStorage.Interfaces;
 using ZeroLevel.Services.Serialization;
 
@@ -24,9 +25,12 @@ namespace ZeroLevel.Services.PartitionStorage.Partition
         private readonly IndexBuilder<TKey, TValue> _indexBuilder;
         private readonly Dictionary<string, MemoryStreamWriter> _writeStreams = new Dictionary<string, MemoryStreamWriter>();
 
+        private readonly PhisicalFileAccessorCachee _phisicalFileAccessor;
+        protected PhisicalFileAccessorCachee PhisicalFileAccessorCachee => _phisicalFileAccessor;
+
         internal BasePartition(StoreOptions<TKey, TInput, TValue, TMeta> options,
             TMeta info,
-            IStoreSerializer<TKey, TInput, TValue> serializer)
+            IStoreSerializer<TKey, TInput, TValue> serializer, PhisicalFileAccessorCachee fileAccessorCachee)
         {
             _options = options;
             _info = info;
@@ -35,7 +39,8 @@ namespace ZeroLevel.Services.PartitionStorage.Partition
             {
                 Directory.CreateDirectory(_catalog);
             }
-            _indexBuilder = _options.Index.Enabled ? new IndexBuilder<TKey, TValue>(_options.Index.StepType, _options.Index.StepValue, _catalog) : null;
+            _phisicalFileAccessor = fileAccessorCachee;
+            _indexBuilder = _options.Index.Enabled ? new IndexBuilder<TKey, TValue>(_options.Index.StepType, _options.Index.StepValue, _catalog, fileAccessorCachee) : null;
             Serializer = serializer;
         }
 
@@ -154,6 +159,42 @@ namespace ZeroLevel.Services.PartitionStorage.Partition
             }
             reader = null;
             return false;
+        }
+        protected IViewAccessor GetViewAccessor(TKey key, long offset)
+        {
+            var fileName = _options.GetFileName(key, _info);
+            var filePath = Path.Combine(_catalog, fileName);
+            return GetViewAccessor(filePath, offset);
+        }
+        protected IViewAccessor GetViewAccessor(TKey key, long offset, int length)
+        {
+            var fileName = _options.GetFileName(key, _info);
+            var filePath = Path.Combine(_catalog, fileName);
+            return GetViewAccessor(filePath, offset, length);
+        }
+        protected IViewAccessor GetViewAccessor(string filePath, long offset)
+        {
+            try
+            {
+                return PhisicalFileAccessorCachee.GetDataAccessor(filePath, offset);
+            }
+            catch (Exception ex)
+            {
+                Log.SystemError(ex, $"[StorePartitionAccessor.GetViewAccessor] '{filePath}'");
+            }
+            return null;
+        }
+        protected IViewAccessor GetViewAccessor(string filePath, long offset, int length)
+        {
+            try
+            {
+                return PhisicalFileAccessorCachee.GetDataAccessor(filePath, offset, length);
+            }
+            catch (Exception ex)
+            {
+                Log.SystemError(ex, $"[StorePartitionAccessor.GetViewAccessor] '{filePath}'");
+            }
+            return null;
         }
     }
 }

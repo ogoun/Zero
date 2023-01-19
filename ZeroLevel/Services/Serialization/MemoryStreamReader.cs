@@ -5,6 +5,7 @@ using System.IO;
 using System.Net;
 using System.Text;
 using ZeroLevel.Services.Extensions;
+using ZeroLevel.Services.Memory;
 
 namespace ZeroLevel.Services.Serialization
 {
@@ -14,7 +15,7 @@ namespace ZeroLevel.Services.Serialization
     public sealed class MemoryStreamReader
         : IBinaryReader
     {
-        private readonly Stream _stream;
+        private readonly IViewAccessor _accessor;
         private bool _reverseByteOrder = false;
 
         public void ReverseByteOrder(bool use_reverse_byte_order)
@@ -25,43 +26,45 @@ namespace ZeroLevel.Services.Serialization
         /// <summary>
         /// End of stream
         /// </summary>
-        public bool EOS => _stream.Position >= _stream.Length;
+        public bool EOS => _accessor.EOV;
 
         public MemoryStreamReader(byte[] data)
         {
             if (data == null)
                 throw new ArgumentNullException(nameof(data));
-            _stream = new MemoryStream(data);
+            _accessor = new StreamVewAccessor(new MemoryStream(data));
         }
 
         public MemoryStreamReader(Stream stream)
         {
             if (stream == null)
                 throw new ArgumentNullException(nameof(stream));
-            _stream = stream;
+            _accessor = new StreamVewAccessor(stream);
         }
 
         public MemoryStreamReader(MemoryStreamReader reader)
         {
             if (reader == null)
                 throw new ArgumentNullException(nameof(reader));
-            _stream = reader._stream;
+            _accessor = reader._accessor;
         }
 
-        public void Seek(long offset, SeekOrigin origin)
+        public MemoryStreamReader(IViewAccessor accessor)
         {
-            _stream.Seek(offset, origin);
+            if (accessor == null)
+                throw new ArgumentNullException(nameof(accessor));
+            _accessor = accessor;
         }
 
-        public long Position => _stream.Position;
+        public long Position => _accessor.Position;
+
+        public void SetPosition(long position) => _accessor.Seek(position);
 
         /// <summary>
         /// Flag reading
         /// </summary>
         public bool ReadBoolean()
         {
-            if (CheckOutOfRange(1))
-                throw new OutOfMemoryException("Array index out of bounds");
             return BitConverter.ToBoolean(new byte[1] { ReadByte() }, 0);
         }
 
@@ -70,15 +73,12 @@ namespace ZeroLevel.Services.Serialization
         /// </summary>
         public byte ReadByte()
         {
-            if (CheckOutOfRange(1))
-                throw new OutOfMemoryException("Array index out of bounds");
-            return (byte)_stream.ReadByte();
+            var buffer = ReadBuffer(1);
+            return buffer[0];
         }
 
         public char ReadChar()
         {
-            if (CheckOutOfRange(2))
-                throw new OutOfMemoryException("Array index out of bounds");
             var buffer = ReadBuffer(2);
             return BitConverter.ToChar(buffer, 0);
         }
@@ -187,13 +187,9 @@ namespace ZeroLevel.Services.Serialization
         /// </summary>
         public byte[] ReadBuffer(int count)
         {
-            if (count == 0) return null;
             if (CheckOutOfRange(count))
                 throw new OutOfMemoryException("Array index out of bounds");
-            var buffer = new byte[count];
-            var readedCount = _stream.Read(buffer, 0, count);
-            if (count != readedCount)
-                throw new InvalidOperationException($"The stream returned less data ({count} bytes) than expected ({readedCount} bytes)");
+            var buffer = _accessor.ReadBuffer(count);
             if (_reverseByteOrder && count > 1)
             {
                 byte b;
@@ -262,7 +258,7 @@ namespace ZeroLevel.Services.Serialization
         /// </summary>
         public bool CheckOutOfRange(int offset)
         {
-            return offset < 0 || (_stream.Position + offset) > _stream.Length;
+            return _accessor.CheckOutOfRange(offset);
         }
 
         #region Extensions
@@ -1137,10 +1133,7 @@ namespace ZeroLevel.Services.Serialization
 
         public void Dispose()
         {
-            _stream.Dispose();
+            _accessor.Dispose();
         }
-
-
-        public Stream Stream => _stream;
     }
 }

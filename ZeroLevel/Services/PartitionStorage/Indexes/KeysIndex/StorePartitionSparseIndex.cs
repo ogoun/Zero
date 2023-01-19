@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using ZeroLevel.Services.Memory;
 using ZeroLevel.Services.Serialization;
 
 namespace ZeroLevel.Services.PartitionStorage
@@ -15,13 +16,13 @@ namespace ZeroLevel.Services.PartitionStorage
         private readonly bool _enableIndexInMemoryCachee;
         private readonly Func<MemoryStreamReader, TKey> _keyDeserializer;
         private readonly TMeta _meta;
-
-        private readonly Dictionary<string, KeyIndex<TKey>[]> _indexCachee = null;
+        private readonly PhisicalFileAccessorCachee _phisicalFileAccessorCachee;
 
         public StorePartitionSparseIndex(string partitionFolder, TMeta meta,
             StoreFilePartition<TKey, TMeta> filePartition,
             Func<TKey, TKey, int> keyComparer,
-            bool enableIndexInMemoryCachee)
+            bool enableIndexInMemoryCachee,
+            PhisicalFileAccessorCachee phisicalFileAccessorCachee)
         {
             _indexFolder = Path.Combine(partitionFolder, "__indexes__");
             _indexExists = Directory.Exists(_indexFolder);
@@ -32,7 +33,7 @@ namespace ZeroLevel.Services.PartitionStorage
             _enableIndexInMemoryCachee = enableIndexInMemoryCachee;
             if (_enableIndexInMemoryCachee)
             {
-                _indexCachee = new Dictionary<string, KeyIndex<TKey>[]>(1024);
+                _phisicalFileAccessorCachee = phisicalFileAccessorCachee;
             }
         }
 
@@ -110,46 +111,26 @@ namespace ZeroLevel.Services.PartitionStorage
         {
             if (_enableIndexInMemoryCachee)
             {
-                lock (_casheupdatelock)
-                {
-                    _indexCachee.Clear();
-                }
+                _phisicalFileAccessorCachee.DropAllIndexReaders();
             }
         }
 
         public void RemoveCacheeItem(string name)
         {
+            var file = Path.Combine(_indexFolder, name);
             if (_enableIndexInMemoryCachee)
             {
-                lock (_casheupdatelock)
-                {
-                    _indexCachee.Remove(name);
-                }
+                _phisicalFileAccessorCachee.DropIndexReader(file);
             }
         }
 
-        private readonly object _casheupdatelock = new object();
         private KeyIndex<TKey>[] GetFileIndex(TKey key)
         {
             var indexName = _filePartition.FileNameExtractor.Invoke(key, _meta);
+            var filePath = Path.Combine(_indexFolder, indexName);
             try
             {
-                if (_enableIndexInMemoryCachee)
-                {
-                    if (_indexCachee.TryGetValue(indexName, out var index))
-                    {
-                        return index;
-                    }
-                    lock (_casheupdatelock)
-                    {
-                        _indexCachee[indexName] = ReadIndexesFromIndexFile(indexName);
-                        return _indexCachee[indexName];
-                    }
-                }
-                else
-                {
-                    return ReadIndexesFromIndexFile(indexName);
-                }
+                return ReadIndexesFromIndexFile(filePath);
             }
             catch (Exception ex)
             {
@@ -158,19 +139,35 @@ namespace ZeroLevel.Services.PartitionStorage
             return null;
         }
 
-        private KeyIndex<TKey>[] ReadIndexesFromIndexFile(string indexName)
+        private KeyIndex<TKey>[] ReadIndexesFromIndexFile(string filePath)
         {
-            var file = Path.Combine(_indexFolder, indexName);
-            if (File.Exists(file))
+            if (File.Exists(filePath))
             {
                 var list = new List<KeyIndex<TKey>>();
-                using (var reader = new MemoryStreamReader(new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.None)))
+                var accessor = _enableIndexInMemoryCachee ? _phisicalFileAccessorCachee.GetIndexAccessor(filePath, 0) : new StreamVewAccessor(new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.None));
+                using (var reader = new MemoryStreamReader(accessor))
                 {
+                    var index = new KeyIndex<TKey>();
+                    if (reader.EOS == false)
+                    {
+                        index.Key = _keyDeserializer.Invoke(reader);
+                    }
+                    if (reader.EOS == false)
+                    {
+                        index.Offset = reader.ReadLong();
+                    }
                     while (reader.EOS == false)
                     {
                         var k = _keyDeserializer.Invoke(reader);
                         var o = reader.ReadLong();
-                        list.Add(new KeyIndex<TKey> { Key = k, Offset = o });
+                        index.Length = (int)(o - index.Offset);
+                        list.Add(index);
+                        index = new KeyIndex<TKey> { Key = k, Offset = o };
+                    }
+                    if (index.Offset > 0)
+                    {
+                        index.Length = 0;
+                        list.Add(index);
                     }
                 }
                 return list.ToArray();
