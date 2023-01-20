@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using ZeroLevel.Services.Cache;
 using ZeroLevel.Services.FileSystem;
@@ -11,6 +12,8 @@ namespace ZeroLevel.Services.PartitionStorage
     {
         private readonly TimerCachee<ParallelFileReader> _indexReadersCachee;
         private readonly TimerCachee<ParallelFileReader> _dataReadersCachee;
+
+        private readonly HashSet<string> _lockedFiles = new HashSet<string>();
 
         public PhisicalFileAccessorCachee(TimeSpan dataExpirationPeriod, TimeSpan indexExpirationPeriod)
         {
@@ -32,32 +35,40 @@ namespace ZeroLevel.Services.PartitionStorage
         }
         public IViewAccessor GetDataAccessor(string filePath, long offset)
         {
-            var reader = GetDataReader(filePath);
-            try
+            if (false == _lockedFiles.Contains(filePath))
             {
+                var reader = GetDataReader(filePath);
+                try
+                {
+                    return reader.GetAccessor(offset);
+                }
+                catch (ObjectDisposedException)
+                {
+                    _dataReadersCachee.Drop(filePath);
+                    reader = _dataReadersCachee.Get(filePath);
+                }
                 return reader.GetAccessor(offset);
             }
-            catch (ObjectDisposedException)
-            {
-                _dataReadersCachee.Drop(filePath);
-                reader = _dataReadersCachee.Get(filePath);
-            }
-            return reader.GetAccessor(offset);
+            return null;
         }
 
         public IViewAccessor GetDataAccessor(string filePath, long offset, int length)
         {
-            var reader = GetDataReader(filePath);
-            try
+            if (false == _lockedFiles.Contains(filePath))
             {
+                var reader = GetDataReader(filePath);
+                try
+                {
+                    return reader.GetAccessor(offset, length);
+                }
+                catch (ObjectDisposedException)
+                {
+                    _dataReadersCachee.Drop(filePath);
+                    reader = _dataReadersCachee.Get(filePath);
+                }
                 return reader.GetAccessor(offset, length);
             }
-            catch (ObjectDisposedException)
-            {
-                _dataReadersCachee.Drop(filePath);
-                reader = _dataReadersCachee.Get(filePath);
-            }
-            return reader.GetAccessor(offset, length);
+            return null;
         }
         public void DropAllDataReaders()
         {
@@ -79,38 +90,58 @@ namespace ZeroLevel.Services.PartitionStorage
         }
         public IViewAccessor GetIndexAccessor(string filePath, long offset)
         {
-            var reader = GetIndexReader(filePath);
-            try
+            if (false == _lockedFiles.Contains(filePath))
             {
+                var reader = GetIndexReader(filePath);
+                try
+                {
+                    return reader.GetAccessor(offset);
+                }
+                catch (ObjectDisposedException)
+                {
+                    _indexReadersCachee.Drop(filePath);
+                    reader = _indexReadersCachee.Get(filePath);
+                }
                 return reader.GetAccessor(offset);
             }
-            catch (ObjectDisposedException)
-            {
-                _indexReadersCachee.Drop(filePath);
-                reader = _indexReadersCachee.Get(filePath);
-            }
-            return reader.GetAccessor(offset);
+            return null;
         }
 
         public IViewAccessor GetIndexAccessor(string filePath, long offset, int length)
         {
-            var reader = GetIndexReader(filePath);
-            try
+            if (false == _lockedFiles.Contains(filePath))
             {
+                var reader = GetIndexReader(filePath);
+                try
+                {
+                    return reader.GetAccessor(offset, length);
+                }
+                catch (ObjectDisposedException)
+                {
+                    _indexReadersCachee.Drop(filePath);
+                    reader = _indexReadersCachee.Get(filePath);
+                }
                 return reader.GetAccessor(offset, length);
             }
-            catch (ObjectDisposedException)
-            {
-                _indexReadersCachee.Drop(filePath);
-                reader = _indexReadersCachee.Get(filePath);
-            }
-            return reader.GetAccessor(offset, length);
+            return null;
         }
         public void DropAllIndexReaders()
         {
             _indexReadersCachee.DropAll();
         }
         #endregion
+
+        public void LockFile(string filePath)
+        {
+            _lockedFiles.Add(filePath);
+            DropDataReader(filePath);
+            DropIndexReader(filePath);
+        }
+
+        public void UnlockFile(string filePath) 
+        {
+            _lockedFiles.Remove(filePath);
+        }
 
         public void Dispose()
         {

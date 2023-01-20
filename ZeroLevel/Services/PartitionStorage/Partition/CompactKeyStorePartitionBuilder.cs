@@ -124,42 +124,50 @@ namespace ZeroLevel.Services.PartitionStorage.Partition
             TKey key;
             TInput input;
             var dict = new Dictionary<TKey, HashSet<TInput>>();
-            using (var reader = new MemoryStreamReader(new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.None, 4096 * 1024)))
+            PhisicalFileAccessorCachee.LockFile(file);
+            try
             {
-                while (reader.EOS == false)
+                using (var reader = new MemoryStreamReader(new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.None, 4096 * 1024)))
                 {
-                    if (false == Serializer.KeyDeserializer.Invoke(reader, out key))
+                    while (reader.EOS == false)
                     {
-                        throw new Exception($"[StorePartitionBuilder.CompressFile] Fault compress data in file '{file}'. Incorrect file structure. Fault read key.");
+                        if (false == Serializer.KeyDeserializer.Invoke(reader, out key))
+                        {
+                            throw new Exception($"[StorePartitionBuilder.CompressFile] Fault compress data in file '{file}'. Incorrect file structure. Fault read key.");
+                        }
+                        if (false == dict.ContainsKey(key))
+                        {
+                            dict[key] = new HashSet<TInput>();
+                        }
+                        if (reader.EOS)
+                        {
+                            break;
+                        }
+                        if (false == Serializer.InputDeserializer.Invoke(reader, out input))
+                        {
+                            throw new Exception($"[StorePartitionBuilder.CompressFile] Fault compress data in file '{file}'. Incorrect file structure. Fault input value.");
+                        }
+                        dict[key].Add(input);
                     }
-                    if (false == dict.ContainsKey(key))
-                    {
-                        dict[key] = new HashSet<TInput>();
-                    }
-                    if (reader.EOS)
-                    {
-                        break;
-                    }
-                    if (false == Serializer.InputDeserializer.Invoke(reader, out input))
-                    {
-                        throw new Exception($"[StorePartitionBuilder.CompressFile] Fault compress data in file '{file}'. Incorrect file structure. Fault input value.");
-                    }
-                    dict[key].Add(input);
                 }
+                var tempFile = FSUtils.GetAppLocalTemporaryFile();
+                using (var writer = new MemoryStreamWriter(new FileStream(tempFile, FileMode.Create, FileAccess.Write, FileShare.None, 4096 * 1024)))
+                {
+                    // sort for search acceleration
+                    foreach (var pair in dict.OrderBy(p => p.Key))
+                    {
+                        var v = _options.MergeFunction(pair.Value);
+                        writer.SerializeCompatible(pair.Key);
+                        writer.SerializeCompatible(v);
+                    }
+                }
+                File.Delete(file);
+                File.Move(tempFile, file, true);
             }
-            var tempFile = FSUtils.GetAppLocalTemporaryFile();
-            using (var writer = new MemoryStreamWriter(new FileStream(tempFile, FileMode.Create, FileAccess.Write, FileShare.None, 4096 * 1024)))
+            finally
             {
-                // sort for search acceleration
-                foreach (var pair in dict.OrderBy(p => p.Key))
-                {
-                    var v = _options.MergeFunction(pair.Value);
-                    writer.SerializeCompatible(pair.Key);
-                    writer.SerializeCompatible(v);
-                }
+                PhisicalFileAccessorCachee.UnlockFile(file);
             }
-            File.Delete(file);
-            File.Move(tempFile, file, true);
         }
         #endregion
     }

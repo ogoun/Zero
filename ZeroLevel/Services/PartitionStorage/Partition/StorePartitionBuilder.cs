@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using ZeroLevel.Services.FileSystem;
+using ZeroLevel.Services.Memory;
 using ZeroLevel.Services.PartitionStorage.Interfaces;
 using ZeroLevel.Services.PartitionStorage.Partition;
 using ZeroLevel.Services.Serialization;
@@ -139,49 +140,57 @@ namespace ZeroLevel.Services.PartitionStorage
         {
             TKey key;
             TInput input;
-            var dict = new Dictionary<TKey, HashSet<TInput>>();
-            var accessor = PhisicalFileAccessorCachee.GetDataAccessor(file, 0);
-            if (accessor != null)
+            PhisicalFileAccessorCachee.LockFile(file);
+            try
             {
-                using (var reader = new MemoryStreamReader(accessor))
+                var dict = new Dictionary<TKey, HashSet<TInput>>();
+                var accessor = new StreamVewAccessor(new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.None, 1024 * 1024 * 32));
+                if (accessor != null)
                 {
-                    while (reader.EOS == false)
+                    using (var reader = new MemoryStreamReader(accessor))
                     {
-                        if (Serializer.KeyDeserializer.Invoke(reader, out key) == false)
+                        while (reader.EOS == false)
                         {
-                            throw new Exception($"[StorePartitionBuilder.CompressFile] Fault compress data in file '{file}'. Incorrect file structure. Fault read key.");
+                            if (Serializer.KeyDeserializer.Invoke(reader, out key) == false)
+                            {
+                                throw new Exception($"[StorePartitionBuilder.CompressFile] Fault compress data in file '{file}'. Incorrect file structure. Fault read key.");
+                            }
+                            if (false == dict.ContainsKey(key))
+                            {
+                                dict[key] = new HashSet<TInput>();
+                            }
+                            if (reader.EOS)
+                            {
+                                break;
+                            }
+                            if (Serializer.InputDeserializer.Invoke(reader, out input) == false)
+                            {
+                                throw new Exception($"[StorePartitionBuilder.CompressFile] Fault compress data in file '{file}'. Incorrect file structure. Fault read input value.");
+                            }
+                            dict[key].Add(input);
                         }
-                        if (false == dict.ContainsKey(key))
-                        {
-                            dict[key] = new HashSet<TInput>();
-                        }
-                        if (reader.EOS)
-                        {
-                            break;
-                        }
-                        if (Serializer.InputDeserializer.Invoke(reader, out input) == false)
-                        {
-                            throw new Exception($"[StorePartitionBuilder.CompressFile] Fault compress data in file '{file}'. Incorrect file structure. Fault read input value.");
-                        }
-                        dict[key].Add(input);
                     }
                 }
-            }
-            var tempFile = FSUtils.GetAppLocalTemporaryFile();
-            using (var writer = new MemoryStreamWriter(new FileStream(tempFile, FileMode.Create, FileAccess.Write, FileShare.None, 4096 * 1024)))
-            {
-                // sort for search acceleration
-                foreach (var pair in dict.OrderBy(p => p.Key))
+
+                var tempFile = FSUtils.GetAppLocalTemporaryFile();
+                using (var writer = new MemoryStreamWriter(new FileStream(tempFile, FileMode.Create, FileAccess.Write, FileShare.None, 4096 * 1024)))
                 {
-                    var v = _options.MergeFunction(pair.Value);
-                    writer.SerializeCompatible(pair.Key);
-                    Thread.MemoryBarrier();
-                    writer.SerializeCompatible(v);
+                    // sort for search acceleration
+                    foreach (var pair in dict.OrderBy(p => p.Key))
+                    {
+                        var v = _options.MergeFunction(pair.Value);
+                        writer.SerializeCompatible(pair.Key);
+                        Thread.MemoryBarrier();
+                        writer.SerializeCompatible(v);
+                    }
                 }
+                File.Delete(file);
+                File.Move(tempFile, file, true);
             }
-            PhisicalFileAccessorCachee.DropDataReader(file);
-            File.Delete(file);
-            File.Move(tempFile, file, true);
+            finally
+            {
+                PhisicalFileAccessorCachee.UnlockFile(file);
+            }
         }
         #endregion
     }

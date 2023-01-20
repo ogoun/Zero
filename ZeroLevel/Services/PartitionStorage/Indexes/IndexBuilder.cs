@@ -57,18 +57,27 @@ namespace ZeroLevel.Services.PartitionStorage
                 RebuildFileIndexWithSteps(file);
             }
         }
+
         /// <summary>
         /// Delete the index for the specified file
         /// </summary>
         internal void DropFileIndex(string file)
         {
             var index_file = Path.Combine(_indexCatalog, Path.GetFileName(file));
-            _phisicalFileAccessorCachee.DropIndexReader(index_file);
-            if (File.Exists(index_file))
+            _phisicalFileAccessorCachee.LockFile(index_file);
+            try
             {
-                File.Delete(index_file);
+                if (File.Exists(index_file))
+                {
+                    File.Delete(index_file);
+                }
+            }
+            finally 
+            {
+                _phisicalFileAccessorCachee.UnlockFile(index_file);
             }
         }
+
         /// <summary>
         /// Rebuild index with specified number of steps for specified file
         /// </summary>
@@ -93,16 +102,28 @@ namespace ZeroLevel.Services.PartitionStorage
             {
                 var step = (int)Math.Round(dict.Count / (float)_stepValue, MidpointRounding.ToZero);
                 var index_file = Path.Combine(_indexCatalog, Path.GetFileName(file));
-                DropFileIndex(index_file);
-                var d_arr = dict.OrderBy(p => p.Key).ToArray();
-                using (var writer = new MemoryStreamWriter(new FileStream(index_file, FileMode.Create, FileAccess.Write, FileShare.None)))
+
+                _phisicalFileAccessorCachee.LockFile(index_file);
+                if (File.Exists(index_file))
                 {
-                    for (int i = 0; i < _stepValue; i++)
+                    File.Delete(index_file);
+                }
+                try
+                {
+                    var d_arr = dict.OrderBy(p => p.Key).ToArray();
+                    using (var writer = new MemoryStreamWriter(new FileStream(index_file, FileMode.Create, FileAccess.Write, FileShare.None)))
                     {
-                        var pair = d_arr[i * step];
-                        writer.WriteCompatible(pair.Key);
-                        writer.WriteLong(pair.Value);
+                        for (int i = 0; i < _stepValue; i++)
+                        {
+                            var pair = d_arr[i * step];
+                            writer.WriteCompatible(pair.Key);
+                            writer.WriteLong(pair.Value);
+                        }
                     }
+                }
+                finally
+                {
+                    _phisicalFileAccessorCachee.UnlockFile(index_file);
                 }
             }
         }
@@ -118,23 +139,34 @@ namespace ZeroLevel.Services.PartitionStorage
             using (var reader = new MemoryStreamReader(new FileStream(Path.Combine(_dataCatalog, file), FileMode.Open, FileAccess.Read, FileShare.None)))
             {
                 var index_file = Path.Combine(_indexCatalog, Path.GetFileName(file));
-                DropFileIndex(index_file);
-                using (var writer = new MemoryStreamWriter(new FileStream(index_file, FileMode.Create, FileAccess.Write, FileShare.None)))
+                _phisicalFileAccessorCachee.LockFile(index_file);
+                if (File.Exists(index_file))
                 {
-                    var counter = 1;
-                    while (reader.EOS == false)
+                    File.Delete(index_file);
+                }
+                try
+                {
+                    using (var writer = new MemoryStreamWriter(new FileStream(index_file, FileMode.Create, FileAccess.Write, FileShare.None)))
                     {
-                        counter--;
-                        var pos = reader.Position;
-                        var k = _keyDeserializer.Invoke(reader);
-                        _valueDeserializer.Invoke(reader);
-                        if (counter == 0)
+                        var counter = 1;
+                        while (reader.EOS == false)
                         {
-                            writer.WriteCompatible(k);
-                            writer.WriteLong(pos);
-                            counter = _stepValue;
+                            counter--;
+                            var pos = reader.Position;
+                            var k = _keyDeserializer.Invoke(reader);
+                            _valueDeserializer.Invoke(reader);
+                            if (counter == 0)
+                            {
+                                writer.WriteCompatible(k);
+                                writer.WriteLong(pos);
+                                counter = _stepValue;
+                            }
                         }
                     }
+                }
+                finally
+                {
+                    _phisicalFileAccessorCachee.UnlockFile(index_file);
                 }
             }
         }

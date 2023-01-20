@@ -115,12 +115,20 @@ namespace ZeroLevel.Services.PartitionStorage
                     // 2. Replace source
                     var name = Path.GetFileName(file);
                     var updateFilePath = Path.Combine(folder, name);
-                    if (File.Exists(updateFilePath))
+
+                    _phisicalFileAccessor.LockFile(updateFilePath);
+                    try
                     {
-                        _phisicalFileAccessor.DropDataReader(updateFilePath);
-                        File.Delete(updateFilePath);
+                        if (File.Exists(updateFilePath))
+                        {
+                            File.Delete(updateFilePath);
+                        }
+                        File.Move(file, updateFilePath, true);
                     }
-                    File.Move(file, updateFilePath, true);
+                    finally
+                    {
+                        _phisicalFileAccessor.UnlockFile(updateFilePath);
+                    }
 
                     // 3. Rebuil index
                     (_accessor as BasePartition<TKey, TInput, TValue, TMeta>).RebuildFileIndex(name);
