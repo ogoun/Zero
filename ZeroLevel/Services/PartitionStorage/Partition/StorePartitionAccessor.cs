@@ -31,15 +31,30 @@ namespace ZeroLevel.Services.PartitionStorage
 
         public StorePartitionKeyValueSearchResult<TKey, TValue> Find(TKey key)
         {
+            TKey k;
+            TValue v;
             IViewAccessor memoryAccessor;
-            if (_options.Index.Enabled)
+            try
             {
-                var offset = Indexes.GetOffset(key);
-                memoryAccessor = offset.Length > 0 ? GetViewAccessor(key, offset.Offset, offset.Length) : GetViewAccessor(key, offset.Offset);
+                if (_options.Index.Enabled)
+                {
+                    var offset = Indexes.GetOffset(key);
+                    memoryAccessor = offset.Length > 0 ? GetViewAccessor(key, offset.Offset, offset.Length) : GetViewAccessor(key, offset.Offset);
+                }
+                else
+                {
+                    memoryAccessor = GetViewAccessor(key, 0);
+                }
             }
-            else
+            catch (Exception ex)
             {
-                memoryAccessor = GetViewAccessor(key, 0);
+                Log.SystemError(ex, $"[StorePartitionAccessor.Find] Fault get IViewAccessor by key {(key == null ? string.Empty : key.ToString())}");
+                return new StorePartitionKeyValueSearchResult<TKey, TValue>
+                {
+                    Key = key,
+                    Status = SearchResult.FileLockedOrUnavaliable,
+                    Value = default
+                };
             }
             if (memoryAccessor != null)
             {
@@ -47,8 +62,8 @@ namespace ZeroLevel.Services.PartitionStorage
                 {
                     while (reader.EOS == false)
                     {
-                        var k = Serializer.KeyDeserializer.Invoke(reader);
-                        var v = Serializer.ValueDeserializer.Invoke(reader);
+                        if (Serializer.KeyDeserializer.Invoke(reader, out k) == false) break;
+                        if (Serializer.ValueDeserializer.Invoke(reader, out v) == false) break;
                         var c = _options.KeyComparer(key, k);
                         if (c == 0) return new StorePartitionKeyValueSearchResult<TKey, TValue>
                         {
@@ -86,6 +101,8 @@ namespace ZeroLevel.Services.PartitionStorage
         }
         public IEnumerable<StorePartitionKeyValueSearchResult<TKey, TValue>> Iterate()
         {
+            TKey k;
+            TValue v;
             var files = Directory.GetFiles(_catalog);
             if (files != null && files.Length > 0)
             {
@@ -98,8 +115,8 @@ namespace ZeroLevel.Services.PartitionStorage
                         {
                             while (reader.EOS == false)
                             {
-                                var k = Serializer.KeyDeserializer.Invoke(reader);
-                                var v = Serializer.ValueDeserializer.Invoke(reader);
+                                if (Serializer.KeyDeserializer.Invoke(reader, out k) == false) break;
+                                if (Serializer.ValueDeserializer.Invoke(reader, out v) == false) break;
                                 yield return new StorePartitionKeyValueSearchResult<TKey, TValue> { Key = k, Value = v, Status = SearchResult.Success };
                             }
                         }
@@ -109,6 +126,8 @@ namespace ZeroLevel.Services.PartitionStorage
         }
         public IEnumerable<StorePartitionKeyValueSearchResult<TKey, TValue>> IterateKeyBacket(TKey key)
         {
+            TKey k;
+            TValue v;
             var fileName = _options.GetFileName(key, _info);
             var filePath = Path.Combine(_catalog, fileName);
             if (File.Exists(filePath))
@@ -120,8 +139,8 @@ namespace ZeroLevel.Services.PartitionStorage
                     {
                         while (reader.EOS == false)
                         {
-                            var k = Serializer.KeyDeserializer.Invoke(reader);
-                            var v = Serializer.ValueDeserializer.Invoke(reader);
+                            if (Serializer.KeyDeserializer.Invoke(reader, out k) == false) break;
+                            if (Serializer.ValueDeserializer.Invoke(reader, out v) == false) break;
                             yield return new StorePartitionKeyValueSearchResult<TKey, TValue> { Key = k, Value = v, Status = SearchResult.Success };
                         }
                     }
@@ -181,6 +200,8 @@ namespace ZeroLevel.Services.PartitionStorage
         private IEnumerable<StorePartitionKeyValueSearchResult<TKey, TValue>> Find(string fileName,
         TKey[] keys)
         {
+            TKey k;
+            TValue v;
             var filePath = Path.Combine(_catalog, fileName);
             if (_options.Index.Enabled)
             {
@@ -204,8 +225,8 @@ namespace ZeroLevel.Services.PartitionStorage
                         {
                             while (reader.EOS == false)
                             {
-                                var k = Serializer.KeyDeserializer.Invoke(reader);
-                                var v = Serializer.ValueDeserializer.Invoke(reader);
+                                if (Serializer.KeyDeserializer.Invoke(reader, out k) == false) break;
+                                if (Serializer.ValueDeserializer.Invoke(reader, out v) == false) break;
                                 var c = _options.KeyComparer(searchKey, k);
                                 if (c == 0)
                                 {
@@ -237,8 +258,8 @@ namespace ZeroLevel.Services.PartitionStorage
                         var keys_arr = keys.OrderBy(k => k).ToArray();
                         while (reader.EOS == false && index < keys_arr.Length)
                         {
-                            var k = Serializer.KeyDeserializer.Invoke(reader);
-                            var v = Serializer.ValueDeserializer.Invoke(reader);
+                            if (Serializer.KeyDeserializer.Invoke(reader, out k) == false) break;
+                            if (Serializer.ValueDeserializer.Invoke(reader, out v) == false) break;
                             var c = _options.KeyComparer(keys_arr[index], k);
                             if (c == 0)
                             {
@@ -269,6 +290,7 @@ namespace ZeroLevel.Services.PartitionStorage
 
         private void RemoveKeyGroup(string fileName, TKey[] keys, bool inverseRemove, bool autoReindex)
         {
+            TKey k;
             var filePath = Path.Combine(_catalog, fileName);
             // 1. Find ranges
             var ranges = new List<FilePositionRange>();
@@ -295,8 +317,16 @@ namespace ZeroLevel.Services.PartitionStorage
                             while (reader.EOS == false)
                             {
                                 var startPosition = reader.Position;
-                                var k = Serializer.KeyDeserializer.Invoke(reader);
-                                Serializer.ValueDeserializer.Invoke(reader);
+                                if (Serializer.KeyDeserializer.Invoke(reader, out k) == false)
+                                {
+                                    Log.Error($"[StorePartitionAccessor.RemoveKeyGroup] Fault remove keys from file '{fileName}'. Incorrect file structure. Fault read key.");
+                                    return;
+                                }
+                                if (Serializer.ValueDeserializer.Invoke(reader, out var _) == false)
+                                {
+                                    Log.Error($"[StorePartitionAccessor.RemoveKeyGroup] Fault remove keys from file '{fileName}'. Incorrect file structure. Fault read value.");
+                                    return;
+                                }
                                 var endPosition = reader.Position;
                                 var c = _options.KeyComparer(searchKey, k);
                                 if (c == 0)
@@ -324,8 +354,16 @@ namespace ZeroLevel.Services.PartitionStorage
                         while (reader.EOS == false && index < keys_arr.Length)
                         {
                             var startPosition = reader.Position;
-                            var k = Serializer.KeyDeserializer.Invoke(reader);
-                            Serializer.ValueDeserializer.Invoke(reader);
+                            if (Serializer.KeyDeserializer.Invoke(reader, out k) == false)
+                            {
+                                Log.Error($"[StorePartitionAccessor.RemoveKeyGroup] Fault remove keys from file '{fileName}'. Incorrect file structure. Fault read key.");
+                                return;
+                            }
+                            if (Serializer.ValueDeserializer.Invoke(reader, out var _) == false)
+                            {
+                                Log.Error($"[StorePartitionAccessor.RemoveKeyGroup] Fault remove keys from file '{fileName}'. Incorrect file structure. Fault read value.");
+                                return;
+                            }
                             var endPosition = reader.Position;
                             var c = _options.KeyComparer(keys_arr[index], k);
                             if (c == 0)

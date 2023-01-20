@@ -4,33 +4,36 @@ using ZeroLevel.Services.Serialization;
 
 namespace ZeroLevel.Services.PartitionStorage
 {
+    
+
     // TODO INTERNAL
     public sealed class StoreStandartSerializer<TKey, TInput, TValue>
         : IStoreSerializer<TKey, TInput, TValue>
     {
         private readonly Action<MemoryStreamWriter, TKey> _keySerializer;
         private readonly Action<MemoryStreamWriter, TInput> _inputSerializer;
-        private readonly Func<MemoryStreamReader, TKey> _keyDeserializer;
-        private readonly Func<MemoryStreamReader, TInput> _inputDeserializer;
-        private readonly Func<MemoryStreamReader, TValue> _valueDeserializer;
+        private readonly TryDeserializeMethod<TKey> _keyDeserializer;
+        private readonly TryDeserializeMethod<TInput> _inputDeserializer;
+        private readonly TryDeserializeMethod<TValue> _valueDeserializer;
 
         public StoreStandartSerializer()
         {
             _keySerializer = MessageSerializer.GetSerializer<TKey>();
             _inputSerializer = MessageSerializer.GetSerializer<TInput>();
-            _keyDeserializer = MessageSerializer.GetDeserializer<TKey>();
-            _inputDeserializer = MessageSerializer.GetDeserializer<TInput>();
-            _valueDeserializer = MessageSerializer.GetDeserializer<TValue>();
+
+            _keyDeserializer = MessageSerializer.GetSafetyDeserializer<TKey>();
+            _inputDeserializer = MessageSerializer.GetSafetyDeserializer<TInput>();
+            _valueDeserializer = MessageSerializer.GetSafetyDeserializer<TValue>();
         }
 
         public Action<MemoryStreamWriter, TKey> KeySerializer => _keySerializer;
 
         public Action<MemoryStreamWriter, TInput> InputSerializer => _inputSerializer;
 
-        public Func<MemoryStreamReader, TKey> KeyDeserializer => _keyDeserializer;
+        public TryDeserializeMethod<TKey> KeyDeserializer => _keyDeserializer;
 
-        public Func<MemoryStreamReader, TInput> InputDeserializer => _inputDeserializer;
+        public TryDeserializeMethod<TInput> InputDeserializer => _inputDeserializer;
 
-        public Func<MemoryStreamReader, TValue> ValueDeserializer => _valueDeserializer;
+        public TryDeserializeMethod<TValue> ValueDeserializer => _valueDeserializer;
     }
 }

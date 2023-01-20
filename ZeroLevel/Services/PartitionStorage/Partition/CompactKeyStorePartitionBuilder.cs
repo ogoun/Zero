@@ -60,6 +60,8 @@ namespace ZeroLevel.Services.PartitionStorage.Partition
         }
         public IEnumerable<StorePartitionKeyValueSearchResult<TKey, TInput>> Iterate()
         {
+            TKey key;
+            TInput input;
             var files = Directory.GetFiles(_catalog);
             if (files != null && files.Length > 0)
             {
@@ -71,9 +73,9 @@ namespace ZeroLevel.Services.PartitionStorage.Partition
                         {
                             while (reader.EOS == false)
                             {
-                                var key = Serializer.KeyDeserializer.Invoke(reader);
-                                var val = Serializer.InputDeserializer.Invoke(reader);
-                                yield return new StorePartitionKeyValueSearchResult<TKey, TInput> { Key = key, Value = val, Status = SearchResult.Success };
+                                if (Serializer.KeyDeserializer.Invoke(reader, out key) == false) break;
+                                if (Serializer.InputDeserializer.Invoke(reader, out input) == false) break;
+                                yield return new StorePartitionKeyValueSearchResult<TKey, TInput> { Key = key, Value = input, Status = SearchResult.Success };
                             }
                         }
                     }
@@ -119,12 +121,17 @@ namespace ZeroLevel.Services.PartitionStorage.Partition
 
         internal void CompressFile(string file)
         {
+            TKey key;
+            TInput input;
             var dict = new Dictionary<TKey, HashSet<TInput>>();
             using (var reader = new MemoryStreamReader(new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.None, 4096 * 1024)))
             {
                 while (reader.EOS == false)
                 {
-                    var key = Serializer.KeyDeserializer.Invoke(reader);
+                    if (false == Serializer.KeyDeserializer.Invoke(reader, out key))
+                    {
+                        throw new Exception($"[StorePartitionBuilder.CompressFile] Fault compress data in file '{file}'. Incorrect file structure. Fault read key.");
+                    }
                     if (false == dict.ContainsKey(key))
                     {
                         dict[key] = new HashSet<TInput>();
@@ -133,7 +140,10 @@ namespace ZeroLevel.Services.PartitionStorage.Partition
                     {
                         break;
                     }
-                    var input = Serializer.InputDeserializer.Invoke(reader);
+                    if (false == Serializer.InputDeserializer.Invoke(reader, out input))
+                    {
+                        throw new Exception($"[StorePartitionBuilder.CompressFile] Fault compress data in file '{file}'. Incorrect file structure. Fault input value.");
+                    }
                     dict[key].Add(input);
                 }
             }

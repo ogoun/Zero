@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
+using System.Runtime.Serialization;
 using System.Text;
 using ZeroLevel.Services.Extensions;
 using ZeroLevel.Services.Memory;
@@ -201,6 +202,36 @@ namespace ZeroLevel.Services.Serialization
                 }
             }
             return buffer;
+        }
+
+        public bool TryReadBuffer(int count, out byte[] buffer)
+        {
+            if (CheckOutOfRange(count))
+            {
+                buffer = null;
+                return false;
+            }
+            try
+            {
+                buffer = _accessor.ReadBuffer(count);
+                if (_reverseByteOrder && count > 1)
+                {
+                    byte b;
+                    for (int i = 0; i < (count >> 1); i++)
+                    {
+                        b = buffer[i];
+                        buffer[i] = buffer[count - i - 1];
+                        buffer[count - i - 1] = b;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.SystemError(ex, $"[MemoryStreamReader.TryReadBuffer] Fault read {count} bytes");
+                buffer = null;
+                return false;
+            }
+            return true;
         }
 
         /// <summary>
@@ -1119,6 +1150,42 @@ namespace ZeroLevel.Services.Serialization
             var item = (T)Activator.CreateInstance<T>();
             item.Deserialize(this);
             return item;
+        }
+
+        public bool TryReadByte(out byte b)
+        {
+            if (TryReadBuffer(1, out var buffer))
+            {
+                b = buffer[0];
+                return true;
+            }
+            b = default;
+            return false;
+        }
+
+        public bool TryRead<T>(out T item) where T : IBinarySerializable
+        {
+            if (TryReadByte(out var type))
+            {
+                if (type == 0)
+                {
+                    item = default(T);
+                    return true;
+                }
+                try
+                {
+                    var o = (IBinarySerializable)FormatterServices.GetUninitializedObject(typeof(T));
+                    o.Deserialize(this);
+                    item = (T)o;
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    Log.SystemError(ex, "[MemoryStreamReader.TryRead]");
+                }
+            }
+            item = default;
+            return false;
         }
 
         public T Read<T>(object arg) where T : IBinarySerializable

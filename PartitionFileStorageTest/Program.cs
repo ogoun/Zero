@@ -375,8 +375,8 @@ namespace PartitionFileStorageTest
                 {
                     counter--;
                     var pos = reader.Position;
-                    var k = serializer.KeyDeserializer.Invoke(reader);
-                    serializer.ValueDeserializer.Invoke(reader);
+                    serializer.KeyDeserializer.Invoke(reader, out var k);
+                    serializer.ValueDeserializer.Invoke(reader, out var _);
                     if (counter == 0)
                     {
                         index[k] = pos;
@@ -392,12 +392,12 @@ namespace PartitionFileStorageTest
                 var accessor = fileReader.GetAccessor(pair.Value);
                 using (var reader = new MemoryStreamReader(accessor))
                 {
-                    var k = serializer.KeyDeserializer.Invoke(reader);
+                    serializer.KeyDeserializer.Invoke(reader, out var k);
                     if (k != pair.Key)
                     {
                         Log.Warning("Broken index");
                     }
-                    var v = serializer.ValueDeserializer.Invoke(reader);
+                    serializer.ValueDeserializer.Invoke(reader, out var _);
                 }
             }
 
@@ -430,7 +430,7 @@ namespace PartitionFileStorageTest
                 {
                     try
                     {
-                        var key = serializer.KeyDeserializer.Invoke(reader);
+                         serializer.KeyDeserializer.Invoke(reader, out var  key);
                         if (false == dict.ContainsKey(key))
                         {
                             dict[key] = new HashSet<ulong>();
@@ -439,7 +439,7 @@ namespace PartitionFileStorageTest
                         {
                             break;
                         }
-                        var input = serializer.InputDeserializer.Invoke(reader);
+                        serializer.InputDeserializer.Invoke(reader, out var input);
                         dict[key].Add(input);
                     }
                     catch (Exception ex)

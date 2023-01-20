@@ -1,11 +1,11 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Serialization;
 
 namespace ZeroLevel.Services.Serialization
 {
+    public delegate bool TryDeserializeMethod<T>(MemoryStreamReader reader, out T output);
     public static class MessageSerializer
     {
         public static byte[] Serialize<T>(T obj)
@@ -52,6 +52,47 @@ namespace ZeroLevel.Services.Serialization
                 };
             }
             return (r) => PrimitiveTypeSerializer.Deserialize<T>(r);
+        }
+
+        static bool TryObjectDeserialize<T>(MemoryStreamReader reader, out T output)
+        {
+            try
+            {
+                var o = (IBinarySerializable)FormatterServices.GetUninitializedObject(typeof(T));
+                o.Deserialize(reader);
+                output = (T)o;
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Log.SystemError(ex, $"[MessageSerializer.TryObjectDeserialize] Fault deserialize type {typeof(T).Name}");
+                output = default;
+            }
+            return false;
+        }
+
+        static bool TryPrimitiveTypeDeserialize<T>(MemoryStreamReader reader, out T output)
+        {
+            try
+            {
+                output = PrimitiveTypeSerializer.Deserialize<T>(reader);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Log.SystemError(ex, $"[MessageSerializer.TryPrimitiveTypeDeserialize] Fault deserialize type {typeof(T).Name}");
+                output = default;
+            }
+            return false;
+        }
+
+        public static TryDeserializeMethod<T> GetSafetyDeserializer<T>()
+        {
+            if (typeof(IBinarySerializable).IsAssignableFrom(typeof(T)))
+            {
+                return TryObjectDeserialize<T>;
+            }
+            return TryPrimitiveTypeDeserialize<T>;
         }
 
         public static byte[] SerializeCompatible(object obj)

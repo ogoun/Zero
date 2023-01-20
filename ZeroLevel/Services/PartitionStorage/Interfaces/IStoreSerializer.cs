@@ -7,8 +7,8 @@ namespace ZeroLevel.Services.PartitionStorage.Interfaces
     {
         Action<MemoryStreamWriter, TKey> KeySerializer { get; }
         Action<MemoryStreamWriter, TInput> InputSerializer { get; }
-        Func<MemoryStreamReader, TKey> KeyDeserializer { get; }
-        Func<MemoryStreamReader, TInput> InputDeserializer { get; }
-        Func<MemoryStreamReader, TValue> ValueDeserializer { get; }
+        TryDeserializeMethod<TKey> KeyDeserializer { get; }
+        TryDeserializeMethod<TInput> InputDeserializer { get; }
+        TryDeserializeMethod<TValue> ValueDeserializer { get; }
     }
 }
