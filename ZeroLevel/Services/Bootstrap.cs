@@ -29,6 +29,10 @@ namespace ZeroLevel
 
             public BootstrapFluent(IZeroService service)
             {
+                if (service == null)
+                {
+                    throw new ArgumentNullException(nameof(service));
+                }
                 _service = service;
             }
 
@@ -45,7 +49,15 @@ namespace ZeroLevel
 
             public IServiceExecution Run()
             {
-                _service.Start();
+                try
+                {
+                    _service?.Start();
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex, $"[Bootstrap] Service {_service?.Name} run error");
+                    return null;
+                }
                 return this;
             }
 
@@ -119,7 +131,7 @@ namespace ZeroLevel
             Func<bool> postStartConfiguration = null)
             where T : IZeroService
         {
-            var service = Initialize<T>(args, Configuration.ReadSetFromApplicationConfig(),
+            var service = Initialize<T>(args, null,
                 preStartConfiguration, postStartConfiguration);
             return new BootstrapFluent(service);
         }
@@ -130,7 +142,7 @@ namespace ZeroLevel
             Func<bool> postStartConfiguration = null)
             where T : IZeroService
         {
-            var service = Initialize<T>(args, configuration(), preStartConfiguration, postStartConfiguration);
+            var service = Initialize<T>(args, configuration?.Invoke(), preStartConfiguration, postStartConfiguration);
             return new BootstrapFluent(service);
         }
 
@@ -143,8 +155,12 @@ namespace ZeroLevel
             IZeroService service = null;
             IConfigurationSet config = Configuration.DefaultSet;
             config.CreateSection("commandline", Configuration.ReadFromCommandLine(args));
-            config.Merge(configurationSet);
+            if (configurationSet != null)
+            {
+                config.Merge(configurationSet);
+            }
             Log.CreateLoggingFromConfiguration(Configuration.DefaultSet);
+
             if (preStartConfiguration != null)
             {
                 try
