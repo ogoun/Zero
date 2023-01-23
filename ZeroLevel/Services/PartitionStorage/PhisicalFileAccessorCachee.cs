@@ -1,6 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
+using ZeroLevel.Collections;
 using ZeroLevel.Services.Cache;
 using ZeroLevel.Services.FileSystem;
 using ZeroLevel.Services.Memory;
@@ -13,7 +13,7 @@ namespace ZeroLevel.Services.PartitionStorage
         private readonly TimerCachee<ParallelFileReader> _indexReadersCachee;
         private readonly TimerCachee<ParallelFileReader> _dataReadersCachee;
 
-        private readonly HashSet<string> _lockedFiles = new HashSet<string>();
+        private readonly ConcurrentHashSet<string> _lockedFiles = new ConcurrentHashSet<string>();
 
         public PhisicalFileAccessorCachee(TimeSpan dataExpirationPeriod, TimeSpan indexExpirationPeriod)
         {
@@ -140,11 +140,12 @@ namespace ZeroLevel.Services.PartitionStorage
 
         public void UnlockFile(string filePath) 
         {
-            _lockedFiles.Remove(filePath);
+            _lockedFiles.TryRemove(filePath);
         }
 
         public void Dispose()
         {
+            _lockedFiles.Clear();
             _dataReadersCachee.Dispose();
             _indexReadersCachee.Dispose();
         }

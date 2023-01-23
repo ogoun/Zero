@@ -58,6 +58,12 @@ namespace ZeroLevel.Services.PartitionStorage
             return new StoreMergePartitionAccessor<TKey, TInput, TValue, TMeta>(_options, info, decompressor, _serializer, _fileAccessorCachee);
         }
 
+        public void DropCache()
+        {
+            _fileAccessorCachee.DropAllDataReaders();
+            _fileAccessorCachee.DropAllIndexReaders();
+        }
+
         public async Task<StoreSearchResult<TKey, TValue, TMeta>> Search(StoreSearchRequest<TKey, TMeta> searchRequest)
         {
             var result = new StoreSearchResult<TKey, TValue, TMeta>();

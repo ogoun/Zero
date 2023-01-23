@@ -144,7 +144,7 @@ namespace ZeroLevel.Services.PartitionStorage
             try
             {
                 var dict = new Dictionary<TKey, HashSet<TInput>>();
-                var accessor = new StreamVewAccessor(new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.None, 1024 * 1024 * 32));
+                var accessor = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.None, 1024 * 1024 * 32);
                 if (accessor != null)
                 {
                     using (var reader = new MemoryStreamReader(accessor))
@@ -155,19 +155,26 @@ namespace ZeroLevel.Services.PartitionStorage
                             {
                                 throw new Exception($"[StorePartitionBuilder.CompressFile] Fault compress data in file '{file}'. Incorrect file structure. Fault read key.");
                             }
-                            if (false == dict.ContainsKey(key))
+                            if (key != null)
                             {
-                                dict[key] = new HashSet<TInput>();
+                                if (false == dict.ContainsKey(key))
+                                {
+                                    dict[key] = new HashSet<TInput>();
+                                }
+                                if (reader.EOS)
+                                {
+                                    break;
+                                }
+                                if (Serializer.InputDeserializer.Invoke(reader, out input) == false)
+                                {
+                                    throw new Exception($"[StorePartitionBuilder.CompressFile] Fault compress data in file '{file}'. Incorrect file structure. Fault read input value.");
+                                }
+                                dict[key].Add(input);
                             }
-                            if (reader.EOS)
+                            else
                             {
-                                break;
+                                Log.SystemWarning($"[StorePartitionBuilder.CompressFile] Null-value key in file '{file}'");
                             }
-                            if (Serializer.InputDeserializer.Invoke(reader, out input) == false)
-                            {
-                                throw new Exception($"[StorePartitionBuilder.CompressFile] Fault compress data in file '{file}'. Incorrect file structure. Fault read input value.");
-                            }
-                            dict[key].Add(input);
                         }
                     }
                 }

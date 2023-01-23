@@ -34,5 +34,9 @@ namespace ZeroLevel.Services.PartitionStorage
         /// Deleting a partition
         /// </summary>
         void RemovePartition(TMeta info);
+        /// <summary>
+        /// Remove all cached data accessors
+        /// </summary>
+        void DropCache();
     }
 }

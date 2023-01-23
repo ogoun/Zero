@@ -3,12 +3,17 @@ using System.Diagnostics;
 using ZeroLevel;
 using ZeroLevel.Collections;
 using ZeroLevel.Services.FileSystem;
+using ZeroLevel.Services.HashFunctions;
 using ZeroLevel.Services.Memory;
 using ZeroLevel.Services.PartitionStorage;
 using ZeroLevel.Services.Serialization;
 
 namespace PartitionFileStorageTest
 {
+    public class StoreMetadata
+    {
+        public DateTime Date { get; set; }
+    }
     internal class Program
     {
         //        const int PAIRS_COUNT = 200_000_000;
@@ -430,7 +435,7 @@ namespace PartitionFileStorageTest
                 {
                     try
                     {
-                         serializer.KeyDeserializer.Invoke(reader, out var  key);
+                        serializer.KeyDeserializer.Invoke(reader, out var key);
                         if (false == dict.ContainsKey(key))
                         {
                             dict[key] = new HashSet<ulong>();
@@ -450,8 +455,40 @@ namespace PartitionFileStorageTest
             }
         }
 
+        private static void FaultCompressionTest(string folder, StoreMetadata meta)
+        {
+            var options = new StoreOptions<string, ulong, byte[], StoreMetadata>
+            {
+                Index = new IndexOptions
+                {
+                    Enabled = true,
+                    StepType = IndexStepType.Step,
+                    StepValue = 32,
+                    EnableIndexInMemoryCachee = true
+                },
+                RootFolder = folder,
+                FilePartition = new StoreFilePartition<string, StoreMetadata>("Host hash", (key, _) => Math.Abs(StringHash.DotNetFullHash(key) % 367).ToString()),
+                MergeFunction = list =>
+                {
+                    ulong s = 0;
+                    return Compressor.GetEncodedBytes(list.OrderBy(c => c), ref s);
+                },
+                Partitions = new List<StoreCatalogPartition<StoreMetadata>>
+                {
+                    new StoreCatalogPartition<StoreMetadata>("Date", m => m.Date.ToString("yyyyMMdd")),
+                },
+                KeyComparer = (left, right) => string.Compare(left, right, true),
+                ThreadSafeWriting = true
+            };
+            var store = new Store<string, ulong, byte[], StoreMetadata>(options);
+            var builder = store.CreateBuilder(meta);
+            builder.Compress();
+        }
+
         static void Main(string[] args)
         {
+            FaultCompressionTest(@"F:\Desktop\DATKA\DNS", new StoreMetadata { Date = new DateTime(2023, 01, 20) });
+
             var root = @"H:\temp";
             var options = new StoreOptions<ulong, ulong, byte[], Metadata>
             {
