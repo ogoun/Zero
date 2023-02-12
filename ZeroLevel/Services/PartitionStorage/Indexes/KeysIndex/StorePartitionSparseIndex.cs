@@ -111,7 +111,13 @@ namespace ZeroLevel.Services.PartitionStorage
         {
             if (_enableIndexInMemoryCachee)
             {
-                _phisicalFileAccessorCachee.DropAllIndexReaders();
+                if (Directory.Exists(_indexFolder))
+                {
+                    foreach (var file in Directory.GetFiles(_indexFolder))
+                    {
+                        _phisicalFileAccessorCachee.DropIndexReader(file);
+                    }
+                }
             }
         }
 

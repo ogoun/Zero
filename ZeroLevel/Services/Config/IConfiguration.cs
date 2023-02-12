@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using ZeroLevel.Services.Config;
 using ZeroLevel.Services.Serialization;
 
 namespace ZeroLevel
@@ -141,6 +142,7 @@ namespace ZeroLevel
         #endregion Create, Clean, Delete
 
         void CopyTo(IConfiguration config);
+        void MergeFrom(IConfiguration config, ConfigurationRecordExistBehavior existRecordBehavior);
 
         T Bind<T>();
         object Bind(Type type);

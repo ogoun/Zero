@@ -477,5 +477,17 @@ namespace ZeroLevel.Services.PartitionStorage
             target.Write(buffer, 0, buffer.Length);
         }
         #endregion
+
+        public override void Release()
+        {
+            if (Directory.Exists(_catalog))
+            {
+                foreach (var file in Directory.GetFiles(_catalog))
+                {
+                    PhisicalFileAccessorCachee.DropDataReader(file);
+                }
+            }
+            Indexes.ResetCachee();
+        }
     }
 }

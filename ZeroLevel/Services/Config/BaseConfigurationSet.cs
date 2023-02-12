@@ -3,7 +3,6 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
 using ZeroLevel.Services.ObjectMapping;
-using ZeroLevel.Services.Reflection;
 using ZeroLevel.Services.Serialization;
 
 namespace ZeroLevel.Services.Config
@@ -122,6 +121,17 @@ namespace ZeroLevel.Services.Config
             throw new KeyNotFoundException("Section not found: " + sectionName);
         }
 
+        public IConfiguration GetOrCreateSection(string sectionName)
+        {
+            var key = GetKey(sectionName);
+            IConfiguration exists;
+            if (_sections.TryGetValue(key, out exists))
+            {
+                return exists;
+            }
+            _sections.TryAdd(key, new BaseConfiguration());
+            return _sections[key];
+        }
         public bool ContainsSection(string sectionName)
         {
             var key = GetKey(sectionName);

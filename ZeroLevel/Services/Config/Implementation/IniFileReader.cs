@@ -53,8 +53,13 @@ namespace ZeroLevel.Services.Config.Implementation
                     key = originalKey.ToLower(CultureInfo.InvariantCulture);
                     value = string.Empty;
                 }
-                if (key[0].Equals(';') || key[0].Equals('#'))
+                if (key[0].Equals(';') || key[0].Equals('#') || key[0].Equals('/'))
                     continue;
+                // Remove quotes
+                if (value.Length > 1 && value[0] == '"' && value[value.Length - 1] == '"')
+                {
+                    value = value.Substring(1, value.Length - 2);
+                }
                 if (string.IsNullOrEmpty(value) && key[0].Equals('[') && key[key.Length - 1].Equals(']'))
                 {
                     sectionName = originalKey.Trim('[', ']');
@@ -100,8 +105,13 @@ namespace ZeroLevel.Services.Config.Implementation
                     key = originalKey.ToLower(CultureInfo.InvariantCulture);
                     value = string.Empty;
                 }
-                if (key[0].Equals(';') || key[0].Equals('#'))
+                if (key[0].Equals(';') || key[0].Equals('#') || key[0].Equals('/'))
                     continue;
+                // Remove quotes
+                if (value.Length > 1 && value[0] == '"' && value[value.Length - 1] == '"')
+                {
+                    value = value.Substring(1, value.Length - 2);
+                }
                 if (string.IsNullOrEmpty(value) && key[0].Equals('[') && key[key.Length - 1].Equals(']'))
                 {
                     sectionName = originalKey.Trim('[', ']');

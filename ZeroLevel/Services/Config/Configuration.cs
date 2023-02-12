@@ -131,11 +131,24 @@ namespace ZeroLevel
         #endregion Factory
 
         #region Read configuration
+        public static IConfiguration ReadFromEnvironmentVariables()
+        {
+            try
+            {
+                return new EnvironmentVariablesConfigReader().ReadConfiguration();
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, $"[Configuration.ReadFromEnvironmentVariables] Can't read environment variables");
+                throw;
+            }
+        }
+
         /// <summary>
         /// Creating a configuration from the AppSettings section of the app.config or web.config file
         /// </summary>
         /// <returns>Configuration</returns>
-        public static IConfiguration ReadFromApplicationConfig() 
+        public static IConfiguration ReadFromApplicationConfig()
         {
             try
             {
@@ -164,8 +177,8 @@ namespace ZeroLevel
         /// Creating a configuration from the AppSettings section of the app.config file or web.config, is supplemented by the 'ConnectionStrings' section
         /// </summary>
         /// <returns>Configuration</returns>
-        public static IConfigurationSet ReadSetFromApplicationConfig() 
-        { 
+        public static IConfigurationSet ReadSetFromApplicationConfig()
+        {
             try
             {
                 return new ApplicationConfigReader().ReadConfigurationSet();
@@ -193,7 +206,7 @@ namespace ZeroLevel
         /// Creating a configuration from the AppSettings section of the app.config or web.config file
         /// </summary>
         /// <returns>Configuration</returns>
-        public static IConfiguration ReadFromApplicationConfig(string configFilePath) 
+        public static IConfiguration ReadFromApplicationConfig(string configFilePath)
         {
             try
             {
@@ -222,7 +235,7 @@ namespace ZeroLevel
         /// Creating a configuration from the AppSettings section of the app.config file or web.config, is supplemented by the 'ConnectionStrings' section
         /// </summary>
         /// <returns>Configuration</returns>
-        public static IConfigurationSet ReadSetFromApplicationConfig(string configFilePath) 
+        public static IConfigurationSet ReadSetFromApplicationConfig(string configFilePath)
         {
             try
             {
@@ -252,7 +265,7 @@ namespace ZeroLevel
         /// </summary>
         /// <param name="path">Path to the ini file</param>
         /// <returns>Configuration</returns>
-        public static IConfiguration ReadFromIniFile(string path) 
+        public static IConfiguration ReadFromIniFile(string path)
         {
             try
             {
@@ -282,7 +295,7 @@ namespace ZeroLevel
         /// </summary>
         /// <param name="path">Path to the ini file</param>
         /// <returns>Configuration</returns>
-        public static IConfigurationSet ReadSetFromIniFile(string path) 
+        public static IConfigurationSet ReadSetFromIniFile(string path)
         {
             try
             {
@@ -312,7 +325,7 @@ namespace ZeroLevel
         /// </summary>
         /// <param name="args">Command line parameters</param>
         /// <returns>Configuration</returns>
-        public static IConfiguration ReadFromCommandLine(string[] args) 
+        public static IConfiguration ReadFromCommandLine(string[] args)
         {
             try
             {
@@ -387,6 +400,32 @@ namespace ZeroLevel
             return _emptySet;
         }
         #endregion Read configuration
+
+
+
+        public static IConfiguration Merge(ConfigurationRecordExistBehavior existRecordBehavior, params IConfiguration[] configurations)
+        {
+            var result = Configuration.Create();
+            foreach (var configuration in configurations)
+            {
+                result.MergeFrom(configuration, existRecordBehavior);
+            }
+            return result;
+        }
+
+        public static IConfigurationSet Merge(ConfigurationRecordExistBehavior existRecordBehavior, params IConfigurationSet[] configurationSets)
+        {
+            var result = Configuration.CreateSet();
+            foreach (var set in configurationSets)
+            {
+                foreach (var sectionName in set.SectionNames)
+                {
+                    var section = result.GetOrCreateSection(sectionName);
+                    section.MergeFrom(set[sectionName], existRecordBehavior);
+                }
+            }
+            return result;
+        }
 
         #region Write configuration
 

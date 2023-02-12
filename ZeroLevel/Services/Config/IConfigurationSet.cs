@@ -57,6 +57,8 @@ namespace ZeroLevel
         /// <returns>Data section</returns>
         IConfiguration GetSection(string sectionName);
 
+        IConfiguration GetOrCreateSection(string sectionName);
+
         /// <summary>
         /// Check for a section by name
         /// </summary>

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Xunit;
 
 namespace ZeroLevel.UnitTests
@@ -49,7 +50,7 @@ namespace ZeroLevel.UnitTests
             // Assert
             Assert.Equal("https://habr.ru", config.Url);
             Assert.Equal(1000, config.BatchSize);
-            Assert.Contains(config.Sheme, t=>t.Equals("socks"));
+            Assert.Contains(config.Sheme, t => t.Equals("socks"));
             Assert.Contains(config.Sheme, t => t.Equals("http"));
             Assert.Contains(config.Sheme, t => t.Equals("https"));
 
@@ -73,7 +74,7 @@ namespace ZeroLevel.UnitTests
             Assert.Equal("System", config.Service.ServiceGroup);
             Assert.Equal("service", config.Service.ServiceType);
         }
-        
+
         [Fact]
         public void NumbersTest()
         {
@@ -94,6 +95,53 @@ namespace ZeroLevel.UnitTests
             Assert.Equal(d, td);
             Assert.Equal(f, set.Default.First<float>("f"));
             Assert.Equal(i, set.Default.First<int>("i"));
+        }
+
+
+        [Fact]
+        public void MergeTest()
+        {
+            // ARRANGE
+            var set1 = Configuration.CreateSet();
+            set1.Default.Append("dk1", "1");
+            set1.Default.Append("dk1", "1");
+            set1["A"].Append("Ak1", "ak1");
+            set1["A"].Append("Ak2", "ak2");
+            var set2 = Configuration.CreateSet();
+            set2.Default.Append("dk1", "2");
+            set2["A"].Append("Ak1", "ak1");
+            var set3 = Configuration.CreateSet();
+            set3.Default.Append("dk1", "3");
+            set3["A"].Append("Ak1", "ak2");
+
+            // ACT 1
+            var mergedSet1 = Configuration.Merge(Services.Config.ConfigurationRecordExistBehavior.Append, set1, set2, set3);
+            // ASSERT 1
+            Assert.Equal(mergedSet1.Default["dk1"].Count(), 4);
+            Assert.Contains(mergedSet1.Default["dk1"], i => i == "1");
+            Assert.Contains(mergedSet1.Default["dk1"], i => i == "2");
+            Assert.Contains(mergedSet1.Default["dk1"], i => i == "3");
+
+            Assert.Equal(mergedSet1["A"]["Ak1"].Count(), 3);
+            Assert.Equal(mergedSet1["A"]["Ak2"].Count(), 1);
+
+            // ACT 2
+            var mergedSet2 = Configuration.Merge(Services.Config.ConfigurationRecordExistBehavior.IgnoreNew, set1, set2, set3);
+            // ASSERT 2
+            Assert.Equal(mergedSet2.Default["dk1"].Count(), 2);
+            Assert.Contains(mergedSet2.Default["dk1"], i => i == "1");
+
+            Assert.Equal(mergedSet2["A"]["Ak1"].Count(), 1);
+            Assert.Equal(mergedSet2["A"]["Ak2"].Count(), 1);
+
+            // ACT 3
+            var mergedSet3 = Configuration.Merge(Services.Config.ConfigurationRecordExistBehavior.Overwrite, set1, set2, set3);
+            // ASSERT 3
+            Assert.Equal(mergedSet3.Default["dk1"].Count(), 1);
+            Assert.Contains(mergedSet3.Default["dk1"], i => i == "3");
+
+            Assert.Equal(mergedSet3["A"]["Ak1"].Count(), 1);
+            Assert.Equal(mergedSet3["A"]["Ak2"].Count(), 1);
         }
     }
 }

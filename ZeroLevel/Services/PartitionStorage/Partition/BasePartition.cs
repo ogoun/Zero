@@ -51,8 +51,11 @@ namespace ZeroLevel.Services.PartitionStorage.Partition
         public void Dispose()
         {
             CloseWriteStreams();
+            Release();            
         }
         #endregion
+
+        public abstract void Release();
 
         /// <summary>
         /// Rebuild indexes for all files

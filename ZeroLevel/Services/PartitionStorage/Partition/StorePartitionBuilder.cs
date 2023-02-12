@@ -5,7 +5,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using ZeroLevel.Services.FileSystem;
-using ZeroLevel.Services.Memory;
 using ZeroLevel.Services.PartitionStorage.Interfaces;
 using ZeroLevel.Services.PartitionStorage.Partition;
 using ZeroLevel.Services.Serialization;
@@ -198,6 +197,10 @@ namespace ZeroLevel.Services.PartitionStorage
             {
                 PhisicalFileAccessorCachee.UnlockFile(file);
             }
+        }
+
+        public override void Release()
+        {
         }
         #endregion
     }

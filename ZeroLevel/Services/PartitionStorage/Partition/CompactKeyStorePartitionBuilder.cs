@@ -169,6 +169,17 @@ namespace ZeroLevel.Services.PartitionStorage.Partition
                 PhisicalFileAccessorCachee.UnlockFile(file);
             }
         }
+
+        public override void Release()
+        {
+            if (Directory.Exists(_catalog))
+            {
+                foreach (var file in Directory.GetFiles(_catalog))
+                {
+                    PhisicalFileAccessorCachee.DropDataReader(file);
+                }
+            }
+        }
         #endregion
     }
 }

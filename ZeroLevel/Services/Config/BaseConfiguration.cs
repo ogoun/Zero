@@ -6,30 +6,12 @@ using System.Linq;
 using System.Net;
 using System.Reflection;
 using ZeroLevel.Services.Collections;
-using ZeroLevel.Services.Invokation;
 using ZeroLevel.Services.ObjectMapping;
 using ZeroLevel.Services.Reflection;
 using ZeroLevel.Services.Serialization;
 
 namespace ZeroLevel.Services.Config
 {
-    public interface IConfigRecordParser
-    {
-        object Parse(string line);
-    }
-
-    public class ConfigRecordParseAttribute
-        : Attribute
-    {
-        public IConfigRecordParser Parser { get; set; }
-
-        public ConfigRecordParseAttribute(Type parserType)
-        {
-            if (parserType == null) throw new ArgumentNullException(nameof(parserType));
-            Parser = (IConfigRecordParser)Activator.CreateInstance(parserType);
-        }
-    }
-
     /// <summary>
     /// Base configuration
     /// </summary>
@@ -486,6 +468,32 @@ namespace ZeroLevel.Services.Config
             foreach (var key in this.Keys)
             {
                 config.Append(key, this[key]);
+            }
+        }
+
+        public void MergeFrom(IConfiguration config, ConfigurationRecordExistBehavior existRecordBehavior)
+        {
+            foreach (var key in config.Keys)
+            {
+                if (this.Contains(key))
+                {
+                    switch (existRecordBehavior)
+                    {
+                        case ConfigurationRecordExistBehavior.Append:
+                            this.Append(key, config[key]);
+                            break;
+                        case ConfigurationRecordExistBehavior.IgnoreNew:
+                            continue;
+                        case ConfigurationRecordExistBehavior.Overwrite:
+                            this.Remove(key);
+                            this.Append(key, config[key]);
+                            break;
+                    }
+                }
+                else
+                {
+                    this.Append(key, config[key]);
+                }
             }
         }
 

@@ -17,7 +17,7 @@ namespace PartitionFileStorageTest
     internal class Program
     {
         //        const int PAIRS_COUNT = 200_000_000;
-        const long PAIRS_COUNT = 100_000_000;
+        const long PAIRS_COUNT = 10_000_000;
 
         private class Metadata
         {
@@ -298,70 +298,72 @@ namespace PartitionFileStorageTest
 
             ulong totalData = 0;
             ulong totalKeys = 0;
-            var readPart = store.CreateAccessor(meta);
-            /*
-            Log.Info("Test #1 reading");
-            foreach (var key in testKeys1)
+            using (var readPart = store.CreateAccessor(meta))
             {
-                var result = readPart.Find(key);
-                totalData += (ulong)(result.Value?.Length ?? 0);
-                totalKeys++;
-            }
-            Log.Info($"\t\tFound: {totalKeys} keys. {totalData} bytes");
-            totalData = 0;
-            totalKeys = 0;
-            Log.Info("Test #1 remove by keys");
-            foreach (var key in testKeys1)
-            {
-                readPart.RemoveKey(key, false);
-            }
-            sw.Restart();
-            readPart.RebuildIndex();
-            sw.Stop();
-            Log.Info($"Rebuild indexes after remove: {sw.ElapsedMilliseconds}ms");
-            Log.Info("Test #1 reading after remove");
-            foreach (var key in testKeys1)
-            {
-                var result = readPart.Find(key);
-                totalData += (ulong)(result.Value?.Length ?? 0);
-                totalKeys++;
-            }
-            Log.Info($"\t\tFound: {totalKeys} keys. {totalData} bytes");
-            totalData = 0;
-            totalKeys = 0;
-            */
-            Log.Info("Test #2 reading");
-            foreach (var key in testKeys2)
-            {
-                var result = readPart.Find(key);
-                totalData += (ulong)(result.Value?.Length ?? 0);
-                totalKeys++;
-            }
-            Log.Info($"\t\tFound: {totalKeys}/{Keys.Count} keys. {totalData} bytes");
-            totalData = 0;
-            totalKeys = 0;
-            Log.Info("Test #2 remove keys batch");
-            readPart.RemoveKeys(testKeys2);
-            foreach (var k in testKeys2)
-            {
-                Keys.TryRemove(k);
-            }
-            Log.Info("Test #2 reading after remove");
-            foreach (var key in testKeys2)
-            {
-                var result = readPart.Find(key);
-                totalData += (ulong)(result.Value?.Length ?? 0);
-                totalKeys++;
-            }
-            Log.Info($"\t\tFound: {totalKeys} keys. {totalData} bytes");
-            totalData = 0;
-            totalKeys = 0;
+                /*
+                Log.Info("Test #1 reading");
+                foreach (var key in testKeys1)
+                {
+                    var result = readPart.Find(key);
+                    totalData += (ulong)(result.Value?.Length ?? 0);
+                    totalKeys++;
+                }
+                Log.Info($"\t\tFound: {totalKeys} keys. {totalData} bytes");
+                totalData = 0;
+                totalKeys = 0;
+                Log.Info("Test #1 remove by keys");
+                foreach (var key in testKeys1)
+                {
+                    readPart.RemoveKey(key, false);
+                }
+                sw.Restart();
+                readPart.RebuildIndex();
+                sw.Stop();
+                Log.Info($"Rebuild indexes after remove: {sw.ElapsedMilliseconds}ms");
+                Log.Info("Test #1 reading after remove");
+                foreach (var key in testKeys1)
+                {
+                    var result = readPart.Find(key);
+                    totalData += (ulong)(result.Value?.Length ?? 0);
+                    totalKeys++;
+                }
+                Log.Info($"\t\tFound: {totalKeys} keys. {totalData} bytes");
+                totalData = 0;
+                totalKeys = 0;
+                */
+                Log.Info("Test #2 reading");
+                foreach (var key in testKeys2)
+                {
+                    var result = readPart.Find(key);
+                    totalData += (ulong)(result.Value?.Length ?? 0);
+                    totalKeys++;
+                }
+                Log.Info($"\t\tFound: {totalKeys}/{Keys.Count} keys. {totalData} bytes");
+                totalData = 0;
+                totalKeys = 0;
+                Log.Info("Test #2 remove keys batch");
+                readPart.RemoveKeys(testKeys2);
+                foreach (var k in testKeys2)
+                {
+                    Keys.TryRemove(k);
+                }
+                Log.Info("Test #2 reading after remove");
+                foreach (var key in testKeys2)
+                {
+                    var result = readPart.Find(key);
+                    totalData += (ulong)(result.Value?.Length ?? 0);
+                    totalKeys++;
+                }
+                Log.Info($"\t\tFound: {totalKeys} keys. {totalData} bytes");
+                totalData = 0;
+                totalKeys = 0;
 
-            Log.Info("Iterator test");
-            foreach (var e in readPart.Iterate())
-            {
-                totalData += (ulong)(e.Value?.Length ?? 0);
-                totalKeys++;
+                Log.Info("Iterator test");
+                foreach (var e in readPart.Iterate())
+                {
+                    totalData += (ulong)(e.Value?.Length ?? 0);
+                    totalKeys++;
+                }
             }
             Log.Info($"\t\tFound: {totalKeys}/{Keys.Count} keys. {totalData} bytes");
             store.Dispose();
@@ -487,7 +489,7 @@ namespace PartitionFileStorageTest
 
         static void Main(string[] args)
         {
-            FaultCompressionTest(@"F:\Desktop\DATKA\DNS", new StoreMetadata { Date = new DateTime(2023, 01, 20) });
+            //FaultCompressionTest(@"F:\Desktop\DATKA\DNS", new StoreMetadata { Date = new DateTime(2023, 01, 20) });
 
             var root = @"H:\temp";
             var options = new StoreOptions<ulong, ulong, byte[], Metadata>
