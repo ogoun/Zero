@@ -4,7 +4,7 @@ using System.Security.Cryptography;
 
 namespace ZeroLevel.Services.Encryption
 {
-    public class RijndaelEncryptor
+    public class AesEncryptor
         : IDisposable
     {
         protected const int DEFAULT_STREAM_BUFFER_SIZE = 16384;
@@ -12,20 +12,20 @@ namespace ZeroLevel.Services.Encryption
 
         #region Crypt fields
 
-        private Rijndael _rijndael;
+        private Aes _aes;
         private CryptoStream _stream;
 
         #endregion Crypt fields
 
-        public RijndaelEncryptor(Stream stream, string password, byte[] salt = null)
+        public AesEncryptor(Stream stream, string password, byte[] salt = null)
         {
-            _rijndael = Rijndael.Create();
+            _aes = Aes.Create();
             using (var pdb = new Rfc2898DeriveBytes(password, SALT))
             {
-                _rijndael.Key = pdb.GetBytes(32);
-                _rijndael.IV = pdb.GetBytes(16);
+                _aes.Key = pdb.GetBytes(32);
+                _aes.IV = pdb.GetBytes(16);
             }
-            _stream = new CryptoStream(stream, _rijndael.CreateEncryptor(), CryptoStreamMode.Write);
+            _stream = new CryptoStream(stream, _aes.CreateEncryptor(), CryptoStreamMode.Write);
         }
 
         public void Write(byte[] data)
@@ -56,15 +56,15 @@ namespace ZeroLevel.Services.Encryption
 
         public static byte[] Encrypt(byte[] plain, string password, byte[] salt = null)
         {
-            using (var rijndael = Rijndael.Create())
+            using (var aes = Aes.Create())
             {
                 using (var pdb = new Rfc2898DeriveBytes(password, salt ?? SALT))
                 {
-                    rijndael.Key = pdb.GetBytes(32);
-                    rijndael.IV = pdb.GetBytes(16);
+                    aes.Key = pdb.GetBytes(32);
+                    aes.IV = pdb.GetBytes(16);
                     using (var memoryStream = new MemoryStream())
                     {
-                        using (var cryptoStream = new CryptoStream(memoryStream, rijndael.CreateEncryptor(), CryptoStreamMode.Write))
+                        using (var cryptoStream = new CryptoStream(memoryStream, aes.CreateEncryptor(), CryptoStreamMode.Write))
                         {
                             cryptoStream.Write(plain, 0, plain.Length);
                             cryptoStream.Close();
@@ -77,15 +77,15 @@ namespace ZeroLevel.Services.Encryption
 
         public static byte[] Encrypt(Stream stream, string password, byte[] salt = null)
         {
-            using (var rijndael = Rijndael.Create())
+            using (var aes = Aes.Create())
             {
                 using (var pdb = new Rfc2898DeriveBytes(password, salt ?? SALT))
                 {
-                    rijndael.Key = pdb.GetBytes(32);
-                    rijndael.IV = pdb.GetBytes(16);
+                    aes.Key = pdb.GetBytes(32);
+                    aes.IV = pdb.GetBytes(16);
                     using (var memoryStream = new MemoryStream())
                     {
-                        using (var cryptoStream = new CryptoStream(memoryStream, rijndael.CreateEncryptor(), CryptoStreamMode.Write))
+                        using (var cryptoStream = new CryptoStream(memoryStream, aes.CreateEncryptor(), CryptoStreamMode.Write))
                         {
                             Transfer(stream, cryptoStream);
                             cryptoStream.Close();
@@ -98,13 +98,13 @@ namespace ZeroLevel.Services.Encryption
 
         public static void Encrypt(Stream inputStream, Stream outputStream, string password, byte[] salt = null)
         {
-            using (var rijndael = Rijndael.Create())
+            using (var aes = Aes.Create())
             {
                 using (var pdb = new Rfc2898DeriveBytes(password, salt ?? SALT))
                 {
-                    rijndael.Key = pdb.GetBytes(32);
-                    rijndael.IV = pdb.GetBytes(16);
-                    using (var cryptoStream = new CryptoStream(outputStream, rijndael.CreateEncryptor(), CryptoStreamMode.Write))
+                    aes.Key = pdb.GetBytes(32);
+                    aes.IV = pdb.GetBytes(16);
+                    using (var cryptoStream = new CryptoStream(outputStream, aes.CreateEncryptor(), CryptoStreamMode.Write))
                     {
                         Transfer(inputStream, cryptoStream);
                         cryptoStream.Close();
@@ -115,15 +115,15 @@ namespace ZeroLevel.Services.Encryption
 
         public static byte[] Decrypt(byte[] cipher, string password, byte[] salt = null)
         {
-            using (var rijndael = Rijndael.Create())
+            using (var aes = Aes.Create())
             {
                 using (var pdb = new Rfc2898DeriveBytes(password, salt ?? SALT))
                 {
-                    rijndael.Key = pdb.GetBytes(32);
-                    rijndael.IV = pdb.GetBytes(16);
+                    aes.Key = pdb.GetBytes(32);
+                    aes.IV = pdb.GetBytes(16);
                     using (var memoryStream = new MemoryStream())
                     {
-                        using (var cryptoStream = new CryptoStream(memoryStream, rijndael.CreateDecryptor(), CryptoStreamMode.Write))
+                        using (var cryptoStream = new CryptoStream(memoryStream, aes.CreateDecryptor(), CryptoStreamMode.Write))
                         {
                             cryptoStream.Write(cipher, 0, cipher.Length);
                             cryptoStream.Close();
@@ -136,15 +136,15 @@ namespace ZeroLevel.Services.Encryption
 
         public static byte[] Decrypt(Stream stream, string password, byte[] salt = null)
         {
-            using (var rijndael = Rijndael.Create())
+            using (var aes = Aes.Create())
             {
                 using (var pdb = new Rfc2898DeriveBytes(password, salt ?? SALT))
                 {
-                    rijndael.Key = pdb.GetBytes(32);
-                    rijndael.IV = pdb.GetBytes(16);
+                    aes.Key = pdb.GetBytes(32);
+                    aes.IV = pdb.GetBytes(16);
                     using (var memoryStream = new MemoryStream())
                     {
-                        using (var cryptoStream = new CryptoStream(memoryStream, rijndael.CreateDecryptor(), CryptoStreamMode.Write))
+                        using (var cryptoStream = new CryptoStream(memoryStream, aes.CreateDecryptor(), CryptoStreamMode.Write))
                         {
                             Transfer(stream, cryptoStream);
                             cryptoStream.Close();
@@ -157,13 +157,13 @@ namespace ZeroLevel.Services.Encryption
 
         public static void Decrypt(Stream inputStream, Stream outputStream, string password, byte[] salt = null)
         {
-            using (var rijndael = Rijndael.Create())
+            using (var aes = Aes.Create())
             {
                 using (var pdb = new Rfc2898DeriveBytes(password, salt ?? SALT))
                 {
-                    rijndael.Key = pdb.GetBytes(32);
-                    rijndael.IV = pdb.GetBytes(16);
-                    using (var cryptoStream = new CryptoStream(outputStream, rijndael.CreateDecryptor(), CryptoStreamMode.Write))
+                    aes.Key = pdb.GetBytes(32);
+                    aes.IV = pdb.GetBytes(16);
+                    using (var cryptoStream = new CryptoStream(outputStream, aes.CreateDecryptor(), CryptoStreamMode.Write))
                     {
                         Transfer(inputStream, cryptoStream);
                         cryptoStream.Close();
@@ -183,8 +183,8 @@ namespace ZeroLevel.Services.Encryption
                 _stream.Dispose();
             }
             catch { }
-            _rijndael.Clear();
-            _rijndael.Dispose();
+            _aes.Clear();
+            _aes.Dispose();
         }
     }
 }

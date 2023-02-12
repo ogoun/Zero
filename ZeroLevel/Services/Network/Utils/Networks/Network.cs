@@ -1,37 +1,46 @@
 ﻿using System;
 using System.IO;
 using System.Net;
+using System.Net.Http;
 
 namespace ZeroLevel.Services.Network.Utils
 {
-	/// <summary>
-	/// Methods related to Network.
-	/// </summary>
-	public static class Network
-	{
-		/// <summary>
-		/// Gets the external IP Address.
-		/// </summary>
-		/// <value>The external IP Address.</value>
-		public static string ExternalIP
-		{
-			get
-			{
-				try
-				{
-					WebRequest request = WebRequest.Create("http://ipv4.icanhazip.com");
-					using (var response = request.GetResponse())
-					using (var sr = new StreamReader(response.GetResponseStream()))
-					{
-						return sr.ReadLine();
-					}
-				}
-				catch (Exception e)
-				{
-					Console.WriteLine("Error: " + e.Message);
-					return "";
-				}
-			}
-		}
-	}
+    /// <summary>
+    /// Methods related to Network.
+    /// </summary>
+    public static class Network
+    {
+        /// <summary>
+        /// Gets the external IP Address.
+        /// </summary>
+        /// <value>The external IP Address.</value>
+        public static string ExternalIP
+        {
+            get
+            {
+                try
+                {
+                    using (var clientHandler = new HttpClientHandler())
+                    {
+                        clientHandler.ServerCertificateCustomValidationCallback = (_, _, _, _) => true;
+                        clientHandler.UseCookies = true;
+                        clientHandler.CookieContainer = new CookieContainer();
+                        using (var client = new HttpClient(clientHandler))
+                        {
+                            var message = new HttpRequestMessage(HttpMethod.Get, "http://ipv4.icanhazip.com");
+                            using (var response = client.Send(message))
+                            {
+                                return response.Content.ReadAsStringAsync().Result;
+                            }
+                        }
+                    }
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine("Error: " + e.Message);
+                    return "";
+                }
+            }
+        }
+    }
 }

@@ -451,7 +451,7 @@ namespace PartitionFileStorageTest
                     }
                     catch (Exception ex)
                     {
-
+                        Log.Error(ex, "FaultUncompressedReadTest");
                     }
                 }
             }

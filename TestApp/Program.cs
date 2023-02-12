@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using ZeroLevel.Services.Network.Utils;
 
 namespace TestApp
 {
@@ -7,9 +8,7 @@ namespace TestApp
     {
         private static void Main(string[] args)
         {
-            var test = new ConcurrentDictionary<string, int>();
-            var v = test.GetOrAdd("sss", 1);
-            Console.ReadKey();
+            Console.WriteLine(Network.ExternalIP);
         }
     }
 }

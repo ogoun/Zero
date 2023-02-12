@@ -7,9 +7,9 @@ namespace ZeroLevel.Services.Cache
     internal sealed class TimerCachee<T>
         : IDisposable
     {
-        private sealed class CacheeItem<T>
+        private sealed class CacheeItem<I>
         {
-            public T Value { get; set; }
+            public I Value { get; set; }
             public DateTime LastAcessTime { get; set; }
         }
 

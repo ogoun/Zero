@@ -50,16 +50,6 @@ namespace ZeroLevel.SqlServer
 
         private void Initialize()
         {
-            try
-            {
-                var perm = new SqlClientPermission(PermissionState.Unrestricted);
-                perm.Demand();
-                perm = null;
-            }
-            catch
-            {
-                throw new ApplicationException("No permission for access to SqlClient");
-            }
             dbConnectionString = new SqlConnectionStringBuilder(_currentConnectionString);
             dbConnectionString.Pooling = true;
         }
