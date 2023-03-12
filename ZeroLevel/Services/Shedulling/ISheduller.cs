@@ -4,6 +4,8 @@ namespace ZeroLevel.Services.Shedulling
 {
     public interface ISheduller : IDisposable
     {
+        DateTime this[long index] { get; }
+
         #region One time events
 
         long RemindAfter(TimeSpan timespan, Action<long> callback);

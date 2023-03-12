@@ -34,6 +34,18 @@ namespace ZeroLevel.Services.Shedulling
 
         private readonly ConcurrentDictionary<long, ExpiredObject> _repitableActions = new ConcurrentDictionary<long, ExpiredObject>();
 
+        public DateTime this[long index]
+        {
+            get
+            {
+                if (_repitableActions.TryGetValue(index, out var result))
+                {
+                    return result.ExpirationDate;
+                }
+                return DateTime.MinValue;
+            }
+        }
+
         /// <summary>
         /// Performs an action once a period, while the period is recalculated according to the transferred function at each re-creation of the task.
         /// </summary>

@@ -298,6 +298,14 @@ namespace PartitionFileStorageTest
 
             ulong totalData = 0;
             ulong totalKeys = 0;
+
+            var s = new HashSet<ulong>();
+            store.Bypass(meta, (k, v) => 
+            {
+                s.Add(k);
+            });
+            Log.Info($"Keys count: {s.Count}");
+
             using (var readPart = store.CreateAccessor(meta))
             {
                 /*

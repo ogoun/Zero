@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace ZeroLevel.Services.Shedulling
 {
@@ -50,16 +49,6 @@ namespace ZeroLevel.Services.Shedulling
                 {
                     Log.SystemError(ex, $"Fault task '{result.Key}' on expiration date '{result.ExpirationDate.ToString("yyyy-MM-dd HH:mm:ss fff}")}'");
                 }
-                /*Task.Run(() => result.Callback(result.Key)).ContinueWith(t =>
-                {
-                    if (t.IsFaulted)
-                    {
-                        Exception ex = t.Exception;
-                        while (ex is AggregateException && ex.InnerException != null)
-                            ex = ex.InnerException;
-                        Log.SystemError(ex, $"Fault task '{result.Key}' on expiration date '{result.ExpirationDate.ToString("yyyy-MM-dd HH:mm:ss fff}")}'");
-                    }
-                });*/
             }
         }
 

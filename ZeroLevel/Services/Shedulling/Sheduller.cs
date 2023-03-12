@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Threading.Tasks;
 using ZeroLevel.Services.Shedulling;
 
 namespace ZeroLevel
@@ -44,6 +43,11 @@ namespace ZeroLevel
                 }
                 return __instanse;
             }
+        }
+
+        public static DateTime GetExpirationDate(long index)
+        {
+            return DefaultInstance[index];
         }
 
         #endregion Singletones

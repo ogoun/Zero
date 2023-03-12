@@ -95,5 +95,20 @@ namespace ZeroLevel.Services.PartitionStorage
         {
             _fileAccessorCachee.Dispose();
         }
+
+        public void Bypass(TMeta meta, Action<TKey, TValue> handler)
+        {
+            var accessor = CreateAccessor(meta);
+            foreach (var kv in accessor.Iterate())
+            {
+                handler.Invoke(kv.Key, kv.Value);
+            }
+        }
+
+        public bool Exists(TMeta meta, TKey key)
+        {
+            var accessor = CreateAccessor(meta);
+            return accessor.Find(key).Status == SearchResult.Success;
+        }
     }
 }
