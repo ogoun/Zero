@@ -123,7 +123,6 @@ namespace ZeroLevel.Services.Collections
 
         public IEnumerable<T> Dump()
         {
-            var dump = new List<T>();
             lock (_accessLocker)
             {
                 var cursor = _startIndex;
@@ -131,12 +130,11 @@ namespace ZeroLevel.Services.Collections
                 {
                     do
                     {
-                        dump.Add(_array[cursor]);
+                        yield return _array[cursor];
                         cursor = (cursor + 1) % _array.Length;
                     } while (cursor != _nextIndex);
                 }
             }
-            return dump;
         }
     }
 }

@@ -1,9 +1,31 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Xunit;
+using ZeroLevel.Services.Config;
 
 namespace ZeroLevel.UnitTests
 {
+    public class Address
+    {
+        public string Host { get; set; }
+        public int Port { get; set; }
+    }
+    public class AddressParser
+        : IConfigRecordParser
+    {
+        public object Parse(string line)
+        {
+            var parts = line.Split(';').Where(part => string.IsNullOrWhiteSpace(part) == false).ToArray();
+            var addresses = new Address[parts.Length];
+            for (int i = 0; i < parts.Length; i++)
+            {
+                var hp = parts[i].Trim().Split(':');
+                addresses[i] = new Address { Host = hp[0], Port = int.Parse(hp[1]) };
+            }
+            return addresses;
+        }
+    }
+
     public class AppConfig
     {
         public string Url;
@@ -12,6 +34,8 @@ namespace ZeroLevel.UnitTests
         public int[] Port;
         public ServiceConfig Service;
         public IEnumerable<int> List;
+        [ConfigRecordParse(typeof(AddressParser))]
+        public Address[] Hosts;
     }
 
     public class ServiceConfig
@@ -21,6 +45,8 @@ namespace ZeroLevel.UnitTests
         public string ServiceGroup;
         public string ServiceType;
     }
+
+
 
     public class ConfigurationTest
     {
@@ -38,6 +64,8 @@ namespace ZeroLevel.UnitTests
             set.Default.Append("port", "90");
             set.Default.Append("port", "8800");
             set.Default.Append("list", "1-5,7,9");
+            set.Default.Append("hosts", "host1:8800;host2:122;host3:1744");
+
             var section = set.CreateSection("service");
             section.Append("AppName", "TestApp");
             section.Append("AppKey", "test.app");
