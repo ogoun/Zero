@@ -42,16 +42,15 @@ namespace ZeroLevel.SqLite
 
         public void Push(T frame)
         {
-            long id = -1;
             _rwLock.EnterWriteLock();
             var creationTime = DateTime.Now.Ticks;
             try
             {
-                id = Append(new PacketRecord 
+                 Append(new PacketRecord 
                 {
                     Data = MessageSerializer.Serialize(frame),
                     Timestamp = creationTime
-                }).Id;                
+                });                
             }
             catch (Exception ex)
             {
