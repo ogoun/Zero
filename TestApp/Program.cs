@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
-using ZeroLevel.Services.Network.Utils;
 
 namespace TestApp
 {
@@ -8,7 +6,16 @@ namespace TestApp
     {
         private static void Main(string[] args)
         {
-            Console.WriteLine(Network.ExternalIP);
+            AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;
+        }
+
+        private static System.Reflection.Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs e)
+        {
+            if (e.Name.StartsWith("Microsoft.Build."))
+            {
+                // искать в локальной папке
+            }
+            return null;
         }
     }
 }

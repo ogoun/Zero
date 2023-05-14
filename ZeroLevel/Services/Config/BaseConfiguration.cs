@@ -527,8 +527,8 @@ namespace ZeroLevel.Services.Config
                         else
                         {
                             var elements = values.Select(v => parser.Parse(v)).ToArray();
-                            var arrayBuilder = CollectionFactory.CreateArray(itemType, elements.Length);
-                            foreach (var item in elements)
+                            var arrayBuilder = CollectionFactory.CreateArray(itemType, (elements[0] as Array).Length);
+                            foreach (var item in (elements[0] as Array))
                             {
                                 arrayBuilder.Set(item, index);
                                 index++;

@@ -401,8 +401,6 @@ namespace ZeroLevel
         }
         #endregion Read configuration
 
-
-
         public static IConfiguration Merge(ConfigurationRecordExistBehavior existRecordBehavior, params IConfiguration[] configurations)
         {
             var result = Configuration.Create();

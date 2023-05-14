@@ -6,7 +6,7 @@ namespace ZeroLevel.Services.Shedulling
     /// <summary>
     /// A wrapper around an Action that stores the time at which an action should be performed, as well as a link to the next action.
     /// </summary>
-    internal class ExpiredObject
+    internal sealed class ExpiredObject
     {
         private static long _counter = 0;
 
