@@ -39,12 +39,24 @@ namespace ZeroLevel.Services.PartitionStorage
         public void RemovePartition(TMeta info)
         {
             var partition = CreateAccessor(info);
-            partition.DropData();
-            FSUtils.RemoveFolder(partition.GetCatalogPath());
+            if (partition != null)
+            {
+                string path;
+                using (partition)
+                {
+                    path = partition.GetCatalogPath();
+                    partition.DropData();
+                }
+                FSUtils.RemoveFolder(path);
+            }
         }
 
         public IStorePartitionAccessor<TKey, TInput, TValue> CreateAccessor(TMeta info)
         {
+            if (false == Directory.Exists(_options.GetCatalogPath(info)))
+            {
+                return null;
+            }
             return new StorePartitionAccessor<TKey, TInput, TValue, TMeta>(_options, info, _serializer, _fileAccessorCachee);
         }
 
@@ -79,11 +91,15 @@ namespace ZeroLevel.Services.PartitionStorage
                 };
                 Parallel.ForEach(partitionsSearchInfo, options, (pair, _) =>
                 {
-                    using (var accessor = CreateAccessor(pair.Key))
+                    var accessor = CreateAccessor(pair.Key);
+                    if (accessor != null)
                     {
-                        results[pair.Key] = accessor
-                            .Find(pair.Value)
-                            .ToArray();
+                        using (accessor)
+                        {
+                            results[pair.Key] = accessor
+                                .Find(pair.Value)
+                                .ToArray();
+                        }
                     }
                 });
             }
@@ -99,16 +115,29 @@ namespace ZeroLevel.Services.PartitionStorage
         public void Bypass(TMeta meta, Action<TKey, TValue> handler)
         {
             var accessor = CreateAccessor(meta);
-            foreach (var kv in accessor.Iterate())
+            if (accessor != null)
             {
-                handler.Invoke(kv.Key, kv.Value);
+                using (accessor)
+                {
+                    foreach (var kv in accessor.Iterate())
+                    {
+                        handler.Invoke(kv.Key, kv.Value);
+                    }
+                }
             }
         }
 
         public bool Exists(TMeta meta, TKey key)
         {
             var accessor = CreateAccessor(meta);
-            return accessor.Find(key).Status == SearchResult.Success;
+            if (accessor != null)
+            {
+                using (accessor)
+                {
+                    return accessor.Find(key).Status == SearchResult.Success;
+                }
+            }
+            return false;
         }
     }
 }
