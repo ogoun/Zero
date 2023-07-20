@@ -1,5 +1,4 @@
 ﻿using Microsoft.ML.OnnxRuntime.Tensors;
-using SixLabors.ImageSharp;
 using ZeroLevel.NN.Models;
 
 namespace ZeroLevel.NN.Architectures.YoloV5

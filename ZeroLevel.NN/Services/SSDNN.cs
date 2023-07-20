@@ -1,6 +1,5 @@
 ﻿using Microsoft.ML.OnnxRuntime;
 using Microsoft.ML.OnnxRuntime.Tensors;
-using SixLabors.ImageSharp;
 using ZeroLevel.NN.Models;
 
 namespace ZeroLevel.NN
@@ -17,8 +16,8 @@ namespace ZeroLevel.NN
                 try
                 {
                     var so = SessionOptions.MakeSessionOptionWithCudaProvider(0);
-                    so.LogSeverityLevel = OrtLoggingLevel.ORT_LOGGING_LEVEL_VERBOSE;
-                    so.GraphOptimizationLevel = GraphOptimizationLevel.ORT_ENABLE_ALL;
+                    so.LogSeverityLevel = OrtLoggingLevel.ORT_LOGGING_LEVEL_FATAL;
+                    so.GraphOptimizationLevel = GraphOptimizationLevel.ORT_DISABLE_ALL;
                     _session = new InferenceSession(modelPath, so);
                 }
                 catch (Exception ex)

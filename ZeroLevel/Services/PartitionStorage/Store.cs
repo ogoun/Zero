@@ -64,7 +64,7 @@ namespace ZeroLevel.Services.PartitionStorage
             _fileAccessorCachee.DropAllIndexReaders();
         }
 
-        public async Task<StoreSearchResult<TKey, TValue, TMeta>> Search(StoreSearchRequest<TKey, TMeta> searchRequest)
+        public StoreSearchResult<TKey, TValue, TMeta> Search(StoreSearchRequest<TKey, TMeta> searchRequest)
         {
             var result = new StoreSearchResult<TKey, TValue, TMeta>();
             var results = new ConcurrentDictionary<TMeta, IEnumerable<StorePartitionKeyValueSearchResult<TKey, TValue>>>();
@@ -77,7 +77,7 @@ namespace ZeroLevel.Services.PartitionStorage
                 {
                     MaxDegreeOfParallelism = _options.MaxDegreeOfParallelism
                 };
-                await Parallel.ForEachAsync(partitionsSearchInfo, options, async (pair, _) =>
+                Parallel.ForEach(partitionsSearchInfo, options, (pair, _) =>
                 {
                     using (var accessor = CreateAccessor(pair.Key))
                     {

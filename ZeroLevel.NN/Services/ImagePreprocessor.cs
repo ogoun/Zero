@@ -1,7 +1,5 @@
-﻿using Microsoft.ML.OnnxRuntime.Tensors;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.PixelFormats;
-using SixLabors.ImageSharp.Processing;
+﻿using Aurigma.GraphicsMill;
+using Microsoft.ML.OnnxRuntime.Tensors;
 using ZeroLevel.NN.Models;
 
 namespace ZeroLevel.NN
