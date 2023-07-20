@@ -101,23 +101,26 @@ namespace ZeroLevel.Services.PartitionStorage
         }
         public IEnumerable<StorePartitionKeyValueSearchResult<TKey, TValue>> Iterate()
         {
-            TKey k;
-            TValue v;
-            var files = Directory.GetFiles(_catalog);
-            if (files != null && files.Length > 0)
+            if (Directory.Exists(_catalog))
             {
-                foreach (var file in files)
+                TKey k;
+                TValue v;
+                var files = Directory.GetFiles(_catalog);
+                if (files != null && files.Length > 0)
                 {
-                    var accessor = PhisicalFileAccessorCachee.GetDataAccessor(file, 0);
-                    if (accessor != null)
+                    foreach (var file in files)
                     {
-                        using (var reader = new MemoryStreamReader(accessor))
+                        var accessor = PhisicalFileAccessorCachee.GetDataAccessor(file, 0);
+                        if (accessor != null)
                         {
-                            while (reader.EOS == false)
+                            using (var reader = new MemoryStreamReader(accessor))
                             {
-                                if (Serializer.KeyDeserializer.Invoke(reader, out k) == false) break;
-                                if (Serializer.ValueDeserializer.Invoke(reader, out v) == false) break;
-                                yield return new StorePartitionKeyValueSearchResult<TKey, TValue> { Key = k, Value = v, Status = SearchResult.Success };
+                                while (reader.EOS == false)
+                                {
+                                    if (Serializer.KeyDeserializer.Invoke(reader, out k) == false) break;
+                                    if (Serializer.ValueDeserializer.Invoke(reader, out v) == false) break;
+                                    yield return new StorePartitionKeyValueSearchResult<TKey, TValue> { Key = k, Value = v, Status = SearchResult.Success };
+                                }
                             }
                         }
                     }
@@ -203,84 +206,87 @@ namespace ZeroLevel.Services.PartitionStorage
             TKey k;
             TValue v;
             var filePath = Path.Combine(_catalog, fileName);
-            if (_options.Index.Enabled)
+            if (File.Exists(filePath))
             {
-                var offsets = Indexes.GetOffset(keys, true);
-                for (int i = 0; i < keys.Length; i++)
+                if (_options.Index.Enabled)
                 {
-                    var searchKey = keys[i];
-                    var offset = offsets[i];
-                    IViewAccessor memoryAccessor;
-                    if (offset.Length > 0)
+                    var offsets = Indexes.GetOffset(keys, true);
+                    for (int i = 0; i < keys.Length; i++)
                     {
-                        memoryAccessor = GetViewAccessor(filePath, offset.Offset, offset.Length);
-                    }
-                    else
-                    {
-                        memoryAccessor = GetViewAccessor(filePath, offset.Offset);
-                    }
-                    if (memoryAccessor != null)
-                    {
-                        using (var reader = new MemoryStreamReader(memoryAccessor))
+                        var searchKey = keys[i];
+                        var offset = offsets[i];
+                        IViewAccessor memoryAccessor;
+                        if (offset.Length > 0)
                         {
-                            while (reader.EOS == false)
+                            memoryAccessor = GetViewAccessor(filePath, offset.Offset, offset.Length);
+                        }
+                        else
+                        {
+                            memoryAccessor = GetViewAccessor(filePath, offset.Offset);
+                        }
+                        if (memoryAccessor != null)
+                        {
+                            using (var reader = new MemoryStreamReader(memoryAccessor))
                             {
-                                if (Serializer.KeyDeserializer.Invoke(reader, out k) == false) break;
-                                if (Serializer.ValueDeserializer.Invoke(reader, out v) == false) break;
-                                var c = _options.KeyComparer(searchKey, k);
-                                if (c == 0)
+                                while (reader.EOS == false)
                                 {
-                                    yield return new StorePartitionKeyValueSearchResult<TKey, TValue>
+                                    if (Serializer.KeyDeserializer.Invoke(reader, out k) == false) break;
+                                    if (Serializer.ValueDeserializer.Invoke(reader, out v) == false) break;
+                                    var c = _options.KeyComparer(searchKey, k);
+                                    if (c == 0)
                                     {
-                                        Key = searchKey,
-                                        Value = v,
-                                        Status = SearchResult.Success
-                                    };
-                                    break;
-                                }
-                                else if (c == -1)
-                                {
-                                    break;
+                                        yield return new StorePartitionKeyValueSearchResult<TKey, TValue>
+                                        {
+                                            Key = searchKey,
+                                            Value = v,
+                                            Status = SearchResult.Success
+                                        };
+                                        break;
+                                    }
+                                    else if (c == -1)
+                                    {
+                                        break;
+                                    }
                                 }
                             }
                         }
                     }
                 }
-            }
-            else
-            {
-                var memoryAccessor = GetViewAccessor(filePath, 0);
-                if (memoryAccessor != null)
+                else
                 {
-                    using (var reader = new MemoryStreamReader(memoryAccessor))
+                    var memoryAccessor = GetViewAccessor(filePath, 0);
+                    if (memoryAccessor != null)
                     {
-                        int index = 0;
-                        var keys_arr = keys.OrderBy(k => k).ToArray();
-                        while (reader.EOS == false && index < keys_arr.Length)
+                        using (var reader = new MemoryStreamReader(memoryAccessor))
                         {
-                            if (Serializer.KeyDeserializer.Invoke(reader, out k) == false) break;
-                            if (Serializer.ValueDeserializer.Invoke(reader, out v) == false) break;
-                            var c = _options.KeyComparer(keys_arr[index], k);
-                            if (c == 0)
+                            int index = 0;
+                            var keys_arr = keys.OrderBy(k => k).ToArray();
+                            while (reader.EOS == false && index < keys_arr.Length)
                             {
-                                yield return new StorePartitionKeyValueSearchResult<TKey, TValue>
+                                if (Serializer.KeyDeserializer.Invoke(reader, out k) == false) break;
+                                if (Serializer.ValueDeserializer.Invoke(reader, out v) == false) break;
+                                var c = _options.KeyComparer(keys_arr[index], k);
+                                if (c == 0)
                                 {
-                                    Key = keys_arr[index],
-                                    Value = v,
-                                    Status = SearchResult.Success
-                                };
-                                index++;
-                            }
-                            else if (c == -1)
-                            {
-                                do
-                                {
-                                    index++;
-                                    if (index < keys_arr.Length)
+                                    yield return new StorePartitionKeyValueSearchResult<TKey, TValue>
                                     {
-                                        c = _options.KeyComparer(keys_arr[index], k);
-                                    }
-                                } while (index < keys_arr.Length && c == -1);
+                                        Key = keys_arr[index],
+                                        Value = v,
+                                        Status = SearchResult.Success
+                                    };
+                                    index++;
+                                }
+                                else if (c == -1)
+                                {
+                                    do
+                                    {
+                                        index++;
+                                        if (index < keys_arr.Length)
+                                        {
+                                            c = _options.KeyComparer(keys_arr[index], k);
+                                        }
+                                    } while (index < keys_arr.Length && c == -1);
+                                }
                             }
                         }
                     }
@@ -292,29 +298,68 @@ namespace ZeroLevel.Services.PartitionStorage
         {
             TKey k;
             var filePath = Path.Combine(_catalog, fileName);
-            // 1. Find ranges
-            var ranges = new List<FilePositionRange>();
-            if (_options.Index.Enabled && autoReindex)
+            if (File.Exists(filePath))
             {
-                var offsets = Indexes.GetOffset(keys, true);
-                for (int i = 0; i < keys.Length; i++)
+                // 1. Find ranges
+                var ranges = new List<FilePositionRange>();
+                if (_options.Index.Enabled && autoReindex)
                 {
-                    var searchKey = keys[i];
-                    var offset = offsets[i];
-                    IViewAccessor memoryAccessor;
-                    if (offset.Length > 0)
+                    var offsets = Indexes.GetOffset(keys, true);
+                    for (int i = 0; i < keys.Length; i++)
                     {
-                        memoryAccessor = GetViewAccessor(filePath, offset.Offset, offset.Length);
+                        var searchKey = keys[i];
+                        var offset = offsets[i];
+                        IViewAccessor memoryAccessor;
+                        if (offset.Length > 0)
+                        {
+                            memoryAccessor = GetViewAccessor(filePath, offset.Offset, offset.Length);
+                        }
+                        else
+                        {
+                            memoryAccessor = GetViewAccessor(filePath, offset.Offset);
+                        }
+                        if (memoryAccessor != null)
+                        {
+                            using (var reader = new MemoryStreamReader(memoryAccessor))
+                            {
+                                while (reader.EOS == false)
+                                {
+                                    var startPosition = reader.Position;
+                                    if (Serializer.KeyDeserializer.Invoke(reader, out k) == false)
+                                    {
+                                        Log.Error($"[StorePartitionAccessor.RemoveKeyGroup] Fault remove keys from file '{fileName}'. Incorrect file structure. Fault read key.");
+                                        return;
+                                    }
+                                    if (Serializer.ValueDeserializer.Invoke(reader, out var _) == false)
+                                    {
+                                        Log.Error($"[StorePartitionAccessor.RemoveKeyGroup] Fault remove keys from file '{fileName}'. Incorrect file structure. Fault read value.");
+                                        return;
+                                    }
+                                    var endPosition = reader.Position;
+                                    var c = _options.KeyComparer(searchKey, k);
+                                    if (c == 0)
+                                    {
+                                        ranges.Add(new FilePositionRange { Start = startPosition, End = endPosition });
+                                    }
+                                    else if (c == -1)
+                                    {
+                                        break;
+                                    }
+                                }
+                            }
+                        }
                     }
-                    else
-                    {
-                        memoryAccessor = GetViewAccessor(filePath, offset.Offset);
-                    }
+                }
+                else
+                {
+                    var memoryAccessor = GetViewAccessor(filePath, 0);
                     if (memoryAccessor != null)
                     {
                         using (var reader = new MemoryStreamReader(memoryAccessor))
                         {
-                            while (reader.EOS == false)
+                            int index = 0;
+                            var keys_arr = keys.OrderBy(k => k).ToArray();
+                            while (reader.EOS == false && index < keys_arr.Length)
                             {
                                 var startPosition = reader.Position;
                                 if (Serializer.KeyDeserializer.Invoke(reader, out k) == false)
@@ -328,101 +373,65 @@ namespace ZeroLevel.Services.PartitionStorage
                                     return;
                                 }
                                 var endPosition = reader.Position;
-                                var c = _options.KeyComparer(searchKey, k);
+                                var c = _options.KeyComparer(keys_arr[index], k);
                                 if (c == 0)
                                 {
                                     ranges.Add(new FilePositionRange { Start = startPosition, End = endPosition });
+                                    index++;
                                 }
                                 else if (c == -1)
                                 {
-                                    break;
+                                    do
+                                    {
+                                        index++;
+                                        if (index < keys_arr.Length)
+                                        {
+                                            c = _options.KeyComparer(keys_arr[index], k);
+                                        }
+                                    } while (index < keys_arr.Length && c == -1);
                                 }
                             }
                         }
                     }
                 }
-            }
-            else
-            {
-                var memoryAccessor = GetViewAccessor(filePath, 0);
-                if (memoryAccessor != null)
+
+                // 2. Temporary file from ranges
+                var tempFile = FSUtils.GetAppLocalTemporaryFile();
+
+                using (var readStream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite, 4096 * 1024))
                 {
-                    using (var reader = new MemoryStreamReader(memoryAccessor))
+                    RangeCompression(ranges);
+                    using (var writeStream = new FileStream(tempFile, FileMode.Create, FileAccess.Write, FileShare.None, 4096 * 1024))
                     {
-                        int index = 0;
-                        var keys_arr = keys.OrderBy(k => k).ToArray();
-                        while (reader.EOS == false && index < keys_arr.Length)
+                        if (inverseRemove)
                         {
-                            var startPosition = reader.Position;
-                            if (Serializer.KeyDeserializer.Invoke(reader, out k) == false)
+                            var inverted = RangeInversion(ranges, readStream.Length);
+                            foreach (var range in inverted)
                             {
-                                Log.Error($"[StorePartitionAccessor.RemoveKeyGroup] Fault remove keys from file '{fileName}'. Incorrect file structure. Fault read key.");
-                                return;
-                            }
-                            if (Serializer.ValueDeserializer.Invoke(reader, out var _) == false)
-                            {
-                                Log.Error($"[StorePartitionAccessor.RemoveKeyGroup] Fault remove keys from file '{fileName}'. Incorrect file structure. Fault read value.");
-                                return;
-                            }
-                            var endPosition = reader.Position;
-                            var c = _options.KeyComparer(keys_arr[index], k);
-                            if (c == 0)
-                            {
-                                ranges.Add(new FilePositionRange { Start = startPosition, End = endPosition });
-                                index++;
-                            }
-                            else if (c == -1)
-                            {
-                                do
-                                {
-                                    index++;
-                                    if (index < keys_arr.Length)
-                                    {
-                                        c = _options.KeyComparer(keys_arr[index], k);
-                                    }
-                                } while (index < keys_arr.Length && c == -1);
+                                CopyRange(range, readStream, writeStream);
                             }
                         }
+                        else
+                        {
+                            foreach (var range in ranges)
+                            {
+                                CopyRange(range, readStream, writeStream);
+                            }
+                        }
+                        writeStream.Flush();
                     }
                 }
-            }
 
-            // 2. Temporary file from ranges
-            var tempFile = FSUtils.GetAppLocalTemporaryFile();
+                // 3. Replace from temporary to original
+                PhisicalFileAccessorCachee.DropDataReader(filePath);
+                File.Delete(filePath);
+                File.Move(tempFile, filePath, true);
 
-            using (var readStream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite, 4096 * 1024))
-            {
-                RangeCompression(ranges);
-                using (var writeStream = new FileStream(tempFile, FileMode.Create, FileAccess.Write, FileShare.None, 4096 * 1024))
+                // Rebuild index if needs
+                if (_options.Index.Enabled && autoReindex)
                 {
-                    if (inverseRemove)
-                    {
-                        var inverted = RangeInversion(ranges, readStream.Length);
-                        foreach (var range in inverted)
-                        {
-                            CopyRange(range, readStream, writeStream);
-                        }
-                    }
-                    else
-                    {
-                        foreach (var range in ranges)
-                        {
-                            CopyRange(range, readStream, writeStream);
-                        }
-                    }
-                    writeStream.Flush();
+                    RebuildFileIndex(filePath);
                 }
-            }
-
-            // 3. Replace from temporary to original
-            PhisicalFileAccessorCachee.DropDataReader(filePath);
-            File.Delete(filePath);
-            File.Move(tempFile, filePath, true);
-
-            // Rebuild index if needs
-            if (_options.Index.Enabled && autoReindex)
-            {
-                RebuildFileIndex(filePath);
             }
         }
 
