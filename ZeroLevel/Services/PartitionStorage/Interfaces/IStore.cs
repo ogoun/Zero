@@ -29,7 +29,7 @@ namespace ZeroLevel.Services.PartitionStorage
         /// <summary>
         /// Performs a search for data in the repository
         /// </summary>
-        Task<StoreSearchResult<TKey, TValue, TMeta>> Search(StoreSearchRequest<TKey, TMeta> searchRequest);
+        IAsyncEnumerable<KV<TKey, TValue>> Search(StoreSearchRequest<TKey, TMeta> searchRequest);
         /// <summary>
         /// bypass all key value by meta
         /// </summary>

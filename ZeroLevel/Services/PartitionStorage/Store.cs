@@ -70,38 +70,29 @@ namespace ZeroLevel.Services.PartitionStorage
             _fileAccessorCachee.DropAllIndexReaders();
         }
 
-        public async Task<StoreSearchResult<TKey, TValue, TMeta>> Search(StoreSearchRequest<TKey, TMeta> searchRequest)
+        public async IAsyncEnumerable<KV<TKey, TValue>> Search(StoreSearchRequest<TKey, TMeta> searchRequest)
         {
-            var result = new StoreSearchResult<TKey, TValue, TMeta>();
-            var results = new ConcurrentDictionary<TMeta, IEnumerable<KV<TKey, TValue>>>();
             if (searchRequest.PartitionSearchRequests?.Any() ?? false)
             {
                 var partitionsSearchInfo = searchRequest
                     .PartitionSearchRequests
                     .ToDictionary(r => r.Info, r => r.Keys);
-                var options = new ParallelOptions
-                {
-                    MaxDegreeOfParallelism = _options.MaxDegreeOfParallelism
-                };
-                await Parallel.ForEachAsync(partitionsSearchInfo, options, async (pair, _) =>
+                foreach(var pair in partitionsSearchInfo) 
                 {
                     var accessor = CreateAccessor(pair.Key);
                     if (accessor != null)
                     {
                         using (accessor)
                         {
-                            var set = new List<KV<TKey, TValue>>();
-                            await foreach (var kv in accessor.Iterate())
+                            var set = new ConcurrentBag<KV<TKey, TValue>>();
+                            await foreach (var kv in accessor.Find(pair.Value))
                             {
-                                set.Add(new KV<TKey, TValue>(kv.Key, kv.Value));
+                                yield return kv;
                             }
-                            results[pair.Key] = set;
                         }
                     }
-                });
+                }
             }
-            result.Results = results;
-            return result;
         }
 
         public void Dispose()

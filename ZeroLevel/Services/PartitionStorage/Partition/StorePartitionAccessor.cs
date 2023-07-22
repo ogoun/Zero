@@ -88,7 +88,8 @@ namespace ZeroLevel.Services.PartitionStorage
                 Value = default
             };
         }
-        public async Task Find(IEnumerable<TKey> keys, Action<TKey, TValue> searchResultHandler)
+
+        public async IAsyncEnumerable<KV<TKey, TValue>> Find(IEnumerable<TKey> keys)
         {
             var results = keys.Distinct()
                 .GroupBy(
@@ -96,9 +97,13 @@ namespace ZeroLevel.Services.PartitionStorage
                     k => k, (key, g) => new { FileName = key, Keys = g.ToArray() });
             foreach (var group in results)
             {
-                await Find(group.FileName, group.Keys, searchResultHandler);
+                await foreach (var kv in Find(group.FileName, group.Keys))
+                {
+                    yield return kv;
+                }
             }
         }
+
         public async IAsyncEnumerable<KV<TKey, TValue>> Iterate()
         {
             if (Directory.Exists(_catalog))
@@ -204,10 +209,8 @@ namespace ZeroLevel.Services.PartitionStorage
 
 
         #region Private methods
-        private async Task Find(string fileName, TKey[] keys, Action<TKey, TValue> searchResultHandler)
+        private async IAsyncEnumerable<KV<TKey, TValue>> Find(string fileName, TKey[] keys)
         {
-            TKey k;
-            TValue v;
             var filePath = Path.Combine(_catalog, fileName);
             if (File.Exists(filePath))
             {
@@ -242,7 +245,7 @@ namespace ZeroLevel.Services.PartitionStorage
                                     var c = _options.KeyComparer(searchKey, kv.Value);
                                     if (c == 0)
                                     {
-                                        searchResultHandler.Invoke(kv.Value, vv.Value);
+                                        yield return new KV<TKey, TValue>(kv.Value, vv.Value);
                                         break;
                                     }
                                     else if (c == -1)
@@ -274,7 +277,7 @@ namespace ZeroLevel.Services.PartitionStorage
                                 var c = _options.KeyComparer(keys_arr[index], kv.Value);
                                 if (c == 0)
                                 {
-                                    searchResultHandler.Invoke(kv.Value, vv.Value);
+                                    yield return new KV<TKey, TValue>(kv.Value, vv.Value);
                                     index++;
                                 }
                                 else if (c == -1)

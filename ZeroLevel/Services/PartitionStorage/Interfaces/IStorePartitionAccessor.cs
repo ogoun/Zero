@@ -24,7 +24,8 @@ namespace ZeroLevel.Services.PartitionStorage
         /// <summary>
         /// Search in a partition for a specified keys
         /// </summary>
-        Task Find(IEnumerable<TKey> keys, Action<TKey, TValue> searchResultHandler);
+        IAsyncEnumerable<KV<TKey, TValue>> Find(IEnumerable<TKey> keys);
+
         /// <summary>
         /// Iterating over all recorded data
         /// </summary>
