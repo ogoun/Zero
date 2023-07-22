@@ -3,8 +3,10 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 using System.Text;
+using System.Threading.Tasks;
 using ZeroLevel.Services.Extensions;
 using ZeroLevel.Services.Memory;
 
@@ -13,7 +15,7 @@ namespace ZeroLevel.Services.Serialization
     /// <summary>
     /// A wrapper over a MemoryStream for reading, with a check for overflow
     /// </summary>
-    public sealed class MemoryStreamReader
+    public partial class MemoryStreamReader
         : IBinaryReader
     {
         private readonly IViewAccessor _accessor;
@@ -124,10 +126,11 @@ namespace ZeroLevel.Services.Serialization
 
         public decimal ReadDecimal()
         {
-            var p1 = ReadInt32();
-            var p2 = ReadInt32();
-            var p3 = ReadInt32();
-            var p4 = ReadInt32();
+            var arr = ReadBuffer(16);
+            var p1 = BitConverter.ToInt32(arr, 0);
+            var p2 = BitConverter.ToInt32(arr, 4);
+            var p3 = BitConverter.ToInt32(arr, 8);
+            var p4 = BitConverter.ToInt32(arr, 12);
             return BitConverterExt.ToDecimal(new int[] { p1, p2, p3, p4 });
         }
 
@@ -190,7 +193,7 @@ namespace ZeroLevel.Services.Serialization
         {
             if (CheckOutOfRange(count))
                 throw new OutOfMemoryException("Array index out of bounds");
-            var buffer = _accessor.ReadBuffer(count);
+            var buffer = _accessor.ReadBuffer(count).Result;
             if (_reverseByteOrder && count > 1)
             {
                 byte b;
@@ -213,7 +216,7 @@ namespace ZeroLevel.Services.Serialization
             }
             try
             {
-                buffer = _accessor.ReadBuffer(count);
+                buffer = _accessor.ReadBuffer(count).Result;
                 if (_reverseByteOrder && count > 1)
                 {
                     byte b;
@@ -287,16 +290,13 @@ namespace ZeroLevel.Services.Serialization
         /// <summary>
         /// Check if data reading is outside the stream
         /// </summary>
-        public bool CheckOutOfRange(int offset)
-        {
-            return _accessor.CheckOutOfRange(offset);
-        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool CheckOutOfRange(int offset) => _accessor.CheckOutOfRange(offset);
 
         #region Extensions
 
         #region Collections
-        public List<T> ReadCollection<T>()
-            where T : IBinarySerializable, new()
+        private List<T> ReadList<T>(Func<T> read)
         {
             int count = ReadInt32();
             var collection = new List<T>(count);
@@ -304,529 +304,125 @@ namespace ZeroLevel.Services.Serialization
             {
                 for (int i = 0; i < count; i++)
                 {
-                    var item = new T();
-                    item.Deserialize(this);
-                    collection.Add(item);
+                    collection.Add(read.Invoke());
                 }
             }
             return collection;
         }
 
-        public List<string> ReadStringCollection()
-        {
-            int count = ReadInt32();
-            var collection = new List<string>(count);
-            if (count > 0)
+        public List<T> ReadCollection<T>()
+            where T : IBinarySerializable, new()
+        =>
+            ReadList(() =>
             {
-                for (int i = 0; i < count; i++)
-                {
-                    collection.Add(ReadString());
-                }
-            }
-            return collection;
-        }
+                var item = new T();
+                item.Deserialize(this);
+                return item;
+            });
 
-        public List<IPAddress> ReadIPCollection()
-        {
-            int count = ReadInt32();
-            var collection = new List<IPAddress>(count);
-            if (count > 0)
-            {
-                for (int i = 0; i < count; i++)
-                {
-                    collection.Add(ReadIP());
-                }
-            }
-            return collection;
-        }
+        public List<string> ReadStringCollection() => ReadList(ReadString);
 
-        public List<IPEndPoint> ReadIPEndPointCollection()
-        {
-            int count = ReadInt32();
-            var collection = new List<IPEndPoint>(count);
-            if (count > 0)
-            {
-                for (int i = 0; i < count; i++)
-                {
-                    collection.Add(ReadIPEndpoint());
-                }
-            }
-            return collection;
-        }
+        public List<IPAddress> ReadIPCollection() => ReadList(ReadIP);
 
-        public List<Guid> ReadGuidCollection()
-        {
-            int count = ReadInt32();
-            var collection = new List<Guid>(count);
-            if (count > 0)
-            {
-                for (int i = 0; i < count; i++)
-                {
-                    collection.Add(ReadGuid());
-                }
-            }
-            return collection;
-        }
+        public List<IPEndPoint> ReadIPEndPointCollection() => ReadList(ReadIPEndpoint);
 
-        public List<DateTime> ReadDateTimeCollection()
-        {
-            int count = ReadInt32();
-            var collection = new List<DateTime>(count);
-            if (count > 0)
-            {
-                for (int i = 0; i < count; i++)
-                {
-                    collection.Add(ReadDateTime() ?? DateTime.MinValue);
-                }
-            }
-            return collection;
-        }
+        public List<Guid> ReadGuidCollection() => ReadList(ReadGuid);
 
-        public List<Int64> ReadInt64Collection()
-        {
-            int count = ReadInt32();
-            var collection = new List<Int64>(count);
-            if (count > 0)
-            {
-                for (int i = 0; i < count; i++)
-                {
-                    collection.Add(ReadLong());
-                }
-            }
-            return collection;
-        }
+        public List<DateTime?> ReadDateTimeCollection() => ReadList(ReadDateTime);
 
-        public List<Int32> ReadInt32Collection()
-        {
-            int count = ReadInt32();
-            var collection = new List<Int32>(count);
-            if (count > 0)
-            {
-                for (int i = 0; i < count; i++)
-                {
-                    collection.Add(ReadInt32());
-                }
-            }
-            return collection;
-        }
+        public List<Int64> ReadInt64Collection() => ReadList(ReadLong);
 
-        public List<UInt64> ReadUInt64Collection()
-        {
-            int count = ReadInt32();
-            var collection = new List<UInt64>(count);
-            if (count > 0)
-            {
-                for (int i = 0; i < count; i++)
-                {
-                    collection.Add(ReadULong());
-                }
-            }
-            return collection;
-        }
+        public List<Int32> ReadInt32Collection() => ReadList(ReadInt32);
 
-        public List<UInt32> ReadUInt32Collection()
-        {
-            int count = ReadInt32();
-            var collection = new List<UInt32>(count);
-            if (count > 0)
-            {
-                for (int i = 0; i < count; i++)
-                {
-                    collection.Add(ReadUInt32());
-                }
-            }
-            return collection;
-        }
+        public List<UInt64> ReadUInt64Collection() => ReadList(ReadULong);
 
-        public List<char> ReadCharCollection()
-        {
-            int count = ReadInt32();
-            var collection = new List<char>(count);
-            if (count > 0)
-            {
-                for (int i = 0; i < count; i++)
-                {
-                    collection.Add(ReadChar());
-                }
-            }
-            return collection;
-        }
+        public List<UInt32> ReadUInt32Collection() => ReadList(ReadUInt32);
 
-        public List<short> ReadShortCollection()
-        {
-            int count = ReadInt32();
-            var collection = new List<short>(count);
-            if (count > 0)
-            {
-                for (int i = 0; i < count; i++)
-                {
-                    collection.Add(ReadShort());
-                }
-            }
-            return collection;
-        }
+        public List<char> ReadCharCollection() => ReadList(ReadChar);
 
-        public List<ushort> ReadUShortCollection()
-        {
-            int count = ReadInt32();
-            var collection = new List<ushort>(count);
-            if (count > 0)
-            {
-                for (int i = 0; i < count; i++)
-                {
-                    collection.Add(ReadUShort());
-                }
-            }
-            return collection;
-        }
+        public List<short> ReadShortCollection() => ReadList(ReadShort);
 
-        public List<float> ReadFloatCollection()
-        {
-            int count = ReadInt32();
-            var collection = new List<float>(count);
-            if (count > 0)
-            {
-                for (int i = 0; i < count; i++)
-                {
-                    collection.Add(ReadFloat());
-                }
-            }
-            return collection;
-        }
+        public List<ushort> ReadUShortCollection() => ReadList(ReadUShort);
 
-        public List<Double> ReadDoubleCollection()
-        {
-            int count = ReadInt32();
-            var collection = new List<Double>(count);
-            if (count > 0)
-            {
-                for (int i = 0; i < count; i++)
-                {
-                    collection.Add(ReadDouble());
-                }
-            }
-            return collection;
-        }
+        public List<float> ReadFloatCollection() => ReadList(ReadFloat);
 
-        public List<bool> ReadBooleanCollection()
-        {
-            int count = ReadInt32();
-            var collection = new List<bool>(count);
-            if (count > 0)
-            {
-                for (int i = 0; i < count; i++)
-                {
-                    collection.Add(ReadBoolean());
-                }
-            }
-            return collection;
-        }
+        public List<Double> ReadDoubleCollection() => ReadList(ReadDouble);
 
-        public List<byte> ReadByteCollection()
-        {
-            int count = ReadInt32();
-            var collection = new List<byte>(count);
-            if (count > 0)
-            {
-                for (int i = 0; i < count; i++)
-                {
-                    collection.Add(ReadByte());
-                }
-            }
-            return collection;
-        }
+        public List<bool> ReadBooleanCollection() => ReadList(ReadBoolean);
 
-        public List<byte[]> ReadByteArrayCollection()
-        {
-            int count = ReadInt32();
-            var collection = new List<byte[]>(count);
-            if (count > 0)
-            {
-                for (int i = 0; i < count; i++)
-                {
-                    collection.Add(ReadBytes());
-                }
-            }
-            return collection;
-        }
+        public List<byte> ReadByteCollection() => ReadList(ReadByte);
 
-        public List<decimal> ReadDecimalCollection()
-        {
-            int count = ReadInt32();
-            var collection = new List<decimal>(count);
-            if (count > 0)
-            {
-                for (int i = 0; i < count; i++)
-                {
-                    collection.Add(ReadDecimal());
-                }
-            }
-            return collection;
-        }
+        public List<byte[]> ReadByteArrayCollection() => ReadList(ReadBytes);
 
-        public List<TimeSpan> ReadTimeSpanCollection()
-        {
-            int count = ReadInt32();
-            var collection = new List<TimeSpan>(count);
-            if (count > 0)
-            {
-                for (int i = 0; i < count; i++)
-                {
-                    collection.Add(ReadTimeSpan());
-                }
-            }
-            return collection;
-        }
+        public List<decimal> ReadDecimalCollection() => ReadList(ReadDecimal);
+
+        public List<TimeSpan> ReadTimeSpanCollection() => ReadList(ReadTimeSpan);
         #endregion
 
         #region Collections lazy
+
+        private IEnumerable<T> ReadEnumerable<T>(Func<T> read)
+        {
+            int count = ReadInt32();
+            if (count > 0)
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    yield return read.Invoke();
+                }
+            }
+        }
+
         public IEnumerable<T> ReadCollectionLazy<T>()
             where T : IBinarySerializable, new()
-        {
-            int count = ReadInt32();
-            if (count > 0)
+            =>
+            ReadEnumerable<T>(() =>
             {
-                for (int i = 0; i < count; i++)
-                {
-                    var item = new T();
-                    item.Deserialize(this);
-                    yield return item;
-                }
-            }
-        }
+                var item = new T();
+                item.Deserialize(this);
+                return item;
+            });
 
-        public IEnumerable<string> ReadStringCollectionLazy()
-        {
-            int count = ReadInt32();
-            if (count > 0)
-            {
-                for (int i = 0; i < count; i++)
-                {
-                    yield return ReadString();
-                }
-            }
-        }
+        public IEnumerable<string> ReadStringCollectionLazy() => ReadEnumerable(ReadString);
 
-        public IEnumerable<IPAddress> ReadIPCollectionLazy()
-        {
-            int count = ReadInt32();
-            if (count > 0)
-            {
-                for (int i = 0; i < count; i++)
-                {
-                    yield return ReadIP();
-                }
-            }
-        }
+        public IEnumerable<IPAddress> ReadIPCollectionLazy() => ReadEnumerable(ReadIP);
+        public IEnumerable<IPEndPoint> ReadIPEndPointCollectionLazy() => ReadEnumerable(ReadIPEndpoint);
 
-        public IEnumerable<IPEndPoint> ReadIPEndPointCollectionLazy()
-        {
-            int count = ReadInt32();
-            if (count > 0)
-            {
-                for (int i = 0; i < count; i++)
-                {
-                    yield return ReadIPEndpoint();
-                }
-            }
-        }
+        public IEnumerable<Guid> ReadGuidCollectionLazy() => ReadEnumerable(ReadGuid);
 
-        public IEnumerable<Guid> ReadGuidCollectionLazy()
-        {
-            int count = ReadInt32();
-            if (count > 0)
-            {
-                for (int i = 0; i < count; i++)
-                {
-                    yield return ReadGuid();
-                }
-            }
-        }
+        public IEnumerable<DateTime?> ReadDateTimeCollectionLazy() => ReadEnumerable(ReadDateTime);
 
-        public IEnumerable<DateTime> ReadDateTimeCollectionLazy()
-        {
-            int count = ReadInt32();
-            if (count > 0)
-            {
-                for (int i = 0; i < count; i++)
-                {
-                    yield return ReadDateTime() ?? DateTime.MinValue;
-                }
-            }
-        }
+        public IEnumerable<Int64> ReadInt64CollectionLazy() => ReadEnumerable(ReadLong);
 
-        public IEnumerable<Int64> ReadInt64CollectionLazy()
-        {
-            int count = ReadInt32();
-            if (count > 0)
-            {
-                for (int i = 0; i < count; i++)
-                {
-                    yield return ReadLong();
-                }
-            }
-        }
+        public IEnumerable<Int32> ReadInt32CollectionLazy() => ReadEnumerable(ReadInt32);
 
-        public IEnumerable<Int32> ReadInt32CollectionLazy()
-        {
-            int count = ReadInt32();
-            if (count > 0)
-            {
-                for (int i = 0; i < count; i++)
-                {
-                    yield return ReadInt32();
-                }
-            }
-        }
+        public IEnumerable<UInt64> ReadUInt64CollectionLazy() => ReadEnumerable(ReadULong);
 
-        public IEnumerable<UInt64> ReadUInt64CollectionLazy()
-        {
-            int count = ReadInt32();
-            if (count > 0)
-            {
-                for (int i = 0; i < count; i++)
-                {
-                    yield return ReadULong();
-                }
-            }
-        }
+        public IEnumerable<UInt32> ReadUInt32CollectionLazy() => ReadEnumerable(ReadUInt32);
 
-        public IEnumerable<UInt32> ReadUInt32CollectionLazy()
-        {
-            int count = ReadInt32();
-            if (count > 0)
-            {
-                for (int i = 0; i < count; i++)
-                {
-                    yield return ReadUInt32();
-                }
-            }
-        }
+        public IEnumerable<char> ReadCharCollectionLazy() => ReadEnumerable(ReadChar);
 
-        public IEnumerable<char> ReadCharCollectionLazy()
-        {
-            int count = ReadInt32();
-            if (count > 0)
-            {
-                for (int i = 0; i < count; i++)
-                {
-                    yield return ReadChar();
-                }
-            }
-        }
+        public IEnumerable<short> ReadShortCollectionLazy() => ReadEnumerable(ReadShort);
 
-        public IEnumerable<short> ReadShortCollectionLazy()
-        {
-            int count = ReadInt32();
-            if (count > 0)
-            {
-                for (int i = 0; i < count; i++)
-                {
-                    yield return ReadShort();
-                }
-            }
-        }
+        public IEnumerable<ushort> ReadUShortCollectionLazy() => ReadEnumerable(ReadUShort);
 
-        public IEnumerable<ushort> ReadUShortCollectionLazy()
-        {
-            int count = ReadInt32();
-            if (count > 0)
-            {
-                for (int i = 0; i < count; i++)
-                {
-                    yield return ReadUShort();
-                }
-            }
-        }
+        public IEnumerable<float> ReadFloatCollectionLazy() => ReadEnumerable(ReadFloat);
 
-        public IEnumerable<float> ReadFloatCollectionLazy()
-        {
-            int count = ReadInt32();
-            if (count > 0)
-            {
-                for (int i = 0; i < count; i++)
-                {
-                    yield return ReadFloat();
-                }
-            }
-        }
+        public IEnumerable<Double> ReadDoubleCollectionLazy() => ReadEnumerable(ReadDouble);
 
-        public IEnumerable<Double> ReadDoubleCollectionLazy()
-        {
-            int count = ReadInt32();
-            if (count > 0)
-            {
-                for (int i = 0; i < count; i++)
-                {
-                    yield return ReadDouble();
-                }
-            }
-        }
+        public IEnumerable<bool> ReadBooleanCollectionLazy() => ReadEnumerable(ReadBoolean);
 
-        public IEnumerable<bool> ReadBooleanCollectionLazy()
-        {
-            int count = ReadInt32();
-            if (count > 0)
-            {
-                for (int i = 0; i < count; i++)
-                {
-                    yield return ReadBoolean();
-                }
-            }
-        }
+        public IEnumerable<byte> ReadByteCollectionLazy() => ReadEnumerable(ReadByte);
 
-        public IEnumerable<byte> ReadByteCollectionLazy()
-        {
-            int count = ReadInt32();
-            if (count > 0)
-            {
-                for (int i = 0; i < count; i++)
-                {
-                    yield return ReadByte();
-                }
-            }
-        }
+        public IEnumerable<byte[]> ReadByteArrayCollectionLazy() => ReadEnumerable(ReadBytes);
 
-        public IEnumerable<byte[]> ReadByteArrayCollectionLazy()
-        {
-            int count = ReadInt32();
-            if (count > 0)
-            {
-                for (int i = 0; i < count; i++)
-                {
-                    yield return ReadBytes();
-                }
-            }
-        }
+        public IEnumerable<decimal> ReadDecimalCollectionLazy() => ReadEnumerable(ReadDecimal);
 
-        public IEnumerable<decimal> ReadDecimalCollectionLazy()
-        {
-            int count = ReadInt32();
-            if (count > 0)
-            {
-                for (int i = 0; i < count; i++)
-                {
-                    yield return ReadDecimal();
-                }
-            }
-        }
-
-        public IEnumerable<TimeSpan> ReadTimeSpanCollectionLazy()
-        {
-            int count = ReadInt32();
-            if (count > 0)
-            {
-                for (int i = 0; i < count; i++)
-                {
-                    yield return ReadTimeSpan();
-                }
-            }
-        }
+        public IEnumerable<TimeSpan> ReadTimeSpanCollectionLazy() => ReadEnumerable(ReadTimeSpan);
         #endregion
 
         #region Arrays
-        public T[] ReadArray<T>()
-            where T : IBinarySerializable, new()
+        private T[] ReadArray<T>(Func<T> read)
         {
             int count = ReadInt32();
             var array = new T[count];
@@ -834,273 +430,61 @@ namespace ZeroLevel.Services.Serialization
             {
                 for (int i = 0; i < count; i++)
                 {
-                    var item = new T();
-                    item.Deserialize(this);
-                    array[i] = item;
+                    array[i] = read.Invoke();
                 }
             }
             return array;
         }
 
-        public string[] ReadStringArray()
-        {
-            int count = ReadInt32();
-            var array = new string[count];
-            if (count > 0)
+
+        public T[] ReadArray<T>()
+            where T : IBinarySerializable, new()
+            =>
+            ReadArray(() =>
             {
-                for (int i = 0; i < count; i++)
-                {
-                    array[i] = ReadString();
-                }
-            }
-            return array;
-        }
+                var item = new T();
+                item.Deserialize(this);
+                return item;
+            });
 
-        public IPAddress[] ReadIPArray()
-        {
-            int count = ReadInt32();
-            var array = new IPAddress[count];
-            if (count > 0)
-            {
-                for (int i = 0; i < count; i++)
-                {
-                    array[i] = ReadIP();
-                }
-            }
-            return array;
-        }
+        public string[] ReadStringArray() => ReadArray(ReadString);
 
-        public IPEndPoint[] ReadIPEndPointArray()
-        {
-            int count = ReadInt32();
-            var array = new IPEndPoint[count];
-            if (count > 0)
-            {
-                for (int i = 0; i < count; i++)
-                {
-                    array[i] = ReadIPEndpoint();
-                }
-            }
-            return array;
-        }
+        public IPAddress[] ReadIPArray() => ReadArray(ReadIP);
 
-        public Guid[] ReadGuidArray()
-        {
-            int count = ReadInt32();
-            var array = new Guid[count];
-            if (count > 0)
-            {
-                for (int i = 0; i < count; i++)
-                {
-                    array[i] = ReadGuid();
-                }
-            }
-            return array;
-        }
+        public IPEndPoint[] ReadIPEndPointArray() => ReadArray(ReadIPEndpoint);
 
-        public DateTime[] ReadDateTimeArray()
-        {
-            int count = ReadInt32();
-            var array = new DateTime[count];
-            if (count > 0)
-            {
-                for (int i = 0; i < count; i++)
-                {
-                    array[i] = (ReadDateTime() ?? DateTime.MinValue);
-                }
-            }
-            return array;
-        }
+        public Guid[] ReadGuidArray() => ReadArray(ReadGuid);
 
-        public Int64[] ReadInt64Array()
-        {
-            int count = ReadInt32();
-            var array = new Int64[count];
-            if (count > 0)
-            {
-                for (int i = 0; i < count; i++)
-                {
-                    array[i] = ReadLong();
-                }
-            }
-            return array;
-        }
+        public DateTime?[] ReadDateTimeArray() => ReadArray(ReadDateTime);
 
-        public Int32[] ReadInt32Array()
-        {
-            int count = ReadInt32();
-            var array = new Int32[count];
-            if (count > 0)
-            {
-                for (int i = 0; i < count; i++)
-                {
-                    array[i] = ReadInt32();
-                }
-            }
-            return array;
-        }
+        public Int64[] ReadInt64Array() => ReadArray(ReadLong);
 
-        public UInt64[] ReadUInt64Array()
-        {
-            int count = ReadInt32();
-            var array = new UInt64[count];
-            if (count > 0)
-            {
-                for (int i = 0; i < count; i++)
-                {
-                    array[i] = ReadULong();
-                }
-            }
-            return array;
-        }
+        public Int32[] ReadInt32Array() => ReadArray(ReadInt32);
 
-        public UInt32[] ReadUInt32Array()
-        {
-            int count = ReadInt32();
-            var array = new UInt32[count];
-            if (count > 0)
-            {
-                for (int i = 0; i < count; i++)
-                {
-                    array[i] = ReadUInt32();
-                }
-            }
-            return array;
-        }
+        public UInt64[] ReadUInt64Array() => ReadArray(ReadULong);
 
-        public char[] ReadCharArray()
-        {
-            int count = ReadInt32();
-            var array = new char[count];
-            if (count > 0)
-            {
-                for (int i = 0; i < count; i++)
-                {
-                    array[i] = ReadChar();
-                }
-            }
-            return array;
-        }
+        public UInt32[] ReadUInt32Array() => ReadArray(ReadUInt32);
 
-        public short[] ReadShortArray()
-        {
-            int count = ReadInt32();
-            var array = new short[count];
-            if (count > 0)
-            {
-                for (int i = 0; i < count; i++)
-                {
-                    array[i] = ReadShort();
-                }
-            }
-            return array;
-        }
+        public char[] ReadCharArray() => ReadArray(ReadChar);
 
-        public ushort[] ReadUShortArray()
-        {
-            int count = ReadInt32();
-            var array = new ushort[count];
-            if (count > 0)
-            {
-                for (int i = 0; i < count; i++)
-                {
-                    array[i] = ReadUShort();
-                }
-            }
-            return array;
-        }
+        public short[] ReadShortArray() => ReadArray(ReadShort);
 
-        public float[] ReadFloatArray()
-        {
-            int count = ReadInt32();
-            var array = new float[count];
-            if (count > 0)
-            {
-                for (int i = 0; i < count; i++)
-                {
-                    array[i] = ReadFloat();
-                }
-            }
-            return array;
-        }
+        public ushort[] ReadUShortArray() => ReadArray(ReadUShort);
 
-        public Double[] ReadDoubleArray()
-        {
-            int count = ReadInt32();
-            var array = new Double[count];
-            if (count > 0)
-            {
-                for (int i = 0; i < count; i++)
-                {
-                    array[i] = ReadDouble();
-                }
-            }
-            return array;
-        }
+        public float[] ReadFloatArray() => ReadArray(ReadFloat);
 
-        public bool[] ReadBooleanArray()
-        {
-            int count = ReadInt32();
-            var array = new bool[count];
-            if (count > 0)
-            {
-                for (int i = 0; i < count; i++)
-                {
-                    array[i] = ReadBoolean();
-                }
-            }
-            return array;
-        }
+        public Double[] ReadDoubleArray() => ReadArray(ReadDouble);
 
-        public byte[] ReadByteArray()
-        {
-            return ReadBytes();
-        }
+        public bool[] ReadBooleanArray() => ReadArray(ReadBoolean);
 
-        public byte[][] ReadByteArrayArray()
-        {
-            int count = ReadInt32();
-            var array = new byte[count][];
-            if (count > 0)
-            {
-                for (int i = 0; i < count; i++)
-                {
-                    array[i] = ReadBytes();
-                }
-            }
-            return array;
-        }
+        public byte[] ReadByteArray() => ReadBytes();
 
-        public decimal[] ReadDecimalArray()
-        {
-            int count = ReadInt32();
-            var array = new decimal[count];
-            if (count > 0)
-            {
-                for (int i = 0; i < count; i++)
-                {
-                    array[i] = ReadDecimal();
-                }
-            }
-            return array;
-        }
+        public byte[][] ReadByteArrayArray() => ReadArray(ReadBytes);
 
-        public TimeSpan[] ReadTimeSpanArray()
-        {
-            int count = ReadInt32();
-            var array = new TimeSpan[count];
-            if (count > 0)
-            {
-                for (int i = 0; i < count; i++)
-                {
-                    array[i] = ReadTimeSpan();
-                }
-            }
-            return array;
-        }
+        public decimal[] ReadDecimalArray() => ReadArray(ReadDecimal);
+
+        public TimeSpan[] ReadTimeSpanArray() => ReadArray(ReadTimeSpan);
         #endregion
-
-
 
         public Dictionary<TKey, TValue> ReadDictionary<TKey, TValue>()
         {
@@ -1203,4 +587,465 @@ namespace ZeroLevel.Services.Serialization
             _accessor.Dispose();
         }
     }
+
+    public partial class MemoryStreamReader
+        : IBinaryReaderAsync
+    {
+        /// <summary>
+        ///  Reading byte-package (read the size of the specified number of bytes, and then the packet itself read size)
+        /// </summary>
+        public async Task<byte[]> ReadBufferAsync(int count)
+        {
+            if (CheckOutOfRange(count))
+                throw new OutOfMemoryException("Array index out of bounds");
+            var buffer = await _accessor.ReadBuffer(count);
+            if (_reverseByteOrder && count > 1)
+            {
+                byte b;
+                for (int i = 0; i < (count >> 1); i++)
+                {
+                    b = buffer[i];
+                    buffer[i] = buffer[count - i - 1];
+                    buffer[count - i - 1] = b;
+                }
+            }
+            return buffer;
+        }
+
+        public async Task<bool> TryReadBufferAsync(int count, byte[] buffer)
+        {
+            if (CheckOutOfRange(count))
+            {
+                buffer = null;
+                return false;
+            }
+            try
+            {
+                buffer = await _accessor.ReadBuffer(count);
+                if (_reverseByteOrder && count > 1)
+                {
+                    byte b;
+                    for (int i = 0; i < (count >> 1); i++)
+                    {
+                        b = buffer[i];
+                        buffer[i] = buffer[count - i - 1];
+                        buffer[count - i - 1] = b;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.SystemError(ex, $"[MemoryStreamReader.TryReadBufferAsync] Fault read {count} bytes");
+                buffer = null;
+                return false;
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// Flag reading
+        /// </summary>
+        public async Task<bool> ReadBooleanAsync()
+        {
+            return BitConverter.ToBoolean(new byte[1] { await ReadByteAsync() }, 0);
+        }
+
+        /// <summary>
+        /// Reading byte
+        /// </summary>
+        public async Task<byte> ReadByteAsync()
+        {
+            var buffer = await ReadBufferAsync(1);
+            return buffer[0];
+        }
+
+        public async Task<char> ReadCharAsync()
+        {
+            var buffer = await ReadBufferAsync(2);
+            return BitConverter.ToChar(buffer, 0);
+        }
+
+        /// <summary>
+        /// Reading bytes
+        /// </summary>
+        /// <returns></returns>
+        public async Task<byte[]> ReadBytesAsync()
+        {
+            var length = BitConverter.ToInt32(await ReadBufferAsync(4), 0);
+            if (length == 0) return new byte[0];
+            return ReadBuffer(length);
+        }
+
+        public async Task<short> ReadShortAsync()
+        {
+            var buffer = await ReadBufferAsync(2);
+            return BitConverter.ToInt16(buffer, 0);
+        }
+
+        public async Task<ushort> ReadUShortAsync()
+        {
+            var buffer = await ReadBufferAsync(2);
+            return BitConverter.ToUInt16(buffer, 0);
+        }
+
+        /// <summary>
+        /// Read 32-bit integer (4 bytes)
+        /// </summary>
+        public async Task<Int32> ReadInt32Async()
+        {
+            var buffer = await ReadBufferAsync(4);
+            return BitConverter.ToInt32(buffer, 0);
+        }
+
+        public async Task<UInt32> ReadUInt32Async()
+        {
+            var buffer = await ReadBufferAsync(4);
+            return BitConverter.ToUInt32(buffer, 0);
+        }
+
+        public async Task<decimal> ReadDecimalAsync()
+        {
+            var arr = await ReadBufferAsync(16);
+            var p1 = BitConverter.ToInt32(arr, 0);
+            var p2 = BitConverter.ToInt32(arr, 4);
+            var p3 = BitConverter.ToInt32(arr, 8);
+            var p4 = BitConverter.ToInt32(arr, 12);
+            return BitConverterExt.ToDecimal(new int[] { p1, p2, p3, p4 });
+        }
+
+        /// <summary>
+        /// Read integer 64-bit number (8 bytes)
+        /// </summary>
+        public async Task<Int64> ReadLongAsync()
+        {
+            var buffer = await ReadBufferAsync(8);
+            return BitConverter.ToInt64(buffer, 0);
+        }
+
+        public async Task<UInt64> ReadULongAsync()
+        {
+            var buffer = await ReadBufferAsync(8);
+            return BitConverter.ToUInt64(buffer, 0);
+        }
+
+        public async Task<TimeSpan> ReadTimeSpanAsync()
+        {
+            return new TimeSpan(await ReadLongAsync());
+        }
+
+        public async Task<float> ReadFloatAsync()
+        {
+            var buffer = await ReadBufferAsync(4);
+            return BitConverter.ToSingle(buffer, 0);
+        }
+
+        public async Task<double> ReadDoubleAsync()
+        {
+            var buffer = await ReadBufferAsync(8);
+            return BitConverter.ToDouble(buffer, 0);
+        }
+
+        /// <summary>
+        /// Read string (4 bytes per length + Length bytes)
+        /// </summary>
+        public async Task<string> ReadStringAsync()
+        {
+            var length = BitConverter.ToInt32(await ReadBufferAsync(4), 0);
+            if (length == 0) return null;
+            var buffer = await ReadBufferAsync(length);
+            return Encoding.UTF8.GetString(buffer);
+        }
+
+        /// <summary>
+        /// Read GUID (16 bytes)
+        /// </summary>
+        public async Task<Guid> ReadGuidAsync()
+        {
+            var buffer = await ReadBufferAsync(16);
+            return new Guid(buffer);
+        }
+
+        /// <summary>
+        /// Reading the datetime
+        /// </summary>
+        /// <returns></returns>
+        public async Task<DateTime?> ReadDateTimeAsync()
+        {
+            var is_null = ReadByte();
+            if (is_null == 0) return null;
+            var buffer = await ReadBufferAsync(8);
+            long deserialized = BitConverter.ToInt64(buffer, 0);
+            return DateTime.FromBinary(deserialized);
+        }
+        public async Task<TimeOnly?> ReadTimeAsync()
+        {
+            var is_null = await ReadByteAsync();
+            if (is_null == 0) return null;
+            var ts = await ReadTimeSpanAsync();
+            return TimeOnly.FromTimeSpan(ts);
+        }
+
+        public async Task<DateOnly?> ReadDateAsync()
+        {
+            var is_null = await ReadByteAsync();
+            if (is_null == 0) return null;
+            var days = await ReadInt32Async();
+            return DateOnly.FromDayNumber(days);
+        }
+        public async Task<IPAddress> ReadIPAsync()
+        {
+            var exists = await ReadByteAsync();
+            if (exists == 1)
+            {
+                var addr = await ReadBytesAsync();
+                return new IPAddress(addr);
+            }
+            return null;
+        }
+
+        public async Task<IPEndPoint> ReadIPEndpointAsync()
+        {
+            var exists = await ReadByteAsync();
+            if (exists == 1)
+            {
+                var addr = await ReadIPAsync();
+                var port = await ReadInt32Async();
+                return new IPEndPoint(addr, port);
+            }
+            return null;
+        }
+
+        #region Extensions
+
+        #region Collections
+        private async Task<List<T>> ReadListAsync<T>(Func<Task<T>> readAsync, Func<T> read)
+        {
+            int count = await ReadInt32Async();
+            var collection = new List<T>(count);
+            if (count > 0)
+            {
+                if (_accessor.IsMemoryStream)
+                {
+                    for (int i = 0; i < count; i++)
+                    {
+                        collection.Add(read.Invoke());
+                    }
+                }
+                else
+                {
+                    for (int i = 0; i < count; i++)
+                    {
+                        collection.Add(await readAsync.Invoke());
+                    }
+                }
+            }
+            return collection;
+        }
+
+        public async Task<List<T>> ReadCollectionAsync<T>()
+            where T : IAsyncBinarySerializable, new()
+        {
+            int count = await ReadInt32Async();
+            var collection = new List<T>(count);
+            if (count > 0)
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    var item = new T();
+                    await item.DeserializeAsync(this);
+                    collection.Add(item);
+                }
+            }
+            return collection;
+        }
+
+        public async Task<List<string>> ReadStringCollectionAsync() => await ReadListAsync(ReadStringAsync, ReadString);
+
+        public async Task<List<IPAddress>> ReadIPCollectionAsync() => await ReadListAsync(ReadIPAsync, ReadIP);
+
+        public async Task<List<IPEndPoint>> ReadIPEndPointCollectionAsync() => await ReadListAsync(ReadIPEndpointAsync, ReadIPEndpoint);
+
+        public async Task<List<Guid>> ReadGuidCollectionAsync() => await ReadListAsync(ReadGuidAsync, ReadGuid);
+
+        public async Task<List<DateTime?>> ReadDateTimeCollectionAsync() => await ReadListAsync(ReadDateTimeAsync, ReadDateTime);
+
+        public async Task<List<Int64>> ReadInt64CollectionAsync() => await ReadListAsync(ReadLongAsync, ReadLong);
+
+        public async Task<List<Int32>> ReadInt32CollectionAsync() => await ReadListAsync(ReadInt32Async, ReadInt32);
+
+        public async Task<List<UInt64>> ReadUInt64CollectionAsync() => await ReadListAsync(ReadULongAsync, ReadULong);
+
+        public async Task<List<UInt32>> ReadUInt32CollectionAsync() => await ReadListAsync(ReadUInt32Async, ReadUInt32);
+
+        public async Task<List<char>> ReadCharCollectionAsync() => await ReadListAsync(ReadCharAsync, ReadChar);
+
+        public async Task<List<short>> ReadShortCollectionAsync() => await ReadListAsync(ReadShortAsync, ReadShort);
+
+        public async Task<List<ushort>> ReadUShortCollectionAsync() => await ReadListAsync(ReadUShortAsync, ReadUShort);
+
+        public async Task<List<float>> ReadFloatCollectionAsync() => await ReadListAsync(ReadFloatAsync, ReadFloat);
+
+        public async Task<List<Double>> ReadDoubleCollectionAsync() => await ReadListAsync(ReadDoubleAsync, ReadDouble);
+
+        public async Task<List<bool>> ReadBooleanCollectionAsync() => await ReadListAsync(ReadBooleanAsync, ReadBoolean);
+
+        public async Task<List<byte>> ReadByteCollectionAsync() => await ReadListAsync(ReadByteAsync, ReadByte);
+
+        public async Task<List<byte[]>> ReadByteArrayCollectionAsync() => await ReadListAsync(ReadBytesAsync, ReadBytes);
+
+        public async Task<List<decimal>> ReadDecimalCollectionAsync() => await ReadListAsync(ReadDecimalAsync, ReadDecimal);
+
+        public async Task<List<TimeSpan>> ReadTimeSpanCollectionAsync() => await ReadListAsync(ReadTimeSpanAsync, ReadTimeSpan);
+
+        #endregion
+
+        #region Arrays
+        private async Task<T[]> ReadArrayAsync<T>(Func<Task<T>> readAsync, Func<T> read)
+        {
+            int count = await ReadInt32Async();
+            var array = new T[count];
+            if (count > 0)
+            {
+                if (_accessor.IsMemoryStream)
+                {
+                    for (int i = 0; i < count; i++)
+                    {
+                        array[i] = read.Invoke();
+                    }
+                }
+                else
+                {
+                    for (int i = 0; i < count; i++)
+                    {
+                        array[i] = await readAsync.Invoke();
+                    }
+                }
+            }
+            return array;
+        }
+        public async Task<T[]> ReadArrayAsync<T>()
+            where T : IAsyncBinarySerializable, new()
+        {
+            int count = ReadInt32();
+            var array = new T[count];
+            if (count > 0)
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    var item = new T();
+                    await item.DeserializeAsync(this);
+                    array[i] = item;
+                }
+            }
+            return array;
+        }
+
+        public async Task<string[]> ReadStringArrayAsync() => await ReadArrayAsync(ReadStringAsync, ReadString);
+
+        public async Task<IPAddress[]> ReadIPArrayAsync() => await ReadArrayAsync(ReadIPAsync, ReadIP);
+
+        public async Task<IPEndPoint[]> ReadIPEndPointArrayAsync() => await ReadArrayAsync(ReadIPEndpointAsync, ReadIPEndpoint);
+
+        public async Task<Guid[]> ReadGuidArrayAsync() => await ReadArrayAsync(ReadGuidAsync, ReadGuid);
+
+        public async Task<DateTime?[]> ReadDateTimeArrayAsync() => await ReadArrayAsync(ReadDateTimeAsync, ReadDateTime);
+
+        public async Task<Int64[]> ReadInt64ArrayAsync() => await ReadArrayAsync(ReadLongAsync, ReadLong);
+
+        public async Task<Int32[]> ReadInt32ArrayAsync() => await ReadArrayAsync(ReadInt32Async, ReadInt32);
+
+        public async Task<UInt64[]> ReadUInt64ArrayAsync() => await ReadArrayAsync(ReadULongAsync, ReadULong);
+
+        public async Task<UInt32[]> ReadUInt32ArrayAsync() => await ReadArrayAsync(ReadUInt32Async, ReadUInt32);
+
+        public async Task<char[]> ReadCharArrayAsync() => await ReadArrayAsync(ReadCharAsync, ReadChar);
+
+        public async Task<short[]> ReadShortArrayAsync() => await ReadArrayAsync(ReadShortAsync, ReadShort);
+
+        public async Task<ushort[]> ReadUShortArrayAsync() => await ReadArrayAsync(ReadUShortAsync, ReadUShort);
+
+        public async Task<float[]> ReadFloatArrayAsync() => await ReadArrayAsync(ReadFloatAsync, ReadFloat);
+
+        public async Task<Double[]> ReadDoubleArrayAsync() => await ReadArrayAsync(ReadDoubleAsync, ReadDouble);
+
+        public async Task<bool[]> ReadBooleanArrayAsync() => await ReadArrayAsync(ReadBooleanAsync, ReadBoolean);
+
+        public async Task<byte[]> ReadByteArrayAsync()
+        {
+            if (_accessor.IsMemoryStream)
+            {
+                return ReadBytes();
+            }
+            return await ReadBytesAsync();
+        }
+
+        public async Task<byte[][]> ReadByteArrayArrayAsync() => await ReadArrayAsync(ReadBytesAsync, ReadBytes);
+
+        public async Task<decimal[]> ReadDecimalArrayAsync() => await ReadArrayAsync(ReadDecimalAsync, ReadDecimal);
+
+        public async Task<TimeSpan[]> ReadTimeSpanArrayAsync() => await ReadArrayAsync(ReadTimeSpanAsync, ReadTimeSpan);
+
+        #endregion
+
+        public async Task<Dictionary<TKey, TValue>> ReadDictionaryAsync<TKey, TValue>()
+        {
+            int count = ReadInt32();
+            var collection = new Dictionary<TKey, TValue>(count);
+            if (count > 0)
+            {
+                TKey key;
+                TValue value;
+                for (int i = 0; i < count; i++)
+                {
+                    key = await ReadCompatibleAsync<TKey>();
+                    value = await ReadCompatibleAsync<TValue>();
+                    collection.Add(key, value);
+                }
+            }
+            return collection;
+        }
+
+        public async Task<ConcurrentDictionary<TKey, TValue>> ReadDictionaryAsConcurrentAsync<TKey, TValue>()
+        {
+            int count = ReadInt32();
+            var collection = new ConcurrentDictionary<TKey, TValue>();
+            if (count > 0)
+            {
+                TKey key;
+                TValue value;
+                for (int i = 0; i < count; i++)
+                {
+                    key = await ReadCompatibleAsync<TKey>();
+                    value = await ReadCompatibleAsync<TValue>();
+                    collection.TryAdd(key, value);
+                }
+            }
+            return collection;
+        }
+
+        public async Task<T> ReadCompatibleAsync<T>()
+        {
+            return await MessageSerializer.DeserializeCompatibleAsync<T>(this);
+        }
+
+        public async Task<T> ReadAsync<T>() where T : IAsyncBinarySerializable
+        {
+            byte type = await ReadByteAsync();
+            if (type == 0) return default(T);
+            var item = (T)Activator.CreateInstance<T>();
+            await item.DeserializeAsync(this);
+            return item;
+        }
+
+        public async Task<T> ReadAsync<T>(object arg) where T : IAsyncBinarySerializable
+        {
+            byte type = ReadByte();
+            if (type == 0) return default(T);
+            var item = (T)Activator.CreateInstance(typeof(T), arg);
+            await item.DeserializeAsync(this);
+            return item;
+        }
+        #endregion Extensions
+    }
+
 }

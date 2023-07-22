@@ -17,18 +17,12 @@ namespace ZeroLevel.Services.PartitionStorage
         private readonly PhisicalFileAccessorCachee _fileAccessorCachee;
 
         public Store(StoreOptions<TKey, TInput, TValue, TMeta> options,
-            IStoreSerializer<TKey, TInput, TValue> serializer = null)
+            IStoreSerializer<TKey, TInput, TValue> serializer)
         {
             if (options == null) throw new ArgumentNullException(nameof(options));
+            if (serializer == null) throw new ArgumentNullException(nameof(serializer));
             _options = options;
-            if (serializer == null)
-            {
-                _serializer = new StoreStandartSerializer<TKey, TInput, TValue>();
-            }
-            else
-            {
-                _serializer = serializer;
-            }
+            _serializer = serializer;
             if (Directory.Exists(_options.RootFolder) == false)
             {
                 Directory.CreateDirectory(_options.RootFolder);
@@ -76,10 +70,10 @@ namespace ZeroLevel.Services.PartitionStorage
             _fileAccessorCachee.DropAllIndexReaders();
         }
 
-        public StoreSearchResult<TKey, TValue, TMeta> Search(StoreSearchRequest<TKey, TMeta> searchRequest)
+        public async Task<StoreSearchResult<TKey, TValue, TMeta>> Search(StoreSearchRequest<TKey, TMeta> searchRequest)
         {
             var result = new StoreSearchResult<TKey, TValue, TMeta>();
-            var results = new ConcurrentDictionary<TMeta, IEnumerable<StorePartitionKeyValueSearchResult<TKey, TValue>>>();
+            var results = new ConcurrentDictionary<TMeta, IEnumerable<KV<TKey, TValue>>>();
             if (searchRequest.PartitionSearchRequests?.Any() ?? false)
             {
                 var partitionsSearchInfo = searchRequest
@@ -89,16 +83,19 @@ namespace ZeroLevel.Services.PartitionStorage
                 {
                     MaxDegreeOfParallelism = _options.MaxDegreeOfParallelism
                 };
-                Parallel.ForEach(partitionsSearchInfo, options, (pair, _) =>
+                await Parallel.ForEachAsync(partitionsSearchInfo, options, async (pair, _) =>
                 {
                     var accessor = CreateAccessor(pair.Key);
                     if (accessor != null)
                     {
                         using (accessor)
                         {
-                            results[pair.Key] = accessor
-                                .Find(pair.Value)
-                                .ToArray();
+                            var set = new List<KV<TKey, TValue>>();
+                            await foreach (var kv in accessor.Iterate())
+                            {
+                                set.Add(new KV<TKey, TValue>(kv.Key, kv.Value));
+                            }
+                            results[pair.Key] = set;
                         }
                     }
                 });
@@ -112,29 +109,30 @@ namespace ZeroLevel.Services.PartitionStorage
             _fileAccessorCachee.Dispose();
         }
 
-        public void Bypass(TMeta meta, Action<TKey, TValue> handler)
+        public async IAsyncEnumerable<KV<TKey, TValue>> Bypass(TMeta meta)
         {
             var accessor = CreateAccessor(meta);
             if (accessor != null)
             {
                 using (accessor)
                 {
-                    foreach (var kv in accessor.Iterate())
+                    await foreach (var kv in accessor.Iterate())
                     {
-                        handler.Invoke(kv.Key, kv.Value);
+                        yield return kv;
                     }
                 }
             }
         }
 
-        public bool Exists(TMeta meta, TKey key)
+        public async Task<bool> Exists(TMeta meta, TKey key)
         {
             var accessor = CreateAccessor(meta);
             if (accessor != null)
             {
                 using (accessor)
                 {
-                    return accessor.Find(key).Status == SearchResult.Success;
+                    var info = await accessor.Find(key);
+                    return info.Success;
                 }
             }
             return false;

@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Serialization;
+using System.Threading.Tasks;
 
 namespace ZeroLevel.Services.Serialization
 {
-    public delegate bool TryDeserializeMethod<T>(MemoryStreamReader reader, out T output);
     public static class MessageSerializer
     {
         public static byte[] Serialize<T>(T obj)
@@ -85,16 +85,7 @@ namespace ZeroLevel.Services.Serialization
             }
             return false;
         }
-
-        public static TryDeserializeMethod<T> GetSafetyDeserializer<T>()
-        {
-            if (typeof(IBinarySerializable).IsAssignableFrom(typeof(T)))
-            {
-                return TryObjectDeserialize<T>;
-            }
-            return TryPrimitiveTypeDeserialize<T>;
-        }
-
+        
         public static byte[] SerializeCompatible(object obj)
         {
             if (null == obj)
@@ -244,6 +235,16 @@ namespace ZeroLevel.Services.Serialization
             {
                 var direct = (IBinarySerializable)Activator.CreateInstance<T>();
                 direct.Deserialize(reader);
+                return (T)direct;
+            }
+            return PrimitiveTypeSerializer.Deserialize<T>(reader);
+        }
+        public static async Task<T> DeserializeCompatibleAsync<T>(IBinaryReader reader)
+        {
+            if (typeof(IAsyncBinarySerializable).IsAssignableFrom(typeof(T)))
+            {
+                var direct = (IAsyncBinarySerializable)Activator.CreateInstance<T>();
+                await direct.DeserializeAsync(reader);
                 return (T)direct;
             }
             return PrimitiveTypeSerializer.Deserialize<T>(reader);

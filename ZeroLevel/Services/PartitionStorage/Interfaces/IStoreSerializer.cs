@@ -1,14 +1,19 @@
 ﻿using System;
+using System.Threading.Tasks;
 using ZeroLevel.Services.Serialization;
 
 namespace ZeroLevel.Services.PartitionStorage.Interfaces
 {
     public interface IStoreSerializer<TKey, TInput, TValue>
     {
-        Action<MemoryStreamWriter, TKey> KeySerializer { get; }
-        Action<MemoryStreamWriter, TInput> InputSerializer { get; }
-        TryDeserializeMethod<TKey> KeyDeserializer { get; }
-        TryDeserializeMethod<TInput> InputDeserializer { get; }
-        TryDeserializeMethod<TValue> ValueDeserializer { get; }
+        Func<MemoryStreamWriter, TKey, Task> KeySerializer { get; }
+
+        Func<MemoryStreamWriter, TInput, Task> InputSerializer { get; }
+
+        Func<MemoryStreamReader, Task<DeserializeResult<TKey>>> KeyDeserializer { get; }
+
+        Func<MemoryStreamReader, Task<DeserializeResult<TInput>>> InputDeserializer { get; }
+
+        Func<MemoryStreamReader, Task<DeserializeResult<TValue>>> ValueDeserializer { get; }
     }
 }

@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
+using System.Threading.Tasks;
 
 namespace ZeroLevel.Services.Serialization
 {
@@ -60,6 +61,7 @@ namespace ZeroLevel.Services.Serialization
         void WriteArray(IPEndPoint[] array);
         void WriteArray(Guid[] array);
         void WriteArray(DateTime[] array);
+        void WriteArray(DateTime?[] array);
         void WriteArray(UInt64[] array);
         void WriteArray(UInt32[] array);
         void WriteArray(char[] array);
@@ -83,6 +85,7 @@ namespace ZeroLevel.Services.Serialization
         void WriteCollection(IEnumerable<char> collection);
         void WriteCollection(IEnumerable<Guid> collection);
         void WriteCollection(IEnumerable<DateTime> collection);
+        void WriteCollection(IEnumerable<DateTime?> collection);
         void WriteCollection(IEnumerable<Int64> collection);
         void WriteCollection(IEnumerable<Int32> collection);
         void WriteCollection(IEnumerable<UInt64> collection);
@@ -107,6 +110,112 @@ namespace ZeroLevel.Services.Serialization
             where T : IBinarySerializable;
 
         void WriteCompatible<T>(T item);
+
+        #endregion Extensions
+
+        Stream Stream { get; }
+    }
+
+    public interface IAsyncBinaryWriter
+        : IDisposable
+    {
+        Task WriteCharAsync(char val);
+
+        Task WriteBytesAsync(byte[] val);
+
+        Task WriteShortAsync(short number);
+
+        Task WriteUShortAsync(ushort number);
+
+        Task WriteDoubleAsync(double val);
+
+        Task WriteFloatAsync(float val);
+
+        Task WriteInt32Async(Int32 number);
+
+        Task WriteUInt32Async(UInt32 number);
+
+        Task WriteLongAsync(Int64 number);
+
+        Task WriteULongAsync(UInt64 number);
+
+        Task WriteStringAsync(string line);
+
+        Task WriteGuidAsync(Guid guid);
+
+        Task WriteDateTimeAsync(DateTime? datetime);
+
+        Task WriteTimeAsync(TimeOnly? time);
+
+        Task WriteDateAsync(DateOnly? date);
+
+        Task WriteDecimalAsync(Decimal number);
+
+        Task WriteTimeSpanAsync(TimeSpan period);
+
+        Task WriteIPAsync(IPAddress ip);
+
+        Task WriteIPEndpointAsync(IPEndPoint endpoint);
+
+        #region Extensions
+
+        #region Arrays
+        Task WriteArrayAsync<T>(T[] array) 
+            where T : IAsyncBinarySerializable;
+        Task WriteArrayAsync(string[] array);
+        Task WriteArrayAsync(IPAddress[] array);
+        Task WriteArrayAsync(IPEndPoint[] array);
+        Task WriteArrayAsync(Guid[] array);
+        Task WriteArrayAsync(DateTime[] array);
+        Task WriteArrayAsync(DateTime?[] array);
+        Task WriteArrayAsync(UInt64[] array);
+        Task WriteArrayAsync(UInt32[] array);
+        Task WriteArrayAsync(char[] array);
+        Task WriteArrayAsync(short[] array);
+        Task WriteArrayAsync(ushort[] array);
+        Task WriteArrayAsync(Int64[] array);
+        Task WriteArrayAsync(Int32[] array);
+        Task WriteArrayAsync(float[] array);
+        Task WriteArrayAsync(Double[] array);
+        Task WriteArrayAsync(bool[] array);
+        Task WriteArrayAsync(byte[] array);
+        Task WriteArrayAsync(byte[][] array);
+        Task WriteArrayAsync(decimal[] array);
+        Task WriteArrayAsync(TimeSpan[] array);
+        #endregion
+
+        #region Collections
+        Task WriteCollectionAsync<T>(IEnumerable<T> collection)
+            where T : IAsyncBinarySerializable;
+        Task WriteCollectionAsync(IEnumerable<string> collection);
+        Task WriteCollectionAsync(IEnumerable<char> collection);
+        Task WriteCollectionAsync(IEnumerable<Guid> collection);
+        Task WriteCollectionAsync(IEnumerable<DateTime> collection);
+        Task WriteCollectionAsync(IEnumerable<DateTime?> collection);
+        Task WriteCollectionAsync(IEnumerable<Int64> collection);
+        Task WriteCollectionAsync(IEnumerable<Int32> collection);
+        Task WriteCollectionAsync(IEnumerable<UInt64> collection);
+        Task WriteCollectionAsync(IEnumerable<UInt32> collection);
+        Task WriteCollectionAsync(IEnumerable<short> collection);
+        Task WriteCollectionAsync(IEnumerable<ushort> collection);
+        Task WriteCollectionAsync(IEnumerable<Double> collection);
+        Task WriteCollectionAsync(IEnumerable<Decimal> collection);
+        Task WriteCollectionAsync(IEnumerable<TimeSpan> collection);
+        Task WriteCollectionAsync(IEnumerable<float> collection);
+        Task WriteCollectionAsync(IEnumerable<bool> collection);
+        Task WriteCollectionAsync(IEnumerable<byte> collection);
+        Task WriteCollectionAsync(IEnumerable<byte[]> collection);
+        Task WriteCollectionAsync(IEnumerable<IPEndPoint> collection);
+        Task WriteCollectionAsync(IEnumerable<IPAddress> collection);
+        #endregion
+
+        Task WriteDictionaryAsync<TKey, TValue>(IDictionary<TKey, TValue> collection);
+        Task WriteDictionaryAsync<TKey, TValue>(ConcurrentDictionary<TKey, TValue> collection);
+
+        Task WriteAsync<T>(T item)
+            where T : IAsyncBinarySerializable;
+
+        Task WriteCompatibleAsync<T>(T item);
 
         #endregion Extensions
 

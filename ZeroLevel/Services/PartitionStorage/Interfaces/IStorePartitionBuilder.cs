@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace ZeroLevel.Services.PartitionStorage
 {
@@ -15,11 +16,11 @@ namespace ZeroLevel.Services.PartitionStorage
         {
             get;
         }
-        IEnumerable<StorePartitionKeyValueSearchResult<TKey, TInput>> Iterate();
+        IAsyncEnumerable<SearchResult<TKey, TInput>> Iterate();
         /// <summary>
         /// Writing a key-value pair
         /// </summary>
-        void Store(TKey key, TInput value);
+        Task Store(TKey key, TInput value);
         /// <summary>
         /// Called after all key-value pairs are written to the partition
         /// </summary>
@@ -27,7 +28,7 @@ namespace ZeroLevel.Services.PartitionStorage
         /// <summary>
         /// Performs compression/grouping of recorded data in a partition
         /// </summary>
-        void Compress();
+        Task Compress();
         /// <summary>
         /// Rebuilds indexes for data in a partition
         /// </summary>

@@ -1,6 +1,8 @@
 ﻿using System;
 using System.IO;
 using System.IO.MemoryMappedFiles;
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 
 namespace ZeroLevel.Services.Memory
 {
@@ -20,29 +22,27 @@ namespace ZeroLevel.Services.Memory
 
         public long Position => _absoluteOffset + _accessor.Position;
 
-        public bool CheckOutOfRange(int offset)
-        {
-            return offset < 0 || (_accessor.Position + offset) > _accessor.Length;
-        }
+        public bool IsMemoryStream => false;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool CheckOutOfRange(int offset) => offset < 0 || (_accessor.Position + offset) > _accessor.Length;
 
         public void Dispose()
         {
             _accessor?.Dispose();
         }
 
-        public byte[] ReadBuffer(int count)
+        public async Task<byte[]> ReadBuffer(int count)
         {
             if (count == 0) return null;
             var buffer = new byte[count];
-            var readedCount = _accessor.Read(buffer, 0, count);
+            var readedCount = await _accessor.ReadAsync(buffer, 0, count);
             if (count != readedCount)
                 throw new InvalidOperationException($"The stream returned less data ({count} bytes) than expected ({readedCount} bytes)");
             return buffer;
         }
 
-        public void Seek(long offset)
-        {
-            _accessor.Seek(offset, SeekOrigin.Begin);
-        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void Seek(long offset) => _accessor.Seek(offset, SeekOrigin.Begin);
     }
 }

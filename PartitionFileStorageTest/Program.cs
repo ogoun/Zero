@@ -31,50 +31,67 @@ namespace PartitionFileStorageTest
             return num_base + (uint)r.Next(999999);
         }
 
-        private static void FastTest(StoreOptions<ulong, ulong, byte[], Metadata> options)
+        private static async Task FastTest(StoreOptions<ulong, ulong, byte[], Metadata> options)
         {
             var r = new Random(Environment.TickCount);
-            var store = new Store<ulong, ulong, byte[], Metadata>(options);
-            var storePart = store.CreateBuilder(new Metadata { Date = new DateTime(2022, 11, 08) });
+            var store = new Store<ulong, ulong, byte[], Metadata>(options, new StoreSerializers<ulong, ulong, byte[]>(
+                async (w, n) => await w.WriteULongAsync(n),
+                async (w, n) => await w.WriteULongAsync(n),
+                async (r) => { try { return new DeserializeResult<ulong>(true, await r.ReadULongAsync()); } catch { return new DeserializeResult<ulong>(false, 0); } },
+                async (r) => { try { return new DeserializeResult<ulong>(true, await r.ReadULongAsync()); } catch { return new DeserializeResult<ulong>(false, 0); } },
+                async (r) => { try { return new DeserializeResult<byte[]>(true, await r.ReadBytesAsync()); } catch { return new DeserializeResult<byte[]>(false, new byte[0]); } }));
 
-            Console.WriteLine("Small test start");
             var c1 = (ulong)(86438 * 128);
             var c2 = (ulong)(83438 * 128);
             var c3 = (ulong)(831238 * 128);
 
-            storePart.Store(c1, Generate(r));
-            storePart.Store(c1, Generate(r));
-            storePart.Store(c1, Generate(r));
-            storePart.Store(c2, Generate(r));
-            storePart.Store(c2, Generate(r));
-            storePart.Store(c2, Generate(r));
-            storePart.Store(c2, Generate(r));
-            storePart.Store(c2, Generate(r));
-            storePart.Store(c3, Generate(r));
-            storePart.Store(c3, Generate(r));
-            storePart.Store(c3, Generate(r));
-            storePart.CompleteAdding();
-            storePart.Compress();
-            var readPart = store.CreateAccessor(new Metadata { Date = new DateTime(2022, 11, 08) });
-            Console.WriteLine("Data:");
-            foreach (var e in readPart.Iterate())
+            using (var storePart = store.CreateBuilder(new Metadata { Date = new DateTime(2022, 11, 08) }))
             {
-                Console.WriteLine($"{e.Key}: {e.Value.Length}");
+                Console.WriteLine("Small test start");
+                await storePart.Store(c1, Generate(r));
+                await storePart.Store(c1, Generate(r));
+                await storePart.Store(c1, Generate(r));
+                await storePart.Store(c2, Generate(r));
+                await storePart.Store(c2, Generate(r));
+                await storePart.Store(c2, Generate(r));
+                await storePart.Store(c2, Generate(r));
+                await storePart.Store(c2, Generate(r));
+                await storePart.Store(c3, Generate(r));
+                await storePart.Store(c3, Generate(r));
+                await storePart.Store(c3, Generate(r));
+                storePart.CompleteAdding();
+                await storePart.Compress();
             }
-            readPart.RemoveKey(c1);
-            Console.WriteLine("Data after remove:");
-            foreach (var e in readPart.Iterate())
+
+            using (var readPart = store.CreateAccessor(new Metadata { Date = new DateTime(2022, 11, 08) }))
             {
-                Console.WriteLine($"{e.Key}: {e.Value.Length}");
+                Console.WriteLine("Data:");
+                await foreach (var kv in readPart.Iterate())
+                {
+                    Console.WriteLine($"{kv.Key}: {kv.Value.Length}");
+                }
+
+                await readPart.RemoveKey(c1);
+                Console.WriteLine("Data after remove:");
+
+                await foreach (var kv in readPart.Iterate())
+                {
+                    Console.WriteLine($"{kv.Key}: {kv.Value.Length}");
+                }
             }
         }
 
-        private static void FullStoreTest(StoreOptions<ulong, ulong, byte[], Metadata> options,
+        private static async Task FullStoreTest(StoreOptions<ulong, ulong, byte[], Metadata> options,
             List<(ulong, ulong)> pairs)
         {
             var meta = new Metadata { Date = new DateTime(2022, 11, 08) };
             var r = new Random(Environment.TickCount);
-            var store = new Store<ulong, ulong, byte[], Metadata>(options);
+            var store = new Store<ulong, ulong, byte[], Metadata>(options, new StoreSerializers<ulong, ulong, byte[]>(
+                async (w, n) => await w.WriteULongAsync(n),
+                async (w, n) => await w.WriteULongAsync(n),
+                async (r) => { try { return new DeserializeResult<ulong>(true, await r.ReadULongAsync()); } catch { return new DeserializeResult<ulong>(false, 0); } },
+                async (r) => { try { return new DeserializeResult<ulong>(true, await r.ReadULongAsync()); } catch { return new DeserializeResult<ulong>(false, 0); } },
+                async (r) => { try { return new DeserializeResult<byte[]>(true, await r.ReadBytesAsync()); } catch { return new DeserializeResult<byte[]>(false, new byte[0]); } }));
             var storePart = store.CreateBuilder(meta);
             var sw = new Stopwatch();
             sw.Start();
@@ -90,7 +107,7 @@ namespace PartitionFileStorageTest
                 var val = pairs[i].Item2;
                 if (testData.ContainsKey(key) == false) testData[key] = new HashSet<ulong>();
                 testData[key].Add(val);
-                storePart.Store(key, val);
+                await storePart.Store(key, val);
                 if (key % 717 == 0)
                 {
                     testKeys1.Add(key);
@@ -105,7 +122,7 @@ namespace PartitionFileStorageTest
             Log.Info($"Fill journal: {sw.ElapsedMilliseconds}ms. Records writed: {storePart.TotalRecords}");
             sw.Restart();
             storePart.CompleteAdding();
-            storePart.Compress();
+            await storePart.Compress();
             sw.Stop();
             Log.Info($"Compress: {sw.ElapsedMilliseconds}ms");
             sw.Restart();
@@ -135,7 +152,7 @@ namespace PartitionFileStorageTest
             ulong totalKeys = 0;
             foreach (var key in testKeys1)
             {
-                var result = readPart.Find(key);
+                var result = readPart.Find(key).Result;
                 totalData += (ulong)(result.Value?.Length ?? 0);
                 totalKeys++;
             }
@@ -145,7 +162,7 @@ namespace PartitionFileStorageTest
             Log.Info("Test #1 remove by keys");
             for (int i = 0; i < testKeys1.Count; i++)
             {
-                readPart.RemoveKey(testKeys1[i], false);
+                await readPart.RemoveKey(testKeys1[i], false);
             }
             sw.Restart();
             readPart.RebuildIndex();
@@ -155,7 +172,7 @@ namespace PartitionFileStorageTest
             foreach (var key in testKeys1)
             {
                 var result = readPart.Find(key);
-                totalData += (ulong)(result.Value?.Length ?? 0);
+                totalData += (ulong)(result.Result.Value?.Length ?? 0);
                 totalKeys++;
             }
             Log.Info($"\t\tFound: {totalKeys} keys. {totalData} bytes");
@@ -165,19 +182,19 @@ namespace PartitionFileStorageTest
             foreach (var key in testKeys2)
             {
                 var result = readPart.Find(key);
-                totalData += (ulong)(result.Value?.Length ?? 0);
+                totalData += (ulong)(result.Result.Value?.Length ?? 0);
                 totalKeys++;
             }
             Log.Info($"\t\tFound: {totalKeys} keys. {totalData} bytes");
             totalData = 0;
             totalKeys = 0;
             Log.Info("Test #2 remove keys batch");
-            readPart.RemoveKeys(testKeys2);
+            await readPart.RemoveKeys(testKeys2);
             Log.Info("Test #2 reading after remove");
             foreach (var key in testKeys2)
             {
                 var result = readPart.Find(key);
-                totalData += (ulong)(result.Value?.Length ?? 0);
+                totalData += (ulong)(result.Result.Value?.Length ?? 0);
                 totalKeys++;
             }
             Log.Info($"\t\tFound: {totalKeys} keys. {totalData} bytes");
@@ -185,11 +202,12 @@ namespace PartitionFileStorageTest
             totalKeys = 0;
 
             Log.Info("Iterator test");
-            foreach (var e in readPart.Iterate())
+            await foreach (var kv in readPart.Iterate())
             {
-                totalData += (ulong)(e.Value?.Length ?? 0);
+                totalData += (ulong)(kv.Value?.Length ?? 0);
                 totalKeys++;
             }
+
             Log.Info($"\t\tFound: {totalKeys} keys. {totalData} bytes");
             totalData = 0;
             totalKeys = 0;
@@ -199,7 +217,7 @@ namespace PartitionFileStorageTest
             {
                 if (test.Value.Count > 0 && testKeys1.Contains(test.Key) == false && testKeys2.Contains(test.Key) == false)
                 {
-                    var result = Compressor.DecodeBytesContent(readPart.Find(test.Key).Value).ToHashSet();
+                    var result = Compressor.DecodeBytesContent(readPart.Find(test.Key).Result.Value).ToHashSet();
                     if (test.Value.Count != result.Count)
                     {
                         Log.Info($"Key '{test.Key}' not found!");
@@ -227,12 +245,17 @@ namespace PartitionFileStorageTest
             }
         }
 
-        private static void FullStoreMultithreadTest(StoreOptions<ulong, ulong, byte[], Metadata> options)
+        private static async Task FullStoreMultithreadTest(StoreOptions<ulong, ulong, byte[], Metadata> options)
         {
             var meta = new Metadata { Date = new DateTime(2022, 11, 08) };
             var r = new Random(Environment.TickCount);
-            var store = new Store<ulong, ulong, byte[], Metadata>(options);
-            var storePart = store.CreateBuilder(meta);
+            var store = new Store<ulong, ulong, byte[], Metadata>(options, new StoreSerializers<ulong, ulong, byte[]>(
+                async (w, n) => await w.WriteULongAsync(n),
+                async (w, n) => await w.WriteULongAsync(n),
+                async (r) => { try { return new DeserializeResult<ulong>(true, await r.ReadULongAsync()); } catch { return new DeserializeResult<ulong>(false, 0); } },
+                async (r) => { try { return new DeserializeResult<ulong>(true, await r.ReadULongAsync()); } catch { return new DeserializeResult<ulong>(false, 0); } },
+                async (r) => { try { return new DeserializeResult<byte[]>(true, await r.ReadBytesAsync()); } catch { return new DeserializeResult<byte[]>(false, new byte[0]); } }));
+
             var sw = new Stopwatch();
             sw.Start();
             var insertCount = (long)(0.7 * PAIRS_COUNT);
@@ -241,58 +264,60 @@ namespace PartitionFileStorageTest
             var parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = 24 };
             var Keys = new ConcurrentHashSet<ulong>();
 
-            Parallel.ForEach(MassGenerator((long)(0.7 * PAIRS_COUNT)), parallelOptions, pair =>
+            using (var storePart = store.CreateBuilder(meta))
             {
-                var key = pair.Item1;
-                var val = pair.Item2;
-                storePart.Store(key, val);
-                if (key % 717 == 0)
+                Parallel.ForEach(MassGenerator((long)(0.7 * PAIRS_COUNT)), parallelOptions, pair =>
                 {
-                    testKeys1.Add(key);
-                }
-                if (key % 117 == 0)
+                    var key = pair.Item1;
+                    var val = pair.Item2;
+                    storePart.Store(key, val);
+                    if (key % 717 == 0)
+                    {
+                        testKeys1.Add(key);
+                    }
+                    if (key % 117 == 0)
+                    {
+                        testKeys2.Add(key);
+                    }
+                    Keys.Add(key);
+                });
+                if (storePart.TotalRecords != insertCount)
                 {
-                    testKeys2.Add(key);
+                    Log.Error($"Count of stored record no equals expected. Recorded: {storePart.TotalRecords}. Expected: {insertCount}. Unique keys: {Keys.Count}");
                 }
-                Keys.Add(key);
-            });
-
-            if (storePart.TotalRecords != insertCount)
-            {
-                Log.Error($"Count of stored record no equals expected. Recorded: {storePart.TotalRecords}. Expected: {insertCount}. Unique keys: {Keys.Count}");
+                sw.Stop();
+                Log.Info($"Fill journal: {sw.ElapsedMilliseconds}ms");
+                sw.Restart();
+                storePart.CompleteAdding();
+                await storePart.Compress();
+                sw.Stop();
+                Log.Info($"Compress: {sw.ElapsedMilliseconds}ms");
+                sw.Restart();
+                storePart.RebuildIndex();
             }
-
-            sw.Stop();
-            Log.Info($"Fill journal: {sw.ElapsedMilliseconds}ms");
-            sw.Restart();
-            storePart.CompleteAdding();
-            storePart.Compress();
-            sw.Stop();
-            Log.Info($"Compress: {sw.ElapsedMilliseconds}ms");
-            sw.Restart();
-            storePart.RebuildIndex();
             sw.Stop();
             Log.Info($"Rebuild indexes: {sw.ElapsedMilliseconds}ms");
 
             Log.Info("Start merge test");
             sw.Restart();
-            var merger = store.CreateMergeAccessor(meta, data => Compressor.DecodeBytesContent(data));
-
-            Parallel.ForEach(MassGenerator((long)(0.3 * PAIRS_COUNT)), parallelOptions, pair =>
+            using (var merger = store.CreateMergeAccessor(meta, data => Compressor.DecodeBytesContent(data)))
             {
-                var key = pair.Item1;
-                var val = pair.Item2;
-                merger.Store(key, val);
-                Keys.Add(key);
-            });
+                Parallel.ForEach(MassGenerator((long)(0.3 * PAIRS_COUNT)), parallelOptions, pair =>
+                {
+                    var key = pair.Item1;
+                    var val = pair.Item2;
+                    merger.Store(key, val);
+                    Keys.Add(key);
+                });
 
-            if (merger.TotalRecords != ((long)(0.3 * PAIRS_COUNT)))
-            {
-                Log.Error($"Count of stored record no equals expected. Recorded: {merger.TotalRecords}. Expected: {((long)(0.3 * PAIRS_COUNT))}");
+                if (merger.TotalRecords != ((long)(0.3 * PAIRS_COUNT)))
+                {
+                    Log.Error($"Count of stored record no equals expected. Recorded: {merger.TotalRecords}. Expected: {((long)(0.3 * PAIRS_COUNT))}");
+                }
+
+                Log.Info($"Merge journal filled: {sw.ElapsedMilliseconds}ms. Total data count: {PAIRS_COUNT}. Unique keys: {Keys.Count}");
+                merger.Compress(); // auto reindex
             }
-
-            Log.Info($"Merge journal filled: {sw.ElapsedMilliseconds}ms. Total data count: {PAIRS_COUNT}. Unique keys: {Keys.Count}");
-            merger.Compress(); // auto reindex
             sw.Stop();
             Log.Info($"Compress after merge: {sw.ElapsedMilliseconds}ms");
 
@@ -300,10 +325,10 @@ namespace PartitionFileStorageTest
             ulong totalKeys = 0;
 
             var s = new HashSet<ulong>();
-            store.Bypass(meta, (k, v) => 
+            await foreach (var kv in store.Bypass(meta))
             {
-                s.Add(k);
-            });
+                s.Add(kv.Key);
+            }
             Log.Info($"Keys count: {s.Count}");
 
             using (var readPart = store.CreateAccessor(meta))
@@ -343,14 +368,14 @@ namespace PartitionFileStorageTest
                 foreach (var key in testKeys2)
                 {
                     var result = readPart.Find(key);
-                    totalData += (ulong)(result.Value?.Length ?? 0);
+                    totalData += (ulong)(result.Result.Value?.Length ?? 0);
                     totalKeys++;
                 }
                 Log.Info($"\t\tFound: {totalKeys}/{Keys.Count} keys. {totalData} bytes");
                 totalData = 0;
                 totalKeys = 0;
                 Log.Info("Test #2 remove keys batch");
-                readPart.RemoveKeys(testKeys2);
+                await readPart.RemoveKeys(testKeys2);
                 foreach (var k in testKeys2)
                 {
                     Keys.TryRemove(k);
@@ -359,7 +384,7 @@ namespace PartitionFileStorageTest
                 foreach (var key in testKeys2)
                 {
                     var result = readPart.Find(key);
-                    totalData += (ulong)(result.Value?.Length ?? 0);
+                    totalData += (ulong)(result.Result.Value?.Length ?? 0);
                     totalKeys++;
                 }
                 Log.Info($"\t\tFound: {totalKeys} keys. {totalData} bytes");
@@ -367,9 +392,9 @@ namespace PartitionFileStorageTest
                 totalKeys = 0;
 
                 Log.Info("Iterator test");
-                foreach (var e in readPart.Iterate())
+                await foreach (var kv in readPart.Iterate())
                 {
-                    totalData += (ulong)(e.Value?.Length ?? 0);
+                    totalData += (ulong)(kv.Value?.Length ?? 0);
                     totalKeys++;
                 }
             }
@@ -380,7 +405,12 @@ namespace PartitionFileStorageTest
 
         private static void FaultIndexTest(string filePath)
         {
-            var serializer = new StoreStandartSerializer<ulong, ulong, byte[]>();
+            var serializer = new StoreSerializers<ulong, ulong, byte[]>(
+                async (w, n) => await w.WriteULongAsync(n),
+                async (w, n) => await w.WriteULongAsync(n),
+                async (r) => { try { return new DeserializeResult<ulong>(true, await r.ReadULongAsync()); } catch { return new DeserializeResult<ulong>(false, 0); } },
+                async (r) => { try { return new DeserializeResult<ulong>(true, await r.ReadULongAsync()); } catch { return new DeserializeResult<ulong>(false, 0); } },
+                async (r) => { try { return new DeserializeResult<byte[]>(true, await r.ReadBytesAsync()); } catch { return new DeserializeResult<byte[]>(false, new byte[0]); } });
             // 1 build index
             var index = new Dictionary<ulong, long>();
             using (var reader = new MemoryStreamReader(new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite, 4096 * 1024)))
@@ -390,11 +420,13 @@ namespace PartitionFileStorageTest
                 {
                     counter--;
                     var pos = reader.Position;
-                    serializer.KeyDeserializer.Invoke(reader, out var k);
-                    serializer.ValueDeserializer.Invoke(reader, out var _);
+
+                    var kv = serializer.KeyDeserializer.Invoke(reader).Result;
+                    var vv = serializer.ValueDeserializer.Invoke(reader).Result;
+
                     if (counter == 0)
                     {
-                        index[k] = pos;
+                        index[kv.Value] = pos;
                         counter = 16;
                     }
                 }
@@ -407,12 +439,12 @@ namespace PartitionFileStorageTest
                 var accessor = fileReader.GetAccessor(pair.Value);
                 using (var reader = new MemoryStreamReader(accessor))
                 {
-                    serializer.KeyDeserializer.Invoke(reader, out var k);
-                    if (k != pair.Key)
+                    var kv = serializer.KeyDeserializer.Invoke(reader).Result;
+                    if (kv.Value != pair.Key)
                     {
                         Log.Warning("Broken index");
                     }
-                    serializer.ValueDeserializer.Invoke(reader, out var _);
+                    serializer.ValueDeserializer.Invoke(reader).Wait();
                 }
             }
 
@@ -436,7 +468,12 @@ namespace PartitionFileStorageTest
 
         private static void FaultUncompressedReadTest(string filePath)
         {
-            var serializer = new StoreStandartSerializer<ulong, ulong, byte[]>();
+            var serializer = new StoreSerializers<ulong, ulong, byte[]>(
+                async (w, n) => await w.WriteULongAsync(n),
+                async (w, n) => await w.WriteULongAsync(n),
+                async (r) => { try { return new DeserializeResult<ulong>(true, await r.ReadULongAsync()); } catch { return new DeserializeResult<ulong>(false, 0); } },
+                async (r) => { try { return new DeserializeResult<ulong>(true, await r.ReadULongAsync()); } catch { return new DeserializeResult<ulong>(false, 0); } },
+                async (r) => { try { return new DeserializeResult<byte[]>(true, await r.ReadBytesAsync()); } catch { return new DeserializeResult<byte[]>(false, new byte[0]); } });
             // 1 build index
             var dict = new Dictionary<ulong, HashSet<ulong>>();
             using (var reader = new MemoryStreamReader(new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.None, 4096 * 1024)))
@@ -445,17 +482,17 @@ namespace PartitionFileStorageTest
                 {
                     try
                     {
-                        serializer.KeyDeserializer.Invoke(reader, out var key);
-                        if (false == dict.ContainsKey(key))
+                        var key = serializer.KeyDeserializer.Invoke(reader).Result;
+                        if (false == dict.ContainsKey(key.Value))
                         {
-                            dict[key] = new HashSet<ulong>();
+                            dict[key.Value] = new HashSet<ulong>();
                         }
                         if (reader.EOS)
                         {
                             break;
                         }
-                        serializer.InputDeserializer.Invoke(reader, out var input);
-                        dict[key].Add(input);
+                        var input = serializer.InputDeserializer.Invoke(reader).Result;
+                        dict[key.Value].Add(input.Value);
                     }
                     catch (Exception ex)
                     {
@@ -490,12 +527,17 @@ namespace PartitionFileStorageTest
                 KeyComparer = (left, right) => string.Compare(left, right, true),
                 ThreadSafeWriting = true
             };
-            var store = new Store<string, ulong, byte[], StoreMetadata>(options);
+            var store = new Store<string, ulong, byte[], StoreMetadata>(options, new StoreSerializers<string, ulong, byte[]>(
+                async (w, n) => await w.WriteStringAsync(n),
+                async (w, n) => await w.WriteULongAsync(n),
+                async (r) => { try { return new DeserializeResult<string>(true, await r.ReadStringAsync()); } catch { return new DeserializeResult<string>(false, string.Empty); } },
+                async (r) => { try { return new DeserializeResult<ulong>(true, await r.ReadULongAsync()); } catch { return new DeserializeResult<ulong>(false, 0); } },
+                async (r) => { try { return new DeserializeResult<byte[]>(true, await r.ReadBytesAsync()); } catch { return new DeserializeResult<byte[]>(false, new byte[0]); } }));
             var builder = store.CreateBuilder(meta);
             builder.Compress();
         }
 
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
             //FaultCompressionTest(@"F:\Desktop\DATKA\DNS", new StoreMetadata { Date = new DateTime(2023, 01, 20) });
 
@@ -558,22 +600,23 @@ namespace PartitionFileStorageTest
             }
             */
             Log.Info("Start test");
-            // FastTest(options);
+
             FSUtils.CleanAndTestFolder(root);
-            FullStoreMultithreadTest(optionsMultiThread);
+            await FastTest(options);
+
+            FSUtils.CleanAndTestFolder(root);
+            await FullStoreMultithreadTest(optionsMultiThread);
 
 
-            /*  
-          FSUtils.CleanAndTestFolder(root);
-          FullStoreTest(options, pairs);
-            */
+
+            /*FSUtils.CleanAndTestFolder(root);
+            FullStoreTest(options, pairs);*/
+
+            FSUtils.CleanAndTestFolder(root);
             //TestParallelFileReadingMMF();
 
-            /*
-            
-            FSUtils.CleanAndTestFolder(root);
-            
-            */
+
+            Console.WriteLine("Completed");
             Console.ReadKey();
         }
 

@@ -1,4 +1,6 @@
-﻿namespace ZeroLevel.Services.PartitionStorage.Interfaces
+﻿using System.Threading.Tasks;
+
+namespace ZeroLevel.Services.PartitionStorage.Interfaces
 {
     /// <summary>
     /// Provides write operations in catalog partition
@@ -16,10 +18,10 @@
         /// <summary>
         /// Writing a key-value pair
         /// </summary>
-        void Store(TKey key, TInput value);
+        Task Store(TKey key, TInput value);
         /// <summary>
         /// Perform the conversion of the records from (TKey; TInput) to (TKey; TValue). Called after CompleteAdding
         /// </summary>
-        void Compress();
+        Task Compress();
     }
 }

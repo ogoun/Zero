@@ -337,9 +337,9 @@ namespace ZeroLevel.Serialization
         [Fact]
         public void SerializeCollectionDateTime()
         {
-            MakeCollectionTest<DateTime>(null);
-            MakeCollectionTest<DateTime>(new DateTime[] { });
-            MakeCollectionTest<DateTime>(new DateTime[] { DateTime.Now, DateTime.UtcNow, DateTime.Today, DateTime.Now.AddYears(2000), DateTime.MinValue, DateTime.MaxValue });
+            MakeCollectionTest<DateTime?>(null);
+            MakeCollectionTest<DateTime?>(new DateTime?[] { });
+            MakeCollectionTest<DateTime?>(new DateTime?[] { DateTime.Now, DateTime.UtcNow, DateTime.Today, DateTime.Now.AddYears(2000), null, DateTime.MinValue, DateTime.MaxValue });
         }
 
         [Fact]

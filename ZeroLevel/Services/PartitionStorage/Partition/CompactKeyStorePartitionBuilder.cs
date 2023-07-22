@@ -13,7 +13,7 @@ namespace ZeroLevel.Services.PartitionStorage.Partition
     internal sealed class CompactKeyStorePartitionBuilder<TKey, TInput, TValue, TMeta>
          : BasePartition<TKey, TInput, TValue, TMeta>, IStorePartitionBuilder<TKey, TInput, TValue>
     {
-        private readonly Action<TKey, TInput> _storeMethod;
+        private readonly Func<TKey, TInput, Task> _storeMethod;
 
         private long _totalRecords = 0;
 
@@ -39,9 +39,9 @@ namespace ZeroLevel.Services.PartitionStorage.Partition
         #region IStorePartitionBuilder
 
 
-        public void Store(TKey key, TInput value)
+        public async Task Store(TKey key, TInput value)
         {
-            _storeMethod.Invoke(key, value);
+            await _storeMethod.Invoke(key, value);
             Interlocked.Increment(ref _totalRecords);
         }
 
@@ -50,18 +50,16 @@ namespace ZeroLevel.Services.PartitionStorage.Partition
             CloseWriteStreams();
         }
 
-        public void Compress()
+        public async Task Compress()
         {
             var files = Directory.GetFiles(_catalog);
             if (files != null && files.Length > 0)
             {
-                Parallel.ForEach(files, file => CompressFile(file));
+                await Parallel.ForEachAsync(files, async (file, ct) => await CompressFile(file));
             }
         }
-        public IEnumerable<StorePartitionKeyValueSearchResult<TKey, TInput>> Iterate()
+        public async IAsyncEnumerable<SearchResult<TKey, TInput>> Iterate()
         {
-            TKey key;
-            TInput input;
             var files = Directory.GetFiles(_catalog);
             if (files != null && files.Length > 0)
             {
@@ -73,9 +71,13 @@ namespace ZeroLevel.Services.PartitionStorage.Partition
                         {
                             while (reader.EOS == false)
                             {
-                                if (Serializer.KeyDeserializer.Invoke(reader, out key) == false) break;
-                                if (Serializer.InputDeserializer.Invoke(reader, out input) == false) break;
-                                yield return new StorePartitionKeyValueSearchResult<TKey, TInput> { Key = key, Value = input, Status = SearchResult.Success };
+                                var kv = await Serializer.KeyDeserializer.Invoke(reader);
+                                if (kv.Success == false) break;
+
+                                var iv = await Serializer.InputDeserializer.Invoke(reader);
+                                if (iv.Success == false) break;
+
+                                yield return new SearchResult<TKey, TInput> { Key = kv.Value, Value = iv.Value, Success = true };
                             }
                         }
                     }
@@ -86,17 +88,16 @@ namespace ZeroLevel.Services.PartitionStorage.Partition
         #endregion
 
         #region Private methods
-        private void StoreDirect(TKey key, TInput value)
+        private async Task StoreDirect(TKey key, TInput value)
         {
             var groupKey = _options.GetFileName(key, _info);
             if (TryGetWriteStream(groupKey, out var stream))
             {
-                Serializer.KeySerializer.Invoke(stream, key);
-                Thread.MemoryBarrier();
-                Serializer.InputSerializer.Invoke(stream, value);
+                await Serializer.KeySerializer.Invoke(stream, key);
+                await Serializer.InputSerializer.Invoke(stream, value);
             }
         }
-        private void StoreDirectSafe(TKey key, TInput value)
+        private async Task StoreDirectSafe(TKey key, TInput value)
         {
             var groupKey = _options.GetFileName(key, _info);
             bool lockTaken = false;
@@ -105,9 +106,8 @@ namespace ZeroLevel.Services.PartitionStorage.Partition
                 Monitor.Enter(stream, ref lockTaken);
                 try
                 {
-                    Serializer.KeySerializer.Invoke(stream, key);
-                    Thread.MemoryBarrier();
-                    Serializer.InputSerializer.Invoke(stream, value);
+                    await Serializer.KeySerializer.Invoke(stream, key);
+                    await Serializer.InputSerializer.Invoke(stream, value);
                 }
                 finally
                 {
@@ -119,10 +119,8 @@ namespace ZeroLevel.Services.PartitionStorage.Partition
             }
         }
 
-        internal void CompressFile(string file)
+        internal async Task CompressFile(string file)
         {
-            TKey key;
-            TInput input;
             var dict = new Dictionary<TKey, HashSet<TInput>>();
             PhisicalFileAccessorCachee.LockFile(file);
             try
@@ -131,23 +129,25 @@ namespace ZeroLevel.Services.PartitionStorage.Partition
                 {
                     while (reader.EOS == false)
                     {
-                        if (false == Serializer.KeyDeserializer.Invoke(reader, out key))
+                        var kv = await Serializer.KeyDeserializer.Invoke(reader);
+                        if (kv.Success == false)
                         {
                             throw new Exception($"[StorePartitionBuilder.CompressFile] Fault compress data in file '{file}'. Incorrect file structure. Fault read key.");
                         }
-                        if (false == dict.ContainsKey(key))
+                        if (false == dict.ContainsKey(kv.Value))
                         {
-                            dict[key] = new HashSet<TInput>();
+                            dict[kv.Value] = new HashSet<TInput>();
                         }
                         if (reader.EOS)
                         {
                             break;
                         }
-                        if (false == Serializer.InputDeserializer.Invoke(reader, out input))
+                        var iv = await Serializer.InputDeserializer.Invoke(reader);
+                        if (iv.Success == false)
                         {
                             throw new Exception($"[StorePartitionBuilder.CompressFile] Fault compress data in file '{file}'. Incorrect file structure. Fault input value.");
                         }
-                        dict[key].Add(input);
+                        dict[kv.Value].Add(iv.Value);
                     }
                 }
                 var tempFile = FSUtils.GetAppLocalTemporaryFile();

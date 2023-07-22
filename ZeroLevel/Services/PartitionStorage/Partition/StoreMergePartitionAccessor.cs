@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using ZeroLevel.Services.PartitionStorage.Interfaces;
 using ZeroLevel.Services.PartitionStorage.Partition;
 using ZeroLevel.Services.Serialization;
@@ -60,14 +61,14 @@ namespace ZeroLevel.Services.PartitionStorage
         /// </summary>
         public void DropData() => _temporaryAccessor.DropData();
         public string GetCatalogPath() => _accessor.GetCatalogPath();
-        public void Store(TKey key, TInput value) => _temporaryAccessor.Store(key, value);
+        public async Task Store(TKey key, TInput value) => await _temporaryAccessor.Store(key, value);
         public int CountDataFiles() => Math.Max(_accessor.CountDataFiles(),
                 _temporaryAccessor.CountDataFiles());
 
         /// <summary>
         /// Performs compression/grouping of recorded data in a partition
         /// </summary>
-        public void Compress()
+        public async Task Compress()
         {
             var newFiles = Directory.GetFiles(_temporaryAccessor.GetCatalogPath());
 
@@ -88,7 +89,7 @@ namespace ZeroLevel.Services.PartitionStorage
                         {
                             foreach (var i in r.Value)
                             {
-                                _temporaryAccessor.Store(r.Key, i);
+                                await _temporaryAccessor.Store(r.Key, i);
                             }
                         }
                     }
@@ -99,7 +100,7 @@ namespace ZeroLevel.Services.PartitionStorage
                 // compress new file
                 foreach (var file in newFiles)
                 {
-                    (_temporaryAccessor as StorePartitionBuilder<TKey, TInput, TValue, TMeta>)
+                    await (_temporaryAccessor as StorePartitionBuilder<TKey, TInput, TValue, TMeta>)
                             .CompressFile(file);
                 }
 
@@ -141,7 +142,7 @@ namespace ZeroLevel.Services.PartitionStorage
         #endregion
 
         #region Private methods
-        private IEnumerable<StorePartitionKeyValueSearchResult<TKey, IEnumerable<TInput>>>
+        private IEnumerable<SearchResult<TKey, IEnumerable<TInput>>>
             IterateReadKeyInputs(string filePath)
         {
             if (File.Exists(filePath))
@@ -154,11 +155,11 @@ namespace ZeroLevel.Services.PartitionStorage
                         var k = _keyDeserializer.Invoke(reader);
                         var v = _valueDeserializer.Invoke(reader);
                         var input = _decompress(v);
-                        yield return new StorePartitionKeyValueSearchResult<TKey, IEnumerable<TInput>>
+                        yield return new SearchResult<TKey, IEnumerable<TInput>>
                         {
                             Key = k,
                             Value = input,
-                            Status = SearchResult.Success
+                            Success = true
                         };
                     }
                 }
