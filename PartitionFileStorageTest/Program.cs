@@ -37,6 +37,7 @@ namespace PartitionFileStorageTest
             var store = new Store<ulong, ulong, byte[], Metadata>(options, new StoreSerializers<ulong, ulong, byte[]>(
                 async (w, n) => await w.WriteULongAsync(n),
                 async (w, n) => await w.WriteULongAsync(n),
+                async (w, n) => await w.WriteBytesAsync(n),
                 async (r) => { try { return new DeserializeResult<ulong>(true, await r.ReadULongAsync()); } catch { return new DeserializeResult<ulong>(false, 0); } },
                 async (r) => { try { return new DeserializeResult<ulong>(true, await r.ReadULongAsync()); } catch { return new DeserializeResult<ulong>(false, 0); } },
                 async (r) => { try { return new DeserializeResult<byte[]>(true, await r.ReadBytesAsync()); } catch { return new DeserializeResult<byte[]>(false, new byte[0]); } }));
@@ -89,6 +90,7 @@ namespace PartitionFileStorageTest
             var store = new Store<ulong, ulong, byte[], Metadata>(options, new StoreSerializers<ulong, ulong, byte[]>(
                 async (w, n) => await w.WriteULongAsync(n),
                 async (w, n) => await w.WriteULongAsync(n),
+                async (w, n) => await w.WriteBytesAsync(n),
                 async (r) => { try { return new DeserializeResult<ulong>(true, await r.ReadULongAsync()); } catch { return new DeserializeResult<ulong>(false, 0); } },
                 async (r) => { try { return new DeserializeResult<ulong>(true, await r.ReadULongAsync()); } catch { return new DeserializeResult<ulong>(false, 0); } },
                 async (r) => { try { return new DeserializeResult<byte[]>(true, await r.ReadBytesAsync()); } catch { return new DeserializeResult<byte[]>(false, new byte[0]); } }));
@@ -252,6 +254,7 @@ namespace PartitionFileStorageTest
             var store = new Store<ulong, ulong, byte[], Metadata>(options, new StoreSerializers<ulong, ulong, byte[]>(
                 async (w, n) => await w.WriteULongAsync(n),
                 async (w, n) => await w.WriteULongAsync(n),
+                async (w, n) => await w.WriteBytesAsync(n),
                 async (r) => { try { return new DeserializeResult<ulong>(true, await r.ReadULongAsync()); } catch { return new DeserializeResult<ulong>(false, 0); } },
                 async (r) => { try { return new DeserializeResult<ulong>(true, await r.ReadULongAsync()); } catch { return new DeserializeResult<ulong>(false, 0); } },
                 async (r) => { try { return new DeserializeResult<byte[]>(true, await r.ReadBytesAsync()); } catch { return new DeserializeResult<byte[]>(false, new byte[0]); } }));
@@ -408,6 +411,7 @@ namespace PartitionFileStorageTest
             var serializer = new StoreSerializers<ulong, ulong, byte[]>(
                 async (w, n) => await w.WriteULongAsync(n),
                 async (w, n) => await w.WriteULongAsync(n),
+                async (w, n) => await w.WriteBytesAsync(n),
                 async (r) => { try { return new DeserializeResult<ulong>(true, await r.ReadULongAsync()); } catch { return new DeserializeResult<ulong>(false, 0); } },
                 async (r) => { try { return new DeserializeResult<ulong>(true, await r.ReadULongAsync()); } catch { return new DeserializeResult<ulong>(false, 0); } },
                 async (r) => { try { return new DeserializeResult<byte[]>(true, await r.ReadBytesAsync()); } catch { return new DeserializeResult<byte[]>(false, new byte[0]); } });
@@ -471,6 +475,7 @@ namespace PartitionFileStorageTest
             var serializer = new StoreSerializers<ulong, ulong, byte[]>(
                 async (w, n) => await w.WriteULongAsync(n),
                 async (w, n) => await w.WriteULongAsync(n),
+                async (w, n) => await w.WriteBytesAsync(n),
                 async (r) => { try { return new DeserializeResult<ulong>(true, await r.ReadULongAsync()); } catch { return new DeserializeResult<ulong>(false, 0); } },
                 async (r) => { try { return new DeserializeResult<ulong>(true, await r.ReadULongAsync()); } catch { return new DeserializeResult<ulong>(false, 0); } },
                 async (r) => { try { return new DeserializeResult<byte[]>(true, await r.ReadBytesAsync()); } catch { return new DeserializeResult<byte[]>(false, new byte[0]); } });
@@ -530,6 +535,7 @@ namespace PartitionFileStorageTest
             var store = new Store<string, ulong, byte[], StoreMetadata>(options, new StoreSerializers<string, ulong, byte[]>(
                 async (w, n) => await w.WriteStringAsync(n),
                 async (w, n) => await w.WriteULongAsync(n),
+                async (w, n) => await w.WriteBytesAsync(n),
                 async (r) => { try { return new DeserializeResult<string>(true, await r.ReadStringAsync()); } catch { return new DeserializeResult<string>(false, string.Empty); } },
                 async (r) => { try { return new DeserializeResult<ulong>(true, await r.ReadULongAsync()); } catch { return new DeserializeResult<ulong>(false, 0); } },
                 async (r) => { try { return new DeserializeResult<byte[]>(true, await r.ReadBytesAsync()); } catch { return new DeserializeResult<byte[]>(false, new byte[0]); } }));

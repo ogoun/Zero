@@ -58,7 +58,12 @@ namespace ZeroLevel.Services.PartitionStorage
             var files = Directory.GetFiles(_catalog);
             if (files != null && files.Length > 0)
             {
-                await Parallel.ForEachAsync(files, async(file, _) => await CompressFile(file));
+                foreach (var file in files) 
+                {
+                    await CompressFile(file);
+                }
+
+                //await Parallel.ForEachAsync(files, async(file, _) => await CompressFile(file));
             }
         }
         public async IAsyncEnumerable<SearchResult<TKey, TInput>> Iterate()
@@ -187,9 +192,9 @@ namespace ZeroLevel.Services.PartitionStorage
                     foreach (var pair in dict.OrderBy(p => p.Key))
                     {
                         var v = _options.MergeFunction(pair.Value);
-                        writer.SerializeCompatible(pair.Key);
+                        await Serializer.KeySerializer.Invoke(writer, pair.Key);
                         Thread.MemoryBarrier();
-                        writer.SerializeCompatible(v);
+                        await Serializer.ValueSerializer.Invoke(writer, v);
                     }
                 }
                 File.Delete(file);

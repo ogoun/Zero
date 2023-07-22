@@ -10,6 +10,8 @@ namespace ZeroLevel.Services.PartitionStorage.Interfaces
 
         Func<MemoryStreamWriter, TInput, Task> InputSerializer { get; }
 
+        Func<MemoryStreamWriter, TValue, Task> ValueSerializer { get; }
+
         Func<MemoryStreamReader, Task<DeserializeResult<TKey>>> KeyDeserializer { get; }
 
         Func<MemoryStreamReader, Task<DeserializeResult<TInput>>> InputDeserializer { get; }

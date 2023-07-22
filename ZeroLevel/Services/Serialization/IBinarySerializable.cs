@@ -11,8 +11,8 @@ namespace ZeroLevel.Services.Serialization
 
     public interface IAsyncBinarySerializable
     {
-        Task SerializeAsync(IBinaryWriter writer);
+        Task SerializeAsync(IAsyncBinaryWriter writer);
 
-        Task DeserializeAsync(IBinaryReader reader);
+        Task DeserializeAsync(IAsyncBinaryReader reader);
     }
 }

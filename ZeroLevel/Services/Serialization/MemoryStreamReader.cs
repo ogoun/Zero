@@ -589,7 +589,7 @@ namespace ZeroLevel.Services.Serialization
     }
 
     public partial class MemoryStreamReader
-        : IBinaryReaderAsync
+        : IAsyncBinaryReader
     {
         /// <summary>
         ///  Reading byte-package (read the size of the specified number of bytes, and then the packet itself read size)

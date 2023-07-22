@@ -239,7 +239,7 @@ namespace ZeroLevel.Services.Serialization
             }
             return PrimitiveTypeSerializer.Deserialize<T>(reader);
         }
-        public static async Task<T> DeserializeCompatibleAsync<T>(IBinaryReader reader)
+        public static async Task<T> DeserializeCompatibleAsync<T>(IAsyncBinaryReader reader)
         {
             if (typeof(IAsyncBinarySerializable).IsAssignableFrom(typeof(T)))
             {
@@ -247,7 +247,7 @@ namespace ZeroLevel.Services.Serialization
                 await direct.DeserializeAsync(reader);
                 return (T)direct;
             }
-            return PrimitiveTypeSerializer.Deserialize<T>(reader);
+            return PrimitiveTypeSerializer.Deserialize<T>(reader as IBinaryReader);
         }
 
         public static object DeserializeCompatible(Type type, byte[] data)

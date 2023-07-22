@@ -136,7 +136,7 @@ namespace ZeroLevel.Services.Serialization
         void SetPosition(long position);
     }
 
-    public interface IBinaryReaderAsync 
+    public interface IAsyncBinaryReader 
         : IDisposable
     {
         Task<bool> ReadBooleanAsync();

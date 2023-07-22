@@ -337,13 +337,17 @@ namespace ZeroLevel.Services.Serialization
         public void WriteArray<T>(T[] array)
             where T : IBinarySerializable
         {
-            WriteInt32(array?.Length ?? 0);
             if (array != null)
             {
+                WriteInt32(array.Length);
                 for (int i = 0; i < array.Length; i++)
                 {
                     array[i].Serialize(this);
                 }
+            }
+            else
+            {
+                WriteInt32(0);
             }
         }
 
