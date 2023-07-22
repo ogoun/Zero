@@ -1,7 +1,9 @@
-﻿using System;
+﻿using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Threading.Tasks;
 using Xunit;
 using ZeroLevel.DocumentObjectModel;
 using ZeroLevel.Network;
@@ -44,11 +46,12 @@ namespace ZeroLevel.Serialization
             }
         }
 
+
         private void MakeCollectionTest<T>(IEnumerable<T> value, Func<T, T, bool> comparator = null)
         {
             // Act
             var data = MessageSerializer.SerializeCompatible<IEnumerable<T>>(value);
-            var clone = MessageSerializer.DeserializeCompatible<IEnumerable<T>>(data);            
+            var clone = MessageSerializer.DeserializeCompatible<IEnumerable<T>>(data);
 
             // Assert
             if (value == null && clone != null && !clone.Any()) return; // OK
@@ -406,7 +409,7 @@ namespace ZeroLevel.Serialization
         [Fact]
         public void EOSTest()
         {
-            var data = new Dictionary<long, string> 
+            var data = new Dictionary<long, string>
             {
                 { 0,  "asd"},
                 { 1,  "sdf"},

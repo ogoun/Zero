@@ -488,6 +488,16 @@ namespace ZeroLevel.Services.Serialization
                 await _stream.WriteAsync(val, 0, val.Length);
             }
         }
+
+        public async Task WriteRawBytesAsyncNoLength(byte[] val)
+        {
+            if (val == null)
+            {
+                throw new ArgumentNullException(nameof(val));
+            }
+            await _stream.WriteAsync(val, 0, val.Length);
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public async Task WriteShortAsync(short number) => await _stream.WriteAsync(BitConverter.GetBytes(number), 0, 2);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -505,7 +515,7 @@ namespace ZeroLevel.Services.Serialization
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public async Task WriteDecimalAsync(Decimal number) => await _stream.WriteAsync(BitConverterExt.GetBytes(number), 0, 16);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public async Task WriteDoubleAsync(double val)=> await _stream.WriteAsync(BitConverter.GetBytes(val), 0, 8);
+        public async Task WriteDoubleAsync(double val) => await _stream.WriteAsync(BitConverter.GetBytes(val), 0, 8);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public async Task WriteFloatAsync(float val) => await _stream.WriteAsync(BitConverter.GetBytes(val), 0, 4);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -527,8 +537,6 @@ namespace ZeroLevel.Services.Serialization
                 await _stream.WriteAsync(buffer, 0, buffer.Length);
             }
         }
-
-        
 
         /// <summary>
         /// Record the datetime
@@ -695,7 +703,7 @@ namespace ZeroLevel.Services.Serialization
                                     saveAction.Invoke(writer, item);
                                     count++;
                                 }
-                                await WriteBytesAsync(writer.Complete());
+                                await WriteRawBytesAsyncNoLength(writer.Complete());
                                 writer.Stream.Position = 0;
                             }
                         }
@@ -933,7 +941,7 @@ namespace ZeroLevel.Services.Serialization
                                 {
                                     saveAction.Invoke(writer, array[i + j]);
                                 }
-                                await WriteBytesAsync(writer.Complete());
+                                await WriteRawBytesAsyncNoLength(writer.Complete());
                                 writer.Stream.Position = 0;
                             }
                         }
@@ -1044,7 +1052,7 @@ namespace ZeroLevel.Services.Serialization
                                 {
                                     buffer[j] = array[i + j] ? ONE : ZERO;
                                 }
-                                await WriteBytesAsync(writer.Complete());
+                                await WriteRawBytesAsyncNoLength(writer.Complete());
                                 writer.Stream.Position = 0;
                             }
                         }
@@ -1083,7 +1091,7 @@ namespace ZeroLevel.Services.Serialization
                                 {
                                     buffer[j] = array[i + j];
                                 }
-                                await WriteBytesAsync(writer.Complete());
+                                await WriteRawBytesAsyncNoLength(writer.Complete());
                                 writer.Stream.Position = 0;
                             }
                         }
