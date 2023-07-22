@@ -58,12 +58,7 @@ namespace ZeroLevel.Services.PartitionStorage
             var files = Directory.GetFiles(_catalog);
             if (files != null && files.Length > 0)
             {
-                foreach (var file in files) 
-                {
-                    await CompressFile(file);
-                }
-
-                //await Parallel.ForEachAsync(files, async(file, _) => await CompressFile(file));
+                await Parallel.ForEachAsync(files, async(file, _) => await CompressFile(file));
             }
         }
         public async IAsyncEnumerable<SearchResult<TKey, TInput>> Iterate()
