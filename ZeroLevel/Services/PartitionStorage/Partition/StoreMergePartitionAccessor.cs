@@ -132,7 +132,7 @@ namespace ZeroLevel.Services.PartitionStorage
                     }
 
                     // 3. Rebuil index
-                    (_accessor as BasePartition<TKey, TInput, TValue, TMeta>).RebuildFileIndex(name);
+                    await (_accessor as BasePartition<TKey, TInput, TValue, TMeta>).RebuildFileIndex(name);
                 }
             }
             // remove temporary files

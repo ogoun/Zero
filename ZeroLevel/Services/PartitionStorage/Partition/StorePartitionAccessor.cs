@@ -159,9 +159,9 @@ namespace ZeroLevel.Services.PartitionStorage
                 }
             }
         }
-        public void RebuildIndex()
+        public async Task RebuildIndex()
         {
-            RebuildIndexes();
+            await RebuildIndexes();
             if (_options.Index.Enabled)
             {
                 Indexes.ResetCachee();
@@ -442,7 +442,7 @@ namespace ZeroLevel.Services.PartitionStorage
                 // Rebuild index if needs
                 if (_options.Index.Enabled && autoReindex)
                 {
-                    RebuildFileIndex(filePath);
+                    await RebuildFileIndex(filePath);
                 }
             }
         }

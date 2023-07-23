@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
+using System.Threading.Tasks;
 using ZeroLevel.Services.FileSystem;
 using ZeroLevel.Services.Memory;
 using ZeroLevel.Services.PartitionStorage.Interfaces;
@@ -40,7 +41,7 @@ namespace ZeroLevel.Services.PartitionStorage.Partition
                 Directory.CreateDirectory(_catalog);
             }
             _phisicalFileAccessor = fileAccessorCachee;
-            _indexBuilder = _options.Index.Enabled ? new IndexBuilder<TKey, TValue>(_options.Index.StepType, _options.Index.StepValue, _catalog, fileAccessorCachee) : null;
+            _indexBuilder = _options.Index.Enabled ? new IndexBuilder<TKey, TValue>(_options.Index.StepType, _options.Index.StepValue, _catalog, fileAccessorCachee, Serializer) : null;
             Serializer = serializer;
         }
 
@@ -60,21 +61,21 @@ namespace ZeroLevel.Services.PartitionStorage.Partition
         /// <summary>
         /// Rebuild indexes for all files
         /// </summary>
-        protected void RebuildIndexes()
+        protected async Task RebuildIndexes()
         {
             if (_options.Index.Enabled)
             {
-                _indexBuilder.RebuildIndex();
+                await _indexBuilder.RebuildIndex();
             }
         }
         /// <summary>
         /// Rebuild index for the specified file
         /// </summary>
-        internal void RebuildFileIndex(string file)
+        internal async Task RebuildFileIndex(string file)
         {
             if (_options.Index.Enabled)
             {
-                _indexBuilder.RebuildFileIndex(file);
+                await _indexBuilder.RebuildFileIndex(file);
             }
         }
         /// <summary>

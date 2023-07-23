@@ -128,7 +128,7 @@ namespace PartitionFileStorageTest
             sw.Stop();
             Log.Info($"Compress: {sw.ElapsedMilliseconds}ms");
             sw.Restart();
-            storePart.RebuildIndex();
+            await storePart.RebuildIndex();
             sw.Stop();
             Log.Info($"Rebuild indexes: {sw.ElapsedMilliseconds}ms");
 
@@ -167,7 +167,7 @@ namespace PartitionFileStorageTest
                 await readPart.RemoveKey(testKeys1[i], false);
             }
             sw.Restart();
-            readPart.RebuildIndex();
+            await readPart.RebuildIndex();
             sw.Stop();
             Log.Info($"Rebuild indexes after remove: {sw.ElapsedMilliseconds}ms");
             Log.Info("Test #1 reading after remove");
@@ -296,7 +296,7 @@ namespace PartitionFileStorageTest
                 sw.Stop();
                 Log.Info($"Compress: {sw.ElapsedMilliseconds}ms");
                 sw.Restart();
-                storePart.RebuildIndex();
+                await storePart.RebuildIndex();
             }
             sw.Stop();
             Log.Info($"Rebuild indexes: {sw.ElapsedMilliseconds}ms");

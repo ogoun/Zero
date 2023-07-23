@@ -32,6 +32,6 @@ namespace ZeroLevel.Services.PartitionStorage
         /// <summary>
         /// Rebuilds indexes for data in a partition
         /// </summary>
-        void RebuildIndex();
+        Task RebuildIndex();
     }
 }

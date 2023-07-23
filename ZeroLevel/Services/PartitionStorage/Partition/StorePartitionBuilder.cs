@@ -88,7 +88,7 @@ namespace ZeroLevel.Services.PartitionStorage
                 }
             }
         }
-        public void RebuildIndex() => RebuildIndexes();
+        public async Task RebuildIndex() => await RebuildIndexes();
         #endregion
 
         #region Private methods

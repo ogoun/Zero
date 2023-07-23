@@ -16,7 +16,7 @@ namespace ZeroLevel.Services.PartitionStorage
         /// <summary>
         /// Rebuilds indexes for data in a partition
         /// </summary>
-        void RebuildIndex();
+        Task RebuildIndex();
         /// <summary>
         /// Search in a partition for a specified key
         /// </summary>

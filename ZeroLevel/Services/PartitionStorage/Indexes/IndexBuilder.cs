@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
+using ZeroLevel.Services.PartitionStorage.Interfaces;
 using ZeroLevel.Services.Serialization;
 
 namespace ZeroLevel.Services.PartitionStorage
@@ -16,27 +18,30 @@ namespace ZeroLevel.Services.PartitionStorage
         private readonly string _indexCatalog;
         private readonly string _dataCatalog;
         private readonly int _stepValue;
-        private readonly Func<MemoryStreamReader, TKey> _keyDeserializer;
-        private readonly Func<MemoryStreamReader, TValue> _valueDeserializer;
+        private readonly IStoreKVSerializer<TKey, TValue> Serializer;
         private readonly PhisicalFileAccessorCachee _phisicalFileAccessorCachee;
-        public IndexBuilder(IndexStepType indexType, int stepValue, string dataCatalog, PhisicalFileAccessorCachee phisicalFileAccessorCachee)
+        public IndexBuilder(IndexStepType indexType, 
+            int stepValue, 
+            string dataCatalog, 
+            PhisicalFileAccessorCachee phisicalFileAccessorCachee,
+            IStoreKVSerializer<TKey, TValue> serializer)
         {
             _dataCatalog = dataCatalog;
             _indexCatalog = Path.Combine(dataCatalog, INDEX_SUBFOLDER_NAME);
             _indexType = indexType;
             _stepValue = stepValue;
-            _keyDeserializer = MessageSerializer.GetDeserializer<TKey>();
-            _valueDeserializer = MessageSerializer.GetDeserializer<TValue>();
+            Serializer = serializer;
             _phisicalFileAccessorCachee = phisicalFileAccessorCachee;
         }
         /// <summary>
         /// Rebuild indexes for all files
         /// </summary>
-        internal void RebuildIndex()
+        internal async Task RebuildIndex()
         {
             var files = Directory.GetFiles(_dataCatalog);
             if (files != null && files.Length > 0)
             {
+
                 foreach (var file in files)
                 {
                     RebuildFileIndex(Path.GetFileName(file));
@@ -46,15 +51,15 @@ namespace ZeroLevel.Services.PartitionStorage
         /// <summary>
         /// Rebuild index for the specified file
         /// </summary>
-        internal void RebuildFileIndex(string file)
+        internal async Task RebuildFileIndex(string file)
         {
             if (_indexType == IndexStepType.AbsoluteCount)
             {
-                RebuildFileIndexWithAbsoluteCountIndexes(file);
+                await RebuildFileIndexWithAbsoluteCountIndexes(file);
             }
             else
             {
-                RebuildFileIndexWithSteps(file);
+                await RebuildFileIndexWithSteps(file);
             }
         }
 
@@ -81,7 +86,7 @@ namespace ZeroLevel.Services.PartitionStorage
         /// <summary>
         /// Rebuild index with specified number of steps for specified file
         /// </summary>
-        private void RebuildFileIndexWithAbsoluteCountIndexes(string file)
+        private async Task RebuildFileIndexWithAbsoluteCountIndexes(string file)
         {
             if (false == Directory.Exists(_indexCatalog))
             {
@@ -93,9 +98,9 @@ namespace ZeroLevel.Services.PartitionStorage
                 while (reader.EOS == false)
                 {
                     var pos = reader.Position;
-                    var k = _keyDeserializer.Invoke(reader);
-                    dict[k] = pos;
-                    _valueDeserializer.Invoke(reader);
+                    var k = await Serializer.KeyDeserializer.Invoke(reader);
+                    dict[k.Value] = pos;
+                    await Serializer.ValueDeserializer.Invoke(reader);
                 }
             }
             if (dict.Count > _stepValue)
@@ -130,7 +135,7 @@ namespace ZeroLevel.Services.PartitionStorage
         /// <summary>
         /// Rebuild index with specified step for keys
         /// </summary>
-        private void RebuildFileIndexWithSteps(string file)
+        private async Task RebuildFileIndexWithSteps(string file)
         {
             if (false == Directory.Exists(_indexCatalog))
             {
@@ -153,8 +158,8 @@ namespace ZeroLevel.Services.PartitionStorage
                         {
                             counter--;
                             var pos = reader.Position;
-                            var k = _keyDeserializer.Invoke(reader);
-                            _valueDeserializer.Invoke(reader);
+                            var k = await Serializer.KeyDeserializer.Invoke(reader);
+                            await Serializer.ValueDeserializer.Invoke(reader);
                             if (counter == 0)
                             {
                                 writer.WriteCompatible(k);
