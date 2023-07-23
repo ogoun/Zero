@@ -141,10 +141,10 @@ namespace PartitionFileStorageTest
                 var val = pairs[i].Item2;
                 if (testData.ContainsKey(key) == false) testData[key] = new HashSet<ulong>();
                 testData[key].Add(val);
-                merger.Store(key, val);
+                await merger.Store(key, val);
             }
             Log.Info($"Merge journal filled: {sw.ElapsedMilliseconds}ms. New records merged: {merger.TotalRecords}");
-            merger.Compress(); // auto reindex
+            await merger.Compress(); // auto reindex
             sw.Stop();
             Log.Info($"Compress after merge: {sw.ElapsedMilliseconds}ms");
 
@@ -319,7 +319,7 @@ namespace PartitionFileStorageTest
                 }
 
                 Log.Info($"Merge journal filled: {sw.ElapsedMilliseconds}ms. Total data count: {PAIRS_COUNT}. Unique keys: {Keys.Count}");
-                merger.Compress(); // auto reindex
+                await merger.Compress(); // auto reindex
             }
             sw.Stop();
             Log.Info($"Compress after merge: {sw.ElapsedMilliseconds}ms");

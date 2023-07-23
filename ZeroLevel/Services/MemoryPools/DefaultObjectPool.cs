@@ -16,10 +16,10 @@ namespace MemoryPools
         private protected readonly ObjectWrapper[] _items;
         private protected readonly IPooledObjectPolicy<T> _policy;
         private protected readonly bool _isDefaultPolicy;
-        private protected T? _firstItem;
+        private protected T _firstItem;
 
         // This class was introduced in 2.1 to avoid the interface call where possible
-        private protected readonly PooledObjectPolicy<T>? _fastPolicy;
+        private protected readonly PooledObjectPolicy<T> _fastPolicy;
 
         /// <summary>
         /// Creates an instance of <see cref="DefaultObjectPool{T}"/>.
@@ -95,7 +95,7 @@ namespace MemoryPools
 
         private protected struct ObjectWrapper
         {
-            public T? Element;
+            public T Element;
         }
     }
 }

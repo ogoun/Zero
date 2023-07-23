@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using System.Net;
-using System.Threading;
 using ZeroLevel;
 using ZeroLevel.Network;
 using ZeroLevel.Services.Applications;

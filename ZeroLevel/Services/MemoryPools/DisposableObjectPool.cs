@@ -5,7 +5,7 @@ using System.Threading;
 
 namespace MemoryPools
 {
-    internal sealed class DisposableObjectPool<T> 
+    internal sealed class DisposableObjectPool<T>
         : DefaultObjectPool<T>, IDisposable where T : class
     {
         private volatile bool _isDisposed;
@@ -81,9 +81,9 @@ namespace MemoryPools
             }
         }
 
-        private static void DisposeItem(T? item)
+        private static void DisposeItem(T item)
         {
-            if (item is IDisposable disposable)
+            if (item != null && item is IDisposable disposable)
             {
                 disposable.Dispose();
             }

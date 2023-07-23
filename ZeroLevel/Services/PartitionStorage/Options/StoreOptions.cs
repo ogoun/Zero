@@ -15,6 +15,7 @@ namespace ZeroLevel.Services.PartitionStorage
     /// <typeparam name="TMeta">Meta information for partition search</typeparam>
     public class StoreOptions<TKey, TInput, TValue, TMeta>
     {
+        private const string DEFAULT_FILE_NAME = "defaultGroup";
         /// <summary>
         /// Method for key comparison
         /// </summary>
@@ -57,7 +58,12 @@ namespace ZeroLevel.Services.PartitionStorage
 
         internal string GetFileName(TKey key, TMeta info)
         {
-            return FilePartition.FileNameExtractor(key, info);
+            var name = FilePartition.FileNameExtractor(key, info);
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                name = DEFAULT_FILE_NAME;
+            }
+            return name;
         }
         internal string GetCatalogPath(TMeta info)
         {

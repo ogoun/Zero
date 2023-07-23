@@ -20,11 +20,14 @@ namespace ZeroLevel.Services.PartitionStorage.Partition
 
         protected readonly TMeta _info;
         protected readonly string _catalog;
+
+        private SemaphoreSlim _writersLock = new SemaphoreSlim(1);
+        private readonly Dictionary<string, MemoryStreamWriter> _writeStreams = new Dictionary<string, MemoryStreamWriter>();
+
         protected IStoreSerializer<TKey, TInput, TValue> Serializer { get; }
         protected readonly StoreOptions<TKey, TInput, TValue, TMeta> _options;
 
         private readonly IndexBuilder<TKey, TValue> _indexBuilder;
-        private readonly Dictionary<string, MemoryStreamWriter> _writeStreams = new Dictionary<string, MemoryStreamWriter>();
 
         private readonly PhisicalFileAccessorCachee _phisicalFileAccessor;
         protected PhisicalFileAccessorCachee PhisicalFileAccessorCachee => _phisicalFileAccessor;
@@ -41,8 +44,8 @@ namespace ZeroLevel.Services.PartitionStorage.Partition
                 Directory.CreateDirectory(_catalog);
             }
             _phisicalFileAccessor = fileAccessorCachee;
-            _indexBuilder = _options.Index.Enabled ? new IndexBuilder<TKey, TValue>(_options.Index.StepType, _options.Index.StepValue, _catalog, fileAccessorCachee, Serializer) : null;
             Serializer = serializer;
+            _indexBuilder = _options.Index.Enabled ? new IndexBuilder<TKey, TValue>(_options.Index.StepType, _options.Index.StepValue, _catalog, fileAccessorCachee, Serializer) : null;
         }
 
         #region IStorePartitionBase
@@ -52,7 +55,7 @@ namespace ZeroLevel.Services.PartitionStorage.Partition
         public void Dispose()
         {
             CloseWriteStreams();
-            Release();            
+            Release();
         }
         #endregion
 
@@ -99,11 +102,77 @@ namespace ZeroLevel.Services.PartitionStorage.Partition
                 {
                     s.Value.Stream.Flush();
                     s.Value.Dispose();
+                    s.Value.DisposeAsync();
                 }
                 catch { }
             }
             _writeStreams.Clear();
         }
+
+        protected async Task WriteStreamAction(string fileName, Func<MemoryStreamWriter, Task> writeAction)
+        {
+            MemoryStreamWriter writer;
+            if (_writeStreams.TryGetValue(fileName, out writer) == false)
+            {
+                await _writersLock.WaitAsync();
+                try
+                {
+                    if (_writeStreams.TryGetValue(fileName, out writer) == false)
+                    {
+                        var filePath = Path.Combine(_catalog, fileName);
+                        var stream = new FileStream(filePath, FileMode.Append, FileAccess.Write, FileShare.None, 4096 * 1024);
+                        var new_w = new MemoryStreamWriter(stream);
+                        _writeStreams[fileName] = new_w;
+                        writer = new_w;
+                    }
+                }
+                finally
+                {
+                    _writersLock.Release();
+                }
+            }
+            await writeAction.Invoke(writer);
+        }
+
+        protected async Task SafeWriteStreamAction(string fileName, Func<MemoryStreamWriter, Task> writeAction)
+        {
+            MemoryStreamWriter writer;
+            if (_writeStreams.TryGetValue(fileName, out writer) == false)
+            {
+                await _writersLock.WaitAsync();
+                try
+                {
+                    if (_writeStreams.TryGetValue(fileName, out writer) == false)
+                    {
+                        var filePath = Path.Combine(_catalog, fileName);
+                        var stream = new FileStream(filePath, FileMode.Append, FileAccess.Write, FileShare.None, 4096 * 1024);
+                        var new_w = new MemoryStreamWriter(stream);
+                        _writeStreams[fileName] = new_w;
+                        writer = new_w;
+                    }
+                }
+                finally
+                {
+                    _writersLock.Release();
+                }
+            }
+            await writeAction.Invoke(writer);
+            /*
+            await writer.WaitLockAsync();
+            try
+            {
+                await writeAction.Invoke(writer);
+            }
+            finally
+            {
+                writer.Release();
+            }*/
+        }
+
+
+
+
+        /*
         /// <summary>
         /// Attempting to open a file for writing
         /// </summary>
@@ -145,6 +214,11 @@ namespace ZeroLevel.Services.PartitionStorage.Partition
             writer = null;
             return false;
         }
+        */
+
+
+
+
         /// <summary>
         /// Attempting to open a file for reading
         /// </summary>

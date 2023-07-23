@@ -88,35 +88,24 @@ namespace ZeroLevel.Services.PartitionStorage.Partition
         #endregion
 
         #region Private methods
+
         private async Task StoreDirect(TKey key, TInput value)
         {
             var groupKey = _options.GetFileName(key, _info);
-            if (TryGetWriteStream(groupKey, out var stream))
+            await WriteStreamAction(groupKey, async stream =>
             {
                 await Serializer.KeySerializer.Invoke(stream, key);
                 await Serializer.InputSerializer.Invoke(stream, value);
-            }
+            });
         }
         private async Task StoreDirectSafe(TKey key, TInput value)
         {
             var groupKey = _options.GetFileName(key, _info);
-            bool lockTaken = false;
-            if (TryGetWriteStream(groupKey, out var stream))
+            await SafeWriteStreamAction(groupKey, async stream => 
             {
-                Monitor.Enter(stream, ref lockTaken);
-                try
-                {
-                    await Serializer.KeySerializer.Invoke(stream, key);
-                    await Serializer.InputSerializer.Invoke(stream, value);
-                }
-                finally
-                {
-                    if (lockTaken)
-                    {
-                        Monitor.Exit(stream);
-                    }
-                }
-            }
+                await Serializer.KeySerializer.Invoke(stream, key);
+                await Serializer.InputSerializer.Invoke(stream, value);
+            });
         }
 
         internal async Task CompressFile(string file)

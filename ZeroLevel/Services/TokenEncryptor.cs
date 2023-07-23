@@ -22,7 +22,7 @@ namespace ZeroLevel.Services
 
             public byte[] Encrypt(byte[] data)
             {
-                using (Aes aes = new AesManaged())
+                using (Aes aes = AesManaged.Create())
                 {
                     aes.Padding = PaddingMode.PKCS7;
                     aes.KeySize = AesKeySizeInBits;
@@ -44,7 +44,7 @@ namespace ZeroLevel.Services
 
             public byte[] Decrypt(byte[] data)
             {
-                using (Aes aes = new AesManaged())
+                using (Aes aes = AesManaged.Create())
                 {
                     aes.Padding = PaddingMode.PKCS7;
                     aes.KeySize = AesKeySizeInBits;

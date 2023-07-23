@@ -163,7 +163,7 @@ namespace ZeroLevel.Collections
         /// </summary>
         /// <param name="comparer">The <see cref="IEqualityComparer{T}"/>
         /// implementation to use when comparing items.</param>
-        public ConcurrentHashSet(IEqualityComparer<T>? comparer)
+        public ConcurrentHashSet(IEqualityComparer<T> comparer)
             : this(DefaultConcurrencyLevel, DefaultCapacity, true, comparer)
         {
         }
@@ -184,7 +184,7 @@ namespace ZeroLevel.Collections
         /// <exception cref="ArgumentNullException"><paramref name="collection"/> is a null reference
         /// (Nothing in Visual Basic).
         /// </exception>
-        public ConcurrentHashSet(IEnumerable<T> collection, IEqualityComparer<T>? comparer)
+        public ConcurrentHashSet(IEnumerable<T> collection, IEqualityComparer<T> comparer)
             : this(comparer)
         {
             if (collection == null) throw new ArgumentNullException(nameof(collection));
@@ -211,7 +211,7 @@ namespace ZeroLevel.Collections
         /// <exception cref="ArgumentOutOfRangeException">
         /// <paramref name="concurrencyLevel"/> is less than 1.
         /// </exception>
-        public ConcurrentHashSet(int concurrencyLevel, IEnumerable<T> collection, IEqualityComparer<T>? comparer)
+        public ConcurrentHashSet(int concurrencyLevel, IEnumerable<T> collection, IEqualityComparer<T> comparer)
             : this(concurrencyLevel, DefaultCapacity, false, comparer)
         {
             if (collection == null) throw new ArgumentNullException(nameof(collection));
@@ -235,12 +235,12 @@ namespace ZeroLevel.Collections
         /// <paramref name="concurrencyLevel"/> is less than 1. -or-
         /// <paramref name="capacity"/> is less than 0.
         /// </exception>
-        public ConcurrentHashSet(int concurrencyLevel, int capacity, IEqualityComparer<T>? comparer)
+        public ConcurrentHashSet(int concurrencyLevel, int capacity, IEqualityComparer<T> comparer)
             : this(concurrencyLevel, capacity, false, comparer)
         {
         }
 
-        private ConcurrentHashSet(int concurrencyLevel, int capacity, bool growLockArray, IEqualityComparer<T>? comparer)
+        private ConcurrentHashSet(int concurrencyLevel, int capacity, bool growLockArray, IEqualityComparer<T> comparer)
         {
             if (concurrencyLevel < 1) throw new ArgumentOutOfRangeException(nameof(concurrencyLevel));
             if (capacity < 0) throw new ArgumentOutOfRangeException(nameof(capacity));
@@ -375,7 +375,7 @@ namespace ZeroLevel.Collections
                         continue;
                     }
 
-                    Node? previous = null;
+                    Node previous = null;
                     for (var current = tables.Buckets[bucketNo]; current != null; current = current.Next)
                     {
                         Debug.Assert((previous == null && current == tables.Buckets[bucketNo]) || previous!.Next == current);
@@ -439,8 +439,8 @@ namespace ZeroLevel.Collections
 
             private readonly ConcurrentHashSet<T> _set;
 
-            private Node?[]? _buckets;
-            private Node? _node;
+            private Node[] _buckets;
+            private Node _node;
             private int _i;
             private int _state;
 
@@ -468,7 +468,7 @@ namespace ZeroLevel.Collections
             /// <value>The element in the collection at the current position of the enumerator.</value>
             public T Current { get; private set; }
 
-            object? IEnumerator.Current => Current;
+            object IEnumerator.Current => Current;
 
             /// <summary>
             /// Sets the enumerator to its initial position, which is before the first element in the collection.
@@ -501,7 +501,7 @@ namespace ZeroLevel.Collections
                         goto case StateOuterloop;
 
                     case StateOuterloop:
-                        Node?[]? buckets = _buckets;
+                        Node[] buckets = _buckets;
                         Debug.Assert(buckets != null);
 
                         int i = ++_i;
@@ -516,7 +516,7 @@ namespace ZeroLevel.Collections
                         goto default;
 
                     case StateInnerLoop:
-                        Node? node = _node;
+                        Node node = _node;
                         if (node != null)
                         {
                             Current = node.Item;
@@ -606,7 +606,7 @@ namespace ZeroLevel.Collections
                     }
 
                     // Try to find this item in the bucket
-                    Node? previous = null;
+                    Node previous = null;
                     for (var current = tables.Buckets[bucketNo]; current != null; current = current.Next)
                     {
                         Debug.Assert(previous == null && current == tables.Buckets[bucketNo] || previous!.Next == current);
@@ -878,12 +878,12 @@ namespace ZeroLevel.Collections
 
         private class Tables
         {
-            public readonly Node?[] Buckets;
+            public readonly Node[] Buckets;
             public readonly object[] Locks;
 
             public readonly int[] CountPerLock;
 
-            public Tables(Node?[] buckets, object[] locks, int[] countPerLock)
+            public Tables(Node[] buckets, object[] locks, int[] countPerLock)
             {
                 Buckets = buckets;
                 Locks = locks;
@@ -896,9 +896,9 @@ namespace ZeroLevel.Collections
             public readonly T Item;
             public readonly int Hashcode;
 
-            public volatile Node? Next;
+            public volatile Node Next;
 
-            public Node(T item, int hashcode, Node? next)
+            public Node(T item, int hashcode, Node next)
             {
                 Item = item;
                 Hashcode = hashcode;

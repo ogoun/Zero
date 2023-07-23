@@ -12,7 +12,7 @@ namespace ZeroLevel.Services.Config.Implementation
             while (enumerator.MoveNext())
             {
                 string key = (string)enumerator.Entry.Key;
-                string value = ((string?)enumerator.Entry.Value) ?? string.Empty;
+                string value = ((string)enumerator.Entry.Value) ?? string.Empty;
                 result.Append(key, value);
             }
             return result;

@@ -95,46 +95,38 @@ namespace ZeroLevel.Services.PartitionStorage
         private async Task<bool> StoreDirect(TKey key, TInput value)
         {
             var groupKey = _options.GetFileName(key, _info);
-            if (TryGetWriteStream(groupKey, out var stream))
+            try
             {
-                await Serializer.KeySerializer.Invoke(stream, key);
-                Thread.MemoryBarrier();
-                await Serializer.InputSerializer.Invoke(stream, value);
+                await WriteStreamAction(groupKey, async stream =>
+                {
+                    await Serializer.KeySerializer.Invoke(stream, key);
+                    await Serializer.InputSerializer.Invoke(stream, value);
+                });
                 return true;
             }
-            else
+            catch (Exception ex)
             {
-                Log.SystemError($"Fault create write stream for key '{groupKey}'");
-            }
-            return false;
+                Log.SystemError(ex, $"[StoreDirect] Fault use writeStream for key '{groupKey}'");
+                return false;
+            }            
         }
         private async Task<bool> StoreDirectSafe(TKey key, TInput value)
         {
             var groupKey = _options.GetFileName(key, _info);
-            bool lockTaken = false;
-            if (TryGetWriteStream(groupKey, out var stream))
+            try
             {
-                Monitor.Enter(stream, ref lockTaken);
-                try
+                await SafeWriteStreamAction(groupKey, async stream =>
                 {
                     await Serializer.KeySerializer.Invoke(stream, key);
-                    Thread.MemoryBarrier();
                     await Serializer.InputSerializer.Invoke(stream, value);
-                    return true;
-                }
-                finally
-                {
-                    if (lockTaken)
-                    {
-                        Monitor.Exit(stream);
-                    }
-                }
+                });
+                return true;
             }
-            else
+            catch(Exception ex)
             {
-                Log.SystemError($"Fault create write stream for key '{groupKey}'");
+                Log.SystemError(ex, $"[StoreDirectSafe] Fault use writeStream for key '{groupKey}'");
+                return false;
             }
-            return false;
         }
 
         internal async Task CompressFile(string file)

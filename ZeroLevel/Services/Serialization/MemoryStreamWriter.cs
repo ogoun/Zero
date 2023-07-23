@@ -6,6 +6,7 @@ using System.Linq;
 using System.Net;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using ZeroLevel.Services.Extensions;
 
@@ -463,6 +464,10 @@ namespace ZeroLevel.Services.Serialization
     public partial class MemoryStreamWriter :
         IAsyncBinaryWriter
     {
+        private SemaphoreSlim _writeLock = new SemaphoreSlim(1);
+        public async Task WaitLockAsync() => await _writeLock.WaitAsync();
+        public void Release() => _writeLock.Release();
+
         /// <summary>
         /// Write char (2 bytes)
         /// </summary>
@@ -663,10 +668,9 @@ namespace ZeroLevel.Services.Serialization
             }
         }
 
-        public async Task DisposeAsync()
+        public void DisposeAsync()
         {
-            await _stream.FlushAsync();
-            await _stream.DisposeAsync();
+            _writeLock.Dispose();
         }
 
         #region Extension
@@ -676,40 +680,51 @@ namespace ZeroLevel.Services.Serialization
         /// <summary>
         /// Increase writing by batches
         /// </summary>
-        private async Task OptimizedWriteCollectionByChunksAsync<T>(IEnumerable<T> collection, Action<MemoryStreamWriter, T> saveAction, int chunk_size)
+        private async Task OptimizedWriteCollectionByChunksAsync<T>(IEnumerable<T> collection, Action<MemoryStreamWriter, T> saveAction, Func<MemoryStreamWriter, T, Task> asyncSaveAction, int chunk_size)
         {
             if (collection != null)
             {
-                MockCount();
-                int count = 0;
-                if (_stream is MemoryStream)
+                if (_stream.CanSeek == false)
                 {
+                    WriteInt32(collection.Count());
                     foreach (var item in collection)
                     {
-                        saveAction.Invoke(this, item);
-                        count++;
+                        await asyncSaveAction.Invoke(this, item);
                     }
                 }
                 else
                 {
-                    using (var ms = new MemoryStream())
+                    MockCount();
+                    int count = 0;
+                    if (_stream is MemoryStream)
                     {
-                        using (var writer = new MemoryStreamWriter(ms))
+                        foreach (var item in collection)
                         {
-                            foreach (var items in collection.Chunkify(chunk_size))
+                            saveAction.Invoke(this, item);
+                            count++;
+                        }
+                    }
+                    else
+                    {
+                        using (var ms = new MemoryStream())
+                        {
+                            using (var writer = new MemoryStreamWriter(ms))
                             {
-                                foreach (var item in items)
+                                foreach (var items in collection.Chunkify(chunk_size))
                                 {
-                                    saveAction.Invoke(writer, item);
-                                    count++;
+                                    foreach (var item in items)
+                                    {
+                                        saveAction.Invoke(writer, item);
+                                        count++;
+                                    }
+                                    await WriteRawBytesAsyncNoLength(writer.Complete());
+                                    writer.Stream.Position = 0;
                                 }
-                                await WriteRawBytesAsyncNoLength(writer.Complete());
-                                writer.Stream.Position = 0;
                             }
                         }
                     }
+                    UpdateCount(count);
                 }
-                UpdateCount(count);
             }
             else
             {
@@ -759,71 +774,82 @@ namespace ZeroLevel.Services.Serialization
             }
         }
 
-        public async Task WriteCollectionAsync(IEnumerable<IPAddress> collection) => await OptimizedWriteCollectionByChunksAsync(collection, (w, i) => w.WriteIP(i), BATCH_MEMORY_SIZE_LIMIT / 5);
+        public async Task WriteCollectionAsync(IEnumerable<IPAddress> collection) => await OptimizedWriteCollectionByChunksAsync(collection, (w, i) => w.WriteIP(i), (w, i) => w.WriteIPAsync(i), BATCH_MEMORY_SIZE_LIMIT / 5);
 
-        public async Task WriteCollectionAsync(IEnumerable<IPEndPoint> collection) => await OptimizedWriteCollectionByChunksAsync(collection, (w, i) => w.WriteIPEndpoint(i), BATCH_MEMORY_SIZE_LIMIT / 9);
+        public async Task WriteCollectionAsync(IEnumerable<IPEndPoint> collection) => await OptimizedWriteCollectionByChunksAsync(collection, (w, i) => w.WriteIPEndpoint(i), (w, i) => w.WriteIPEndpointAsync(i), BATCH_MEMORY_SIZE_LIMIT / 9);
 
-        public async Task WriteCollectionAsync(IEnumerable<Guid> collection) => await OptimizedWriteCollectionByChunksAsync(collection, (w, i) => w.WriteGuid(i), BATCH_MEMORY_SIZE_LIMIT / 16);
+        public async Task WriteCollectionAsync(IEnumerable<Guid> collection) => await OptimizedWriteCollectionByChunksAsync(collection, (w, i) => w.WriteGuid(i), (w, i) => w.WriteGuidAsync(i), BATCH_MEMORY_SIZE_LIMIT / 16);
 
-        public async Task WriteCollectionAsync(IEnumerable<DateTime> collection) => await OptimizedWriteCollectionByChunksAsync(collection, (w, i) => w.WriteDateTime(i), BATCH_MEMORY_SIZE_LIMIT / 9);
+        public async Task WriteCollectionAsync(IEnumerable<DateTime> collection) => await OptimizedWriteCollectionByChunksAsync(collection, (w, i) => w.WriteDateTime(i), (w, i) => w.WriteDateTimeAsync(i), BATCH_MEMORY_SIZE_LIMIT / 9);
 
-        public async Task WriteCollectionAsync(IEnumerable<DateTime?> collection) => await OptimizedWriteCollectionByChunksAsync(collection, (w, i) => w.WriteDateTime(i), BATCH_MEMORY_SIZE_LIMIT / 9);
+        public async Task WriteCollectionAsync(IEnumerable<DateTime?> collection) => await OptimizedWriteCollectionByChunksAsync(collection, (w, i) => w.WriteDateTime(i), (w, i) => w.WriteDateTimeAsync(i), BATCH_MEMORY_SIZE_LIMIT / 9);
 
-        public async Task WriteCollectionAsync(IEnumerable<UInt64> collection) => await OptimizedWriteCollectionByChunksAsync(collection, (w, i) => w.WriteULong(i), BATCH_MEMORY_SIZE_LIMIT / 8);
+        public async Task WriteCollectionAsync(IEnumerable<UInt64> collection) => await OptimizedWriteCollectionByChunksAsync(collection, (w, i) => w.WriteULong(i), (w, i) => w.WriteULongAsync(i), BATCH_MEMORY_SIZE_LIMIT / 8);
 
-        public async Task WriteCollectionAsync(IEnumerable<UInt32> collection) => await OptimizedWriteCollectionByChunksAsync(collection, (w, i) => w.WriteUInt32(i), BATCH_MEMORY_SIZE_LIMIT / 4);
+        public async Task WriteCollectionAsync(IEnumerable<UInt32> collection) => await OptimizedWriteCollectionByChunksAsync(collection, (w, i) => w.WriteUInt32(i), (w, i) => w.WriteUInt32Async(i), BATCH_MEMORY_SIZE_LIMIT / 4);
 
-        public async Task WriteCollectionAsync(IEnumerable<char> collection) => await OptimizedWriteCollectionByChunksAsync(collection, (w, i) => w.WriteChar(i), BATCH_MEMORY_SIZE_LIMIT / 2);
+        public async Task WriteCollectionAsync(IEnumerable<char> collection) => await OptimizedWriteCollectionByChunksAsync(collection, (w, i) => w.WriteChar(i), (w, i) => w.WriteCharAsync(i), BATCH_MEMORY_SIZE_LIMIT / 2);
 
-        public async Task WriteCollectionAsync(IEnumerable<short> collection) => await OptimizedWriteCollectionByChunksAsync(collection, (w, i) => w.WriteShort(i), BATCH_MEMORY_SIZE_LIMIT / 2);
+        public async Task WriteCollectionAsync(IEnumerable<short> collection) => await OptimizedWriteCollectionByChunksAsync(collection, (w, i) => w.WriteShort(i), (w, i) => w.WriteShortAsync(i), BATCH_MEMORY_SIZE_LIMIT / 2);
 
-        public async Task WriteCollectionAsync(IEnumerable<ushort> collection) => await OptimizedWriteCollectionByChunksAsync(collection, (w, i) => w.WriteUShort(i), BATCH_MEMORY_SIZE_LIMIT / 2);
+        public async Task WriteCollectionAsync(IEnumerable<ushort> collection) => await OptimizedWriteCollectionByChunksAsync(collection, (w, i) => w.WriteUShort(i), (w, i) => w.WriteUShortAsync(i), BATCH_MEMORY_SIZE_LIMIT / 2);
 
-        public async Task WriteCollectionAsync(IEnumerable<Int64> collection) => await OptimizedWriteCollectionByChunksAsync(collection, (w, i) => w.WriteLong(i), BATCH_MEMORY_SIZE_LIMIT / 8);
+        public async Task WriteCollectionAsync(IEnumerable<Int64> collection) => await OptimizedWriteCollectionByChunksAsync(collection, (w, i) => w.WriteLong(i), (w, i) => w.WriteLongAsync(i), BATCH_MEMORY_SIZE_LIMIT / 8);
 
-        public async Task WriteCollectionAsync(IEnumerable<Int32> collection) => await OptimizedWriteCollectionByChunksAsync(collection, (w, i) => w.WriteInt32(i), BATCH_MEMORY_SIZE_LIMIT / 4);
+        public async Task WriteCollectionAsync(IEnumerable<Int32> collection) => await OptimizedWriteCollectionByChunksAsync(collection, (w, i) => w.WriteInt32(i), (w, i) => w.WriteInt32Async(i), BATCH_MEMORY_SIZE_LIMIT / 4);
 
-        public async Task WriteCollectionAsync(IEnumerable<float> collection) => await OptimizedWriteCollectionByChunksAsync(collection, (w, i) => w.WriteFloat(i), BATCH_MEMORY_SIZE_LIMIT / 4);
+        public async Task WriteCollectionAsync(IEnumerable<float> collection) => await OptimizedWriteCollectionByChunksAsync(collection, (w, i) => w.WriteFloat(i), (w, i) => w.WriteFloatAsync(i), BATCH_MEMORY_SIZE_LIMIT / 4);
 
-        public async Task WriteCollectionAsync(IEnumerable<Double> collection) => await OptimizedWriteCollectionByChunksAsync(collection, (w, i) => w.WriteDouble(i), BATCH_MEMORY_SIZE_LIMIT / 8);
+        public async Task WriteCollectionAsync(IEnumerable<Double> collection) => await OptimizedWriteCollectionByChunksAsync(collection, (w, i) => w.WriteDouble(i), (w, i) => w.WriteDoubleAsync(i), BATCH_MEMORY_SIZE_LIMIT / 8);
 
         public async Task WriteCollectionAsync(IEnumerable<bool> collection)
         {
             if (collection != null)
             {
-                MockCount();
-
-                int count = 0;
-                if (_stream is MemoryStream)
+                if (_stream.CanSeek == false)
                 {
+                    WriteInt32(collection.Count());
                     foreach (var item in collection)
                     {
                         WriteBoolean(item);
-                        count++;
                     }
                 }
                 else
                 {
-                    var buffer = new byte[BATCH_MEMORY_SIZE_LIMIT];
-                    int index = 0;
-                    foreach (var b in collection)
-                    {
-                        buffer[index] = b ? ONE : ZERO;
-                        index++;
-                        if (index == BATCH_MEMORY_SIZE_LIMIT)
-                        {
-                            await _stream.WriteAsync(buffer, 0, buffer.Length);
-                            index = 0;
-                        }
-                        count++;
-                    }
-                    if (index != 0)
-                    {
-                        _stream.Write(buffer, 0, index);
-                    }
-                }
+                    MockCount();
 
-                UpdateCount(count);
+                    int count = 0;
+                    if (_stream is MemoryStream)
+                    {
+                        foreach (var item in collection)
+                        {
+                            WriteBoolean(item);
+                            count++;
+                        }
+                    }
+                    else
+                    {
+                        var buffer = new byte[BATCH_MEMORY_SIZE_LIMIT];
+                        int index = 0;
+                        foreach (var b in collection)
+                        {
+                            buffer[index] = b ? ONE : ZERO;
+                            index++;
+                            if (index == BATCH_MEMORY_SIZE_LIMIT)
+                            {
+                                await _stream.WriteAsync(buffer, 0, buffer.Length);
+                                index = 0;
+                            }
+                            count++;
+                        }
+                        if (index != 0)
+                        {
+                            _stream.Write(buffer, 0, index);
+                        }
+                    }
+
+                    UpdateCount(count);
+                }
             }
             else
             {
@@ -835,39 +861,49 @@ namespace ZeroLevel.Services.Serialization
         {
             if (collection != null)
             {
-                MockCount();
-
-                int count = 0;
-                if (_stream is MemoryStream)
+                if (_stream.CanSeek == false)
                 {
+                    WriteInt32(collection.Count());
                     foreach (var item in collection)
                     {
                         WriteByte(item);
-                        count++;
                     }
                 }
                 else
                 {
-                    var buffer = new byte[BATCH_MEMORY_SIZE_LIMIT];
-                    int index = 0;
-                    foreach (var b in collection)
+                    MockCount();
+                    int count = 0;
+                    if (_stream is MemoryStream)
                     {
-                        buffer[index] = b;
-                        index++;
-                        if (index == BATCH_MEMORY_SIZE_LIMIT)
+                        foreach (var item in collection)
                         {
-                            await _stream.WriteAsync(buffer, 0, buffer.Length);
-                            index = 0;
+                            WriteByte(item);
+                            count++;
                         }
-                        count++;
                     }
-                    if (index != 0)
+                    else
                     {
-                        _stream.Write(buffer, 0, index);
+                        var buffer = new byte[BATCH_MEMORY_SIZE_LIMIT];
+                        int index = 0;
+                        foreach (var b in collection)
+                        {
+                            buffer[index] = b;
+                            index++;
+                            if (index == BATCH_MEMORY_SIZE_LIMIT)
+                            {
+                                await _stream.WriteAsync(buffer, 0, buffer.Length);
+                                index = 0;
+                            }
+                            count++;
+                        }
+                        if (index != 0)
+                        {
+                            _stream.Write(buffer, 0, index);
+                        }
                     }
-                }
 
-                UpdateCount(count);
+                    UpdateCount(count);
+                }
             }
             else
             {
@@ -879,26 +915,37 @@ namespace ZeroLevel.Services.Serialization
         {
             if (collection != null)
             {
-                MockCount();
-
-                int count = 0;
-                if (_stream is MemoryStream)
+                if (_stream.CanSeek == false)
                 {
+                    WriteInt32(collection.Count());
                     foreach (var item in collection)
                     {
                         WriteBytes(item);
-                        count++;
                     }
                 }
                 else
                 {
-                    foreach (var b in collection)
+                    MockCount();
+
+                    int count = 0;
+                    if (_stream is MemoryStream)
                     {
-                        await WriteBytesAsync(b);
-                        count++;
+                        foreach (var item in collection)
+                        {
+                            WriteBytes(item);
+                            count++;
+                        }
                     }
+                    else
+                    {
+                        foreach (var b in collection)
+                        {
+                            await WriteBytesAsync(b);
+                            count++;
+                        }
+                    }
+                    UpdateCount(count);
                 }
-                UpdateCount(count);
             }
             else
             {
@@ -906,9 +953,9 @@ namespace ZeroLevel.Services.Serialization
             }
         }
 
-        public async Task WriteCollectionAsync(IEnumerable<decimal> collection) => await OptimizedWriteCollectionByChunksAsync(collection, (w, i) => w.WriteDecimal(i), BATCH_MEMORY_SIZE_LIMIT / 16);
+        public async Task WriteCollectionAsync(IEnumerable<decimal> collection) => await OptimizedWriteCollectionByChunksAsync(collection, (w, i) => w.WriteDecimal(i), (w, i) => w.WriteDecimalAsync(i), BATCH_MEMORY_SIZE_LIMIT / 16);
 
-        public async Task WriteCollectionAsync(IEnumerable<TimeSpan> collection) => await OptimizedWriteCollectionByChunksAsync(collection, (w, i) => w.WriteTimeSpan(i), BATCH_MEMORY_SIZE_LIMIT / 16);
+        public async Task WriteCollectionAsync(IEnumerable<TimeSpan> collection) => await OptimizedWriteCollectionByChunksAsync(collection, (w, i) => w.WriteTimeSpan(i), (w, i) => w.WriteTimeSpanAsync(i), BATCH_MEMORY_SIZE_LIMIT / 16);
         #endregion
 
         #region Arrays

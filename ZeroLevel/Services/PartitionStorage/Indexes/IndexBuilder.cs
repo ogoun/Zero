@@ -41,10 +41,9 @@ namespace ZeroLevel.Services.PartitionStorage
             var files = Directory.GetFiles(_dataCatalog);
             if (files != null && files.Length > 0)
             {
-
                 foreach (var file in files)
                 {
-                    RebuildFileIndex(Path.GetFileName(file));
+                    await RebuildFileIndex(Path.GetFileName(file));
                 }
             }
         }
@@ -121,7 +120,7 @@ namespace ZeroLevel.Services.PartitionStorage
                         for (int i = 0; i < _stepValue; i++)
                         {
                             var pair = d_arr[i * step];
-                            writer.WriteCompatible(pair.Key);
+                            await Serializer.KeySerializer.Invoke(writer, pair.Key);
                             writer.WriteLong(pair.Value);
                         }
                     }
@@ -162,7 +161,7 @@ namespace ZeroLevel.Services.PartitionStorage
                             await Serializer.ValueDeserializer.Invoke(reader);
                             if (counter == 0)
                             {
-                                writer.WriteCompatible(k);
+                                await Serializer.KeySerializer.Invoke(writer, k.Value);
                                 writer.WriteLong(pos);
                                 counter = _stepValue;
                             }
