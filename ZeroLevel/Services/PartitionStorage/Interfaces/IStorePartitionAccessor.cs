@@ -33,7 +33,7 @@ namespace ZeroLevel.Services.PartitionStorage
         /// <summary>
         /// Iterating over all recorded data of the file with the specified key
         /// </summary>
-        Task IterateKeyBacket(TKey key, Action<TKey, TValue> kvHandler);
+        IAsyncEnumerable<KV<TKey, TValue>> IterateKeyBacket(TKey key);
         /// <summary>
         /// Deleting the specified key and associated data
         /// </summary>

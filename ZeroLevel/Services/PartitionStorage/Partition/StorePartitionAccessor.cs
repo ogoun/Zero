@@ -134,7 +134,7 @@ namespace ZeroLevel.Services.PartitionStorage
                 }
             }
         }
-        public async Task IterateKeyBacket(TKey key, Action<TKey, TValue> kvHandler)
+        public async IAsyncEnumerable<KV<TKey, TValue>> IterateKeyBacket(TKey key)
         {
             var fileName = _options.GetFileName(key, _info);
             var filePath = Path.Combine(_catalog, fileName);
@@ -153,7 +153,7 @@ namespace ZeroLevel.Services.PartitionStorage
                             var vv = await Serializer.ValueDeserializer.Invoke(reader);
                             if (vv.Success == false) break;
 
-                            kvHandler.Invoke(kv.Value, vv.Value);
+                            yield return new KV<TKey, TValue>(kv.Value, vv.Value);
                         }
                     }
                 }
