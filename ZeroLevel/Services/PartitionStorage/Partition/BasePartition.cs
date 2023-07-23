@@ -156,8 +156,6 @@ namespace ZeroLevel.Services.PartitionStorage.Partition
                     _writersLock.Release();
                 }
             }
-            await writeAction.Invoke(writer);
-            /*
             await writer.WaitLockAsync();
             try
             {
@@ -166,10 +164,8 @@ namespace ZeroLevel.Services.PartitionStorage.Partition
             finally
             {
                 writer.Release();
-            }*/
+            }
         }
-
-
 
 
         /*
