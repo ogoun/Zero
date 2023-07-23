@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -70,7 +69,7 @@ namespace ZeroLevel.Services.PartitionStorage
             _fileAccessorCachee.DropAllIndexReaders();
         }
 
-        public async IAsyncEnumerable<KV<TKey, TValue>> Search(StoreSearchRequest<TKey, TMeta> searchRequest)
+        public async IAsyncEnumerable<KVM<TKey, TValue, TMeta>> Search(StoreSearchRequest<TKey, TMeta> searchRequest)
         {
             if (searchRequest.PartitionSearchRequests?.Any() ?? false)
             {
@@ -84,10 +83,9 @@ namespace ZeroLevel.Services.PartitionStorage
                     {
                         using (accessor)
                         {
-                            var set = new ConcurrentBag<KV<TKey, TValue>>();
                             await foreach (var kv in accessor.Find(pair.Value))
                             {
-                                yield return kv;
+                                yield return new KVM<TKey, TValue, TMeta>(kv.Key, kv.Value, pair.Key);
                             }
                         }
                     }
