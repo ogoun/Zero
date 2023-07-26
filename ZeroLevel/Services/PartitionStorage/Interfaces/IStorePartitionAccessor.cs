@@ -25,11 +25,14 @@ namespace ZeroLevel.Services.PartitionStorage
         /// Search in a partition for a specified keys
         /// </summary>
         IAsyncEnumerable<KV<TKey, TValue>> Find(IEnumerable<TKey> keys);
-
         /// <summary>
         /// Iterating over all recorded data
         /// </summary>
         IAsyncEnumerable<KV<TKey, TValue>> Iterate();
+        /// <summary>
+        /// Iterating over all recorded data and return keys only
+        /// </summary>
+        IAsyncEnumerable<TKey> IterateKeys();
         /// <summary>
         /// Iterating over all recorded data of the file with the specified key
         /// </summary>

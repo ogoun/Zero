@@ -35,6 +35,10 @@ namespace ZeroLevel.Services.PartitionStorage
         /// </summary>
         IAsyncEnumerable<KV<TKey, TValue>> Bypass(TMeta meta);
         /// <summary>
+        /// bypass all keys by meta
+        /// </summary>
+        IAsyncEnumerable<TKey> BypassKeys(TMeta meta);
+        /// <summary>
         /// true - if key exists
         /// </summary>
         Task<bool> Exists(TMeta meta, TKey key);

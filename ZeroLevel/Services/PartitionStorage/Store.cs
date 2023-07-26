@@ -113,6 +113,21 @@ namespace ZeroLevel.Services.PartitionStorage
             }
         }
 
+        public async IAsyncEnumerable<TKey> BypassKeys(TMeta meta)
+        {
+            var accessor = CreateAccessor(meta);
+            if (accessor != null)
+            {
+                using (accessor)
+                {
+                    await foreach (var kv in accessor.IterateKeys())
+                    {
+                        yield return kv;
+                    }
+                }
+            }
+        }
+
         public async Task<bool> Exists(TMeta meta, TKey key)
         {
             var accessor = CreateAccessor(meta);

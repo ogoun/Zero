@@ -134,6 +134,38 @@ namespace ZeroLevel.Services.PartitionStorage
                 }
             }
         }
+
+        public async IAsyncEnumerable<TKey> IterateKeys()
+        {
+            if (Directory.Exists(_catalog))
+            {
+                var files = Directory.GetFiles(_catalog);
+                if (files != null && files.Length > 0)
+                {
+                    foreach (var file in files)
+                    {
+                        var accessor = PhisicalFileAccessorCachee.GetDataAccessor(file, 0);
+                        if (accessor != null)
+                        {
+                            using (var reader = new MemoryStreamReader(accessor))
+                            {
+                                while (reader.EOS == false)
+                                {
+                                    var kv = await Serializer.KeyDeserializer.Invoke(reader);
+                                    if (kv.Success == false) break;
+
+                                    var vv = await Serializer.ValueDeserializer.Invoke(reader);
+                                    if (vv.Success == false) break;
+
+                                    yield return kv.Value;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         public async IAsyncEnumerable<KV<TKey, TValue>> IterateKeyBacket(TKey key)
         {
             var fileName = _options.GetFileName(key, _info);
