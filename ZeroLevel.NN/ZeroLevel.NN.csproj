@@ -35,10 +35,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Aurigma.GraphicsMill.Core.x64" Version="11.1.18" />
+    <PackageReference Include="Aurigma.GraphicsMill.Core.x64" Version="11.4.3" />
     <PackageReference Include="Microsoft.ML.OnnxRuntime.Managed" Version="1.15.1" />
-    <PackageReference Include="SixLabors.ImageSharp" Version="3.0.1" />
-    <PackageReference Include="SixLabors.ImageSharp.Drawing" Version="1.0.0-beta14" />
+    <PackageReference Include="SixLabors.ImageSharp" Version="3.0.2" />
+    <PackageReference Include="SixLabors.ImageSharp.Drawing" Version="2.0.0" />
   </ItemGroup>
 
   <ItemGroup>

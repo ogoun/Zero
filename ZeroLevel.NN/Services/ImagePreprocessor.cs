@@ -1,5 +1,4 @@
-﻿using Aurigma.GraphicsMill;
-using Microsoft.ML.OnnxRuntime.Tensors;
+﻿using Microsoft.ML.OnnxRuntime.Tensors;
 using ZeroLevel.NN.Models;
 
 namespace ZeroLevel.NN

@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Google.Protobuf" Version="3.24.3" />
+    <PackageReference Include="Grpc.Net.Client" Version="2.57.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="ZeroLevel.Qdrant.GrpcClient">
+      <HintPath>..\..\ZeroLevel.Qdrant.GrpcClient\bin\Release\net6.0\ZeroLevel.Qdrant.GrpcClient.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>

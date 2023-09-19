@@ -2,17 +2,17 @@
 {
     public class FeatureClusterBulder
     {
-        public FeatureClusterCollection<T> Build<T>(IEnumerable<T> faces, Func<T, float[]> vectorExtractor, Func<float[], float[], double> similarityFunction, float threshold, float clusterThreshold = 0.5f)
+        public FeatureClusterCollection<T> Build<T>(IEnumerable<T> items, Func<T, float[]> vectorExtractor, Func<float[], float[], double> similarityFunction, float threshold, float clusterThreshold = 0.5f)
         {
             var collection = new FeatureClusterCollection<T>();
-            foreach (var face in faces)
+            foreach (var item in items)
             {
                 bool isAdded = false;
                 foreach (var cluster in collection.Clusters)
                 {
-                    if (cluster.Value.IsNeighbor(face, similarityFunction, threshold, clusterThreshold))
+                    if (cluster.Value.IsNeighbor(item, similarityFunction, threshold, clusterThreshold))
                     {
-                        cluster.Value.Append(face);
+                        cluster.Value.Append(item);
                         isAdded = true;
                         break;
                     }
@@ -20,7 +20,7 @@
                 if (false == isAdded)
                 {
                     var cluster = new FeatureCluster<T>(vectorExtractor);
-                    cluster.Append(face);
+                    cluster.Append(item);
                     collection.Add(cluster);
                 }
             }
