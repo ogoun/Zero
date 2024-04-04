@@ -18,11 +18,11 @@ namespace ZeroLevel.Services.Web
             {
                 if (i % 2 == 0)
                 {
-                    result.Add(i + "-" + result[i - 2]);
+                    result.Add($"{i}-{result[i - 2]}");
                 }
                 else
                 {
-                    result.Add(new string(result[i - 2].Reverse().ToArray()) + "-" + i);
+                    result.Add($"{new string(result[i - 2].Reverse().ToArray())}-{i}");
                 }
             }
             return result;
