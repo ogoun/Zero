@@ -28,7 +28,7 @@ namespace ZeroLevel.Services.PartitionStorage
         /// <summary>
         /// Performs compression/grouping of recorded data in a partition
         /// </summary>
-        Task Compress();
+        void Compress();
         /// <summary>
         /// Rebuilds indexes for data in a partition
         /// </summary>

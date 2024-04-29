@@ -10,7 +10,8 @@ namespace ZeroLevel.Services.Utils
             uint scale = uint.MaxValue;
             while (scale == uint.MaxValue)
             {
-                byte[] four_bytes = RandomNumberGenerator.GetBytes(4);
+                byte[] four_bytes = new byte[4];
+                RandomNumberGenerator.Fill(four_bytes);
                 scale = BitConverter.ToUInt32(four_bytes, 0);
             }
             return (int)(min + (max - min) * (scale / (double)uint.MaxValue));

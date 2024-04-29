@@ -104,7 +104,7 @@ namespace ZeroLevel.Services.PartitionStorage
             }
             if (dict.Count > _stepValue)
             {
-                var step = (int)Math.Round(dict.Count / (float)_stepValue, MidpointRounding.ToZero);
+                var step = (int)Math.Truncate(dict.Count / (float)_stepValue);
                 var index_file = Path.Combine(_indexCatalog, Path.GetFileName(file));
 
                 _phisicalFileAccessorCachee.LockFile(index_file);

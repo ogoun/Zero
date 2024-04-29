@@ -152,7 +152,7 @@ namespace ZeroLevel.UnitTests
                 await storePart.Store(numbers[2], texts[7]);  // 2 - 21
 
                 storePart.CompleteAdding();
-                await storePart.Compress();
+                storePart.Compress();
             }
 
             // Assert

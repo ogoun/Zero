@@ -47,8 +47,8 @@ namespace System.Linq
             }
         }
 
-        /*public static IEnumerable<TSource> DistinctBy<TSource, TKey>
-            (this IEnumerable<TSource> source, Func<TSource, TKey> keySelector)
+        public static IEnumerable<TSource> DistinctBy<TSource, TKey>
+             (this IEnumerable<TSource> source, Func<TSource, TKey> keySelector)
         {
             if (source != null)
             {
@@ -61,7 +61,7 @@ namespace System.Linq
                     }
                 }
             }
-        }*/
+        }
 
         public static IList<TSource> Materialize<TSource>(this IEnumerable<TSource> source)
         {

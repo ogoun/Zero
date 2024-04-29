@@ -469,7 +469,7 @@ namespace ZeroLevel.Services.PartitionStorage
                 // 3. Replace from temporary to original
                 PhisicalFileAccessorCachee.DropDataReader(filePath);
                 File.Delete(filePath);
-                File.Move(tempFile, filePath, true);
+                File.Move(tempFile, filePath);
 
                 // Rebuild index if needs
                 if (_options.Index.Enabled && autoReindex)

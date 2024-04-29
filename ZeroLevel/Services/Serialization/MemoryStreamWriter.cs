@@ -144,34 +144,6 @@ namespace ZeroLevel.Services.Serialization
             }
         }
 
-        public void WriteTime(TimeOnly? time)
-        {
-            if (time == null)
-            {
-                WriteByte(0);
-            }
-            else
-            {
-                WriteByte(1);
-                var ts = time.Value.ToTimeSpan();
-                WriteTimeSpan(ts);
-            }
-        }
-
-        public void WriteDate(DateOnly? date)
-        {
-            if (date == null)
-            {
-                WriteByte(0);
-            }
-            else
-            {
-                WriteByte(1);
-                var days = date.Value.DayNumber;
-                WriteInt32(days);
-            }
-        }
-
         public void WriteIP(IPAddress ip)
         {
             if (ip == null)
@@ -559,34 +531,6 @@ namespace ZeroLevel.Services.Serialization
                 long serialized = datetime.Value.ToBinary();
                 byte[] data = BitConverter.GetBytes(serialized);
                 await _stream.WriteAsync(data, 0, 8);
-            }
-        }
-
-        public async Task WriteTimeAsync(TimeOnly? time)
-        {
-            if (time == null)
-            {
-                WriteByte(0);
-            }
-            else
-            {
-                WriteByte(1);
-                var ts = time.Value.ToTimeSpan();
-                await WriteTimeSpanAsync(ts);
-            }
-        }
-
-        public async Task WriteDateAsync(DateOnly? date)
-        {
-            if (date == null)
-            {
-                WriteByte(0);
-            }
-            else
-            {
-                WriteByte(1);
-                var days = date.Value.DayNumber;
-                await WriteInt32Async(days);
             }
         }
 

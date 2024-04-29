@@ -61,7 +61,7 @@ namespace PartitionFileStorageTest
                 await storePart.Store(c3, Generate(r));
                 await storePart.Store(c3, Generate(r));
                 storePart.CompleteAdding();
-                await storePart.Compress();
+                storePart.Compress();
             }
 
             using (var readPart = store.CreateAccessor(new Metadata { Date = new DateTime(2022, 11, 08) }))
@@ -124,7 +124,7 @@ namespace PartitionFileStorageTest
             Log.Info($"Fill journal: {sw.ElapsedMilliseconds}ms. Records writed: {storePart.TotalRecords}");
             sw.Restart();
             storePart.CompleteAdding();
-            await storePart.Compress();
+            storePart.Compress();
             sw.Stop();
             Log.Info($"Compress: {sw.ElapsedMilliseconds}ms");
             sw.Restart();
@@ -269,11 +269,11 @@ namespace PartitionFileStorageTest
 
             using (var storePart = store.CreateBuilder(meta))
             {
-                Parallel.ForEach(MassGenerator((long)(0.7 * PAIRS_COUNT)), parallelOptions, pair =>
+                await Parallel.ForEachAsync(MassGenerator((long)(0.7 * PAIRS_COUNT)), CancellationToken.None, async (pair, _) =>
                 {
                     var key = pair.Item1;
                     var val = pair.Item2;
-                    storePart.Store(key, val);
+                    await storePart.Store(key, val);
                     if (key % 717 == 0)
                     {
                         testKeys1.Add(key);
@@ -292,7 +292,7 @@ namespace PartitionFileStorageTest
                 Log.Info($"Fill journal: {sw.ElapsedMilliseconds}ms");
                 sw.Restart();
                 storePart.CompleteAdding();
-                await storePart.Compress();
+                storePart.Compress();
                 sw.Stop();
                 Log.Info($"Compress: {sw.ElapsedMilliseconds}ms");
                 sw.Restart();
@@ -305,11 +305,11 @@ namespace PartitionFileStorageTest
             sw.Restart();
             using (var merger = store.CreateMergeAccessor(meta, data => Compressor.DecodeBytesContent(data)))
             {
-                Parallel.ForEach(MassGenerator((long)(0.3 * PAIRS_COUNT)), parallelOptions, pair =>
+                await Parallel.ForEachAsync(MassGenerator((long)(0.3 * PAIRS_COUNT)), CancellationToken.None, async (pair, _) =>
                 {
                     var key = pair.Item1;
                     var val = pair.Item2;
-                    merger.Store(key, val);
+                    await merger.Store(key, val);
                     Keys.Add(key);
                 });
 
@@ -610,9 +610,10 @@ namespace PartitionFileStorageTest
             FSUtils.CleanAndTestFolder(root);
             await FastTest(options);
 
+            
             FSUtils.CleanAndTestFolder(root);
             await FullStoreMultithreadTest(optionsMultiThread);
-
+            
 
 
             /*FSUtils.CleanAndTestFolder(root);

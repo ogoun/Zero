@@ -53,12 +53,28 @@ namespace ZeroLevel.Services.PartitionStorage
             CloseWriteStreams();
         }
 
-        public async Task Compress()
+        public void Compress()
         {
             var files = Directory.GetFiles(_catalog);
             if (files != null && files.Length > 0)
             {
-                await Parallel.ForEachAsync(files, async(file, _) => await CompressFile(file));
+                var tasks = new Task[files.Length];
+                for (int i = 0; i < files.Length; i++)
+                {
+                    tasks[i] = Task.Factory.StartNew(f =>
+                    {
+                        var file = (string)f;
+                        try
+                        {
+                            CompressFile(file).Wait();
+                        }
+                        catch (Exception ex)
+                        {
+                            Log.Error(ex, $"[StorePartitionBuilder.Compress] '{file}'");
+                        }
+                    }, files[i]);
+                }
+                Task.WaitAll(tasks);
             }
         }
         public async IAsyncEnumerable<SearchResult<TKey, TInput>> Iterate()
@@ -108,7 +124,7 @@ namespace ZeroLevel.Services.PartitionStorage
             {
                 Log.SystemError(ex, $"[StoreDirect] Fault use writeStream for key '{groupKey}'");
                 return false;
-            }            
+            }
         }
         private async Task<bool> StoreDirectSafe(TKey key, TInput value)
         {
@@ -122,7 +138,7 @@ namespace ZeroLevel.Services.PartitionStorage
                 });
                 return true;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Log.SystemError(ex, $"[StoreDirectSafe] Fault use writeStream for key '{groupKey}'");
                 return false;
@@ -184,8 +200,12 @@ namespace ZeroLevel.Services.PartitionStorage
                         await Serializer.ValueSerializer.Invoke(writer, v);
                     }
                 }
-                File.Delete(file);
-                File.Move(tempFile, file, true);
+                if (File.Exists(file))
+                {
+                    File.Delete(file);
+                }
+                File.Copy(tempFile, file, true);
+                File.Delete(tempFile);
             }
             finally
             {

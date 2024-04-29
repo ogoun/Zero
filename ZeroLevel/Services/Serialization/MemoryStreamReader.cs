@@ -249,21 +249,7 @@ namespace ZeroLevel.Services.Serialization
             long deserialized = BitConverter.ToInt64(buffer, 0);
             return DateTime.FromBinary(deserialized);
         }
-        public TimeOnly? ReadTime()
-        {
-            var is_null = ReadByte();
-            if (is_null == 0) return null;
-            var ts = ReadTimeSpan();
-            return TimeOnly.FromTimeSpan(ts);
-        }
-
-        public DateOnly? ReadDate()
-        {
-            var is_null = ReadByte();
-            if (is_null == 0) return null;
-            var days = ReadInt32();
-            return DateOnly.FromDayNumber(days);
-        }
+        
         public IPAddress ReadIP()
         {
             var exists = ReadByte();
@@ -776,21 +762,6 @@ namespace ZeroLevel.Services.Serialization
             var buffer = await ReadBufferAsync(8);
             long deserialized = BitConverter.ToInt64(buffer, 0);
             return DateTime.FromBinary(deserialized);
-        }
-        public async Task<TimeOnly?> ReadTimeAsync()
-        {
-            var is_null = await ReadByteAsync();
-            if (is_null == 0) return null;
-            var ts = await ReadTimeSpanAsync();
-            return TimeOnly.FromTimeSpan(ts);
-        }
-
-        public async Task<DateOnly?> ReadDateAsync()
-        {
-            var is_null = await ReadByteAsync();
-            if (is_null == 0) return null;
-            var days = await ReadInt32Async();
-            return DateOnly.FromDayNumber(days);
         }
         public async Task<IPAddress> ReadIPAsync()
         {

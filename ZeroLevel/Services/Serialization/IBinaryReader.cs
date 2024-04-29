@@ -38,10 +38,6 @@ namespace ZeroLevel.Services.Serialization
 
         DateTime? ReadDateTime();
 
-        TimeOnly? ReadTime();
-
-        DateOnly? ReadDate();
-
         decimal ReadDecimal();
 
         TimeSpan ReadTimeSpan();
@@ -154,8 +150,6 @@ namespace ZeroLevel.Services.Serialization
         Task<string> ReadStringAsync();
         Task<Guid> ReadGuidAsync();
         Task<DateTime?> ReadDateTimeAsync();
-        Task<TimeOnly?> ReadTimeAsync();
-        Task<DateOnly?> ReadDateAsync();
         Task<decimal> ReadDecimalAsync();
         Task<TimeSpan> ReadTimeSpanAsync();
         Task<IPAddress> ReadIPAsync();

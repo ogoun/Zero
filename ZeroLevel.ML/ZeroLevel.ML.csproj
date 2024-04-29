@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<LangVersion>latest</LangVersion>
+		<TargetFramework>netstandard2.1</TargetFramework>
+		<Nullable>enable</Nullable>
+		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="CoreCompat.System.Drawing" Version="1.0.0-beta006">
+			<Aliases>CoreDrawing</Aliases>
+		</PackageReference>
+		<PackageReference Include="MetadataExtractor" Version="2.9.0-rc2" />
+		<PackageReference Include="Microsoft.ML.OnnxRuntime.Extensions" Version="0.10.0" />
+		<PackageReference Include="Microsoft.ML.OnnxRuntime.Managed" Version="1.17.3" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\ZeroLevel\ZeroLevel.csproj" />
+	</ItemGroup>
+
+</Project>

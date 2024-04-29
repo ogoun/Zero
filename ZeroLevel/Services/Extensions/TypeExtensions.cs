@@ -55,5 +55,11 @@ namespace ZeroLevel
 
             return IsAssignableToGenericType(baseType, genericType);
         }
+
+        public static bool IsAssignableTo(this Type type, Type assignableType)
+            => assignableType.IsAssignableFrom(type);
+
+        public static bool IsAssignableTo<T>(this Type type)
+            => typeof(T).IsAssignableFrom(type);
     }
 }

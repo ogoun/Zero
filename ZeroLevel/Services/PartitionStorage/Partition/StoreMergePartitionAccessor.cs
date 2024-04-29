@@ -124,7 +124,7 @@ namespace ZeroLevel.Services.PartitionStorage
                         {
                             File.Delete(updateFilePath);
                         }
-                        File.Move(file, updateFilePath, true);
+                        File.Move(file, updateFilePath);
                     }
                     finally
                     {

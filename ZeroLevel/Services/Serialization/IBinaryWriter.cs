@@ -40,10 +40,6 @@ namespace ZeroLevel.Services.Serialization
 
         void WriteDateTime(DateTime? datetime);
 
-        void WriteTime(TimeOnly? time);
-
-        void WriteDate(DateOnly? date);
-
         void WriteDecimal(Decimal number);
 
         void WriteTimeSpan(TimeSpan period);
@@ -144,10 +140,6 @@ namespace ZeroLevel.Services.Serialization
         Task WriteGuidAsync(Guid guid);
 
         Task WriteDateTimeAsync(DateTime? datetime);
-
-        Task WriteTimeAsync(TimeOnly? time);
-
-        Task WriteDateAsync(DateOnly? date);
 
         Task WriteDecimalAsync(Decimal number);
 

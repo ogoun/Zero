@@ -1,80 +1,19 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
-    <Description>Multi-tool
-</Description>
-    <Authors>ogoun</Authors>
-    <Company>ogoun</Company>
-    <AssemblyVersion>3.4.0.8</AssemblyVersion>
-    <PackageReleaseNotes></PackageReleaseNotes>
-    <PackageProjectUrl>https://github.com/ogoun/Zero/wiki</PackageProjectUrl>
-    <Copyright>Copyright Ogoun 2023</Copyright>
-    <PackageLicenseUrl></PackageLicenseUrl>
-    <PackageIconUrl></PackageIconUrl>
-    <RepositoryUrl>https://github.com/ogoun/Zero</RepositoryUrl>
-    <RepositoryType>git</RepositoryType>
-    <Version>3.4.0.8</Version>
-    <FileVersion>3.4.0.8</FileVersion>
-    <Platforms>AnyCPU;x64;x86</Platforms>
-    <PackageIcon>zero.png</PackageIcon>
-    <DebugType>full</DebugType>
-    <ErrorReport>none</ErrorReport>
-    <ApplicationIcon>zero.ico</ApplicationIcon>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <Title>ZeroLevel</Title>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
-  </PropertyGroup>
+	<PropertyGroup>
+		<LangVersion>latest</LangVersion>
+		<TargetFramework>netstandard2.1</TargetFramework>
+		<Nullable>enable</Nullable>
+		<ApplicationIcon>lz.ico</ApplicationIcon>
+		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+	</PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <Deterministic>False</Deterministic>
-    <DebugType>portable</DebugType>
-  </PropertyGroup>
+	<ItemGroup>
+		<None Remove="lz.ico" />
+	</ItemGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <Deterministic>False</Deterministic>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <Deterministic>False</Deterministic>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <ErrorReport>prompt</ErrorReport>
-    <DebugType>none</DebugType>
-    <DebugSymbols>false</DebugSymbols>
-    <PlatformTarget>x64</PlatformTarget>
-    <Deterministic>False</Deterministic>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <ErrorReport>prompt</ErrorReport>
-    <DebugType>none</DebugType>
-    <DebugSymbols>false</DebugSymbols>
-    <PlatformTarget>x86</PlatformTarget>
-    <Deterministic>False</Deterministic>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <Deterministic>False</Deterministic>
-    <DebugType>none</DebugType>
-  </PropertyGroup>
-
-  <ItemGroup>
-    <Content Include="zero.ico" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Update="zero.png">
-      <Pack>True</Pack>
-      <PackagePath></PackagePath>
-    </None>
-  </ItemGroup>
+	<ItemGroup>
+		<Content Include="lz.ico" />
+	</ItemGroup>
 
 </Project>

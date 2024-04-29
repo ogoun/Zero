@@ -28,7 +28,7 @@ namespace ZeroLevel.Services.Network.Utils
                         using (var client = new HttpClient(clientHandler))
                         {
                             var message = new HttpRequestMessage(HttpMethod.Get, "http://ipv4.icanhazip.com");
-                            using (var response = client.Send(message))
+                            using (var response = client.SendAsync(message).Result)
                             {
                                 return response.Content.ReadAsStringAsync().Result;
                             }

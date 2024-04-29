@@ -50,12 +50,12 @@ namespace ZeroLevel.Services.PartitionStorage.Partition
             CloseWriteStreams();
         }
 
-        public async Task Compress()
+        public void Compress()
         {
             var files = Directory.GetFiles(_catalog);
             if (files != null && files.Length > 0)
             {
-                await Parallel.ForEachAsync(files, async (file, ct) => await CompressFile(file));
+                Parallel.ForEach(files, async (file, ct) => await CompressFile(file));
             }
         }
         public async IAsyncEnumerable<SearchResult<TKey, TInput>> Iterate()
@@ -151,7 +151,7 @@ namespace ZeroLevel.Services.PartitionStorage.Partition
                     }
                 }
                 File.Delete(file);
-                File.Move(tempFile, file, true);
+                File.Move(tempFile, file);
             }
             finally
             {
