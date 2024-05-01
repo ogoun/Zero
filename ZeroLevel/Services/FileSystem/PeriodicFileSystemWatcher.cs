@@ -65,7 +65,7 @@ namespace ZeroLevel.Services.FileSystem
 
         private void CheckSourceFolder()
         {
-            string[] files = null;
+            string[] files = null!;
             try
             {
                 files = GetFilesFromSource();

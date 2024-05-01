@@ -76,7 +76,7 @@ namespace ZeroLevel.Services.Semantic
             }
             internal uint? GetKey(string word, int index)
             {
-                if (this.Children?.ContainsKey(word[index]) ?? false)
+                if (word != null && (this.Children?.ContainsKey(word[index]) ?? false))
                 {
                     if (word.Length == index + 1) return this.Children[word[index]].Value;
                     return this.Children[word[index]].GetKey(word, index + 1);
@@ -103,7 +103,7 @@ namespace ZeroLevel.Services.Semantic
 
             internal void DestroyReverseIndex()
             {
-                this.Parent = null;
+                this.Parent = null!;
                 this.Key = null;
                 if (this.Children != null)
                 {
@@ -189,7 +189,7 @@ namespace ZeroLevel.Services.Semantic
             {
                 do
                 {
-                    yield return node.Key.Value;
+                    yield return node.Key!.Value;
                     node = node.Parent;
                 } while (node.Parent != null);
             }
@@ -198,7 +198,7 @@ namespace ZeroLevel.Services.Semantic
         public bool Contains(string word)
         {
             if (word?.Length == 0) return false;
-            return _root.GetKey(word, 0).HasValue;
+            return _root.GetKey(word!, 0).HasValue;
         }
 
         public void Serialize(IBinaryWriter writer)
@@ -224,7 +224,7 @@ namespace ZeroLevel.Services.Semantic
                 {
                     _reverse_index = new Dictionary<uint, TrieNode>();
                 }
-                _root.RebuildReverseIndex(null, ' ', _reverse_index);
+                _root.RebuildReverseIndex(null!, ' ', _reverse_index);
             }
         }
 
@@ -233,7 +233,7 @@ namespace ZeroLevel.Services.Semantic
             if (_reverse_index != null)
             {
                 _reverse_index.Clear();
-                _reverse_index = null;
+                _reverse_index = null!;
             }
             _root.DestroyReverseIndex();
         }

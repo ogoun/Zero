@@ -74,20 +74,20 @@ namespace MemoryPools.Collections.Linq
 
             public void Reset() => _src.Reset();
 
-            object IPoolingEnumerator.Current => Current;
+            object IPoolingEnumerator.Current => Current!;
 
             public T Current => _src.Current;
 
             public void Dispose()
             {
                 _parent?.Dispose();
-                _parent = default;
+                _parent = default!;
                 
                 _hashset?.Dispose();
-                _hashset = default;
+                _hashset = default!;
                 
-                _src = default;
-                _selector = default;
+                _src = default!;
+                _selector = default!;
                 Pool<DistinctExprEnumerator>.Return(this);
             }
         }

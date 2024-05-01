@@ -11,9 +11,9 @@ namespace ZeroLevel.Models
 
         public bool Equals(BaseModel other)
         {
-            if (this == null)
+            if (this == null!)
                 throw new NullReferenceException();
-            if (other == null)
+            if (other == null!)
                 return false;
             if (ReferenceEquals(this, other))
                 return true;
@@ -24,10 +24,10 @@ namespace ZeroLevel.Models
 
         public override bool Equals(object obj)
         {
-            if (this == null)
+            if (this == null!)
                 throw new NullReferenceException();
 
-            return Equals(obj as BaseModel);
+            return Equals((obj as BaseModel)!);
         }
 
         public static bool operator ==(BaseModel first, BaseModel second) => Equals(first, second);

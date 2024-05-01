@@ -16,8 +16,8 @@ namespace MemoryPools.Collections.Specialized
 		private IList<T> _other;
 
 		// Static lists to store real length (-1 field in struct)
-		private static readonly IList<T> LengthIs1 = new List<T> {default};
-		private static readonly IList<T> LengthIs2 = new List<T> {default, default};
+		private static readonly IList<T> LengthIs1 = new List<T> {default!};
+		private static readonly IList<T> LengthIs2 = new List<T> {default!, default!};
 
 		private const int DefaultListCapacity = 8;
 		public const int LocalStoreCapacity = 2;
@@ -238,7 +238,7 @@ namespace MemoryPools.Collections.Specialized
 					throw new IndexOutOfRangeException();
 
 				if (_other?.Count > LocalStoreCapacity) return _other[index];
-				if (_other.Count > 0 && index == 0) return _items.Item1;
+				if (_other!.Count > 0 && index == 0) return _items.Item1;
 				if (_other.Count > 1 && index == 1) return _items.Item2;
 
 				throw new InvalidOperationException("Uncovered branch");

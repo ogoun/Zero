@@ -6,14 +6,37 @@
 		<Nullable>enable</Nullable>
 		<ApplicationIcon>lz.ico</ApplicationIcon>
 		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+		<Title>ZeroLevel</Title>
+		<FileVersion>4.0.0.0</FileVersion>
+		<AssemblyVersion>4.0.0.0</AssemblyVersion>
+		<AnalysisLevel>latest</AnalysisLevel>
+		<Version>$(AssemblyVersion)</Version>
+		<Authors>Ogoun</Authors>
+		<Description>Basic Toolkit.</Description>
+		<Copyright>© ogoun</Copyright>
+		<PackageProjectUrl>https://github.com/ogoun/Zero</PackageProjectUrl>
+		<PackageIcon>lz.ico</PackageIcon>
+		<RepositoryUrl>https://github.com/ogoun/Zero</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+	  <NoWarn>1701;1702;8618</NoWarn>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+	  <NoWarn>1701;1702;8618</NoWarn>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<None Remove="lz.ico" />
+		<Content Include="lz.ico" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<Content Include="lz.ico" />
+	  <None Update="lz.ico">
+	    <Pack>True</Pack>
+	    <PackagePath>\</PackagePath>
+	  </None>
 	</ItemGroup>
 
 </Project>

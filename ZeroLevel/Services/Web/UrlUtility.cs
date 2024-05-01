@@ -497,8 +497,8 @@ namespace ZeroLevel.Services.Web
                     i++;
                 }
                 // extract the name / value pair
-                string name = null;
-                string value = null;
+                string name = null!;
+                string value = null!;
                 if (ti >= 0)
                 {
                     name = s.Substring(si, ti - si);

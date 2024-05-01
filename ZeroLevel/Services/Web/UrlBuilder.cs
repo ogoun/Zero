@@ -20,7 +20,7 @@ namespace ZeroLevel.Services.Web
         {
             if (null == instance)
             {
-                return BuildRequestUrl(baseUri, resource, null);
+                return BuildRequestUrl(baseUri, resource, null!);
             }
             var members = typeof(T).GetMembers(
                 BindingFlags.Public |
@@ -34,10 +34,10 @@ namespace ZeroLevel.Services.Web
                 switch (member.MemberType)
                 {
                     case MemberTypes.Property:
-                        parameters.Add(member.Name.ToLowerInvariant(), (member as PropertyInfo).GetValue(instance));
+                        parameters.Add(member.Name.ToLowerInvariant(), (member as PropertyInfo)!.GetValue(instance));
                         break;
                     case MemberTypes.Field:
-                        parameters.Add(member.Name.ToLowerInvariant(), (member as FieldInfo).GetValue(instance));
+                        parameters.Add(member.Name.ToLowerInvariant(), (member as FieldInfo)!.GetValue(instance));
                         break;
                     default:
                         continue;

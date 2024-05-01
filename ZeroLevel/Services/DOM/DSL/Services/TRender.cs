@@ -57,7 +57,7 @@ namespace DOM.DSL.Services
             Factory = new TContainerFactory(this);
         }
 
-        public void Resolve(TToken token, Action<TContainer> handler, bool release = true, TContainer self = null)
+        public void Resolve(TToken token, Action<TContainer> handler, bool release = true, TContainer self = null!)
         {
             var self_copy = self == null ? null : Factory.Get(self.Current, self.Index);
             try
@@ -70,7 +70,7 @@ namespace DOM.DSL.Services
                 }
                 else if (token is TElementToken)
                 {
-                    var containers = ResolveElementToken(token.AsElementToken(), self_copy);
+                    var containers = ResolveElementToken(token.AsElementToken(), self_copy!);
                     foreach (var c in containers)
                     {
                         handler(c);
@@ -79,7 +79,7 @@ namespace DOM.DSL.Services
                 }
                 else if (token is TBlockToken)
                 {
-                    var containers = ResolveBlockToken(token.AsBlockToken(), self_copy);
+                    var containers = ResolveBlockToken(token.AsBlockToken(), self_copy!);
                     foreach (var c in containers)
                     {
                         handler(c);
@@ -89,13 +89,13 @@ namespace DOM.DSL.Services
             }
             finally
             {
-                Factory.Release(self_copy);
+                Factory.Release(self_copy!);
             }
         }
 
-        private TContainer[] ResolveElementToken(TElementToken token, TContainer self = null)
+        private TContainer[] ResolveElementToken(TElementToken token, TContainer self = null!)
         {
-            TContainer container = null;
+            TContainer container = null!;
             switch (token.ElementName.Trim().ToLowerInvariant())
             {
                 // External
@@ -147,7 +147,7 @@ namespace DOM.DSL.Services
                 case "content": container = Factory.Get(new TContentElement(_document)); break;
                 case "aside": container = Factory.Get(_document.Attachments); break;
                 case "assotiations": container = Factory.Get(_document.Assotiations); break;
-                case "null": container = Factory.Get(null); break;
+                case "null": container = Factory.Get(null!); break;
                 case "empty": container = Factory.Get(string.Empty); break;
 
                 // Blocks
@@ -165,7 +165,7 @@ namespace DOM.DSL.Services
                     }
             }
 
-            if (container == null) container = Factory.Get(null);
+            if (container == null) container = Factory.Get(null!);
 
             if (token.NextToken is TPropertyToken)
             {
@@ -184,7 +184,7 @@ namespace DOM.DSL.Services
 
         private TContainer ResolvePropertyToken(TPropertyToken token, TContainer container)
         {
-            string property_index = null;
+            string property_index = null!;
             Resolve(token.PropertyIndex, c => property_index = c.ToString());
             container.MoveToProperty(token.PropertyName, property_index);
             if (token.NextToken is TPropertyToken)
@@ -223,13 +223,13 @@ namespace DOM.DSL.Services
             return container;
         }
 
-        private IEnumerable<TContainer> ResolveBlockToken(TBlockToken blockToken, TContainer self_parent = null)
+        private IEnumerable<TContainer> ResolveBlockToken(TBlockToken blockToken, TContainer self_parent = null!)
         {
             switch (blockToken.Name)
             {
                 case "block":
                     {
-                        string name = null;
+                        string name = null!;
                         Resolve(blockToken.Condition, c => name = c.ToString(), true);
                         if (false == string.IsNullOrWhiteSpace(name))
                         {
@@ -254,19 +254,19 @@ namespace DOM.DSL.Services
                         if (success)
                         {
                             var ls = self_parent == null ? null : Factory.Get(self_parent.Current, self_parent.Index);
-                            result = ResolveSimpleBlockToken(blockToken, ls);
+                            result = ResolveSimpleBlockToken(blockToken, ls!);
                             Factory.Release(ls);
                         }
                         else
                         {
-                            result = new List<TContainer> { Factory.Get(null) };
+                            result = new List<TContainer> { Factory.Get(null!) };
                         }
                         return result;
                     }
                 case "for":
                     {
                         var list = new List<TContainer>();
-                        TContainer self_container = null;
+                        TContainer self_container = null!;
                         Resolve(blockToken.Condition, c => self_container = c, false, self_parent);
                         if (self_container != null)
                         {
@@ -292,14 +292,14 @@ namespace DOM.DSL.Services
                                 }
                             }
                         }
-                        Factory.Release(self_container);
+                        Factory.Release(self_container!);
                         return list;
                     }
             }
             return ResolveSimpleBlockToken(blockToken, self_parent);
         }
 
-        private List<TContainer> ResolveSimpleBlockToken(TBlockToken token, TContainer self = null)
+        private List<TContainer> ResolveSimpleBlockToken(TBlockToken token, TContainer self = null!)
         {
             var block = new List<TContainer>();
             foreach (var t in token.Body)
@@ -319,23 +319,26 @@ namespace DOM.DSL.Services
                 {
                     var function = token.AsElementToken()?.NextToken?.AsFunctionToken();
                     var elementName = token.AsElementToken()?.ElementName;
-                    var functionName = function?.FunctionName;
-                    var rule_token = function?.FunctionArgs == null ?
-                        null :
-                        new TBlockToken(function.FunctionArgs.Select(a => a.Clone()));
-                    string special = null;
-                    if (functionName.Equals("special", StringComparison.OrdinalIgnoreCase))
+                    if (elementName != null)
                     {
-                        var args = new List<TContainer>();
-                        foreach (var a in function.FunctionArgs)
+                        var functionName = function?.FunctionName ?? string.Empty;
+                        var rule_token = function?.FunctionArgs == null ?
+                            null :
+                            new TBlockToken(function.FunctionArgs.Select(a => a.Clone()));
+                        string special = null!;
+                        if (functionName.Equals("special", StringComparison.OrdinalIgnoreCase))
                         {
-                            Resolve(a, c => args.Add(c), false);
+                            var args = new List<TContainer>();
+                            foreach (var a in function?.FunctionArgs ?? Enumerable.Empty<TToken>())
+                            {
+                                Resolve(a, c => args.Add(c), false);
+                            }
+                            special = string.Join(",", args.Select(a => a.ToString()));
+                            foreach (var a in args)
+                                Factory.Release(a);
                         }
-                        special = string.Join(",", args.Select(a => a.ToString()));
-                        foreach (var a in args)
-                            Factory.Release(a);
+                        rules.UpdateRule(elementName, functionName, rule_token!, special);
                     }
-                    rules.UpdateRule(elementName, functionName, rule_token, special);
                 }
             }
             return Factory.Get(DocumentContentReader.ReadAs<string>(_document, new TContentToStringConverter(this, rules)));
@@ -399,7 +402,7 @@ namespace DOM.DSL.Services
                     }
                     break;
             }
-            foreach (var a in args)
+            foreach (var a in args!)
             {
                 Factory.Release(a);
             }

@@ -15,20 +15,20 @@ namespace DOM.DSL.Tokens
             IEnumerable<TToken> body)
         {
             Name = name;
-            Condition = condition?.Clone();
+            Condition = condition?.Clone()!;
             Body = body.Select(b => b.Clone()).ToArray();
         }
 
         public TBlockToken(IEnumerable<TToken> body)
         {
             Name = string.Empty;
-            Condition = null;
+            Condition = null!;
             Body = body.Select(b => b.Clone()).ToArray();
         }
 
         public override TToken Clone()
         {
-            return new TBlockToken(this.Name, this.Condition?.Clone(), this.Body?.Select(b => b.Clone()).ToArray());
+            return new TBlockToken(this.Name, this.Condition?.Clone()!, this.Body?.Select(b => b.Clone()!).ToArray()!);
         }
 
         public override TToken CloneLocal()

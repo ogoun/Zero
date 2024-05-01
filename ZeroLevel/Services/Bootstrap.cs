@@ -127,32 +127,32 @@ namespace ZeroLevel
         }
 
         public static BootstrapFluent Startup<T>(string[] args,
-            Func<bool> preStartConfiguration = null,
-            Func<bool> postStartConfiguration = null)
+            Func<bool> preStartConfiguration = null!,
+            Func<bool> postStartConfiguration = null!)
             where T : IZeroService
         {
-            var service = Initialize<T>(args, null,
+            var service = Initialize<T>(args, null!,
                 preStartConfiguration, postStartConfiguration);
             return new BootstrapFluent(service);
         }
 
         public static BootstrapFluent Startup<T>(string[] args,
             Func<IConfigurationSet> configuration,
-            Func<bool> preStartConfiguration = null,
-            Func<bool> postStartConfiguration = null)
+            Func<bool> preStartConfiguration = null!,
+            Func<bool> postStartConfiguration = null!)
             where T : IZeroService
         {
-            var service = Initialize<T>(args, configuration?.Invoke(), preStartConfiguration, postStartConfiguration);
+            var service = Initialize<T>(args, configuration?.Invoke()!, preStartConfiguration, postStartConfiguration);
             return new BootstrapFluent(service);
         }
 
         private static IZeroService Initialize<T>(string[] args,
             IConfigurationSet configurationSet,
-            Func<bool> preStartConfiguration = null,
-            Func<bool> postStartConfiguration = null)
+            Func<bool> preStartConfiguration = null!,
+            Func<bool> postStartConfiguration = null!)
             where T : IZeroService
         {
-            IZeroService service = null;
+            IZeroService service = null!;
             IConfigurationSet config = Configuration.DefaultSet;
             config.CreateSection("commandline", Configuration.ReadFromCommandLine(args));
             if (configurationSet != null)
@@ -168,13 +168,13 @@ namespace ZeroLevel
                     if (preStartConfiguration() == false)
                     {
                         Log.SystemInfo("[Bootstrap] Service start canceled, because custom preconfig return false");
-                        return null;
+                        return null!;
                     }
                 }
                 catch (Exception ex)
                 {
                     Log.SystemError(ex, "[Bootstrap] Service start canceled, preconfig faulted");
-                    return null;
+                    return null!;
                 }
             }
             try
@@ -204,7 +204,7 @@ namespace ZeroLevel
             return service;
         }
 
-        public static IExchange CreateExchange() => new Exchange(null);
+        public static IExchange CreateExchange() => new Exchange(null!);
 
         public static void Shutdown()
         {

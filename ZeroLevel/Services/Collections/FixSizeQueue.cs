@@ -46,13 +46,13 @@ namespace ZeroLevel.Services.Collections
         public bool Equals(T x, T y)
         {
             if (x == null && y == null) return true;
-            if ((object)x == (object)y) return true;
             if (x == null || y == null) return false;
+            if ((object)x == (object)y) return true;
             if (ReferenceEquals(x, y)) return true;
             return x.Equals(y);
         }
 
-        public bool Contains(T item, IComparer<T> comparer = null)
+        public bool Contains(T item, IComparer<T> comparer = null!)
         {
             lock (_accessLocker)
             {

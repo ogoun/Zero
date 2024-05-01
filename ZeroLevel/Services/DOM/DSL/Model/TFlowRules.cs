@@ -68,54 +68,54 @@ namespace DOM.DSL.Model
 
         public void Bootstrap()
         {
-            if (null == SectionPrefix) SectionPrefix = null;
-            if (null == SectionPostfix) SectionPostfix = null;
-            if (null == ParagraphPrefix) ParagraphPrefix = null;
-            if (null == ParagraphPostfix) ParagraphPostfix = null;
-            if (null == ListPrefix) ListPrefix = null;
-            if (null == ListPostfix) ListPostfix = null;
-            if (null == ListItemPrefix) ListItemPrefix = null;
-            if (null == ListItemPostfix) ListItemPostfix = null;
-            if (null == TablePrefix) TablePrefix = null;
-            if (null == TablePostfix) TablePostfix = null;
-            if (null == ColumnsPrefix) ColumnsPrefix = null;
-            if (null == ColumnsPostfix) ColumnsPostfix = null;
-            if (null == ColumnPrefix) ColumnPrefix = null;
-            if (null == ColumnTemplate) ColumnTemplate = null;
-            if (null == ColumnPostfix) ColumnPostfix = null;
-            if (null == RowPrefix) RowPrefix = null;
-            if (null == RowPostfix) RowPostfix = null;
-            if (null == CellPrefix) CellPrefix = null;
-            if (null == CellPostfix) CellPostfix = null;
-            if (null == FirstRowCellPrefix) FirstRowCellPrefix = null;
-            if (null == FirstRowCellPostfix) FirstRowCellPostfix = null;
-            if (null == AudioplayerPrefix) AudioplayerPrefix = null;
-            if (null == AudioplayerPostfix) AudioplayerPostfix = null;
-            if (null == VideoplayerPrefix) VideoplayerPrefix = null;
-            if (null == VideoplayerPostfix) VideoplayerPostfix = null;
-            if (null == GalleryPrefix) GalleryPrefix = null;
-            if (null == GalleryPostfix) GalleryPostfix = null;
-            if (null == FormPrefix) FormPrefix = null;
-            if (null == FormTemplate) FormTemplate = null;
-            if (null == FormPostfix) FormPostfix = null;
-            if (null == VideoPrefix) VideoPrefix = null;
-            if (null == VideoTemplate) VideoTemplate = null;
-            if (null == VideoPostfix) VideoPostfix = null;
-            if (null == AudioPrefix) AudioPrefix = null;
-            if (null == AudioTemplate) AudioTemplate = null;
-            if (null == AudioPostfix) AudioPostfix = null;
-            if (null == ImagePrefix) ImagePrefix = null;
-            if (null == ImageTemplate) ImageTemplate = null;
-            if (null == ImagePostfix) ImagePostfix = null;
-            if (null == LinkPrefix) LinkPrefix = null;
-            if (null == LinkTemplate) LinkTemplate = null;
-            if (null == LinkPostfix) LinkPostfix = null;
-            if (null == QuotePrefix) QuotePrefix = null;
+            if (null == SectionPrefix) SectionPrefix = null!;
+            if (null == SectionPostfix) SectionPostfix = null!;
+            if (null == ParagraphPrefix) ParagraphPrefix = null!;
+            if (null == ParagraphPostfix) ParagraphPostfix = null!;
+            if (null == ListPrefix) ListPrefix = null!;
+            if (null == ListPostfix) ListPostfix = null!;
+            if (null == ListItemPrefix) ListItemPrefix = null!;
+            if (null == ListItemPostfix) ListItemPostfix = null!;
+            if (null == TablePrefix) TablePrefix = null!;
+            if (null == TablePostfix) TablePostfix = null!;
+            if (null == ColumnsPrefix) ColumnsPrefix = null!;
+            if (null == ColumnsPostfix) ColumnsPostfix = null!;
+            if (null == ColumnPrefix) ColumnPrefix = null!;
+            if (null == ColumnTemplate) ColumnTemplate = null!;
+            if (null == ColumnPostfix) ColumnPostfix = null!;
+            if (null == RowPrefix) RowPrefix = null!;
+            if (null == RowPostfix) RowPostfix = null!;
+            if (null == CellPrefix) CellPrefix = null!;
+            if (null == CellPostfix) CellPostfix = null!;
+            if (null == FirstRowCellPrefix) FirstRowCellPrefix = null!;
+            if (null == FirstRowCellPostfix) FirstRowCellPostfix = null!;
+            if (null == AudioplayerPrefix) AudioplayerPrefix = null!;
+            if (null == AudioplayerPostfix) AudioplayerPostfix = null!;
+            if (null == VideoplayerPrefix) VideoplayerPrefix = null!;
+            if (null == VideoplayerPostfix) VideoplayerPostfix = null!;
+            if (null == GalleryPrefix) GalleryPrefix = null!;
+            if (null == GalleryPostfix) GalleryPostfix = null!;
+            if (null == FormPrefix) FormPrefix = null!;
+            if (null == FormTemplate) FormTemplate = null!;
+            if (null == FormPostfix) FormPostfix = null!;
+            if (null == VideoPrefix) VideoPrefix = null!;
+            if (null == VideoTemplate) VideoTemplate = null!;
+            if (null == VideoPostfix) VideoPostfix = null!;
+            if (null == AudioPrefix) AudioPrefix = null!;
+            if (null == AudioTemplate) AudioTemplate = null!;
+            if (null == AudioPostfix) AudioPostfix = null!;
+            if (null == ImagePrefix) ImagePrefix = null!;
+            if (null == ImageTemplate) ImageTemplate = null!;
+            if (null == ImagePostfix) ImagePostfix = null!;
+            if (null == LinkPrefix) LinkPrefix = null!;
+            if (null == LinkTemplate) LinkTemplate = null!;
+            if (null == LinkPostfix) LinkPostfix = null!;
+            if (null == QuotePrefix) QuotePrefix = null!;
             if (null == QuoteTemplate) QuoteTemplate = new TBlockToken(new[] { new TElementToken { ElementName = "self" } });
-            if (null == QuotePostfix) QuotePostfix = null;
-            if (null == TextPrefix) TextPrefix = null;
+            if (null == QuotePostfix) QuotePostfix = null!;
+            if (null == TextPrefix) TextPrefix = null!;
             if (null == TextTemplate) TextTemplate = new TBlockToken(new[] { new TElementToken { ElementName = "self" } });
-            if (null == TextPostfix) TextPostfix = null;
+            if (null == TextPostfix) TextPostfix = null!;
         }
 
         public void UpdateRule(string elementName, string functionName, TBlockToken rule_token, string special)
@@ -134,7 +134,7 @@ namespace DOM.DSL.Model
                             break;
 
                         case "ignore":
-                            ListPostfix = ListPrefix = null;
+                            ListPostfix = ListPrefix = null!;
                             break;
                     }
                     break;
@@ -151,7 +151,7 @@ namespace DOM.DSL.Model
                             break;
 
                         case "ignore":
-                            ListItemPrefix = ListItemPostfix = null;
+                            ListItemPrefix = ListItemPostfix = null!;
                             break;
                     }
                     break;
@@ -172,7 +172,7 @@ namespace DOM.DSL.Model
                             break;
 
                         case "ignore":
-                            TextPrefix = TextTemplate = TextPostfix = null;
+                            TextPrefix = TextTemplate = TextPostfix = null!;
                             break;
                     }
                     break;
@@ -193,7 +193,7 @@ namespace DOM.DSL.Model
                             break;
 
                         case "ignore":
-                            LinkPrefix = LinkTemplate = LinkPostfix = null;
+                            LinkPrefix = LinkTemplate = LinkPostfix = null!;
                             break;
                     }
                     break;
@@ -214,7 +214,7 @@ namespace DOM.DSL.Model
                             break;
 
                         case "ignore":
-                            ImagePrefix = ImageTemplate = ImagePostfix = null;
+                            ImagePrefix = ImageTemplate = ImagePostfix = null!;
                             break;
                     }
                     break;
@@ -235,7 +235,7 @@ namespace DOM.DSL.Model
                             break;
 
                         case "ignore":
-                            QuotePrefix = QuoteTemplate = QuotePostfix = null;
+                            QuotePrefix = QuoteTemplate = QuotePostfix = null!;
                             break;
                     }
                     break;
@@ -256,7 +256,7 @@ namespace DOM.DSL.Model
                             break;
 
                         case "ignore":
-                            FormPrefix = FormTemplate = FormPostfix = null;
+                            FormPrefix = FormTemplate = FormPostfix = null!;
                             break;
                     }
                     break;
@@ -277,7 +277,7 @@ namespace DOM.DSL.Model
                             break;
 
                         case "ignore":
-                            VideoPrefix = VideoTemplate = VideoPostfix = null;
+                            VideoPrefix = VideoTemplate = VideoPostfix = null!;
                             break;
                     }
                     break;
@@ -298,7 +298,7 @@ namespace DOM.DSL.Model
                             break;
 
                         case "ignore":
-                            AudioPrefix = AudioTemplate = AudioPostfix = null;
+                            AudioPrefix = AudioTemplate = AudioPostfix = null!;
                             break;
                     }
                     break;
@@ -315,7 +315,7 @@ namespace DOM.DSL.Model
                             break;
 
                         case "ignore":
-                            SectionPrefix = SectionPostfix = null;
+                            SectionPrefix = SectionPostfix = null!;
                             break;
                     }
                     break;
@@ -332,7 +332,7 @@ namespace DOM.DSL.Model
                             break;
 
                         case "ignore":
-                            ParagraphPrefix = ParagraphPostfix = null;
+                            ParagraphPrefix = ParagraphPostfix = null!;
                             break;
                     }
                     break;
@@ -349,15 +349,15 @@ namespace DOM.DSL.Model
                             break;
 
                         case "ignore":
-                            TablePrefix = TablePostfix = null;
+                            TablePrefix = TablePostfix = null!;
                             break;
 
                         case "special": // Using a hardcoded table conversion
                                         //TablePrefix = TablePostfix = null;
-                            ColumnsPrefix = ColumnsPostfix = null;
-                            ColumnPrefix = ColumnTemplate = ColumnPostfix = null;
-                            RowPrefix = RowPostfix = null;
-                            CellPrefix = CellPostfix = null;
+                            ColumnsPrefix = ColumnsPostfix = null!;
+                            ColumnPrefix = ColumnTemplate = ColumnPostfix = null!;
+                            RowPrefix = RowPostfix = null!;
+                            CellPrefix = CellPostfix = null!;
                             // Args: (style, paddings l-t-r-b, maxcellwidth, maxtablewidth)
                             UseSpecialTableBuilder = true;
                             SpecialTableBuilder = SpecialTableBuilderFactory.CreateSpecialTableBuilder(special);
@@ -378,7 +378,7 @@ namespace DOM.DSL.Model
                             break;
 
                         case "ignore":
-                            ColumnsPrefix = ColumnsPostfix = null;
+                            ColumnsPrefix = ColumnsPostfix = null!;
                             break;
                     }
                     break;
@@ -399,7 +399,7 @@ namespace DOM.DSL.Model
                             break;
 
                         case "ignore":
-                            ColumnPrefix = ColumnTemplate = ColumnPostfix = null;
+                            ColumnPrefix = ColumnTemplate = ColumnPostfix = null!;
                             break;
                     }
                     break;
@@ -416,7 +416,7 @@ namespace DOM.DSL.Model
                             break;
 
                         case "ignore":
-                            RowPrefix = RowPostfix = null;
+                            RowPrefix = RowPostfix = null!;
                             break;
                     }
                     break;
@@ -433,7 +433,7 @@ namespace DOM.DSL.Model
                             break;
 
                         case "ignore":
-                            CellPrefix = CellPostfix = null;
+                            CellPrefix = CellPostfix = null!;
                             break;
                     }
                     break;
@@ -450,7 +450,7 @@ namespace DOM.DSL.Model
                             break;
 
                         case "ignore":
-                            VideoplayerPrefix = VideoplayerPostfix = null;
+                            VideoplayerPrefix = VideoplayerPostfix = null!;
                             break;
                     }
                     break;
@@ -467,7 +467,7 @@ namespace DOM.DSL.Model
                             break;
 
                         case "ignore":
-                            AudioplayerPrefix = AudioplayerPostfix = null;
+                            AudioplayerPrefix = AudioplayerPostfix = null!;
                             break;
                     }
                     break;
@@ -484,7 +484,7 @@ namespace DOM.DSL.Model
                             break;
 
                         case "ignore":
-                            GalleryPrefix = GalleryPostfix = null;
+                            GalleryPrefix = GalleryPostfix = null!;
                             break;
                     }
                     break;

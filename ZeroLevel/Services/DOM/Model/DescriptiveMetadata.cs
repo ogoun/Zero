@@ -96,7 +96,7 @@ namespace ZeroLevel.DocumentObjectModel
         {
             this.Byline = reader.ReadString();
             this.CopyrightNotice = reader.ReadString();
-            this.Created = reader.ReadDateTime().Value;
+            this.Created = reader.ReadDateTime()!.Value;
             this.Headers = reader.ReadCollection<Header>();
             this.Language = reader.ReadString();
             this.Original = new Tag();

@@ -7,7 +7,7 @@ using System.Threading;
 using ZeroLevel.Services.Collections;
 
 namespace ZeroLevel.DependencyInjection
-{    
+{
     internal sealed class Container :
         IContainer
     {
@@ -15,29 +15,30 @@ namespace ZeroLevel.DependencyInjection
 
         private static object Activate(Type type, object[] args)
         {
+            if (type == null) return null!;
             var flags = BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Public;
-            CultureInfo culture = null; // use InvariantCulture or other if you prefer
+            CultureInfo culture = null!; // use InvariantCulture or other if you prefer
             return Activator.CreateInstance(type, flags, null, args, culture);
         }
 
         public T CreateInstance<T>(string resolveName = "")
         {
-            T instance = default(T);
+            T instance = default(T)!;
             try
             {
                 instance = Resolve<T>(resolveName);
             }
             catch
             {
-                instance = (T)Activate(typeof(T), null);
+                instance = (T)Activate(typeof(T), null!);
             }
-            Compose(instance);
+            Compose(instance!);
             return instance;
         }
 
         public T CreateInstance<T>(object[] args, string resolveName = "")
         {
-            T instance = default(T);
+            T instance = default(T)!;
             try
             {
                 instance = Resolve<T>(resolveName, args);
@@ -46,20 +47,20 @@ namespace ZeroLevel.DependencyInjection
             {
                 instance = (T)Activate(typeof(T), args);
             }
-            Compose(instance);
+            Compose(instance!);
             return instance;
         }
 
         public object CreateInstance(Type type, string resolveName = "")
         {
-            object instance = null;
+            object instance = null!;
             try
             {
                 instance = Resolve(type, resolveName);
             }
             catch
             {
-                instance = Activate(type, null);
+                instance = Activate(type, null!);
             }
             Compose(instance);
             return instance;
@@ -67,7 +68,7 @@ namespace ZeroLevel.DependencyInjection
 
         public object CreateInstance(Type type, object[] args, string resolveName = "")
         {
-            object instance = null;
+            object instance = null!;
             try
             {
                 instance = Resolve(type, resolveName, args);
@@ -258,12 +259,12 @@ namespace ZeroLevel.DependencyInjection
             }
             var resolveType = FindResolving(maybyType,
                 resolveAttribute?.ResolveName ?? string.Empty,
-                resolveAttribute?.ContractType);
+                resolveAttribute?.ContractType!);
             try
             {
                 if (is_generic)
-                    return MakeGenericResolving(resolveType, type, null);
-                return MakeResolving(resolveType, null);
+                    return MakeGenericResolving(resolveType, type, null!);
+                return MakeResolving(resolveType, null!);
             }
             catch (Exception ex)
             {
@@ -375,7 +376,7 @@ namespace ZeroLevel.DependencyInjection
                     if (_resolvingMap[contractType].
                         Any(it => it.ResolveKey.Equals(resolveType.ResolveKey, StringComparison.OrdinalIgnoreCase)))
                     {
-                        throw new Exception($"Resolve type with the same name '{resolveType.ResolveKey}' already has been defined. Contract: { contractType.FullName}");
+                        throw new Exception($"Resolve type with the same name '{resolveType.ResolveKey}' already has been defined. Contract: {contractType.FullName}");
                     }
                 }
                 try
@@ -667,7 +668,7 @@ namespace ZeroLevel.DependencyInjection
 
         #region Safe register
 
-        public bool TryRegister<TContract, TImplementation>(Action<Exception> fallback = null)
+        public bool TryRegister<TContract, TImplementation>(Action<Exception> fallback = null!)
         {
             try
             {
@@ -681,7 +682,7 @@ namespace ZeroLevel.DependencyInjection
             }
         }
 
-        public bool TryRegister<TContract, TImplementation>(bool shared, Action<Exception> fallback = null)
+        public bool TryRegister<TContract, TImplementation>(bool shared, Action<Exception> fallback = null!)
         {
             try
             {
@@ -695,7 +696,7 @@ namespace ZeroLevel.DependencyInjection
             }
         }
 
-        public bool TryRegister<TContract, TImplementation>(string resolveName, Action<Exception> fallback = null)
+        public bool TryRegister<TContract, TImplementation>(string resolveName, Action<Exception> fallback = null!)
         {
             try
             {
@@ -709,7 +710,7 @@ namespace ZeroLevel.DependencyInjection
             }
         }
 
-        public bool TryRegister<TContract, TImplementation>(string resolveName, bool shared, Action<Exception> fallback = null)
+        public bool TryRegister<TContract, TImplementation>(string resolveName, bool shared, Action<Exception> fallback = null!)
         {
             try
             {
@@ -723,7 +724,7 @@ namespace ZeroLevel.DependencyInjection
             }
         }
 
-        public bool TryRegister(Type contractType, Type implementationType, Action<Exception> fallback = null)
+        public bool TryRegister(Type contractType, Type implementationType, Action<Exception> fallback = null!)
         {
             try
             {
@@ -737,7 +738,7 @@ namespace ZeroLevel.DependencyInjection
             }
         }
 
-        public bool TryRegister(Type contractType, Type implementationType, string resolveName, Action<Exception> fallback = null)
+        public bool TryRegister(Type contractType, Type implementationType, string resolveName, Action<Exception> fallback = null!)
         {
             try
             {
@@ -751,7 +752,7 @@ namespace ZeroLevel.DependencyInjection
             }
         }
 
-        public bool TryRegister(Type contractType, Type implementationType, bool shared, Action<Exception> fallback = null)
+        public bool TryRegister(Type contractType, Type implementationType, bool shared, Action<Exception> fallback = null!)
         {
             try
             {
@@ -765,7 +766,7 @@ namespace ZeroLevel.DependencyInjection
             }
         }
 
-        public bool TryRegister(Type contractType, Type implementationType, string resolveName, bool shared, Action<Exception> fallback = null)
+        public bool TryRegister(Type contractType, Type implementationType, string resolveName, bool shared, Action<Exception> fallback = null!)
         {
             try
             {
@@ -783,7 +784,7 @@ namespace ZeroLevel.DependencyInjection
 
         #region Safe register with parameters
 
-        public bool TryParameterizedRegister<TContract, TImplementation>(object[] constructorParameters, Action<Exception> fallback = null)
+        public bool TryParameterizedRegister<TContract, TImplementation>(object[] constructorParameters, Action<Exception> fallback = null!)
         {
             try
             {
@@ -797,7 +798,7 @@ namespace ZeroLevel.DependencyInjection
             }
         }
 
-        public bool TryParameterizedRegister<TContract, TImplementation>(string resolveName, object[] constructorParameters, Action<Exception> fallback = null)
+        public bool TryParameterizedRegister<TContract, TImplementation>(string resolveName, object[] constructorParameters, Action<Exception> fallback = null!)
         {
             try
             {
@@ -811,7 +812,7 @@ namespace ZeroLevel.DependencyInjection
             }
         }
 
-        public bool TryParameterizedRegister<TContract, TImplementation>(bool shared, object[] constructorParameters, Action<Exception> fallback = null)
+        public bool TryParameterizedRegister<TContract, TImplementation>(bool shared, object[] constructorParameters, Action<Exception> fallback = null!)
         {
             try
             {
@@ -825,7 +826,7 @@ namespace ZeroLevel.DependencyInjection
             }
         }
 
-        public bool TryParameterizedRegister<TContract, TImplementation>(string resolveName, bool shared, object[] constructorParameters, Action<Exception> fallback = null)
+        public bool TryParameterizedRegister<TContract, TImplementation>(string resolveName, bool shared, object[] constructorParameters, Action<Exception> fallback = null!)
         {
             try
             {
@@ -839,7 +840,7 @@ namespace ZeroLevel.DependencyInjection
             }
         }
 
-        public bool TryParameterizedRegister(Type contractType, Type implementationType, object[] constructorParameters, Action<Exception> fallback = null)
+        public bool TryParameterizedRegister(Type contractType, Type implementationType, object[] constructorParameters, Action<Exception> fallback = null!)
         {
             try
             {
@@ -853,7 +854,7 @@ namespace ZeroLevel.DependencyInjection
             }
         }
 
-        public bool TryParameterizedRegister(Type contractType, Type implementationType, string resolveName, object[] constructorParameters, Action<Exception> fallback = null)
+        public bool TryParameterizedRegister(Type contractType, Type implementationType, string resolveName, object[] constructorParameters, Action<Exception> fallback = null!)
         {
             try
             {
@@ -867,7 +868,7 @@ namespace ZeroLevel.DependencyInjection
             }
         }
 
-        public bool TryParameterizedRegister(Type contractType, Type implementationType, bool shared, object[] constructorParameters, Action<Exception> fallback = null)
+        public bool TryParameterizedRegister(Type contractType, Type implementationType, bool shared, object[] constructorParameters, Action<Exception> fallback = null!)
         {
             try
             {
@@ -881,7 +882,7 @@ namespace ZeroLevel.DependencyInjection
             }
         }
 
-        public bool TryParameterizedRegister(Type contractType, Type implementationType, string resolveName, bool shared, object[] constructorParameters, Action<Exception> fallback = null)
+        public bool TryParameterizedRegister(Type contractType, Type implementationType, string resolveName, bool shared, object[] constructorParameters, Action<Exception> fallback = null!)
         {
             try
             {
@@ -901,7 +902,7 @@ namespace ZeroLevel.DependencyInjection
 
         public object Resolve(Type type, bool compose = true)
         {
-            return Resolve(type, string.Empty, null, compose);
+            return Resolve(type, string.Empty, null!, compose);
         }
 
         public object Resolve(Type type, object[] args, bool compose = true)
@@ -911,12 +912,12 @@ namespace ZeroLevel.DependencyInjection
 
         public object Resolve(Type type, string resolveName, bool compose = true)
         {
-            return Resolve(type, resolveName, null, compose);
+            return Resolve(type, resolveName, null!, compose);
         }
 
         public T Resolve<T>(bool compose = true)
         {
-            return (T)Resolve(typeof(T), string.Empty, null, compose);
+            return (T)Resolve(typeof(T), string.Empty, null!, compose);
         }
 
         public T Resolve<T>(object[] args, bool compose = true)
@@ -926,7 +927,7 @@ namespace ZeroLevel.DependencyInjection
 
         public T Resolve<T>(string resolveName, bool compose = true)
         {
-            return (T)Resolve(typeof(T), resolveName, null, compose);
+            return (T)Resolve(typeof(T), resolveName, null!, compose);
         }
 
         public T Resolve<T>(string resolveName, object[] args, bool compose = true)
@@ -980,7 +981,7 @@ namespace ZeroLevel.DependencyInjection
             {
                 _rwLock.ExitReadLock();
             }
-            return new Tuple<ResolveTypeInfo, bool>(null, false);
+            return new Tuple<ResolveTypeInfo, bool>(null!, false);
         }
 
         public object Resolve(Type type, string resolveName, object[] args, bool compose = true)
@@ -1009,7 +1010,7 @@ namespace ZeroLevel.DependencyInjection
 
         public object TryResolve(Type type, out object result, bool compose = true)
         {
-            return TryResolve(type, string.Empty, null, out result, compose);
+            return TryResolve(type, string.Empty, null!, out result, compose);
         }
 
         public object TryResolve(Type type, object[] args, out object result, bool compose = true)
@@ -1019,18 +1020,18 @@ namespace ZeroLevel.DependencyInjection
 
         public object TryResolve(Type type, string resolveName, out object result, bool compose = true)
         {
-            return TryResolve(type, resolveName, null, out result, compose);
+            return TryResolve(type, resolveName, null!, out result, compose);
         }
 
         public bool TryResolve<T>(out T result, bool compose = true)
         {
             object instance;
-            if (TryResolve(typeof(T), string.Empty, null, out instance, compose))
+            if (TryResolve(typeof(T), string.Empty, null!, out instance, compose))
             {
                 result = (T)instance;
                 return true;
             }
-            result = default(T);
+            result = default(T)!;
             return false;
         }
 
@@ -1042,19 +1043,19 @@ namespace ZeroLevel.DependencyInjection
                 result = (T)instance;
                 return true;
             }
-            result = default(T);
+            result = default(T)!;
             return false;
         }
 
         public bool TryResolve<T>(string resolveName, out T result, bool compose = true)
         {
             object instance;
-            if (TryResolve(typeof(T), resolveName, null, out instance, compose))
+            if (TryResolve(typeof(T), resolveName, null!, out instance, compose))
             {
                 result = (T)instance;
                 return true;
             }
-            result = default(T);
+            result = default(T)!;
             return false;
         }
 
@@ -1066,7 +1067,7 @@ namespace ZeroLevel.DependencyInjection
                 result = (T)instance;
                 return true;
             }
-            result = default(T);
+            result = default(T)!;
             return false;
         }
 
@@ -1076,7 +1077,7 @@ namespace ZeroLevel.DependencyInjection
             var resolve = GetResolvedType(type, resolveName);
             if (null == resolve.Item1)
             {
-                result = null;
+                result = null!;
                 return false;
             }
             try
@@ -1096,7 +1097,7 @@ namespace ZeroLevel.DependencyInjection
                 Log.SystemWarning(
                     $"Can't create type '{type.FullName}' instance for resolve dependency with contract type '{type.FullName}' and dependency name '{resolveName}'", ex);
             }
-            result = null;
+            result = null!;
             return false;
         }
 
@@ -1109,62 +1110,71 @@ namespace ZeroLevel.DependencyInjection
         /// </summary>
         private void FillParametrizedFieldsAndProperties(object instance)
         {
-            foreach (var property in instance.GetType().GetProperties(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.FlattenHierarchy))
+            if (instance != null)
             {
-                var attr = property.GetCustomAttribute<ParameterAttribute>();
-                if (attr != null)
+                foreach (var property in instance.GetType().GetProperties(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.FlattenHierarchy))
                 {
-                    var parameterType = attr.Type ?? property.PropertyType;
-                    var parameterName = attr.Name ?? property.Name;
-                    property.SetValue(instance, this.Get(parameterType, parameterName));
+                    var attr = property.GetCustomAttribute<ParameterAttribute>();
+                    if (attr != null)
+                    {
+                        var parameterType = attr.Type ?? property.PropertyType;
+                        var parameterName = attr.Name ?? property.Name;
+                        property.SetValue(instance, this.Get(parameterType, parameterName));
+                    }
                 }
-            }
-            foreach (var field in instance.GetType().GetFields(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.FlattenHierarchy))
-            {
-                var attr = field.GetCustomAttribute<ParameterAttribute>();
-                if (attr != null)
+                foreach (var field in instance.GetType().GetFields(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.FlattenHierarchy))
                 {
-                    var parameterType = attr.Type ?? field.FieldType;
-                    var parameterName = string.IsNullOrWhiteSpace(attr.Name) ? field.Name : attr.Name;
-                    field.SetValue(instance, this.Get(parameterType, parameterName));
+                    var attr = field.GetCustomAttribute<ParameterAttribute>();
+                    if (attr != null)
+                    {
+                        var parameterType = attr.Type ?? field.FieldType;
+                        var parameterName = string.IsNullOrWhiteSpace(attr.Name) ? field.Name : attr.Name;
+                        field.SetValue(instance, this.Get(parameterType, parameterName));
+                    }
                 }
             }
         }
 
         private void ComposeParts(object instance)
         {
-            var resolve_properties = CollectResolvingProperties(instance.GetType());
-            var resolve_fields = CollectResolvingFields(instance.GetType());
-            foreach (var p in resolve_properties)
+            if (instance != null)
             {
-                var resolve_instance = MakeInstanceBy(p.PropertyType,
-                    p.GetCustomAttribute<ResolveAttribute>());
-                p.SetValue(instance, resolve_instance);
-            }
-            foreach (var f in resolve_fields)
-            {
-                var resolve_instance = MakeInstanceBy(f.FieldType,
-                    f.GetCustomAttribute<ResolveAttribute>());
-                f.SetValue(instance, resolve_instance);
+                var resolve_properties = CollectResolvingProperties(instance.GetType());
+                var resolve_fields = CollectResolvingFields(instance.GetType());
+                foreach (var p in resolve_properties)
+                {
+                    var resolve_instance = MakeInstanceBy(p.PropertyType,
+                        p.GetCustomAttribute<ResolveAttribute>());
+                    p.SetValue(instance, resolve_instance);
+                }
+                foreach (var f in resolve_fields)
+                {
+                    var resolve_instance = MakeInstanceBy(f.FieldType,
+                        f.GetCustomAttribute<ResolveAttribute>());
+                    f.SetValue(instance, resolve_instance);
+                }
             }
             FillParametrizedFieldsAndProperties(instance);
         }
 
         private void RecursiveCompose(object instance, HashSet<object> set)
         {
-            foreach (var f in
+            if (instance != null)
+            {
+                foreach (var f in
                 instance.GetType().GetFields(BindingFlags.Public |
                 BindingFlags.NonPublic |
                 BindingFlags.Instance))
-            {
-                if (f.FieldType.IsClass || f.FieldType.IsInterface)
                 {
-                    var next = f.GetValue(instance);
-                    if (null != next)
+                    if (f.FieldType.IsClass || f.FieldType.IsInterface)
                     {
-                        if (set.Add(next))
+                        var next = f.GetValue(instance);
+                        if (null != next)
                         {
-                            RecursiveCompose(next, set);
+                            if (set.Add(next))
+                            {
+                                RecursiveCompose(next, set);
+                            }
                         }
                     }
                 }
@@ -1219,7 +1229,7 @@ namespace ZeroLevel.DependencyInjection
                         {
                             Log.SystemError(ex, $"[Container] Singletone dispose error. Instance: '{item?.GetType()?.FullName ?? string.Empty}'");
                         }
-                        if (item.GenericInstanceCachee != null)
+                        if (item!.GenericInstanceCachee != null)
                         {
                             foreach (var gitem in item.GenericInstanceCachee.Values)
                             {

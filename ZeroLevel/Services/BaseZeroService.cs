@@ -72,30 +72,30 @@ namespace ZeroLevel.Services.Applications
                 this.Type = ReadServiceType(set);
         }
 
-        private string ReadName(IConfigurationSet set = null)
+        private string ReadName(IConfigurationSet set = null!)
         {
             return FindInConfig<string>(set, new[] { "ServiceName", "AppName" }, string.Empty, "service")
                 ?? this.GetType().Name;
         }
 
-        private string ReadKey(IConfigurationSet set = null)
+        private string ReadKey(IConfigurationSet set = null!)
         {
             return FindInConfig<string>(set, new[] { "ServiceKey", "AppKey" }, string.Empty, "service");
         }
 
-        private string ReadVersion(IConfigurationSet set = null)
+        private string ReadVersion(IConfigurationSet set = null!)
         {
             return FindInConfig<string>(set, new[] { "Version", "AppVersion" }, string.Empty, "service")
                 ?? "1.0";
         }
 
-        private string ReadServiceGroup(IConfigurationSet set = null)
+        private string ReadServiceGroup(IConfigurationSet set = null!)
         {
             return FindInConfig<string>(set, new[] { "DiscoveryGroup", "ServiceGroup" }, string.Empty, "service")
                 ?? DEFAULT_GROUP_NAME;
         }
 
-        private string ReadServiceType(IConfigurationSet set = null)
+        private string ReadServiceType(IConfigurationSet set = null!)
         {
             return FindInConfig<string>(set, new[] { "DiscoveryType", "ServiceType" }, string.Empty, "service")
                 ?? DEFAULT_TYPE_NAME;
@@ -299,13 +299,13 @@ namespace ZeroLevel.Services.Applications
                             if (args.Length == 1)
                             {
                                 var handler = CreateDelegate(typeof(MessageHandler), mi, this);
-                                register_message_handler.Invoke(server, new object[] { (attr as ExchangeHandlerAttribute).Inbox, handler });
+                                register_message_handler.Invoke(server, new object[] { (attr as ExchangeHandlerAttribute)!.Inbox, handler });
                             }
                             else
                             {
                                 var handler = CreateDelegate(typeof(MessageHandler<>).MakeGenericType(args[1].ParameterType), mi, this);
                                 MethodInfo genericMethod = register_message_handler_with_msg.MakeGenericMethod(args[1].ParameterType);
-                                genericMethod.Invoke(server, new object[] { (attr as ExchangeHandlerAttribute).Inbox, handler });
+                                genericMethod.Invoke(server, new object[] { (attr as ExchangeHandlerAttribute)!.Inbox, handler });
                             }
                         }
 
@@ -323,7 +323,7 @@ namespace ZeroLevel.Services.Applications
                             var genArgType = args[1].ParameterType;
                             MethodInfo genericMethod = register_request_handler.MakeGenericMethod(genArgType, returnType);
                             var requestHandler = CreateDelegate(typeof(RequestHandler<,>).MakeGenericType(args[1].ParameterType, returnType), mi, this);
-                            genericMethod.Invoke(server, new object[] { (attr as ExchangeReplierAttribute).Inbox, requestHandler });
+                            genericMethod.Invoke(server, new object[] { (attr as ExchangeReplierAttribute)!.Inbox, requestHandler });
                         }
 
                         else if (attr.GetType() == typeof(ExchangeMainReplierWithoutArgAttribute))
@@ -338,7 +338,7 @@ namespace ZeroLevel.Services.Applications
                             var returnType = mi.ReturnType;
                             MethodInfo genericMethod = register_request_handler_without_msg.MakeGenericMethod(returnType);
                             var requestHandler = CreateDelegate(typeof(RequestHandler<>).MakeGenericType(returnType), mi, this);
-                            genericMethod.Invoke(server, new object[] { (attr as ExchangeReplierWithoutArgAttribute).Inbox, requestHandler });
+                            genericMethod.Invoke(server, new object[] { (attr as ExchangeReplierWithoutArgAttribute)!.Inbox, requestHandler });
                         }
                     }
                 }

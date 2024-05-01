@@ -157,8 +157,12 @@ namespace ZeroLevel.Services.Invokation
                                          BindingFlags.NonPublic |
                                          BindingFlags.FlattenHierarchy)?.Where(filter)
                 ?.Select(method => method.MakeGenericMethod(typeof(T))).Select(CreateCompiledExpression);
-            Configure(result);
-            return result.Select(r => r.Item1).ToList();
+            if (result != null)
+            {
+                Configure(result);
+                return result.Select(r => r.Item1).ToList();
+            }
+            return Enumerable.Empty<string>();
         }
 
         public IEnumerable<string> ConfigureGeneric(Type instanceType, Type genericType, Func<MethodInfo, bool> filter)
@@ -169,8 +173,12 @@ namespace ZeroLevel.Services.Invokation
                                          BindingFlags.NonPublic |
                                          BindingFlags.FlattenHierarchy)?.Where(filter)
                 ?.Select(method => method.MakeGenericMethod(genericType)).Select(CreateCompiledExpression);
-            Configure(result);
-            return result.Select(r => r.Item1).ToList();
+            if (result != null)
+            {
+                Configure(result);
+                return result.Select(r => r.Item1).ToList();
+            }
+            return Enumerable.Empty<string>();
         }
 
         public IEnumerable<string> Configure(Type instanceType, Func<MethodInfo, bool> filter)
@@ -181,8 +189,12 @@ namespace ZeroLevel.Services.Invokation
                                          BindingFlags.NonPublic |
                                          BindingFlags.FlattenHierarchy)?.Where(filter)
                 ?.Select(CreateCompiledExpression);
-            Configure(result);
-            return result.Select(r => r.Item1).ToList();
+            if (result != null)
+            {
+                Configure(result);
+                return result.Select(r => r.Item1).ToList();
+            }
+            return Enumerable.Empty<string>();
         }
 
         #endregion Configure by Type

@@ -12,7 +12,7 @@ namespace ZeroLevel.Services.Config.Implementation
 
         public bool ExistsAppConfigFile => string.IsNullOrWhiteSpace(_configFilePath) == false;
 
-        internal AppWebConfigReader(string configFilePath = null)
+        internal AppWebConfigReader(string configFilePath = null!)
         {
             if (configFilePath == null)
             {
@@ -69,14 +69,16 @@ namespace ZeroLevel.Services.Config.Implementation
                     SelectMany(x => x.Nodes().Where(n => null != (n as XElement)).Select(n =>
                     {
                         var xe = n as XElement;
-                        return new Tuple<string, string>(FindName(xe), FindValue(xe));
-                    }));
+                        return new Tuple<string, string>(FindName(xe!), FindValue(xe!));
+                    }))
+                    .Where(t => string.IsNullOrWhiteSpace(t.Item1) == false);
             }
             return Enumerable.Empty<Tuple<string, string>>();
         }
 
         private static string FindName(XElement n)
         {
+            if (n == null) return string.Empty;
             var attributes = n.Attributes().
                 ToDictionary(i => i.Name.LocalName.ToLowerInvariant(), j => j.Value);
             foreach (var v in new[] { "key", "name", "code", "id" })
@@ -89,6 +91,7 @@ namespace ZeroLevel.Services.Config.Implementation
 
         private static string FindValue(XElement n)
         {
+            if (n == null) return string.Empty;
             var attributes = n.Attributes().
                 ToDictionary(i => i.Name.LocalName.ToLowerInvariant(), j => j.Value);
             foreach (var v in new[] { "value", "val", "file", "db", "connectionstring" })

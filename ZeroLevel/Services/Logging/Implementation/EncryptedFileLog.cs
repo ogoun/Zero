@@ -112,7 +112,7 @@ namespace ZeroLevel.Logging
             {
                 var nextFileName = GetNextFileName();
                 CloseCurrentWriter();
-                Stream stream = null;
+                Stream stream = null!;
                 try
                 {
                     _currentLogFile = nextFileName;

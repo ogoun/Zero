@@ -63,7 +63,7 @@ namespace DOM.DSL.Services
                         foreach (var i in _list) list.Add(i.ToString());
                         _elementType = typeof(string);
                         _list.Clear();
-                        _list = null;
+                        _list = null!;
                         _list = list;
                         list.Add(item.ToString());
                     }
@@ -72,7 +72,7 @@ namespace DOM.DSL.Services
 
             public object First()
             {
-                return (_list.Count > 0) ? _list[0] : null;
+                return (_list.Count > 0) ? _list[0] : null!;
             }
 
             public IList Complete()
@@ -907,7 +907,7 @@ namespace DOM.DSL.Services
 
         private void SelectProperty(TagMetadata tags, string property, string propertyIndex)
         {
-            IList enumerable = null;
+            IList enumerable = null!;
             switch (property.Trim().ToLowerInvariant())
             {
                 case "places":
@@ -1322,7 +1322,7 @@ namespace DOM.DSL.Services
                 {
                     if (headers.Count == 0)
                     {
-                        Reset(null);
+                        Reset(null!);
                     }
                     else if (headers.Count == 1)
                     {
@@ -1390,7 +1390,7 @@ namespace DOM.DSL.Services
         {
             if (_current == null)
             {
-                args = null;
+                args = null!;
                 return;
             }
             //args = args_getter(this);
@@ -1418,7 +1418,7 @@ namespace DOM.DSL.Services
                                 var container = _factory.Get(i);
                                 if (args.Length > 1)
                                 {
-                                    container.MoveToProperty(args[1].ToString(), null);
+                                    container.MoveToProperty(args[1].ToString(), null!);
                                 }
                                 if (result.Length > 0) result.Append(separator);
                                 result.Append(container.ToString());
@@ -1439,7 +1439,7 @@ namespace DOM.DSL.Services
                     {
                         var format = (args != null && args.Length > 0) ? args[0].ToString() : null;
                         var culture = (args != null && args.Length > 1) ? args[1].ToString() : null;
-                        Reset(FormattedDateTime((DateTime)_current, format, culture));
+                        Reset(FormattedDateTime((DateTime)_current, format!, culture!));
                     }
                     break;
 
@@ -1792,16 +1792,16 @@ namespace DOM.DSL.Services
                         var key = args[0].ToString();
                         if (_render.BufferDictionary.ContainsKey(key) == false)
                         {
-                            _render.BufferDictionary.Add(key, this._current);
+                            _render.BufferDictionary.Add(key, this._current!);
                         }
                         else
                         {
-                            _render.BufferDictionary[key] = this._current;
+                            _render.BufferDictionary[key] = this._current!;
                         }
-                        Reset(null);
+                        Reset(null!);
                     }
                 }
-                args = null;
+                args = null!;
                 return;
             }
             if (function.Equals("where", StringComparison.OrdinalIgnoreCase))
@@ -1923,7 +1923,7 @@ namespace DOM.DSL.Services
                                     }
                                     else
                                     {
-                                        Reset(null);
+                                        Reset(null!);
                                     }
                                 }
                                 else if (_current is string)
@@ -1935,7 +1935,7 @@ namespace DOM.DSL.Services
                                     }
                                     else
                                     {
-                                        Reset(null);
+                                        Reset(null!);
                                     }
                                 }
                                 else if (_current is IEnumerable)
@@ -1950,7 +1950,7 @@ namespace DOM.DSL.Services
                                         }
                                         _i++;
                                     }
-                                    if (found == false) Reset(null);
+                                    if (found == false) Reset(null!);
                                 }
                             }
                         }
@@ -1969,7 +1969,7 @@ namespace DOM.DSL.Services
                                     {
                                         if (i == null) continue;
                                         var container = _factory.Get(i);
-                                        container.MoveToProperty(property, property_index);
+                                        container.MoveToProperty(property, property_index!);
                                         list.Append(container.Current);
                                         _factory.Release(container);
                                     }
@@ -1978,7 +1978,7 @@ namespace DOM.DSL.Services
                                 else
                                 {
                                     var container = _factory.Get(_current);
-                                    container.MoveToProperty(property, property_index);
+                                    container.MoveToProperty(property, property_index!);
                                     Reset(container.Current);
                                     _factory.Release(container);
                                 }
@@ -2081,10 +2081,15 @@ namespace DOM.DSL.Services
                         if (_current is List<TContainer>)
                         {
                             var list = _current as List<TContainer>;
+                            if (list == null)
+                            {
+                                _current = new List<TContainer>();
+                                list = _current as List<TContainer>;
+                            }
                             foreach (var i in args)
-                                list.Add(i);
-                            Reset(list);
-                            args = null;
+                                list!.Add(i);
+                            Reset(list!);
+                            args = null!;
                         }
                         break;
                 }
@@ -2491,10 +2496,10 @@ namespace DOM.DSL.Services
 
         #region Conditions
 
-        public bool Any(TContainer[] set = null, bool ignoreCase = true)
+        public bool Any(TContainer[] set = null!, bool ignoreCase = true)
         {
             if (_current == null) return false;
-            if (set.Any())
+            if (set?.Any() ?? false)
             {
                 if (_current is IEnumerable && false == (_current is string))
                 {
@@ -2524,7 +2529,7 @@ namespace DOM.DSL.Services
             if (set == null || set?.Length == 0) return false;
             if (_current is IEnumerable && false == (_current is string))
             {
-                foreach (var t in set)
+                foreach (var t in set!)
                 {
                     bool contains = false;
                     foreach (var c in (IEnumerable)_current)
@@ -2541,7 +2546,7 @@ namespace DOM.DSL.Services
             else if (_current is string)
             {
                 var line = (string)_current;
-                foreach (var t in set)
+                foreach (var t in set!)
                 {
                     if (line.IndexOf(t.ToString(), StringComparison.OrdinalIgnoreCase) == -1) return false;
                 }
@@ -2549,7 +2554,7 @@ namespace DOM.DSL.Services
             }
             else
             {
-                foreach (var t in set)
+                foreach (var t in set!)
                 {
                     if (CompareWith(t, ignoreCase) != 0) return false;
                 }
@@ -2726,7 +2731,7 @@ namespace DOM.DSL.Services
 
         private const string DEFAULT_DATETIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
 
-        private static string FormattedDateTime(DateTime dt, string format = null, string culture = null)
+        private static string FormattedDateTime(DateTime dt, string format = null!, string culture = null!)
         {
             CultureInfo ci;
             if (culture != null)

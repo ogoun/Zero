@@ -9,8 +9,8 @@ namespace DOM.DSL.Services
     {
         public static ISpecialTableBuilder CreateSpecialTableBuilder(string command)
         {
-            if (string.IsNullOrWhiteSpace(command)) return null;
-            ISpecialTableBuilder result = null;
+            if (string.IsNullOrWhiteSpace(command)) return null!;
+            ISpecialTableBuilder result = null!;
             var args = command.Split(',').Select(s => s.Trim()).ToArray();
             switch (args[0])
             {

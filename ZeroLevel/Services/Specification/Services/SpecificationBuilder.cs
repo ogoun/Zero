@@ -81,14 +81,14 @@ namespace ZeroLevel.Specification
                     case SpecificationConstructorParameterKind.Tree:
                         var tree = (ITree)_values[i].Value;
                         var list = new List<object>();
-                        Action<ITreeNode> visitor = null;
+                        Action<ITreeNode> visitor = null!;
                         visitor = new Action<ITreeNode>(node =>
                         {
                             if (node.IsSelected)
                             {
                                 if (node.Tag != null || _values[i].ParameterType.GetElementType() != typeof(string))
                                 {
-                                    list.Add(node.Tag);
+                                    list.Add(node.Tag!);
                                 }
                                 else
                                 {
@@ -116,7 +116,7 @@ namespace ZeroLevel.Specification
 
         public override bool Equals(object obj)
         {
-            return this.Equals(obj as ISpecificationBuilder);
+            return this.Equals((obj as ISpecificationBuilder)!);
         }
 
         public bool Equals(ISpecificationBuilder other)

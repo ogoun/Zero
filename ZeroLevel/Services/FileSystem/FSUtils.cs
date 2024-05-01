@@ -275,7 +275,7 @@ namespace ZeroLevel.Services.FileSystem
         /// </summary>
         public static bool IsFileLocked(FileInfo file)
         {
-            FileStream fileStream = null;
+            FileStream fileStream = null!;
             try
             {
                 fileStream = file.Open(FileMode.Open, FileAccess.Read, FileShare.None);
@@ -291,14 +291,14 @@ namespace ZeroLevel.Services.FileSystem
                     fileStream.Close();
                     fileStream.Dispose();
                 }
-                file = null;
+                file = null!;
             }
             return false;
         }
 
         public static bool IsFileLocked(string file)
         {
-            FileStream fileStream = null;
+            FileStream fileStream = null!;
             try
             {
                 fileStream = File.Open(file, FileMode.Open, FileAccess.Read, FileShare.None);
@@ -314,7 +314,7 @@ namespace ZeroLevel.Services.FileSystem
                     fileStream.Close();
                     fileStream.Dispose();
                 }
-                file = null;
+                file = null!;
             }
             return false;
         }

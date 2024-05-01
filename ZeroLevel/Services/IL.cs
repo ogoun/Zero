@@ -172,7 +172,7 @@ namespace ZeroLevel.Services
             var returnType = method.ReturnType;
             var parametersTypes = method.GetParameters().Select(p => p.ParameterType).ToArray();
             var hasReturnValue = returnType != typeof(void);
-            MethodBuilder dynamicMethod = null;
+            MethodBuilder dynamicMethod = null!;
             switch (methodType)
             {
                 case MethodType.DirectProxy:

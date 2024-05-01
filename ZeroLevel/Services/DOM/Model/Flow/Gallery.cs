@@ -17,6 +17,8 @@ namespace ZeroLevel.DocumentObjectModel.Flow
             Deserialize(reader);
         }
 
+        public void SetTitle(Text title) => this.Title = title;
+
         public override void Deserialize(IBinaryReader reader)
         {
             Title = reader.Read<Text>();

@@ -11,7 +11,8 @@ namespace ZeroLevel.DocumentObjectModel.Flow
         public List<Column> Columns = new List<Column>();
         public List<Row> Rows = new List<Row>();
 
-        public Table() : base(ContentElementType.Table)
+        public Table()
+            : base(ContentElementType.Table)
         {
         }
 

@@ -185,62 +185,62 @@ namespace DOM.Services
             switch (current.Type)
             {
                 case ContentElementType.Section:
-                    (current as Section).Parts.Add(element);
+                    (current as Section)?.Parts?.Add(element);
                     break;
 
                 case ContentElementType.Paragraph:
-                    (current as Paragraph).Parts.Add(element);
+                    (current as Paragraph)?.Parts?.Add(element);
                     break;
 
                 case ContentElementType.List:
-                    (current as List).Items.Add(element);
+                    (current as List)?.Items?.Add(element);
                     break;
 
                 case ContentElementType.Row:
-                    (current as Row).Cells.Add(element);
+                    (current as Row)?.Cells?.Add(element);
                     break;
 
                 case ContentElementType.Audioplayer:
                     if (element.Type == ContentElementType.Text)
                     {
-                        (current as Audioplayer).Title = element as ZeroLevel.DocumentObjectModel.Flow.Text;
+                        (current as Audioplayer)?.SetTitle((element as ZeroLevel.DocumentObjectModel.Flow.Text)!);
                     }
                     else
                     {
-                        (current as Audioplayer).Tracks.Add(element as Audio);
+                        (current as Audioplayer)?.Tracks?.Add((element as Audio)!);
                     }
                     break;
 
                 case ContentElementType.Videoplayer:
                     if (element.Type == ContentElementType.Text)
                     {
-                        (current as Videoplayer).Title = element as ZeroLevel.DocumentObjectModel.Flow.Text;
+                        (current as Videoplayer)?.SetTitle((element as ZeroLevel.DocumentObjectModel.Flow.Text)!);
                     }
                     else
                     {
-                        (current as Videoplayer).Playlist.Add(element as Video);
+                        (current as Videoplayer)?.Playlist?.Add((element as Video)!);
                     }
                     break;
 
                 case ContentElementType.Gallery:
                     if (element.Type == ContentElementType.Text)
                     {
-                        (current as Gallery).Title = element as ZeroLevel.DocumentObjectModel.Flow.Text;
+                        (current as Gallery)?.SetTitle((element as ZeroLevel.DocumentObjectModel.Flow.Text)!);
                     }
                     else
                     {
-                        (current as Gallery).Images.Add(element as Image);
+                        (current as Gallery)?.Images?.Add((element as Image)!);
                     }
                     break;
 
                 case ContentElementType.Table:
                     if (element.Type == ContentElementType.Column)
                     {
-                        (current as Table).Columns.Add(element as Column);
+                        (current as Table)?.Columns?.Add((element as Column)!);
                     }
                     else if (element.Type == ContentElementType.Row)
                     {
-                        (current as Table).Rows.Add(element as Row);
+                        (current as Table)?.Rows?.Add((element as Row)!);
                     }
                     break;
             }

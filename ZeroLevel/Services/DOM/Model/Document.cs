@@ -20,12 +20,14 @@ namespace ZeroLevel.DocumentObjectModel
 
         public Document()
         {
-            Id = Guid.NewGuid(); Initialize();
+            Id = Guid.NewGuid(); 
+            Initialize();
         }
 
         public Document(Guid id)
         {
-            Id = id; Initialize();
+            Id = id; 
+            Initialize();
         }
 
         public Document(IBinaryReader reader)

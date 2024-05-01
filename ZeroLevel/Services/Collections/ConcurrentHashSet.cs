@@ -116,7 +116,7 @@ namespace ZeroLevel.Collections
         /// uses the default comparer for the item type.
         /// </summary>
         public ConcurrentHashSet()
-            : this(DefaultConcurrencyLevel, DefaultCapacity, true, null)
+            : this(DefaultConcurrencyLevel, DefaultCapacity, true, null!)
         {
         }
 
@@ -136,7 +136,7 @@ namespace ZeroLevel.Collections
         /// <exception cref="ArgumentOutOfRangeException"> <paramref name="capacity"/> is less than
         /// 0.</exception>
         public ConcurrentHashSet(int concurrencyLevel, int capacity)
-            : this(concurrencyLevel, capacity, false, null)
+            : this(concurrencyLevel, capacity, false, null!)
         {
         }
 
@@ -152,7 +152,7 @@ namespace ZeroLevel.Collections
         /// <see cref="ConcurrentHashSet{T}"/>.</param>
         /// <exception cref="ArgumentNullException"><paramref name="collection"/> is a null reference.</exception>
         public ConcurrentHashSet(IEnumerable<T> collection)
-            : this(collection, null)
+            : this(collection, null!)
         {
         }
 
@@ -375,7 +375,7 @@ namespace ZeroLevel.Collections
                         continue;
                     }
 
-                    Node previous = null;
+                    Node previous = null!;
                     for (var current = tables.Buckets[bucketNo]; current != null; current = current.Next)
                     {
                         Debug.Assert((previous == null && current == tables.Buckets[bucketNo]) || previous!.Next == current);
@@ -455,8 +455,8 @@ namespace ZeroLevel.Collections
             public Enumerator(ConcurrentHashSet<T> set)
             {
                 _set = set;
-                _buckets = null;
-                _node = null;
+                _buckets = null!;
+                _node = null!;
                 Current = default!;
                 _i = -1;
                 _state = StateUninitialized;
@@ -468,15 +468,15 @@ namespace ZeroLevel.Collections
             /// <value>The element in the collection at the current position of the enumerator.</value>
             public T Current { get; private set; }
 
-            object IEnumerator.Current => Current;
+            object IEnumerator.Current => Current!;
 
             /// <summary>
             /// Sets the enumerator to its initial position, which is before the first element in the collection.
             /// </summary>
             public void Reset()
             {
-                _buckets = null;
-                _node = null;
+                _buckets = null!;
+                _node = null!;
                 Current = default!;
                 _i = -1;
                 _state = StateUninitialized;
