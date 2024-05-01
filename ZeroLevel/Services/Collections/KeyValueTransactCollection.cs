@@ -179,7 +179,7 @@ namespace ZeroLevel.Services.Collections
             }
             else
             {
-                if (!_collection[id].Equals(value))
+                if (!_collection[id]!.Equals(value))
                 {
                     if (false == _updatedRecords.ContainsKey(id))
                     {
@@ -254,12 +254,12 @@ namespace ZeroLevel.Services.Collections
         {
             if (disposing)
             {
-                if (_collection != null)
+                if (_collection != null!)
                 {
                     foreach (TKey key in _collection.Keys)
                     {
                         var disposable = _collection[key] as IDisposable;
-                        if (disposable != null)
+                        if (disposable != null!)
                             disposable.Dispose();
                     }
                     _collection.Clear();

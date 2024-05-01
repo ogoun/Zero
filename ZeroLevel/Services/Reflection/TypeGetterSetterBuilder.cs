@@ -8,7 +8,7 @@ namespace ZeroLevel.Services.Reflection
     {
         public static Func<object, object> BuildGetter(FieldInfo field)
         {
-            if (field == null) return null;
+            if (field == null!) return null!;
             var entity = Expression.Parameter(typeof(object), "o");
             var target = field.DeclaringType.IsValueType ?
                             Expression.Unbox(entity, field.DeclaringType) :
@@ -21,8 +21,8 @@ namespace ZeroLevel.Services.Reflection
 
         public static Func<object, object> BuildGetter(PropertyInfo property)
         {
-            if (property == null) return null;
-            if (property.CanRead == false) return null;
+            if (property == null!) return null!;
+            if (property.CanRead == false) return null!;
             var getterMethodInfo = property.GetGetMethod();
             var entity = Expression.Parameter(typeof(object), "o");
             var target = property.DeclaringType.IsValueType ?
@@ -39,9 +39,9 @@ namespace ZeroLevel.Services.Reflection
         /// </summary>
         public static Action<object, object> BuildSetter(FieldInfo field)
         {
-            if (field == null)
+            if (field == null!)
             {
-                return null;
+                return null!;
             }
             var instance = Expression.Parameter(typeof(object), "target");
             var inputValue = Expression.Parameter(typeof(object), "value");
@@ -74,7 +74,7 @@ namespace ZeroLevel.Services.Reflection
         {
             if (property == null || property.CanWrite == false)
             {
-                return null;
+                return null!;
             }
             var instance = Expression.Parameter(typeof(object), "target");
             var inputValue = Expression.Parameter(typeof(object), "value");
@@ -106,7 +106,7 @@ namespace ZeroLevel.Services.Reflection
         {
             if (field == null || typeof(T) != field.DeclaringType)
             {
-                return null;
+                return null!;
             }
             var targetExp = Expression.Parameter(typeof(T), "target");
             var inputValue = Expression.Parameter(typeof(object), "o");
@@ -133,7 +133,7 @@ namespace ZeroLevel.Services.Reflection
         {
             if (property == null || typeof(T) != property.DeclaringType || property.CanWrite == false)
             {
-                return null;
+                return null!;
             }
             var method = property.GetSetMethod(true);
             var instance = Expression.Parameter(property.DeclaringType, "i");

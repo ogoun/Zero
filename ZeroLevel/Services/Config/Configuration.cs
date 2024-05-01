@@ -29,7 +29,7 @@ namespace ZeroLevel
             _emptySet.FreezeConfiguration(true);
             DefaultSet = Configuration.CreateSet();
             var assembly = EntryAssemblyAttribute.GetEntryAssembly();
-            if (assembly != null)
+            if (assembly != null!)
             {
                 BaseDirectory = Path.GetDirectoryName(assembly.Location);
                 AppLocation = assembly.Location;
@@ -52,7 +52,7 @@ namespace ZeroLevel
         public static IConfiguration Empty { get { return _empty; } }
         public static IConfigurationSet EmptySet { get { return _emptySet; } }
 
-        public static IConfiguration Default => DefaultSet?.Default;
+        public static IConfiguration Default => DefaultSet?.Default!;
         public static IConfigurationSet DefaultSet { get; private set; }
 
         public static void Save(string name, IConfiguration configuration)
@@ -62,7 +62,7 @@ namespace ZeroLevel
 
         public static void Save(IConfiguration configuration)
         {
-            if (DefaultSet == null)
+            if (DefaultSet == null!)
             {
                 DefaultSet = Configuration.CreateSet(configuration);
             }
@@ -79,7 +79,7 @@ namespace ZeroLevel
 
         public static void Save(IConfigurationSet configuration)
         {
-            if (DefaultSet == null)
+            if (DefaultSet == null!)
             {
                 DefaultSet = configuration;
             }

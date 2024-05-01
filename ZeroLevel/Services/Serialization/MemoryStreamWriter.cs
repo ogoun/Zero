@@ -98,7 +98,7 @@ namespace ZeroLevel.Services.Serialization
         /// <param name="val"></param>
         public void WriteBytes(byte[] val)
         {
-            if (val == null)
+            if (val == null!)
             {
                 WriteInt32(0);
             }
@@ -113,7 +113,7 @@ namespace ZeroLevel.Services.Serialization
         /// </summary>
         public void WriteString(string line)
         {
-            if (line == null)
+            if (line == null!)
             {
                 WriteInt32(0);
             }
@@ -131,7 +131,7 @@ namespace ZeroLevel.Services.Serialization
         /// <param name="datetime"></param>
         public void WriteDateTime(DateTime? datetime)
         {
-            if (datetime == null)
+            if (datetime == null!)
             {
                 WriteByte(0);
             }
@@ -146,7 +146,7 @@ namespace ZeroLevel.Services.Serialization
 
         public void WriteIP(IPAddress ip)
         {
-            if (ip == null)
+            if (ip == null!)
             {
                 WriteByte(0);
             }
@@ -159,7 +159,7 @@ namespace ZeroLevel.Services.Serialization
 
         public void WriteIPEndpoint(IPEndPoint endpoint)
         {
-            if (endpoint == null)
+            if (endpoint == null!)
             {
                 WriteByte(0);
             }
@@ -235,7 +235,7 @@ namespace ZeroLevel.Services.Serialization
             where T : IBinarySerializable
         {
             WriteInt32(collection?.Count() ?? 0);
-            if (collection != null)
+            if (collection != null!)
             {
                 foreach (var item in collection)
                 {
@@ -246,7 +246,7 @@ namespace ZeroLevel.Services.Serialization
 
         public void WriteCollection<T>(IEnumerable<T> collection, Action<T> writeAction)
         {
-            if (collection != null)
+            if (collection != null!)
             {
                 MockCount();
                 int count = 0;
@@ -310,7 +310,7 @@ namespace ZeroLevel.Services.Serialization
         public void WriteArray<T>(T[] array)
             where T : IBinarySerializable
         {
-            if (array != null)
+            if (array != null!)
             {
                 WriteInt32(array.Length);
                 for (int i = 0; i < array.Length; i++)
@@ -326,7 +326,7 @@ namespace ZeroLevel.Services.Serialization
 
         public void WriteArray<T>(T[] array, Action<T> writeAction)
         {
-            if (array != null)
+            if (array != null!)
             {
                 WriteInt32(array.Length);
                 for (int i = 0; i < array.Length; i++)
@@ -390,7 +390,7 @@ namespace ZeroLevel.Services.Serialization
         public void Write<T>(T item)
             where T : IBinarySerializable
         {
-            if (item != null)
+            if (item != null!)
             {
                 WriteByte(1);
                 item.Serialize(this);
@@ -404,7 +404,7 @@ namespace ZeroLevel.Services.Serialization
         public void WriteDictionary<TKey, TValue>(IDictionary<TKey, TValue> collection)
         {
             WriteInt32(collection?.Count() ?? 0);
-            if (collection != null)
+            if (collection != null!)
             {
                 foreach (var item in collection)
                 {
@@ -417,7 +417,7 @@ namespace ZeroLevel.Services.Serialization
         public void WriteDictionary<TKey, TValue>(ConcurrentDictionary<TKey, TValue> collection)
         {
             WriteInt32(collection?.Count() ?? 0);
-            if (collection != null)
+            if (collection != null!)
             {
                 foreach (var item in collection)
                 {
@@ -455,7 +455,7 @@ namespace ZeroLevel.Services.Serialization
         /// <param name="val"></param>
         public async Task WriteBytesAsync(byte[] val)
         {
-            if (val == null)
+            if (val == null!)
             {
                 await WriteInt32Async(0);
             }
@@ -468,7 +468,7 @@ namespace ZeroLevel.Services.Serialization
 
         public async Task WriteRawBytesAsyncNoLength(byte[] val)
         {
-            if (val == null)
+            if (val == null!)
             {
                 throw new ArgumentNullException(nameof(val));
             }
@@ -503,7 +503,7 @@ namespace ZeroLevel.Services.Serialization
         /// </summary>
         public async Task WriteStringAsync(string line)
         {
-            if (line == null)
+            if (line == null!)
             {
                 await WriteInt32Async(0);
             }
@@ -521,7 +521,7 @@ namespace ZeroLevel.Services.Serialization
         /// <param name="datetime"></param>
         public async Task WriteDateTimeAsync(DateTime? datetime)
         {
-            if (datetime == null)
+            if (datetime == null!)
             {
                 WriteByte(0);
             }
@@ -536,7 +536,7 @@ namespace ZeroLevel.Services.Serialization
 
         public async Task WriteIPAsync(IPAddress ip)
         {
-            if (ip == null)
+            if (ip == null!)
             {
                 WriteByte(0);
             }
@@ -549,7 +549,7 @@ namespace ZeroLevel.Services.Serialization
 
         public async Task WriteIPEndpointAsync(IPEndPoint endpoint)
         {
-            if (endpoint == null)
+            if (endpoint == null!)
             {
                 WriteByte(0);
             }
@@ -626,7 +626,7 @@ namespace ZeroLevel.Services.Serialization
         /// </summary>
         private async Task OptimizedWriteCollectionByChunksAsync<T>(IEnumerable<T> collection, Action<MemoryStreamWriter, T> saveAction, Func<MemoryStreamWriter, T, Task> asyncSaveAction, int chunk_size)
         {
-            if (collection != null)
+            if (collection != null!)
             {
                 if (_stream.CanSeek == false)
                 {
@@ -679,7 +679,7 @@ namespace ZeroLevel.Services.Serialization
         public async Task WriteCollectionAsync<T>(IEnumerable<T> collection)
             where T : IAsyncBinarySerializable
         {
-            if (collection != null)
+            if (collection != null!)
             {
                 MockCount();
                 int count = 0;
@@ -698,11 +698,11 @@ namespace ZeroLevel.Services.Serialization
 
         public async Task WriteCollectionAsync(IEnumerable<string> collection)
         {
-            if (collection != null)
+            if (collection != null!)
             {
                 MockCount();
                 int count = 0;
-                if (collection != null)
+                if (collection != null!)
                 {
                     foreach (var item in collection)
                     {
@@ -748,7 +748,7 @@ namespace ZeroLevel.Services.Serialization
 
         public async Task WriteCollectionAsync(IEnumerable<bool> collection)
         {
-            if (collection != null)
+            if (collection != null!)
             {
                 if (_stream.CanSeek == false)
                 {
@@ -803,7 +803,7 @@ namespace ZeroLevel.Services.Serialization
 
         public async Task WriteCollectionAsync(IEnumerable<byte> collection)
         {
-            if (collection != null)
+            if (collection != null!)
             {
                 if (_stream.CanSeek == false)
                 {
@@ -857,7 +857,7 @@ namespace ZeroLevel.Services.Serialization
 
         public async Task WriteCollectionAsync(IEnumerable<byte[]> collection)
         {
-            if (collection != null)
+            if (collection != null!)
             {
                 if (_stream.CanSeek == false)
                 {
@@ -909,7 +909,7 @@ namespace ZeroLevel.Services.Serialization
         /// </summary>
         private async Task OptimizedWriteArrayByChunksAsync<T>(T[] array, Action<MemoryStreamWriter, T> saveAction, int chunk_size)
         {
-            if (array != null)
+            if (array != null!)
             {
                 WriteInt32(array.Length);
 
@@ -948,7 +948,7 @@ namespace ZeroLevel.Services.Serialization
         public async Task WriteArrayAsync<T>(T[] array)
             where T : IAsyncBinarySerializable
         {
-            if (array != null)
+            if (array != null!)
             {
                 await WriteInt32Async(array.Length);
                 for (int i = 0; i < array.Length; i++)
@@ -964,7 +964,7 @@ namespace ZeroLevel.Services.Serialization
 
         public async Task WriteArrayAsync(string[] array)
         {
-            if (array != null)
+            if (array != null!)
             {
                 if (_stream is MemoryStream)
                 {
@@ -1019,7 +1019,7 @@ namespace ZeroLevel.Services.Serialization
 
         public async Task WriteArrayAsync(bool[] array)
         {
-            if (array != null)
+            if (array != null!)
             {
                 WriteInt32(array.Length);
 
@@ -1058,7 +1058,7 @@ namespace ZeroLevel.Services.Serialization
 
         public async Task WriteArrayAsync(byte[] array)
         {
-            if (array != null)
+            if (array != null!)
             {
                 WriteInt32(array.Length);
 
@@ -1097,7 +1097,7 @@ namespace ZeroLevel.Services.Serialization
 
         public async Task WriteArrayAsync(byte[][] array)
         {
-            if (array != null)
+            if (array != null!)
             {
                 WriteInt32(array.Length);
                 if (_stream is MemoryStream)
@@ -1135,7 +1135,7 @@ namespace ZeroLevel.Services.Serialization
         public async Task WriteAsync<T>(T item)
             where T : IAsyncBinarySerializable
         {
-            if (item != null)
+            if (item != null!)
             {
                 WriteByte(1);
                 await item.SerializeAsync(this);
@@ -1148,7 +1148,7 @@ namespace ZeroLevel.Services.Serialization
 
         public async Task WriteDictionaryAsync<TKey, TValue>(IDictionary<TKey, TValue> collection)
         {
-            if (collection != null)
+            if (collection != null!)
             {
                 WriteInt32(collection.Count);
                 foreach (var item in collection)
@@ -1165,7 +1165,7 @@ namespace ZeroLevel.Services.Serialization
 
         public async Task WriteDictionaryAsync<TKey, TValue>(ConcurrentDictionary<TKey, TValue> collection)
         {
-            if (collection != null)
+            if (collection != null!)
             {
                 WriteInt32(collection.Count);
                 foreach (var item in collection)

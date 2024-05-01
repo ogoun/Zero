@@ -21,7 +21,7 @@ namespace ZeroLevel.Services.Reflection
             foreach (var frame in stackTrace.GetFrames() ?? Enumerable.Empty<StackFrame>())
             {
                 var method = frame.GetMethod();
-                if (method != null && method.DeclaringType != null)
+                if (method != null && method.DeclaringType != null!)
                 {
                     var type = method.DeclaringType.Name;
                     if (false == type.Equals("StackTraceReader", StringComparison.Ordinal))

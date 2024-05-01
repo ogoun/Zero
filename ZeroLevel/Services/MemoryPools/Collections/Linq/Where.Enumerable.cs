@@ -30,8 +30,8 @@ namespace MemoryPools.Collections.Linq
 	        
 	        if (_count == 0)
 	        {
-			    _src = default;
-		        _condition = default;
+			    _src = default!;
+		        _condition = default!;
 		        Pool<WhereExprEnumerable<T>>.Return(this);
 	        }
         }
@@ -66,16 +66,16 @@ namespace MemoryPools.Collections.Linq
     			_src.Reset();
     		}
 
-            object IPoolingEnumerator.Current => Current;
+            object IPoolingEnumerator.Current => Current!;
 
             public T Current => _src.Current;
     
     		public void Dispose()
     		{
     			_parent?.Dispose();
-                _parent = default;
+                _parent = default!;
                 _src?.Dispose();
-    			_src = default;
+    			_src = default!;
     			Pool<WhereExprEnumerator>.Return(this);
     		}
     	}

@@ -3,312 +3,312 @@ using System.Buffers;
 
 namespace MemoryPools.Collections.Specialized
 {
-	public abstract class PoolingListBase<T> : IDisposable, IPoolingEnumerable<T>
-	{
-		protected IMemoryOwner<IPoolingNode<T>> _root;
-		protected int _count;
-		protected int _ver;
+    public abstract class PoolingListBase<T> : IDisposable, IPoolingEnumerable<T>
+    {
+        protected IMemoryOwner<IPoolingNode<T>> _root;
+        protected int _count;
+        protected int _ver;
 
-		public IPoolingEnumerator<T> GetEnumerator()
-		{
-			return Pool<Enumerator>.Get().Init(this);
-		}
+        public IPoolingEnumerator<T> GetEnumerator()
+        {
+            return Pool<Enumerator>.Get().Init(this);
+        }
 
-		IPoolingEnumerator IPoolingEnumerable.GetEnumerator()
-		{
-			return GetEnumerator();
-		}
+        IPoolingEnumerator IPoolingEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
 
-		protected abstract IPoolingNode<T> CreateNodeHolder();
-		
-		public void Add(T item)
-		{
-			var bn = _count >> PoolsDefaults.DefaultPoolBucketDegree;
-			var bi = _count & PoolsDefaults.DefaultPoolBucketMask;
+        protected abstract IPoolingNode<T> CreateNodeHolder();
 
-			_root.Memory.Span[bn] ??= CreateNodeHolder();
+        public void Add(T item)
+        {
+            var bn = _count >> PoolsDefaults.DefaultPoolBucketDegree;
+            var bi = _count & PoolsDefaults.DefaultPoolBucketMask;
 
-			_root.Memory.Span[bn][bi] = item;
+            _root.Memory.Span[bn] ??= CreateNodeHolder();
 
-			_count++;
+            _root.Memory.Span[bn][bi] = item;
 
-			unchecked
-			{
-				_ver++;
-			}
-		}
+            _count++;
 
-		public void Clear()
-		{
-			for (int i = 0, len = _root.Memory.Span.Length; i < len; i++)
-			{
-				if (_root.Memory.Span[i] == null) break;
-				_root.Memory.Span[i].Clear();
-				_root.Memory.Span[i].Dispose();
-				_root.Memory.Span[i] = default;
-			}
+            unchecked
+            {
+                _ver++;
+            }
+        }
 
-			_count = default;
+        public void Clear()
+        {
+            for (int i = 0, len = _root.Memory.Span.Length; i < len; i++)
+            {
+                if (_root.Memory.Span[i] == null!) break;
+                _root.Memory.Span[i].Clear();
+                _root.Memory.Span[i].Dispose();
+                _root.Memory.Span[i] = default!;
+            }
 
-			unchecked
-			{
-				_ver++;
-			}
-		}
-		
-		public bool Contains(T item) => IndexOf(item) != -1;
+            _count = default!;
 
-		public void CopyTo(T[] array, int arrayIndex)
-		{
-			var len = 0;
-			for (var i = 0; i <= PoolsDefaults.DefaultPoolBucketSize; i++)
-			for (var j = 0; j < PoolsDefaults.DefaultPoolBucketSize && len < _count; j++, len++)
-			{
-				array[len] = _root.Memory.Span[i][j];
-			}
-		}
+            unchecked
+            {
+                _ver++;
+            }
+        }
 
-		public bool Remove(T item)
-		{
-			int i, j;
-			for (i = 0, j = 0; i < _count; i++)
-			{
-				var bfn = i >> PoolsDefaults.DefaultPoolBucketDegree;
-				var bfi = i & PoolsDefaults.DefaultPoolBucketMask;
-				var btn = j >> PoolsDefaults.DefaultPoolBucketDegree;
-				var bti = j & PoolsDefaults.DefaultPoolBucketMask;
+        public bool Contains(T item) => IndexOf(item) != -1;
 
-				if (!_root.Memory.Span[bfn][bfi].Equals(item))
-				{
-					_root.Memory.Span[btn][bti] = _root.Memory.Span[bfn][bfi];
-					j++;
-				}
-				else
-				{
-					_count--;
-				}
-			}
+        public void CopyTo(T[] array, int arrayIndex)
+        {
+            var len = 0;
+            for (var i = 0; i <= PoolsDefaults.DefaultPoolBucketSize; i++)
+                for (var j = 0; j < PoolsDefaults.DefaultPoolBucketSize && len < _count; j++, len++)
+                {
+                    array[len] = _root.Memory.Span[i][j];
+                }
+        }
 
-			unchecked
-			{
-				_ver++;
-			}
+        public bool Remove(T item)
+        {
+            int i, j;
+            for (i = 0, j = 0; i < _count; i++)
+            {
+                var bfn = i >> PoolsDefaults.DefaultPoolBucketDegree;
+                var bfi = i & PoolsDefaults.DefaultPoolBucketMask;
+                var btn = j >> PoolsDefaults.DefaultPoolBucketDegree;
+                var bti = j & PoolsDefaults.DefaultPoolBucketMask;
 
-			return i != j && i != 0;
-		}
+                if (!(_root.Memory.Span[bfn][bfi]?.Equals(item) ?? false))
+                {
+                    _root.Memory.Span[btn][bti] = _root.Memory.Span[bfn][bfi];
+                    j++;
+                }
+                else
+                {
+                    _count--;
+                }
+            }
 
-		public int Count => _count;
+            unchecked
+            {
+                _ver++;
+            }
 
-		public bool IsReadOnly => false;
+            return i != j && i != 0;
+        }
 
-		public int IndexOf(T item)
-		{
-			var len = 0;
-			
-			for (var i = 0; i <= PoolsDefaults.DefaultPoolBucketSize; i++)
-			for (var j = 0; j < PoolsDefaults.DefaultPoolBucketSize && len < _count; j++, len++)
-			{
-				if (item.Equals(_root.Memory.Span[i][j])) return len;
-			}
+        public int Count => _count;
 
-			return -1;
-		}
+        public bool IsReadOnly => false;
 
-		public void Insert(int index, T item)
-		{
-			if (index < _count)
-			{
-				throw new IndexOutOfRangeException(nameof(index));
-			}
+        public int IndexOf(T item)
+        {
+            var len = 0;
 
-			for (var i = index; i <= _count; i++)
-			{
-				var j = i + 1;
+            for (var i = 0; i <= PoolsDefaults.DefaultPoolBucketSize; i++)
+                for (var j = 0; j < PoolsDefaults.DefaultPoolBucketSize && len < _count; j++, len++)
+                {
+                    if (item?.Equals(_root.Memory.Span[i][j]) ?? false) return len;
+                }
 
-				var bn = i >> PoolsDefaults.DefaultPoolBucketDegree;
-				var bi = i & PoolsDefaults.DefaultPoolBucketMask;
+            return -1;
+        }
 
-				var bjn = j >> PoolsDefaults.DefaultPoolBucketDegree;
-				var bji = j & PoolsDefaults.DefaultPoolBucketMask;
+        public void Insert(int index, T item)
+        {
+            if (index < _count)
+            {
+                throw new IndexOutOfRangeException(nameof(index));
+            }
 
-				var copy = _root.Memory.Span[bn][bi];
-				_root.Memory.Span[bjn][bji] = item;
-				item = copy;
-			}
+            for (var i = index; i <= _count; i++)
+            {
+                var j = i + 1;
 
-			_count++;
-			unchecked
-			{
-				_ver++;
-			}
-		}
+                var bn = i >> PoolsDefaults.DefaultPoolBucketDegree;
+                var bi = i & PoolsDefaults.DefaultPoolBucketMask;
 
-		public void RemoveAt(int index)
-		{
-			if (index >= _count)
-			{
-				throw new IndexOutOfRangeException(nameof(index));
-			}
-			
-			for (int i = index, j = i + 1; i <= _count; i++)
-			{
-				var bn = i >> PoolsDefaults.DefaultPoolBucketDegree;
-				var bi = i & PoolsDefaults.DefaultPoolBucketMask;
+                var bjn = j >> PoolsDefaults.DefaultPoolBucketDegree;
+                var bji = j & PoolsDefaults.DefaultPoolBucketMask;
 
-				var bjn = j >> PoolsDefaults.DefaultPoolBucketDegree;
-				var bji = j & PoolsDefaults.DefaultPoolBucketMask;
+                var copy = _root.Memory.Span[bn][bi];
+                _root.Memory.Span[bjn][bji] = item;
+                item = copy;
+            }
 
-				_root.Memory.Span[bn][bi] = _root.Memory.Span[bjn][bji];
-			}
+            _count++;
+            unchecked
+            {
+                _ver++;
+            }
+        }
 
-			_count--;
-			unchecked
-			{
-				_ver++;
-			}
-		}
+        public void RemoveAt(int index)
+        {
+            if (index >= _count)
+            {
+                throw new IndexOutOfRangeException(nameof(index));
+            }
 
-		public void Resize(int size)
-		{
-			if (size == _count) return;
-			if (size < _count)
-			{
-				var cbn = _count >> PoolsDefaults.DefaultPoolBucketDegree;
-				var sbn = size >> PoolsDefaults.DefaultPoolBucketDegree;
-				var sbi = size & PoolsDefaults.DefaultPoolBucketMask;
+            for (int i = index, j = i + 1; i <= _count; i++)
+            {
+                var bn = i >> PoolsDefaults.DefaultPoolBucketDegree;
+                var bi = i & PoolsDefaults.DefaultPoolBucketMask;
 
-				for (var bn = sbn + 1; bn <= cbn; bn++)
-				{
-					_root.Memory.Span[bn].Dispose();
-					_root.Memory.Span[bn] = default;
-				}
+                var bjn = j >> PoolsDefaults.DefaultPoolBucketDegree;
+                var bji = j & PoolsDefaults.DefaultPoolBucketMask;
 
-				var span = _root.Memory.Span[sbn];
-				for (var i = sbi; i <= PoolsDefaults.DefaultPoolBucketSize; i++)
-				{
-					span[i] = default;
-				}
+                _root.Memory.Span[bn][bi] = _root.Memory.Span[bjn][bji];
+            }
 
-				_count = size;
-			}
-			else
-			{
-				var cbn = _count >> PoolsDefaults.DefaultPoolBucketDegree;
-				var sbn = size >> PoolsDefaults.DefaultPoolBucketDegree;
-				
-				for (var bn = cbn + 1; bn <= sbn; bn++)
-				{
-					_root.Memory.Span[bn] = CreateNodeHolder();
-				}
+            _count--;
+            unchecked
+            {
+                _ver++;
+            }
+        }
 
-				_count = size;
-			}
-		}
+        public void Resize(int size)
+        {
+            if (size == _count) return;
+            if (size < _count)
+            {
+                var cbn = _count >> PoolsDefaults.DefaultPoolBucketDegree;
+                var sbn = size >> PoolsDefaults.DefaultPoolBucketDegree;
+                var sbi = size & PoolsDefaults.DefaultPoolBucketMask;
 
-		public T this[int index]
-		{
-			get
-			{
-				if (index >= _count)
-				{
-					throw new IndexOutOfRangeException(nameof(index));
-				}
+                for (var bn = sbn + 1; bn <= cbn; bn++)
+                {
+                    _root.Memory.Span[bn].Dispose();
+                    _root.Memory.Span[bn] = default!;
+                }
 
-				var bn = index >> PoolsDefaults.DefaultPoolBucketDegree;
-				var bi = index & PoolsDefaults.DefaultPoolBucketMask;
-				return _root.Memory.Span[bn][bi];
-			}
-			set
-			{
-				if (index >= _count)
-				{
-					throw new IndexOutOfRangeException(nameof(index));
-				}
-				
-				var bn = index >> PoolsDefaults.DefaultPoolBucketDegree;
-				var bi = index & PoolsDefaults.DefaultPoolBucketMask;
-				_root.Memory.Span[bn][bi] = value;
+                var span = _root.Memory.Span[sbn];
+                for (var i = sbi; i <= PoolsDefaults.DefaultPoolBucketSize; i++)
+                {
+                    span[i] = default!;
+                }
 
-				unchecked
-				{
-					_ver++;
-				}
-			}
-		}
+                _count = size;
+            }
+            else
+            {
+                var cbn = _count >> PoolsDefaults.DefaultPoolBucketDegree;
+                var sbn = size >> PoolsDefaults.DefaultPoolBucketDegree;
 
-		public void Dispose()
-		{
-			Clear();
-			_root?.Dispose();
-			_root = default;
-		}
+                for (var bn = cbn + 1; bn <= sbn; bn++)
+                {
+                    _root.Memory.Span[bn] = CreateNodeHolder();
+                }
 
-		private class Enumerator : IPoolingEnumerator<T>
-		{
-			private PoolingListBase<T> _src;
-			private int _bucket, _index, _ver;
+                _count = size;
+            }
+        }
 
-			public Enumerator Init(PoolingListBase<T> src)
-			{
-				_bucket = 0;
-				_index = -1;
-				_src = src;
-				_ver = _src._ver;
-				return this;
-			}
-			
-			public bool MoveNext()
-			{
-				if (_index >= _src.Count) return false;
-				if (_ver != _src._ver)
-				{
-					throw new InvalidOperationException("Collection was changed while enumeration");
-				}
-				
-				_index++;
-				var tb = _src._count >> PoolsDefaults.DefaultPoolBucketDegree;
-				var ti = _src._count & PoolsDefaults.DefaultPoolBucketMask;
+        public T this[int index]
+        {
+            get
+            {
+                if (index >= _count)
+                {
+                    throw new IndexOutOfRangeException(nameof(index));
+                }
 
-				if (_index == PoolsDefaults.DefaultPoolBucketSize)
-				{
-					_index = 0;
-					_bucket++;
-				}
-				
-				if ((_bucket < tb && _index < PoolsDefaults.DefaultPoolBucketSize) || 
-				    (_bucket == tb && _index < ti))
-				{
-					return true;
-				}
+                var bn = index >> PoolsDefaults.DefaultPoolBucketDegree;
+                var bi = index & PoolsDefaults.DefaultPoolBucketMask;
+                return _root.Memory.Span[bn][bi];
+            }
+            set
+            {
+                if (index >= _count)
+                {
+                    throw new IndexOutOfRangeException(nameof(index));
+                }
 
-				return false;
-			}
+                var bn = index >> PoolsDefaults.DefaultPoolBucketDegree;
+                var bi = index & PoolsDefaults.DefaultPoolBucketMask;
+                _root.Memory.Span[bn][bi] = value;
 
-			public void Reset()
-			{
-				_index = -1;
-				_bucket = 0;
-				_ver = _src._ver;
-			}
+                unchecked
+                {
+                    _ver++;
+                }
+            }
+        }
 
-			public T Current
-			{
-				get
-				{
-					if (_ver != _src._ver)
-					{
-						throw new InvalidOperationException("Collection was changed while enumeration");
-					}
-					return _src._root.Memory.Span[_bucket][_index];
-				}
-			}
+        public void Dispose()
+        {
+            Clear();
+            _root?.Dispose();
+            _root = default!;
+        }
 
-			object IPoolingEnumerator.Current => Current;
+        private class Enumerator : IPoolingEnumerator<T>
+        {
+            private PoolingListBase<T> _src;
+            private int _bucket, _index, _ver;
 
-			public void Dispose()
-			{
-				Pool<Enumerator>.Return(this);
-			}
-		}
-	}
+            public Enumerator Init(PoolingListBase<T> src)
+            {
+                _bucket = 0;
+                _index = -1;
+                _src = src;
+                _ver = _src._ver;
+                return this;
+            }
+
+            public bool MoveNext()
+            {
+                if (_index >= _src.Count) return false;
+                if (_ver != _src._ver)
+                {
+                    throw new InvalidOperationException("Collection was changed while enumeration");
+                }
+
+                _index++;
+                var tb = _src._count >> PoolsDefaults.DefaultPoolBucketDegree;
+                var ti = _src._count & PoolsDefaults.DefaultPoolBucketMask;
+
+                if (_index == PoolsDefaults.DefaultPoolBucketSize)
+                {
+                    _index = 0;
+                    _bucket++;
+                }
+
+                if ((_bucket < tb && _index < PoolsDefaults.DefaultPoolBucketSize) ||
+                    (_bucket == tb && _index < ti))
+                {
+                    return true;
+                }
+
+                return false;
+            }
+
+            public void Reset()
+            {
+                _index = -1;
+                _bucket = 0;
+                _ver = _src._ver;
+            }
+
+            public T Current
+            {
+                get
+                {
+                    if (_ver != _src._ver)
+                    {
+                        throw new InvalidOperationException("Collection was changed while enumeration");
+                    }
+                    return _src._root.Memory.Span[_bucket][_index];
+                }
+            }
+
+            object IPoolingEnumerator.Current => Current!;
+
+            public void Dispose()
+            {
+                Pool<Enumerator>.Return(this);
+            }
+        }
+    }
 }

@@ -26,7 +26,7 @@ namespace DOM.DSL.Model
                 // Containers
                 case ContentElementType.Section:
                     var section = (element as Section);
-                    foreach (var item in section.Parts)
+                    foreach (var item in section!.Parts)
                     {
                         TraversElement(item, type, handler);
                     }
@@ -34,7 +34,7 @@ namespace DOM.DSL.Model
 
                 case ContentElementType.Paragraph:
                     var paragraph = (element as Paragraph);
-                    foreach (var item in paragraph.Parts)
+                    foreach (var item in paragraph!.Parts)
                     {
                         TraversElement(item, type, handler);
                     }
@@ -42,7 +42,7 @@ namespace DOM.DSL.Model
 
                 case ContentElementType.List:
                     var list = (element as List);
-                    foreach (var item in list.Items)
+                    foreach (var item in list!.Items)
                     {
                         TraversElement(item, type, handler);
                     }
@@ -50,7 +50,7 @@ namespace DOM.DSL.Model
 
                 case ContentElementType.Gallery:
                     var gallery = (element as Gallery);
-                    foreach (var item in gallery.Images)
+                    foreach (var item in gallery!.Images)
                     {
                         TraversElement(item, type, handler);
                     }
@@ -58,7 +58,7 @@ namespace DOM.DSL.Model
 
                 case ContentElementType.Audioplayer:
                     var audioplayer = (element as Audioplayer);
-                    foreach (var item in audioplayer.Tracks)
+                    foreach (var item in audioplayer!.Tracks)
                     {
                         TraversElement(item, type, handler);
                     }
@@ -66,7 +66,7 @@ namespace DOM.DSL.Model
 
                 case ContentElementType.Videoplayer:
                     var videoplayer = (element as Videoplayer);
-                    foreach (var item in videoplayer.Playlist)
+                    foreach (var item in videoplayer!.Playlist)
                     {
                         TraversElement(item, type, handler);
                     }
@@ -74,7 +74,7 @@ namespace DOM.DSL.Model
 
                 case ContentElementType.Table:
                     var table = (element as Table);
-                    foreach (var column in table.Columns)
+                    foreach (var column in table!.Columns)
                     {
                         TraversElement(column, type, handler);
                     }

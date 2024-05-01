@@ -7,7 +7,7 @@ namespace MemoryPools.Collections.Linq
         public static T Last<T>(this IPoolingEnumerable<T> source)
         {
             var enumerator = source.GetEnumerator();
-            T element = default;
+            T element = default!;
             var hasItems = false;
             while (enumerator.MoveNext())
             {
@@ -21,7 +21,7 @@ namespace MemoryPools.Collections.Linq
         public static T Last<T>(this IPoolingEnumerable<T> source, Func<T, bool> condition)
         {
             var enumerator = source.GetEnumerator();
-            T element = default;
+            T element = default!;
             var hasItems = false;
             while (enumerator.MoveNext())
             {
@@ -37,7 +37,7 @@ namespace MemoryPools.Collections.Linq
         public static T Last<T, TContext>(this IPoolingEnumerable<T> source, TContext context, Func<TContext, T, bool> condition)
         {
             var enumerator = source.GetEnumerator();
-            T element = default;
+            T element = default!;
             var hasItems = false;
             while (enumerator.MoveNext())
             {
@@ -53,7 +53,7 @@ namespace MemoryPools.Collections.Linq
         public static T LastOrDefault<T>(this IPoolingEnumerable<T> source)
         {
             var enumerator = source.GetEnumerator();
-            T element = default;
+            T element = default!;
             var hasItems = false;
             while (enumerator.MoveNext())
             {
@@ -61,13 +61,13 @@ namespace MemoryPools.Collections.Linq
                 hasItems = true;
             }
             enumerator.Dispose();
-            return hasItems ? element : default;
+            return hasItems ? element : default!;
         }
         
         public static T LastOrDefault<T>(this IPoolingEnumerable<T> source, Func<T, bool> condition)
         {
             var enumerator = source.GetEnumerator();
-            T element = default;
+            T element = default!;
             var hasItems = false;
             while (enumerator.MoveNext())
             {
@@ -77,13 +77,13 @@ namespace MemoryPools.Collections.Linq
                 hasItems = true;
             }
             enumerator.Dispose();
-            return hasItems ? element : default;
+            return (hasItems ? element : default)!;
         }
 		
         public static T LastOrDefault<T, TContext>(this IPoolingEnumerable<T> source, TContext context, Func<TContext, T, bool> condition)
         {
             var enumerator = source.GetEnumerator();
-            T element = default;
+            T element = default!;
             var hasItems = false;
             while (enumerator.MoveNext())
             {
@@ -93,7 +93,7 @@ namespace MemoryPools.Collections.Linq
                 hasItems = true;
             }
             enumerator.Dispose();
-            return hasItems ? element : default;
+            return (hasItems ? element : default)!;
         }
     }
 }

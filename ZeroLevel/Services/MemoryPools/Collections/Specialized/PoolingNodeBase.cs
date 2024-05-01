@@ -17,8 +17,8 @@ namespace MemoryPools.Collections.Specialized
 		public virtual void Dispose()
 		{
 			_buf.Dispose();
-			_buf = null;
-			Next = null;
+			_buf = null!;
+			Next = null!;
 		}
 
 		public IPoolingNode<T> Next { get; set; }

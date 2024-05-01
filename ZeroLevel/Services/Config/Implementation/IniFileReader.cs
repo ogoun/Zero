@@ -30,7 +30,7 @@ namespace ZeroLevel.Services.Config.Implementation
         public IConfiguration ReadConfiguration()
         {
             var result = Configuration.Create();
-            string sectionName = null;
+            string sectionName = null!;
             foreach (var line in File.ReadAllLines(_iniPath))
             {
                 if (string.IsNullOrWhiteSpace(line))
@@ -82,7 +82,7 @@ namespace ZeroLevel.Services.Config.Implementation
         public IConfigurationSet ReadConfigurationSet()
         {
             var result = Configuration.CreateSet();
-            string sectionName = null;
+            string sectionName = null!;
             foreach (var line in File.ReadAllLines(_iniPath))
             {
                 if (string.IsNullOrWhiteSpace(line))

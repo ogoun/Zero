@@ -9,7 +9,7 @@ namespace ZeroLevel.DependencyInjection
 
         public ParameterAttribute()
         {
-            this.Type = null;
+            this.Type = null!;
             this.Name = string.Empty;
         }
 
@@ -21,7 +21,7 @@ namespace ZeroLevel.DependencyInjection
 
         public ParameterAttribute(string parameterName)
         {
-            this.Type = null;
+            this.Type = null!;
             this.Name = parameterName;
         }
 

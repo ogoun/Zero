@@ -7,15 +7,15 @@
 		<ApplicationIcon>lz.ico</ApplicationIcon>
 		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
 		<Title>ZeroLevel</Title>
-		<FileVersion>4.0.0.0</FileVersion>
+		<FileVersion>$(AssemblyVersion)</FileVersion>
 		<AssemblyVersion>4.0.0.0</AssemblyVersion>
-		<AnalysisLevel>latest</AnalysisLevel>
 		<Version>$(AssemblyVersion)</Version>
+		<AnalysisLevel>latest</AnalysisLevel>
 		<Authors>Ogoun</Authors>
 		<Description>Basic Toolkit.</Description>
 		<Copyright>© ogoun</Copyright>
 		<PackageProjectUrl>https://github.com/ogoun/Zero</PackageProjectUrl>
-		<PackageIcon>lz.ico</PackageIcon>
+		<PackageIcon>lz.png</PackageIcon>
 		<RepositoryUrl>https://github.com/ogoun/Zero</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
 	</PropertyGroup>
@@ -34,6 +34,10 @@
 
 	<ItemGroup>
 	  <None Update="lz.ico">
+	    <Pack>True</Pack>
+	    <PackagePath>\</PackagePath>
+	  </None>
+	  <None Update="lz.png">
 	    <Pack>True</Pack>
 	    <PackagePath>\</PackagePath>
 	  </None>

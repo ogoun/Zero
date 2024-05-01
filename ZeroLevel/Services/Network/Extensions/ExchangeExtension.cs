@@ -15,7 +15,7 @@ namespace ZeroLevel.Network
 
         public static Tresponse Request<Tresponse>(this IClientSet exchange, string alias, TimeSpan timeout)
         {
-            Tresponse response = default;
+            Tresponse response = default!;
             var ev = _mrePool.Get();
             ev.Reset();
             try
@@ -35,7 +35,7 @@ namespace ZeroLevel.Network
 
         public static Tresponse Request<Tresponse>(this IClientSet exchange, string alias, string inbox, TimeSpan timeout)
         {
-            Tresponse response = default;
+            Tresponse response = default!;
             var ev = _mrePool.Get();
             ev.Reset();
             try
@@ -58,7 +58,7 @@ namespace ZeroLevel.Network
 
         public static Tresponse Request<Trequest, Tresponse>(this IClientSet exchange, string alias, Trequest request, TimeSpan timeout)
         {
-            Tresponse response = default;
+            Tresponse response = default!;
             var ev = _mrePool.Get();
             ev.Reset();
             try
@@ -79,7 +79,7 @@ namespace ZeroLevel.Network
         public static Tresponse Request<Trequest, Tresponse>(this IClientSet exchange, string alias, string inbox
             , Trequest request, TimeSpan timeout)
         { 
-            Tresponse response = default;
+            Tresponse response = default!;
             var ev = _mrePool.Get();
             ev.Reset();
             try
@@ -99,7 +99,7 @@ namespace ZeroLevel.Network
 
         public static Tresponse Request<Tresponse>(this IClientSet exchange, string alias)
         {
-            Tresponse response = default;
+            Tresponse response = default!;
             var ev = _mrePool.Get();
             ev.Reset();
             try
@@ -119,7 +119,7 @@ namespace ZeroLevel.Network
 
         public static Tresponse Request<Tresponse>(this IClientSet exchange, string alias, string inbox)
         {
-            Tresponse response = default;
+            Tresponse response = default!;
             var ev = _mrePool.Get();
             ev.Reset();
             try
@@ -142,7 +142,7 @@ namespace ZeroLevel.Network
 
         public static Tresponse Request<Trequest, Tresponse>(this IClientSet exchange, string alias, Trequest request)
         {
-            Tresponse response = default;
+            Tresponse response = default!;
             var ev = _mrePool.Get();
             ev.Reset();
             try
@@ -163,7 +163,7 @@ namespace ZeroLevel.Network
         public static Tresponse Request<Trequest, Tresponse>(this IClientSet exchange, string alias, string inbox
             , Trequest request)
         {
-            Tresponse response = default;
+            Tresponse response = default!;
             var ev = _mrePool.Get();
             ev.Reset();
             try

@@ -42,7 +42,7 @@ namespace ZeroLevel.Services.FileSystem
             return folderName;
         }
 
-        public static string GetAppLocalDbDirectory(string dbFolderName = null)
+        public static string GetAppLocalDbDirectory(string dbFolderName = null!)
         {
             dbFolderName = Path.Combine(Configuration.BaseDirectory, dbFolderName ?? "db");
             if (false == Directory.Exists(dbFolderName))
@@ -153,7 +153,7 @@ namespace ZeroLevel.Services.FileSystem
         /// </summary>
         public static string PathCorrection(string path)
         {
-            if (path == null) return string.Empty;
+            if (path == null!) return string.Empty;
             var result = new char[path.Length];
             var index = 0;
             foreach (char c in path)
@@ -173,7 +173,7 @@ namespace ZeroLevel.Services.FileSystem
         /// </summary>
         public static string FileNameCorrection(string name, bool isRootPath = false)
         {
-            if (name == null) return string.Empty;
+            if (name == null!) return string.Empty;
             // The reserved filenames
             if (StartWithInvalidWindowsPrefix(name))
             {
@@ -207,7 +207,7 @@ namespace ZeroLevel.Services.FileSystem
         /// </summary>
         public static string FileNameCorrection(string name, char replacedSymbol, bool isRootPath = false)
         {
-            if (name == null) return string.Empty;
+            if (name == null!) return string.Empty;
             if (_invalid_filename_characters.IndexOf(replacedSymbol) >= 0)
             {
                 throw new ArgumentException($"The sybmol '{replacedSymbol}' is invalid for windows filenames");
@@ -250,7 +250,7 @@ namespace ZeroLevel.Services.FileSystem
         /// <returns></returns>
         public static string FileNameCorrection(string path, char replaceChar)
         {
-            if (path == null) return string.Empty;
+            if (path == null!) return string.Empty;
             var result = new char[path.Length];
             var index = 0;
             foreach (char c in path)
@@ -286,7 +286,7 @@ namespace ZeroLevel.Services.FileSystem
             }
             finally
             {
-                if (fileStream != null)
+                if (fileStream != null!)
                 {
                     fileStream.Close();
                     fileStream.Dispose();
@@ -309,7 +309,7 @@ namespace ZeroLevel.Services.FileSystem
             }
             finally
             {
-                if (fileStream != null)
+                if (fileStream != null!)
                 {
                     fileStream.Close();
                     fileStream.Dispose();
@@ -319,14 +319,14 @@ namespace ZeroLevel.Services.FileSystem
             return false;
         }
 
-        public static void PackFolder(string sourceFolder, string zipPath, Func<FileInfo, bool> selector = null)
+        public static void PackFolder(string sourceFolder, string zipPath, Func<FileInfo, bool> selector = null!)
         {
             var tmp = FSUtils.GetAppLocalTemporaryDirectory();
             var tmpDir = Directory.CreateDirectory(tmp);
             var files = new DirectoryInfo(sourceFolder)
                 .GetFiles("*.*", SearchOption.AllDirectories)
                 .AsEnumerable();
-            if (selector != null)
+            if (selector != null!)
             {
                 files = files.Where(selector);
             }

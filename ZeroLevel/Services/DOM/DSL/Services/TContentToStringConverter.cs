@@ -22,7 +22,7 @@ namespace DOM.DSL.Services
             _render = render;
             _transformRules = rules;
             _specialTableBuilder = rules.SpecialTableBuilder;
-            _useSpecialTableBuilder = rules.UseSpecialTableBuilder && rules.SpecialTableBuilder != null;
+            _useSpecialTableBuilder = rules.UseSpecialTableBuilder && rules.SpecialTableBuilder != null!;
 
             _builder = new StringBuilder();
         }
@@ -58,15 +58,15 @@ namespace DOM.DSL.Services
         public void ReadAudio(Audio audio, int order)
         {
             _render.Counter.IncAudioId();
-            if (_transformRules.AudioPrefix != null)
+            if (_transformRules.AudioPrefix != null!)
             {
                 WriteText(Resolve(_transformRules.AudioPrefix, audio, order));
             }
-            if (_transformRules.AudioTemplate != null)
+            if (_transformRules.AudioTemplate != null!)
             {
                 WriteText(Resolve(_transformRules.AudioTemplate, audio, order));
             }
-            if (_transformRules.AudioPostfix != null)
+            if (_transformRules.AudioPostfix != null!)
             {
                 WriteText(Resolve(_transformRules.AudioPostfix, audio, order));
             }
@@ -75,15 +75,15 @@ namespace DOM.DSL.Services
         public void ReadColumn(Table table, Column column, int order)
         {
             _render.Counter.IncColumnId();
-            if (_transformRules.ColumnPrefix != null)
+            if (_transformRules.ColumnPrefix != null!)
             {
                 WriteText(Resolve(_transformRules.ColumnPrefix, column, order));
             }
-            if (_transformRules.ColumnTemplate != null)
+            if (_transformRules.ColumnTemplate != null!)
             {
                 WriteText(Resolve(_transformRules.ColumnTemplate, column, order));
             }
-            if (_transformRules.ColumnPostfix != null)
+            if (_transformRules.ColumnPostfix != null!)
             {
                 WriteText(Resolve(_transformRules.ColumnPostfix, column, order));
             }
@@ -92,15 +92,15 @@ namespace DOM.DSL.Services
         public void ReadForm(FormContent form)
         {
             _render.Counter.IncFormId();
-            if (_transformRules.FormPrefix != null)
+            if (_transformRules.FormPrefix != null!)
             {
                 WriteText(Resolve(_transformRules.FormPrefix, form, 0));
             }
-            if (_transformRules.FormTemplate != null)
+            if (_transformRules.FormTemplate != null!)
             {
                 WriteText(Resolve(_transformRules.FormTemplate, form, 0));
             }
-            if (_transformRules.FormPostfix != null)
+            if (_transformRules.FormPostfix != null!)
             {
                 WriteText(Resolve(_transformRules.FormPostfix, form, 0));
             }
@@ -109,15 +109,15 @@ namespace DOM.DSL.Services
         public void ReadImage(Image image, int order)
         {
             _render.Counter.IncImageId();
-            if (_transformRules.ImagePrefix != null)
+            if (_transformRules.ImagePrefix != null!)
             {
                 WriteText(Resolve(_transformRules.ImagePrefix, image, order));
             }
-            if (_transformRules.ImageTemplate != null)
+            if (_transformRules.ImageTemplate != null!)
             {
                 WriteText(Resolve(_transformRules.ImageTemplate, image, order));
             }
-            if (_transformRules.ImagePostfix != null)
+            if (_transformRules.ImagePostfix != null!)
             {
                 WriteText(Resolve(_transformRules.ImagePostfix, image, order));
             }
@@ -126,15 +126,15 @@ namespace DOM.DSL.Services
         public void ReadLink(Link link, int order)
         {
             _render.Counter.IncLinkId();
-            if (_transformRules.LinkPrefix != null)
+            if (_transformRules.LinkPrefix != null!)
             {
                 WriteText(Resolve(_transformRules.LinkPrefix, link, order));
             }
-            if (_transformRules.LinkTemplate != null)
+            if (_transformRules.LinkTemplate != null!)
             {
                 WriteText(Resolve(_transformRules.LinkTemplate, link, order));
             }
-            if (_transformRules.LinkPostfix != null)
+            if (_transformRules.LinkPostfix != null!)
             {
                 WriteText(Resolve(_transformRules.LinkPostfix, link, order));
             }
@@ -143,15 +143,15 @@ namespace DOM.DSL.Services
         public void ReadQuote(Quote quote)
         {
             _render.Counter.IncQuoteId();
-            if (_transformRules.QuotePrefix != null)
+            if (_transformRules.QuotePrefix != null!)
             {
                 WriteText(Resolve(_transformRules.QuotePrefix, quote, 0));
             }
-            if (_transformRules.QuoteTemplate != null)
+            if (_transformRules.QuoteTemplate != null!)
             {
                 WriteText(Resolve(_transformRules.QuoteTemplate, quote, 0));
             }
-            if (_transformRules.QuotePostfix != null)
+            if (_transformRules.QuotePostfix != null!)
             {
                 WriteText(Resolve(_transformRules.QuotePostfix, quote, 0));
             }
@@ -160,15 +160,15 @@ namespace DOM.DSL.Services
         public void ReadText(Text text)
         {
             _render.Counter.IncTextId();
-            if (_transformRules.TextPrefix != null)
+            if (_transformRules.TextPrefix != null!)
             {
                 WriteText(Resolve(_transformRules.TextPrefix, text, 0));
             }
-            if (_transformRules.TextTemplate != null)
+            if (_transformRules.TextTemplate != null!)
             {
                 WriteText(Resolve(_transformRules.TextTemplate, text, 0));
             }
-            if (_transformRules.TextPostfix != null)
+            if (_transformRules.TextPostfix != null!)
             {
                 WriteText(Resolve(_transformRules.TextPostfix, text, 0));
             }
@@ -177,15 +177,15 @@ namespace DOM.DSL.Services
         public void ReadVideo(Video video, int order)
         {
             _render.Counter.IncVideoId();
-            if (_transformRules.VideoPrefix != null)
+            if (_transformRules.VideoPrefix != null!)
             {
                 WriteText(Resolve(_transformRules.VideoPrefix, video, order));
             }
-            if (_transformRules.VideoTemplate != null)
+            if (_transformRules.VideoTemplate != null!)
             {
                 WriteText(Resolve(_transformRules.VideoTemplate, video, order));
             }
-            if (_transformRules.VideoPostfix != null)
+            if (_transformRules.VideoPostfix != null!)
             {
                 WriteText(Resolve(_transformRules.VideoPostfix, video, order));
             }
@@ -198,7 +198,7 @@ namespace DOM.DSL.Services
         public void EnterParagraph(Paragraph paragraph)
         {
             _render.Counter.IncParagraphId();
-            if (_transformRules.ParagraphPrefix != null)
+            if (_transformRules.ParagraphPrefix != null!)
             {
                 WriteText(Resolve(_transformRules.ParagraphPrefix, paragraph, _render.Counter.ParagraphId));
             }
@@ -206,7 +206,7 @@ namespace DOM.DSL.Services
 
         public void LeaveParagraph(Paragraph paragraph)
         {
-            if (_transformRules.ParagraphPostfix != null)
+            if (_transformRules.ParagraphPostfix != null!)
             {
                 WriteText(Resolve(_transformRules.ParagraphPostfix, paragraph, _render.Counter.ParagraphId));
             }
@@ -215,7 +215,7 @@ namespace DOM.DSL.Services
         public void EnterSection(Section section)
         {
             _render.Counter.IncSectionId();
-            if (_transformRules.SectionPrefix != null)
+            if (_transformRules.SectionPrefix != null!)
             {
                 WriteText(Resolve(_transformRules.SectionPrefix, section, _render.Counter.SectionId));
             }
@@ -223,7 +223,7 @@ namespace DOM.DSL.Services
 
         public void LeaveSection(Section section)
         {
-            if (_transformRules.SectionPostfix != null)
+            if (_transformRules.SectionPostfix != null!)
             {
                 WriteText(Resolve(_transformRules.SectionPostfix, section, _render.Counter.SectionId));
             }
@@ -236,7 +236,7 @@ namespace DOM.DSL.Services
         public void EnterTable(Table table)
         {
             _render.Counter.IncTableId();
-            if (_transformRules.TablePrefix != null)
+            if (_transformRules.TablePrefix != null!)
             {
                 _builder.Append(Resolve(_transformRules.TablePrefix, table, _render.Counter.TableId));
             }
@@ -249,7 +249,7 @@ namespace DOM.DSL.Services
 
         public void EnterColumns(Table table)
         {
-            if (_useSpecialTableBuilder == false && _transformRules.ColumnsPrefix != null)
+            if (_useSpecialTableBuilder == false && _transformRules.ColumnsPrefix != null!)
             {
                 _builder.Append(Resolve(_transformRules.ColumnsPrefix, table.Columns, 0));
             }
@@ -262,7 +262,7 @@ namespace DOM.DSL.Services
             {
                 _specialTableBuilder.EnterRow(row.Cells.Count);
             }
-            else if (_transformRules.RowPrefix != null)
+            else if (_transformRules.RowPrefix != null!)
             {
                 _builder.Append(Resolve(_transformRules.RowPrefix, row, order));
             }
@@ -277,11 +277,11 @@ namespace DOM.DSL.Services
             }
             else
             {
-                if (order == 0 && _transformRules.FirstRowCellPrefix != null)
+                if (order == 0 && _transformRules.FirstRowCellPrefix != null!)
                 {
                     _builder.Append(Resolve(_transformRules.FirstRowCellPrefix, cell, order));
                 }
-                else if (_transformRules.CellPrefix != null)
+                else if (_transformRules.CellPrefix != null!)
                 {
                     _builder.Append(Resolve(_transformRules.CellPrefix, cell, order));
                 }
@@ -290,7 +290,7 @@ namespace DOM.DSL.Services
 
         public void LeaveColumns(Table table)
         {
-            if (_useSpecialTableBuilder == false && _transformRules.ColumnsPostfix != null)
+            if (_useSpecialTableBuilder == false && _transformRules.ColumnsPostfix != null!)
             {
                 _builder.Append(Resolve(_transformRules.ColumnsPostfix, table.Columns, 0));
             }
@@ -302,7 +302,7 @@ namespace DOM.DSL.Services
             {
                 _specialTableBuilder.LeaveRow();
             }
-            else if (_transformRules.RowPostfix != null)
+            else if (_transformRules.RowPostfix != null!)
             {
                 _builder.Append(Resolve(_transformRules.RowPostfix, row, order));
             }
@@ -316,11 +316,11 @@ namespace DOM.DSL.Services
             }
             else
             {
-                if (order == 0 && _transformRules.FirstRowCellPostfix != null)
+                if (order == 0 && _transformRules.FirstRowCellPostfix != null!)
                 {
                     _builder.Append(Resolve(_transformRules.FirstRowCellPostfix, cell, order));
                 }
-                else if (_transformRules.CellPostfix != null)
+                else if (_transformRules.CellPostfix != null!)
                 {
                     _builder.Append(Resolve(_transformRules.CellPostfix, cell, order));
                 }
@@ -333,7 +333,7 @@ namespace DOM.DSL.Services
             {
                 _specialTableBuilder.FlushTable(_builder);
             }
-            if (_transformRules.TablePostfix != null)
+            if (_transformRules.TablePostfix != null!)
             {
                 _builder.Append(Resolve(_transformRules.TablePostfix, table, _render.Counter.TableId));
             }
@@ -346,7 +346,7 @@ namespace DOM.DSL.Services
         public void EnterList(List list)
         {
             _render.Counter.IncListId();
-            if (_transformRules.ListPrefix != null)
+            if (_transformRules.ListPrefix != null!)
             {
                 WriteText(Resolve(_transformRules.ListPrefix, list, 0));
             }
@@ -355,7 +355,7 @@ namespace DOM.DSL.Services
         public void EnterListItem(List list, IContentElement item, int order)
         {
             _render.Counter.IncListItemId();
-            if (_transformRules.ListItemPrefix != null)
+            if (_transformRules.ListItemPrefix != null!)
             {
                 WriteText(Resolve(_transformRules.ListItemPrefix, item, order));
             }
@@ -363,7 +363,7 @@ namespace DOM.DSL.Services
 
         public void LeaveList(List list)
         {
-            if (_transformRules.ListPostfix != null)
+            if (_transformRules.ListPostfix != null!)
             {
                 WriteText(Resolve(_transformRules.ListPostfix, list, 0));
             }
@@ -371,7 +371,7 @@ namespace DOM.DSL.Services
 
         public void LeaveListItem(List list, IContentElement item, int order)
         {
-            if (_transformRules.ListItemPostfix != null)
+            if (_transformRules.ListItemPostfix != null!)
             {
                 WriteText(Resolve(_transformRules.ListItemPostfix, item, order));
             }
@@ -384,7 +384,7 @@ namespace DOM.DSL.Services
         public void EnterAudioplayer(Audioplayer player)
         {
             _render.Counter.IncAudioplayerId();
-            if (_transformRules.AudioplayerPrefix != null)
+            if (_transformRules.AudioplayerPrefix != null!)
             {
                 WriteText(Resolve(_transformRules.AudioplayerPrefix, player, 0));
             }
@@ -393,7 +393,7 @@ namespace DOM.DSL.Services
         public void EnterGallery(Gallery gallery)
         {
             _render.Counter.IncGalleryId();
-            if (_transformRules.GalleryPrefix != null)
+            if (_transformRules.GalleryPrefix != null!)
             {
                 WriteText(Resolve(_transformRules.GalleryPrefix, gallery, 0));
             }
@@ -402,7 +402,7 @@ namespace DOM.DSL.Services
         public void EnterVideoplayer(Videoplayer player)
         {
             _render.Counter.IncVideoplayerId();
-            if (_transformRules.VideoplayerPrefix != null)
+            if (_transformRules.VideoplayerPrefix != null!)
             {
                 WriteText(Resolve(_transformRules.VideoplayerPrefix, player, 0));
             }
@@ -410,7 +410,7 @@ namespace DOM.DSL.Services
 
         public void LeaveAudioplayer(Audioplayer player)
         {
-            if (_transformRules.AudioplayerPostfix != null)
+            if (_transformRules.AudioplayerPostfix != null!)
             {
                 WriteText(Resolve(_transformRules.AudioplayerPostfix, player, 0));
             }
@@ -418,7 +418,7 @@ namespace DOM.DSL.Services
 
         public void LeaveGallery(Gallery gallery)
         {
-            if (_transformRules.GalleryPostfix != null)
+            if (_transformRules.GalleryPostfix != null!)
             {
                 WriteText(Resolve(_transformRules.GalleryPostfix, gallery, 0));
             }
@@ -426,7 +426,7 @@ namespace DOM.DSL.Services
 
         public void LeaveVideoplayer(Videoplayer player)
         {
-            if (_transformRules.VideoplayerPostfix != null)
+            if (_transformRules.VideoplayerPostfix != null!)
             {
                 WriteText(Resolve(_transformRules.VideoplayerPostfix, player, 0));
             }

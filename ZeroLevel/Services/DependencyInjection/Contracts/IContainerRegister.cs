@@ -161,7 +161,7 @@ namespace ZeroLevel.DependencyInjection
         /// <typeparam name="TImplementation">Dependency resolution</typeparam>
         /// <param name="fallback">Error handler</param>
         /// <returns>true - registration successfully completed</returns>
-        bool TryRegister<TContract, TImplementation>(Action<Exception> fallback = null);
+        bool TryRegister<TContract, TImplementation>(Action<Exception> fallback = null!);
 
         /// <summary>
         /// Safe dependency resolution registration
@@ -171,7 +171,7 @@ namespace ZeroLevel.DependencyInjection
         /// <param name="resolveName">Dependency name</param>
         /// <param name="fallback">Error handler</param>
         /// <returns>true - registration successfully completed</returns>
-        bool TryRegister<TContract, TImplementation>(string resolveName, Action<Exception> fallback = null);
+        bool TryRegister<TContract, TImplementation>(string resolveName, Action<Exception> fallback = null!);
 
         /// <summary>
         /// Safe dependency resolution registration
@@ -181,7 +181,7 @@ namespace ZeroLevel.DependencyInjection
         /// <param name="shared">true - for singletone</param>
         /// <param name="fallback">Error handler</param>
         /// <returns>true - registration successfully completed</returns>
-        bool TryRegister<TContract, TImplementation>(bool shared, Action<Exception> fallback = null);
+        bool TryRegister<TContract, TImplementation>(bool shared, Action<Exception> fallback = null!);
 
         /// <summary>
         /// Safe dependency resolution registration
@@ -192,7 +192,7 @@ namespace ZeroLevel.DependencyInjection
         /// <param name="shared">true - for singletone</param>
         /// <param name="fallback">Error handler</param>
         /// <returns>true - registration successfully completed</returns>
-        bool TryRegister<TContract, TImplementation>(string resolveName, bool shared, Action<Exception> fallback = null);
+        bool TryRegister<TContract, TImplementation>(string resolveName, bool shared, Action<Exception> fallback = null!);
 
         /// <summary>
         /// Safe dependency resolution registration
@@ -201,7 +201,7 @@ namespace ZeroLevel.DependencyInjection
         /// <param name="implementationType">Dependency resolution</param>
         /// <param name="fallback">Error handler</param>
         /// <returns>true - registration successfully completed</returns>
-        bool TryRegister(Type contractType, Type implementationType, Action<Exception> fallback = null);
+        bool TryRegister(Type contractType, Type implementationType, Action<Exception> fallback = null!);
 
         /// <summary>
         /// Safe dependency resolution registration
@@ -211,7 +211,7 @@ namespace ZeroLevel.DependencyInjection
         /// <param name="resolveName">Dependency name</param>
         /// <param name="fallback">Error handler</param>
         /// <returns>true - registration successfully completed</returns>
-        bool TryRegister(Type contractType, Type implementationType, string resolveName, Action<Exception> fallback = null);
+        bool TryRegister(Type contractType, Type implementationType, string resolveName, Action<Exception> fallback = null!);
 
         /// <summary>
         /// Safe dependency resolution registration
@@ -221,7 +221,7 @@ namespace ZeroLevel.DependencyInjection
         /// <param name="shared">true - for singletone</param>
         /// <param name="fallback">Error handler</param>
         /// <returns>true - registration successfully completed</returns>
-        bool TryRegister(Type contractType, Type implementationType, bool shared, Action<Exception> fallback = null);
+        bool TryRegister(Type contractType, Type implementationType, bool shared, Action<Exception> fallback = null!);
 
         /// <summary>
         /// Safe dependency resolution registration
@@ -232,7 +232,7 @@ namespace ZeroLevel.DependencyInjection
         /// <param name="shared">true - for singletone</param>
         /// <param name="fallback">Error handler</param>
         /// <returns>true - registration successfully completed</returns>
-        bool TryRegister(Type contractType, Type implementationType, string resolveName, bool shared, Action<Exception> fallback = null);
+        bool TryRegister(Type contractType, Type implementationType, string resolveName, bool shared, Action<Exception> fallback = null!);
 
         #endregion Safe register
 
@@ -246,7 +246,7 @@ namespace ZeroLevel.DependencyInjection
         /// <param name="constructorParameters">Ctor args</param>
         /// <param name="fallback">Error handler</param>
         /// <returns>true - registration successfully completed</returns>
-        bool TryParameterizedRegister<TContract, TImplementation>(object[] constructorParameters, Action<Exception> fallback = null);
+        bool TryParameterizedRegister<TContract, TImplementation>(object[] constructorParameters, Action<Exception> fallback = null!);
 
         /// <summary>
         /// Safe dependency resolution registration with constructor parameters
@@ -257,7 +257,7 @@ namespace ZeroLevel.DependencyInjection
         /// <param name="constructorParameters">Ctor args</param>
         /// <param name="fallback">Error handler</param>
         /// <returns>true - registration successfully completed</returns>
-        bool TryParameterizedRegister<TContract, TImplementation>(string resolveName, object[] constructorParameters, Action<Exception> fallback = null);
+        bool TryParameterizedRegister<TContract, TImplementation>(string resolveName, object[] constructorParameters, Action<Exception> fallback = null!);
 
         /// <summary>
         /// Safe dependency resolution registration with constructor parameters
@@ -268,7 +268,7 @@ namespace ZeroLevel.DependencyInjection
         /// <param name="constructorParameters">Ctor args</param>
         /// <param name="fallback">Error handler</param>
         /// <returns>true - registration successfully completed</returns>
-        bool TryParameterizedRegister<TContract, TImplementation>(bool shared, object[] constructorParameters, Action<Exception> fallback = null);
+        bool TryParameterizedRegister<TContract, TImplementation>(bool shared, object[] constructorParameters, Action<Exception> fallback = null!);
 
         /// <summary>
         /// Safe dependency resolution registration with constructor parameters
@@ -280,7 +280,7 @@ namespace ZeroLevel.DependencyInjection
         /// <param name="constructorParameters">Ctor args</param>
         /// <param name="fallback">Error handler</param>
         /// <returns>true - registration successfully completed</returns>
-        bool TryParameterizedRegister<TContract, TImplementation>(string resolveName, bool shared, object[] constructorParameters, Action<Exception> fallback = null);
+        bool TryParameterizedRegister<TContract, TImplementation>(string resolveName, bool shared, object[] constructorParameters, Action<Exception> fallback = null!);
 
         /// <summary>
         /// Safe dependency resolution registration with constructor parameters
@@ -290,7 +290,7 @@ namespace ZeroLevel.DependencyInjection
         /// <param name="constructorParameters">Ctor args</param>
         /// <param name="fallback">Error handler</param>
         /// <returns>true - registration successfully completed</returns>
-        bool TryParameterizedRegister(Type contractType, Type implementationType, object[] constructorParameters, Action<Exception> fallback = null);
+        bool TryParameterizedRegister(Type contractType, Type implementationType, object[] constructorParameters, Action<Exception> fallback = null!);
 
         /// <summary>
         /// Safe dependency resolution registration with constructor parameters
@@ -301,7 +301,7 @@ namespace ZeroLevel.DependencyInjection
         /// <param name="constructorParameters">Ctor args</param>
         /// <param name="fallback">Error handler</param>
         /// <returns>true - registration successfully completed</returns>
-        bool TryParameterizedRegister(Type contractType, Type implementationType, string resolveName, object[] constructorParameters, Action<Exception> fallback = null);
+        bool TryParameterizedRegister(Type contractType, Type implementationType, string resolveName, object[] constructorParameters, Action<Exception> fallback = null!);
 
         /// <summary>
         /// Safe dependency resolution registration with constructor parameters
@@ -312,7 +312,7 @@ namespace ZeroLevel.DependencyInjection
         /// <param name="constructorParameters">Ctor args</param>
         /// <param name="fallback">Error handler</param>
         /// <returns>true - registration successfully completed</returns>
-        bool TryParameterizedRegister(Type contractType, Type implementationType, bool shared, object[] constructorParameters, Action<Exception> fallback = null);
+        bool TryParameterizedRegister(Type contractType, Type implementationType, bool shared, object[] constructorParameters, Action<Exception> fallback = null!);
 
         /// <summary>
         /// Safe dependency resolution registration with constructor parameters
@@ -324,7 +324,7 @@ namespace ZeroLevel.DependencyInjection
         /// <param name="constructorParameters">Ctor args</param>
         /// <param name="fallback">Error handler</param>
         /// <returns>true - registration successfully completed</returns>
-        bool TryParameterizedRegister(Type contractType, Type implementationType, string resolveName, bool shared, object[] constructorParameters, Action<Exception> fallback = null);
+        bool TryParameterizedRegister(Type contractType, Type implementationType, string resolveName, bool shared, object[] constructorParameters, Action<Exception> fallback = null!);
 
         #endregion Safe register with parameters
     }

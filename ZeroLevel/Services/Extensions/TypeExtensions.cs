@@ -20,7 +20,7 @@ namespace ZeroLevel
             // The value returned contains the StateMachineType property.
             // Null is returned if the attribute isn't present for the method.
             var attrib = (AsyncStateMachineAttribute)method.GetCustomAttribute(attType);
-            return (attrib != null);
+            return (attrib != null!);
         }
 
         public static object GetDefault(this Type type)
@@ -29,12 +29,12 @@ namespace ZeroLevel
             {
                 return Activator.CreateInstance(type);
             }
-            return null;
+            return null!;
         }
 
         public static object GetPropValue(this object src, string propName)
         {
-            return src?.GetType()?.GetProperty(propName)?.GetValue(src, null);
+            return (src?.GetType()?.GetProperty(propName)?.GetValue(src, null))!;
         }
 
         public static bool IsAssignableToGenericType(this Type givenType, Type genericType)
@@ -51,7 +51,7 @@ namespace ZeroLevel
                 return true;
 
             Type baseType = givenType.BaseType;
-            if (baseType == null) return false;
+            if (baseType == null!) return false;
 
             return IsAssignableToGenericType(baseType, genericType);
         }

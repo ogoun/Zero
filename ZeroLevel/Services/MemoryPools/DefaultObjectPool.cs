@@ -38,7 +38,7 @@ namespace MemoryPools
         public DefaultObjectPool(IPooledObjectPolicy<T> policy, int maximumRetained)
         {
             _policy = policy ?? throw new ArgumentNullException(nameof(policy));
-            _fastPolicy = policy as PooledObjectPolicy<T>;
+            _fastPolicy = (policy as PooledObjectPolicy<T>)!;
             _isDefaultPolicy = IsDefaultPolicy();
 
             // -1 due to _firstItem
@@ -56,13 +56,13 @@ namespace MemoryPools
         public override T Get()
         {
             var item = _firstItem;
-            if (item == null || Interlocked.CompareExchange(ref _firstItem, null, item) != item)
+            if (item == null || Interlocked.CompareExchange(ref _firstItem!, null, item) != item)
             {
                 var items = _items;
                 for (var i = 0; i < items.Length; i++)
                 {
                     item = items[i].Element;
-                    if (item != null && Interlocked.CompareExchange(ref items[i].Element, null, item) == item)
+                    if (item != null && Interlocked.CompareExchange(ref items[i].Element!, null, item) == item)
                     {
                         return item;
                     }
@@ -83,10 +83,10 @@ namespace MemoryPools
         {
             if (_isDefaultPolicy || (_fastPolicy?.Return(obj) ?? _policy.Return(obj)))
             {
-                if (_firstItem != null || Interlocked.CompareExchange(ref _firstItem, obj, null) != null)
+                if (_firstItem != null || Interlocked.CompareExchange(ref _firstItem, obj, null) != null!)
                 {
                     var items = _items;
-                    for (var i = 0; i < items.Length && Interlocked.CompareExchange(ref items[i].Element, obj, null) != null; ++i)
+                    for (var i = 0; i < items.Length && Interlocked.CompareExchange(ref items[i].Element, obj, null) != null!; ++i)
                     {
                     }
                 }

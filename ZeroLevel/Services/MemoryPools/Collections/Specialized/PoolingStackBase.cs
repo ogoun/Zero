@@ -12,7 +12,7 @@ namespace MemoryPools.Collections.Specialized
         {
             Count = 0;
             _topIndex = 0;
-            _top = null;
+            _top = null!;
         }
 
         public bool IsEmpty => Count == 0;
@@ -30,7 +30,7 @@ namespace MemoryPools.Collections.Specialized
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Push(T obj)
         {
-            if (Count == 0 && _top == null)
+            if (Count == 0 && _top == null!)
                 _top = CreateNodeHolder();
 
             _top[_topIndex] = obj;
@@ -57,7 +57,7 @@ namespace MemoryPools.Collections.Specialized
         {
             if (IsEmpty)
             {
-                val = default;
+                val = default!;
                 return false;
             }
 
@@ -87,7 +87,7 @@ namespace MemoryPools.Collections.Specialized
             }
             
             var obj = _top[_topIndex];
-            _top[_topIndex] = default;
+            _top[_topIndex] = default!;
 
             Count--;
 
@@ -97,7 +97,7 @@ namespace MemoryPools.Collections.Specialized
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Clear()
         {
-            while (_top != null)
+            while (_top != null!)
             {
                 var next = _top.Next;
                 _top.Dispose();

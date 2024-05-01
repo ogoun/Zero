@@ -206,7 +206,7 @@ namespace ZeroLevel
             {
                 return;
             }
-            string logPath = null;
+            string logPath = null!;
             if (config.Contains("log"))
             {
                 logPath = config.First("log");
@@ -218,7 +218,7 @@ namespace ZeroLevel
             if (false == string.IsNullOrWhiteSpace(logPath))
             {
                 var options = TextFileLoggerOptions.CreateOptionsBy(config, logPath, log_section ? string.Empty : "log.");
-                if (options != null)
+                if (options != null!)
                 {
                     AddTextFileLogger(options);
                 }

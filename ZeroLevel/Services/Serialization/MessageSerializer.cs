@@ -11,7 +11,7 @@ namespace ZeroLevel.Services.Serialization
         public static byte[] Serialize<T>(T obj)
             where T : IBinarySerializable
         {
-            if (obj == null) return null;
+            if (obj == null!) return null!;
             using (var writer = new MemoryStreamWriter())
             {
                 obj.Serialize(writer);
@@ -22,7 +22,7 @@ namespace ZeroLevel.Services.Serialization
         public static byte[] Serialize<T>(IEnumerable<T> items)
             where T : IBinarySerializable
         {
-            if (items == null) return null;
+            if (items == null!) return null!;
             using (var writer = new MemoryStreamWriter())
             {
                 writer.WriteCollection<T>(items);
@@ -35,7 +35,7 @@ namespace ZeroLevel.Services.Serialization
             var t = typeof(T);
             if (t.IsAssignableTo(typeof(IBinarySerializable)))
             {
-                return (w, o) => ((IBinarySerializable)o).Serialize(w);
+                return (w, o) => (o as IBinarySerializable)?.Serialize(w);
             }
             return (w, o) => PrimitiveTypeSerializer.Serialize<T>(w, o);
         }
@@ -66,7 +66,7 @@ namespace ZeroLevel.Services.Serialization
             catch (Exception ex)
             {
                 Log.SystemError(ex, $"[MessageSerializer.TryObjectDeserialize] Fault deserialize type {typeof(T).Name}");
-                output = default;
+                output = default!;
             }
             return false;
         }
@@ -81,7 +81,7 @@ namespace ZeroLevel.Services.Serialization
             catch (Exception ex)
             {
                 Log.SystemError(ex, $"[MessageSerializer.TryPrimitiveTypeDeserialize] Fault deserialize type {typeof(T).Name}");
-                output = default;
+                output = default!;
             }
             return false;
         }
@@ -90,10 +90,10 @@ namespace ZeroLevel.Services.Serialization
         {
             if (null == obj)
             {
-                return null;
+                return null!;
             }
             var direct_seriazlizable = (obj as IBinarySerializable);
-            if (direct_seriazlizable != null)
+            if (direct_seriazlizable != null!)
             {
                 using (var writer = new MemoryStreamWriter())
                 {
@@ -111,7 +111,7 @@ namespace ZeroLevel.Services.Serialization
         public static void SerializeCompatible(this MemoryStreamWriter writer, object obj)
         {
             var direct_seriazlizable = (obj as IBinarySerializable);
-            if (direct_seriazlizable != null)
+            if (direct_seriazlizable != null!)
             {
                 direct_seriazlizable.Serialize(writer);
             }
@@ -125,10 +125,10 @@ namespace ZeroLevel.Services.Serialization
         {
             if (null == obj)
             {
-                return null;
+                return null!;
             }
             var direct_seriazlizable = (obj as IBinarySerializable);
-            if (direct_seriazlizable != null)
+            if (direct_seriazlizable != null!)
             {
                 using (var writer = new MemoryStreamWriter())
                 {
@@ -146,7 +146,7 @@ namespace ZeroLevel.Services.Serialization
         public static T Deserialize<T>(byte[] data)
             where T : IBinarySerializable
         {
-            if (data == null || data.Length == 0) return default(T);
+            if (data == null || data.Length == 0) return default(T)!;
             using (var reader = new MemoryStreamReader(data))
             {
                 var result = Activator.CreateInstance<T>();
@@ -157,7 +157,7 @@ namespace ZeroLevel.Services.Serialization
 
         public static object Deserialize(Type type, byte[] data)
         {
-            if (data == null || data.Length == 0) return null;
+            if (data == null || data.Length == 0) return null!;
             using (var reader = new MemoryStreamReader(data))
             {
                 var result = (IBinarySerializable)Activator.CreateInstance(type);
@@ -169,7 +169,7 @@ namespace ZeroLevel.Services.Serialization
         public static List<T> DeserializeCollection<T>(byte[] data)
            where T : IBinarySerializable
         {
-            List<T> collection = null;
+            List<T> collection = null!;
             if (data != null && data.Length > 0)
             {
                 using (var reader = new MemoryStreamReader(data))
@@ -313,7 +313,7 @@ namespace ZeroLevel.Services.Serialization
         public static void Serialize<T>(Stream stream, T obj)
             where T : IBinarySerializable
         {
-            if (obj == null) return;
+            if (obj == null!) return;
             using (var writer = new MemoryStreamWriter(stream))
             {
                 obj.Serialize(writer);
@@ -323,7 +323,7 @@ namespace ZeroLevel.Services.Serialization
         public static void Serialize<T>(Stream stream, IEnumerable<T> items)
             where T : IBinarySerializable
         {
-            if (items == null) return;
+            if (items == null!) return;
             using (var writer = new MemoryStreamWriter(stream))
             {
                 writer.WriteCollection<T>(items);
@@ -337,7 +337,7 @@ namespace ZeroLevel.Services.Serialization
                 return;
             }
             var direct_seriazlizable = (obj as IBinarySerializable);
-            if (direct_seriazlizable != null)
+            if (direct_seriazlizable != null!)
             {
                 using (var writer = new MemoryStreamWriter(stream))
                 {
@@ -360,7 +360,7 @@ namespace ZeroLevel.Services.Serialization
                 return;
             }
             var direct_seriazlizable = (obj as IBinarySerializable);
-            if (direct_seriazlizable != null)
+            if (direct_seriazlizable != null!)
             {
                 using (var writer = new MemoryStreamWriter(stream))
                 {
@@ -379,7 +379,7 @@ namespace ZeroLevel.Services.Serialization
         public static T Deserialize<T>(Stream stream)
             where T : IBinarySerializable
         {
-            if (stream == null) return default(T);
+            if (stream == null!) return default(T)!;
             using (var reader = new MemoryStreamReader(stream))
             {
                 var result = Activator.CreateInstance<T>();
@@ -390,7 +390,7 @@ namespace ZeroLevel.Services.Serialization
 
         public static object Deserialize(Type type, Stream stream)
         {
-            if (stream == null) return null;
+            if (stream == null!) return null!;
             using (var reader = new MemoryStreamReader(stream))
             {
                 var result = (IBinarySerializable)Activator.CreateInstance(type);
@@ -402,8 +402,8 @@ namespace ZeroLevel.Services.Serialization
         public static List<T> DeserializeCollection<T>(Stream stream)
            where T : IBinarySerializable
         {
-            List<T> collection = null;
-            if (stream != null)
+            List<T> collection = null!;
+            if (stream != null!)
             {
                 using (var reader = new MemoryStreamReader(stream))
                 {
@@ -426,7 +426,7 @@ namespace ZeroLevel.Services.Serialization
         public static IEnumerable<T> DeserializeCollectionLazy<T>(Stream stream)
            where T : IBinarySerializable
         {
-            if (stream != null)
+            if (stream != null!)
             {
                 using (var reader = new MemoryStreamReader(stream))
                 {
@@ -446,12 +446,12 @@ namespace ZeroLevel.Services.Serialization
 
         public static T DeserializeCompatible<T>(Stream stream)
         {
-            if (stream == null) return default(T);
+            if (stream == null!) return default(T)!;
             if (typeof(IBinarySerializable).IsAssignableFrom(typeof(T)))
             {
                 using (var reader = new MemoryStreamReader(stream))
                 {
-                    var direct = (IBinarySerializable)Activator.CreateInstance<T>();
+                    var direct = (IBinarySerializable)Activator.CreateInstance<T>()!;
                     direct.Deserialize(reader);
                     return (T)direct;
                 }
@@ -464,7 +464,7 @@ namespace ZeroLevel.Services.Serialization
 
         public static object DeserializeCompatible(Type type, Stream stream)
         {
-            if (stream == null) return null;
+            if (stream == null!) return null!;
             if (typeof(IBinarySerializable).IsAssignableFrom(type))
             {
                 using (var reader = new MemoryStreamReader(stream))

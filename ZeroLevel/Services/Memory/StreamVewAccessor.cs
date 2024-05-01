@@ -25,7 +25,7 @@ namespace ZeroLevel.Services.Memory
 
         public async Task<byte[]> ReadBuffer(int count)
         {
-            if (count == 0) return null;
+            if (count == 0) return null!;
             var buffer = new byte[count];
             var readedCount = await _stream.ReadAsync(buffer, 0, count);
             if (count != readedCount)

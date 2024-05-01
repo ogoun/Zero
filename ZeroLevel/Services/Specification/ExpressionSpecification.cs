@@ -12,7 +12,7 @@ namespace ZeroLevel.Specification
 
         public ExpressionSpecification(Func<T, bool> expression)
         {
-            if (expression == null)
+            if (expression == null!)
                 throw new ArgumentNullException();
             else
                 this._expression = expression;

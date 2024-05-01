@@ -97,7 +97,7 @@ namespace ZeroLevel.Services.Text
                 var max = candidates.Max(s => s?.Length ?? 0);
                 return candidates.FirstOrDefault(c => c != null && c.Length == max);
             }
-            return null;
+            return null!;
             /*
             int v = 0, l = 0, best = 0, bestpos = 0;
             for (int i = 0; i < (int)t.Length; ++i)
@@ -122,7 +122,7 @@ namespace ZeroLevel.Services.Text
             var length = best;
             if (start >= 0 && start < t.Length && (start + length) <= t.Length)
                 return t.Substring(start, length);
-            return null;
+            return null!;
             */
         }
 
@@ -153,7 +153,7 @@ namespace ZeroLevel.Services.Text
             var length = best;
             if (start >= 0 && start < t.Length && (start + length) <= t.Length)
                 return t.Substring(start, length);
-            return null;
+            return null!;
         }
     }
 }

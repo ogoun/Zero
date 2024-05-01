@@ -37,7 +37,7 @@ namespace DOM.DSL.Services
 
         internal void Release(TContainer container)
         {
-            if (container != null)
+            if (container != null!)
             {
                 Interlocked.Increment(ref _release_count);
                 _pool.Return(container);

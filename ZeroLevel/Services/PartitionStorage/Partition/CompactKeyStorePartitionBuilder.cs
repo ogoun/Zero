@@ -25,7 +25,7 @@ namespace ZeroLevel.Services.PartitionStorage.Partition
             PhisicalFileAccessorCachee fileAccessorCachee)
             : base(options, info, serializer, fileAccessorCachee)
         {
-            if (options == null) throw new ArgumentNullException(nameof(options));
+            if (options == null!) throw new ArgumentNullException(nameof(options));
             if (options.ThreadSafeWriting)
             {
                 _storeMethod = StoreDirectSafe;
@@ -146,8 +146,8 @@ namespace ZeroLevel.Services.PartitionStorage.Partition
                     foreach (var pair in dict.OrderBy(p => p.Key))
                     {
                         var v = _options.MergeFunction(pair.Value);
-                        writer.SerializeCompatible(pair.Key);
-                        writer.SerializeCompatible(v);
+                        writer.SerializeCompatible(pair.Key!);
+                        writer.SerializeCompatible(v!);
                     }
                 }
                 File.Delete(file);

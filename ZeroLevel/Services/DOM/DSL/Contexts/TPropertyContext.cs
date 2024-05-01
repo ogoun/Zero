@@ -185,8 +185,8 @@ namespace DOM.DSL.Contexts
             return new TPropertyToken
             {
                 PropertyName = _name,
-                PropertyIndex = new TBlockToken(_name, null, _indexTokens.Select(t => t.Clone()).ToArray()),
-                NextToken = _nextToken?.Clone()
+                PropertyIndex = new TBlockToken(_name, null!, _indexTokens.Select(t => t.Clone()).ToArray()),
+                NextToken = _nextToken?.Clone()!
             };
         }
     }

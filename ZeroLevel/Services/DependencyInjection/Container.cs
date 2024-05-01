@@ -15,7 +15,7 @@ namespace ZeroLevel.DependencyInjection
 
         private static object Activate(Type type, object[] args)
         {
-            if (type == null) return null!;
+            if (type == null!) return null!;
             var flags = BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Public;
             CultureInfo culture = null!; // use InvariantCulture or other if you prefer
             return Activator.CreateInstance(type, flags, null, args, culture);
@@ -157,7 +157,7 @@ namespace ZeroLevel.DependencyInjection
             Type instanceType = resolveType.GenericCachee[genericType];
             if (resolveType.IsShared)
             {
-                if (resolveType.GenericInstanceCachee == null)
+                if (resolveType.GenericInstanceCachee == null!)
                 {
                     resolveType.GenericInstanceCachee = new Dictionary<Type, object>();
                 }
@@ -188,7 +188,7 @@ namespace ZeroLevel.DependencyInjection
         private static IEnumerable<PropertyInfo> CollectResolvingProperties(Type type)
         {
             return type.GetProperties(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.FlattenHierarchy).
-                Where(p => p.GetCustomAttribute<ResolveAttribute>() != null);
+                Where(p => p.GetCustomAttribute<ResolveAttribute>() != null!);
         }
 
         /// <summary>
@@ -199,7 +199,7 @@ namespace ZeroLevel.DependencyInjection
         private static IEnumerable<FieldInfo> CollectResolvingFields(Type type)
         {
             return type.GetFields(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.FlattenHierarchy).
-                Where(p => p.GetCustomAttribute<ResolveAttribute>() != null);
+                Where(p => p.GetCustomAttribute<ResolveAttribute>() != null!);
         }
 
         /// <summary>
@@ -212,7 +212,7 @@ namespace ZeroLevel.DependencyInjection
         private ResolveTypeInfo FindResolving(Type type, string resolveName, Type contractType)
         {
             HashSet<Type> contract_candidates = new HashSet<Type>();
-            if (contractType != null)
+            if (contractType != null!)
             {
                 if (contractType.IsInterface)
                     contract_candidates.Add(contractType);
@@ -321,8 +321,8 @@ namespace ZeroLevel.DependencyInjection
         /// <returns>Instance</returns>
         private object MakeInstance(Type type, object[] args)
         {
-            ConstructorInfo constructor = null;
-            object[] parameters = null;
+            ConstructorInfo constructor = null!;
+            object[] parameters = null!;
             foreach (var ctor in GetConstructors(type))
             {
                 if (ctor.IsMatch(args, out parameters))
@@ -339,7 +339,7 @@ namespace ZeroLevel.DependencyInjection
             {
                 return constructor.Invoke(parameters);
                 /*var flags = BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Public;
-                CultureInfo culture = null; // use InvariantCulture or other if you prefer
+                CultureInfo culture = null!; // use InvariantCulture or other if you prefer
                 return Activator.CreateInstance(type, flags, null, args, culture);*/
             }
         }
@@ -430,7 +430,7 @@ namespace ZeroLevel.DependencyInjection
                 ImplementationType = typeof(TImplementation),
                 IsDefault = string.IsNullOrWhiteSpace(resolveName),
                 IsShared = false,
-                ResolveKey = resolveName?.Trim()
+                ResolveKey = resolveName?.Trim()!
             };
             Register(typeof(TContract), resolveType);
         }
@@ -442,7 +442,7 @@ namespace ZeroLevel.DependencyInjection
                 ImplementationType = typeof(TImplementation),
                 IsDefault = string.IsNullOrWhiteSpace(resolveName),
                 IsShared = shared,
-                ResolveKey = resolveName?.Trim()
+                ResolveKey = resolveName?.Trim()!
             };
             Register(typeof(TContract), resolveType);
         }
@@ -466,7 +466,7 @@ namespace ZeroLevel.DependencyInjection
                 ImplementationType = implementationType,
                 IsDefault = string.IsNullOrWhiteSpace(resolveName),
                 IsShared = false,
-                ResolveKey = resolveName?.Trim()
+                ResolveKey = resolveName?.Trim()!
             };
             Register(contractType, resolveType);
         }
@@ -490,7 +490,7 @@ namespace ZeroLevel.DependencyInjection
                 ImplementationType = implementationType,
                 IsDefault = string.IsNullOrWhiteSpace(resolveName),
                 IsShared = shared,
-                ResolveKey = resolveName?.Trim()
+                ResolveKey = resolveName?.Trim()!
             };
             Register(contractType, resolveType);
         }
@@ -519,7 +519,7 @@ namespace ZeroLevel.DependencyInjection
                 ImplementationType = typeof(TImplementation),
                 IsDefault = string.IsNullOrWhiteSpace(resolveName),
                 IsShared = false,
-                ResolveKey = resolveName?.Trim(),
+                ResolveKey = resolveName?.Trim()!,
                 ConstructorParameters = constructorParameters
             };
             Register(typeof(TContract), resolveType);
@@ -545,7 +545,7 @@ namespace ZeroLevel.DependencyInjection
                 ImplementationType = typeof(TImplementation),
                 IsDefault = string.IsNullOrWhiteSpace(resolveName),
                 IsShared = shared,
-                ResolveKey = resolveName?.Trim(),
+                ResolveKey = resolveName?.Trim()!,
                 ConstructorParameters = constructorParameters
             };
             Register(typeof(TContract), resolveType);
@@ -571,7 +571,7 @@ namespace ZeroLevel.DependencyInjection
                 ImplementationType = implementationType,
                 IsDefault = string.IsNullOrWhiteSpace(resolveName),
                 IsShared = false,
-                ResolveKey = resolveName?.Trim(),
+                ResolveKey = resolveName?.Trim()!,
                 ConstructorParameters = constructorParameters
             };
             Register(contractType, resolveType);
@@ -597,7 +597,7 @@ namespace ZeroLevel.DependencyInjection
                 ImplementationType = implementationType,
                 IsDefault = string.IsNullOrWhiteSpace(resolveName),
                 IsShared = shared,
-                ResolveKey = resolveName?.Trim(),
+                ResolveKey = resolveName?.Trim()!,
                 ConstructorParameters = constructorParameters
             };
             Register(contractType, resolveType);
@@ -614,6 +614,7 @@ namespace ZeroLevel.DependencyInjection
         /// <param name="implementation">Instance</param>
         public void Register<TContract>(TContract implementation)
         {
+            if(implementation == null) throw new ArgumentNullException(nameof(implementation));
             var resolveType = new ResolveTypeInfo
             {
                 ImplementationType = implementation.GetType(),
@@ -627,6 +628,7 @@ namespace ZeroLevel.DependencyInjection
 
         public void Register(Type contractType, object implementation)
         {
+            if (implementation == null) throw new ArgumentNullException(nameof(implementation));
             var resolveType = new ResolveTypeInfo
             {
                 ImplementationType = implementation.GetType(),
@@ -640,6 +642,7 @@ namespace ZeroLevel.DependencyInjection
 
         public void Register<TContract>(TContract implementation, string resolveName)
         {
+            if (implementation == null) throw new ArgumentNullException(nameof(implementation));
             var resolveType = new ResolveTypeInfo
             {
                 ImplementationType = implementation.GetType(),
@@ -653,6 +656,7 @@ namespace ZeroLevel.DependencyInjection
 
         public void Register(Type contractType, string resolveName, object implementation)
         {
+            if (implementation == null) throw new ArgumentNullException(nameof(implementation));
             var resolveType = new ResolveTypeInfo
             {
                 ImplementationType = implementation.GetType(),
@@ -952,7 +956,7 @@ namespace ZeroLevel.DependencyInjection
 
         public bool IsResolvingExists(Type type, string resolveName)
         {
-            return GetResolvedType(type, resolveName)?.Item1 != null;
+            return GetResolvedType(type, resolveName)?.Item1 != null!;
         }
 
         private Tuple<ResolveTypeInfo, bool> GetResolvedType(Type type, string resolveName)
@@ -1110,12 +1114,12 @@ namespace ZeroLevel.DependencyInjection
         /// </summary>
         private void FillParametrizedFieldsAndProperties(object instance)
         {
-            if (instance != null)
+            if (instance != null!)
             {
                 foreach (var property in instance.GetType().GetProperties(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.FlattenHierarchy))
                 {
                     var attr = property.GetCustomAttribute<ParameterAttribute>();
-                    if (attr != null)
+                    if (attr != null!)
                     {
                         var parameterType = attr.Type ?? property.PropertyType;
                         var parameterName = attr.Name ?? property.Name;
@@ -1125,7 +1129,7 @@ namespace ZeroLevel.DependencyInjection
                 foreach (var field in instance.GetType().GetFields(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.FlattenHierarchy))
                 {
                     var attr = field.GetCustomAttribute<ParameterAttribute>();
-                    if (attr != null)
+                    if (attr != null!)
                     {
                         var parameterType = attr.Type ?? field.FieldType;
                         var parameterName = string.IsNullOrWhiteSpace(attr.Name) ? field.Name : attr.Name;
@@ -1137,7 +1141,7 @@ namespace ZeroLevel.DependencyInjection
 
         private void ComposeParts(object instance)
         {
-            if (instance != null)
+            if (instance != null!)
             {
                 var resolve_properties = CollectResolvingProperties(instance.GetType());
                 var resolve_fields = CollectResolvingFields(instance.GetType());
@@ -1153,13 +1157,13 @@ namespace ZeroLevel.DependencyInjection
                         f.GetCustomAttribute<ResolveAttribute>());
                     f.SetValue(instance, resolve_instance);
                 }
+                FillParametrizedFieldsAndProperties(instance);
             }
-            FillParametrizedFieldsAndProperties(instance);
         }
 
         private void RecursiveCompose(object instance, HashSet<object> set)
         {
-            if (instance != null)
+            if (instance != null!)
             {
                 foreach (var f in
                 instance.GetType().GetFields(BindingFlags.Public |
@@ -1178,8 +1182,8 @@ namespace ZeroLevel.DependencyInjection
                         }
                     }
                 }
+                ComposeParts(instance);
             }
-            ComposeParts(instance);
         }
 
         public void Compose(object instance, bool recursive = true)
@@ -1229,7 +1233,7 @@ namespace ZeroLevel.DependencyInjection
                         {
                             Log.SystemError(ex, $"[Container] Singletone dispose error. Instance: '{item?.GetType()?.FullName ?? string.Empty}'");
                         }
-                        if (item!.GenericInstanceCachee != null)
+                        if (item!.GenericInstanceCachee != null!)
                         {
                             foreach (var gitem in item.GenericInstanceCachee.Values)
                             {
@@ -1307,7 +1311,7 @@ namespace ZeroLevel.DependencyInjection
         {
             if (_everything.Value.ContainsKey<T>(key))
                 return _everything.Value.Get<T>(key);
-            return default(T);
+            return default(T)!;
         }
 
         public T GetOrDefault<T>(string key, T defaultValue)

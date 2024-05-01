@@ -9,7 +9,7 @@ namespace ZeroLevel
         public static TResult With<TInput, TResult>(this TInput o, Func<TInput, TResult> evaluator)
         {
             if (null != o) return evaluator(o);
-            return default(TResult);
+            return default(TResult)!;
         }
 
         #endregion With
@@ -25,7 +25,7 @@ namespace ZeroLevel
         public static TResult Return<TInput, TResult>(this TInput o, Func<TInput, TResult> evaluator)
         {
             if (null != o) return evaluator(o);
-            return default(TResult);
+            return default(TResult)!;
         }
 
         #endregion Return
@@ -44,8 +44,8 @@ namespace ZeroLevel
 
         public static TInput If<TInput>(this TInput o, Predicate<TInput> evaluator)
         {
-            if (null != o) return evaluator(o) ? o : default(TInput);
-            return default(TInput);
+            if (null != o) return evaluator(o) ? o : default(TInput)!;
+            return default(TInput)!;
         }
 
         public static TOutput Either<TInput, TOutput>(this TInput o, Func<TInput, bool> condition,
@@ -54,7 +54,7 @@ namespace ZeroLevel
 
         public static TOutput Either<TInput, TOutput>(this TInput o, Func<TInput, TOutput> ifTrue,
             Func<TInput, TOutput> ifFalse)
-            => o.Either(x => x != null, ifTrue, ifFalse);
+            => o.Either(x => x != null!, ifTrue, ifFalse);
 
         #endregion If
 

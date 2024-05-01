@@ -77,7 +77,7 @@ namespace ZeroLevel.DocumentObjectModel
 
         public bool Equals(Header other)
         {
-            if (other == null) return false;
+            if (other == null!) return false;
             if (string.Compare(this.Name, other.Name, StringComparison.Ordinal) != 0) return false;
             if (string.Compare(this.Value, other.Value, StringComparison.Ordinal) != 0) return false;
             if (string.Compare(this.Type, other.Type, StringComparison.Ordinal) != 0) return false;
@@ -91,7 +91,7 @@ namespace ZeroLevel.DocumentObjectModel
 
         public override bool Equals(object obj)
         {
-            return this.Equals(obj as Header);
+            return this.Equals((obj as Header)!);
         }
 
         public override int GetHashCode()

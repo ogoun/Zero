@@ -147,7 +147,7 @@ namespace ZeroLevel.Services.Collections
         {
             get
             {
-                return _index == -1 ? default(T) : _collection[_index];
+                return (_index == -1 ? default(T) : _collection[_index])!;
             }
         }
 

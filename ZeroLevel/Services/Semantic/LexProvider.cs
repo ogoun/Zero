@@ -65,7 +65,7 @@ namespace ZeroLevel.Services.Semantic
         public IDictionary<string, IEnumerable<LexToken>> SearchLexTokensByWords(string text, string[] words)
         {
             var result = new Dictionary<string, IEnumerable<LexToken>>();
-            if (false == string.IsNullOrWhiteSpace(text) && words != null)
+            if (false == string.IsNullOrWhiteSpace(text) && words != null!)
             {
                 var textWords = ExtractLexTokens(text).ToList();
                 var keywords = words.Select(w => new Tuple<string, string>(w, _lexer.Lex(w)));
@@ -85,7 +85,7 @@ namespace ZeroLevel.Services.Semantic
         public IDictionary<string, IEnumerable<LexToken[]>> SearchLexTokensByPhrases(string text, string[] phrases)
         {
             var result = new Dictionary<string, IEnumerable<LexToken[]>>();
-            if (false == string.IsNullOrWhiteSpace(text) && phrases != null)
+            if (false == string.IsNullOrWhiteSpace(text) && phrases != null!)
             {
                 var text_tokens = ExtractLexTokens(text).ToList();
                 foreach (var phrase in phrases)

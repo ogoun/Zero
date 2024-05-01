@@ -15,7 +15,7 @@
 			public IPoolingEnumerator<T> GetEnumerator()
 			{
 				var src = _src;
-				_src = default;
+				_src = default!;
 				Pool<EnumerableTyped<T>>.Return(this);
 				return Pool<EnumeratorVal>.Get().Init(src);
 			}
@@ -44,15 +44,15 @@
 
 				public T Current => _enumerator.Current;
 
-				object IPoolingEnumerator.Current => Current;
+				object IPoolingEnumerator.Current => Current!;
 
 				public void Dispose()
 				{
 					_enumerator?.Dispose();
 					_src?.Dispose();
-					Pool<PoolingList<T>>.Return(_src);
-					Pool<EnumeratorVal>.Return(this);
-					_src = default;
+					Pool<PoolingList<T>>.Return(_src!);
+					Pool<EnumeratorVal>.Return(this!);
+					_src = default!;
 				}
 			}
 		}

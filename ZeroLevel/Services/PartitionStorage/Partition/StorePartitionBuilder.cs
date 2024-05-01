@@ -26,7 +26,7 @@ namespace ZeroLevel.Services.PartitionStorage
             PhisicalFileAccessorCachee fileAccessorCachee)
             : base(options, info, serializer, fileAccessorCachee)
         {
-            if (options == null) throw new ArgumentNullException(nameof(options));
+            if (options == null!) throw new ArgumentNullException(nameof(options));
             if (options.ThreadSafeWriting)
             {
                 _storeMethod = StoreDirectSafe;
@@ -85,7 +85,7 @@ namespace ZeroLevel.Services.PartitionStorage
                 foreach (var file in files)
                 {
                     var accessor = GetViewAccessor(file, 0);
-                    if (accessor != null)
+                    if (accessor != null!)
                     {
                         using (var reader = new MemoryStreamReader(accessor))
                         {
@@ -152,7 +152,7 @@ namespace ZeroLevel.Services.PartitionStorage
             {
                 var dict = new Dictionary<TKey, HashSet<TInput>>();
                 var accessor = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.None, 1024 * 1024 * 32);
-                if (accessor != null)
+                if (accessor != null!)
                 {
                     using (var reader = new MemoryStreamReader(accessor))
                     {
@@ -163,7 +163,7 @@ namespace ZeroLevel.Services.PartitionStorage
                             {
                                 throw new Exception($"[StorePartitionBuilder.CompressFile] Fault compress data in file '{file}'. Incorrect file structure. Fault read key.");
                             }
-                            if (kv.Value != null)
+                            if (kv.Value != null!)
                             {
                                 if (false == dict.ContainsKey(kv.Value))
                                 {

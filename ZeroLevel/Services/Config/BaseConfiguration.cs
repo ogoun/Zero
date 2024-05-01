@@ -118,7 +118,7 @@ namespace ZeroLevel.Services.Config
             {
                 if (result.Count > 0)
                     return result[0];
-                return null;
+                return null!;
             }
             throw new KeyNotFoundException("Key not found: " + key);
         }
@@ -154,7 +154,7 @@ namespace ZeroLevel.Services.Config
                 {
                     return (T)StringToTypeConverter.TryConvert(result[0], typeof(T));
                 }
-                return default(T);
+                return default(T)!;
             }
             throw new KeyNotFoundException("Parameter not found: " + key);
         }
@@ -192,7 +192,7 @@ namespace ZeroLevel.Services.Config
                     return (T)StringToTypeConverter.TryConvert(result[0], typeof(T));
                 }
             }
-            return default(T);
+            return default(T)!;
         }
 
         /// <summary>
@@ -280,7 +280,7 @@ namespace ZeroLevel.Services.Config
                 {
                     _keyValues.TryAdd(key, new List<string>());
                 }
-                _keyValues[key].Add(value?.Trim() ?? null);
+                _keyValues[key].Add((value?.Trim() ?? null)!);
             }
             return this;
         }
@@ -296,7 +296,7 @@ namespace ZeroLevel.Services.Config
                 }
                 foreach (var value in values)
                 {
-                    _keyValues[key].Add(value?.Trim() ?? null);
+                    _keyValues[key].Add((value?.Trim() ?? null)!);
                 }
             }
             return this;
@@ -318,7 +318,7 @@ namespace ZeroLevel.Services.Config
                 {
                     _keyValues[key].Clear();
                 }
-                _keyValues[key].Add(value?.Trim() ?? null);
+                _keyValues[key].Add((value?.Trim() ?? null)!);
             }
             return this;
         }
@@ -360,8 +360,7 @@ namespace ZeroLevel.Services.Config
         {
             if (false == _freezed)
             {
-                IList<string> removed;
-                _keyValues.TryRemove(GetKey(key), out removed);
+                _keyValues.TryRemove(GetKey(key), out _);
             }
             return this;
         }
@@ -404,7 +403,7 @@ namespace ZeroLevel.Services.Config
 
         public bool Equals(IConfiguration other)
         {
-            if (other == null)
+            if (other == null!)
             {
                 return false;
             }
@@ -508,12 +507,12 @@ namespace ZeroLevel.Services.Config
                 if (count > 0)
                 {
                     var values = this.Items(member.Name);
-                    IConfigRecordParser parser = member.Original.GetCustomAttribute<ConfigRecordParseAttribute>()?.Parser;
+                    IConfigRecordParser parser = member.Original.GetCustomAttribute<ConfigRecordParseAttribute>()?.Parser!;
                     if (TypeHelpers.IsArray(member.ClrType) && member.ClrType.GetArrayRank() == 1)
                     {
                         int index = 0;
                         var itemType = member.ClrType.GetElementType();
-                        if (parser == null)
+                        if (parser == null!)
                         {
                             var elements = values.SelectMany(v => SplitRange(v, itemType)).ToArray();
                             var arrayBuilder = CollectionFactory.CreateArray(itemType, elements.Length);
@@ -540,7 +539,7 @@ namespace ZeroLevel.Services.Config
                     {
                         var itemType = member.ClrType.GenericTypeArguments.First();
                         var collectionBuilder = CollectionFactory.Create(itemType);
-                        if (parser == null)
+                        if (parser == null!)
                         {
                             var elements = values.SelectMany(v => SplitRange(v, itemType)).ToArray();
                             foreach (var item in elements)
@@ -561,7 +560,7 @@ namespace ZeroLevel.Services.Config
                     else
                     {
                         var single = values.First();
-                        if (parser != null)
+                        if (parser != null!)
                         {
                             member.Setter(instance, parser.Parse(single));
                         }

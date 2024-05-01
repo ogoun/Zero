@@ -79,7 +79,7 @@ namespace ZeroLevel.Services.Shedulling
         long RemindEvery(TimeSpan first, TimeSpan next, Action<long> callback,
             bool breakWherError = false);
 
-        long RemindWhile(TimeSpan period, Func<long, bool> callback, Action continueWith = null,
+        long RemindWhile(TimeSpan period, Func<long, bool> callback, Action continueWith = null!,
             bool breakWherError = false);
 
         #endregion Repitable behaviour

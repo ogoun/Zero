@@ -28,10 +28,10 @@ namespace MemoryPools.Collections.Linq
             if (_count == 0)
             {
                 _src?.Dispose();
-                Pool<PoolingDictionary<T, int>>.Return(_src);
-                _src = default;
+                Pool<PoolingDictionary<T, int>>.Return(_src!);
+                _src = default!;
 
-                Pool<UnionExprEnumerable<T>>.Return(this);
+                Pool<UnionExprEnumerable<T>>.Return(this!);
             }
         }
         internal class UnionExprEnumerator : IPoolingEnumerator<T>
@@ -50,17 +50,17 @@ namespace MemoryPools.Collections.Linq
 
             public void Reset() => _src.Reset();
 
-            object IPoolingEnumerator.Current => Current;
+            object IPoolingEnumerator.Current => Current!;
 
             public T Current => _src.Current.Key;
 
             public void Dispose()
             {
                 _src?.Dispose();
-                _src = null;
+                _src = null!;
                 
                 _parent?.Dispose();
-                _parent = default;
+                _parent = default!;
                 
                 Pool<UnionExprEnumerator>.Return(this);
             }

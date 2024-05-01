@@ -53,9 +53,9 @@ namespace MemoryPools.Collections.Linq
             
             if (_count == 0)
             {
-                _comparer = default;
-                _resultSelector = default;
-                _keySelector = default;
+                _comparer = default!;
+                _resultSelector = default!;
+                _keySelector = default!;
                 Pool<GroupedResultEnumerable<TSource, TKey, TResult>>.Return(this);
             }
         }
@@ -89,14 +89,14 @@ namespace MemoryPools.Collections.Linq
                 
                 // cleanup collection
                 _src?.Dispose();
-                Pool<PoolingDictionary<TKey, PoolingGrouping>>.Return(_src);
-                _src = default;
+                Pool<PoolingDictionary<TKey, PoolingGrouping>>.Return(_src!);
+                _src = default!;
                 
                 _enumerator?.Dispose();
-                _enumerator = default;
+                _enumerator = default!;
                 
                 _parent?.Dispose();
-                _parent = default;
+                _parent = default!;
                 
                 Pool<GroupedResultEnumerator>.Return(this);
             }
@@ -107,7 +107,7 @@ namespace MemoryPools.Collections.Linq
 
             public TResult Current => _parent._resultSelector(_enumerator.Current.Key, _enumerator.Current.Value.InternalList);
 
-            object IPoolingEnumerator.Current => Current;
+            object IPoolingEnumerator.Current => Current!;
         }
 
         internal class PoolingGrouping : IPoolingGrouping<TKey, TSource>, IDisposable
@@ -132,10 +132,10 @@ namespace MemoryPools.Collections.Linq
             public void Dispose()
             {
                 _elements?.Dispose();
-                Pool<PoolingList<TSource>>.Return(_elements);
-                _elements = null;
+                Pool<PoolingList<TSource>>.Return(_elements!);
+                _elements = null!;
                 
-                Key = default;
+                Key = default!;
             }
         }
     }

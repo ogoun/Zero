@@ -20,7 +20,7 @@ namespace ZeroLevel.Services.Trees
 
         public TreeNode(TreeNode other)
         {
-            if (other == null)
+            if (other == null!)
             {
                 throw new ArgumentNullException(nameof(other));
             }

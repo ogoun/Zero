@@ -29,7 +29,7 @@
 				if (_count == 0)
 				{
 					_src?.Dispose();
-					_src = default;
+					_src = default!;
 					Pool<EnumerableShared<T>>.Return(this);
 				}
 			}
@@ -52,15 +52,15 @@
 
 				public T Current => _enumerator.Current;
 
-				object IPoolingEnumerator.Current => Current;
+				object IPoolingEnumerator.Current => Current!;
 
 				public void Dispose()
 				{
 					_enumerator?.Dispose();
-					_enumerator = default;
+					_enumerator = default!;
 					
 					_parent?.Dispose();
-					_parent = default;
+					_parent = default!;
 					
 					Pool<EnumeratorRef>.Return(this);
 				}

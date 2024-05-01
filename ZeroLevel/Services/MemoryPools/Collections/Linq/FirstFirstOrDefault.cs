@@ -19,7 +19,7 @@ namespace MemoryPools.Collections.Linq
             enumerator.Dispose();
             return element;
         }
-        
+
         /// <summary>
         /// Gets first element from sequence by given <paramref name="condition"/>. Complexity = O(1) - O(N)
         /// </summary>
@@ -38,7 +38,7 @@ namespace MemoryPools.Collections.Linq
             enumerator.Dispose();
             throw new InvalidOperationException("Sequence is empty");
         }
-		
+
         /// <summary>
         /// Gets first element from sequence by given <paramref name="condition"/>. Complexity = O(1) - O(N)
         /// </summary>
@@ -48,7 +48,7 @@ namespace MemoryPools.Collections.Linq
             while (enumerator.MoveNext())
             {
                 if (!condition(context, enumerator.Current)) continue;
-                
+
                 var item = enumerator.Current;
                 enumerator.Dispose();
                 return item;
@@ -56,7 +56,7 @@ namespace MemoryPools.Collections.Linq
             enumerator.Dispose();
             throw new InvalidOperationException("Sequence is empty");
         }
-        
+
         /// <summary>
         /// Gets first element from sequence. Complexity = O(1)
         /// </summary>
@@ -65,12 +65,12 @@ namespace MemoryPools.Collections.Linq
             var enumerator = source.GetEnumerator();
             var hasItem = enumerator.MoveNext();
 
-            var item= hasItem ? enumerator.Current : default;
+            var item = hasItem ? enumerator.Current : default;
             enumerator.Dispose();
 
-            return item;
+            return item!;
         }
-        
+
         /// <summary>
         /// Gets first element from sequence by given <paramref name="condition"/>. Complexity = O(1) - O(N)
         /// </summary>
@@ -80,15 +80,15 @@ namespace MemoryPools.Collections.Linq
             while (enumerator.MoveNext())
             {
                 if (!condition(enumerator.Current)) continue;
-                
+
                 var elem = enumerator.Current;
                 enumerator.Dispose();
                 return elem;
             }
             enumerator.Dispose();
-            return default;
+            return default!;
         }
-		
+
         /// <summary>
         /// Gets first element from sequence by given <paramref name="condition"/>. Complexity = O(1) - O(N)
         /// </summary>
@@ -98,13 +98,13 @@ namespace MemoryPools.Collections.Linq
             while (enumerator.MoveNext())
             {
                 if (!condition(context, enumerator.Current)) continue;
-                
+
                 var elem = enumerator.Current;
                 enumerator.Dispose();
                 return elem;
             }
             enumerator.Dispose();
-            return default;
+            return default!;
         }
     }
 }

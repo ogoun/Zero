@@ -59,7 +59,7 @@ namespace ZeroLevel.Services.ObjectMapping
 
         public TypeMapper(Type entityType)
         {
-            if (entityType == null)
+            if (entityType == null!)
             {
                 throw new ArgumentNullException(nameof(entityType));
             }
@@ -96,13 +96,13 @@ namespace ZeroLevel.Services.ObjectMapping
             if (this._fields.ContainsKey(name))
             {
                 var setter = this._fields[name].Setter;
-                if (setter == null)
+                if (setter == null!)
                 {
                     throw new Exception($"{(this._fields[name].IsField ? "Field" : "Property")} '{name}' has not setter");
                 }
-                if (value == null)
+                if (value == null!)
                 {
-                    setter(instance, null);
+                    setter(instance, null!);
                 }
                 else if (value.GetType() != this._fields[name].ClrType)
                 {
@@ -120,7 +120,7 @@ namespace ZeroLevel.Services.ObjectMapping
             if (this._fields.ContainsKey(name))
             {
                 var getter = this._fields[name]?.Getter;
-                if (getter == null)
+                if (getter == null!)
                 {
                     throw new Exception($"{(this._fields[name].IsField ? "Field" : "Property")} '{name}' has not getter");
                 }
@@ -134,7 +134,7 @@ namespace ZeroLevel.Services.ObjectMapping
             if (this._fields.ContainsKey(name))
             {
                 var getter = this._fields[name]?.Getter;
-                if (getter == null)
+                if (getter == null!)
                 {
                     throw new Exception($"{(this._fields[name].IsField ? "Field" : "Property")} '{name}' has not getter");
                 }
@@ -148,7 +148,7 @@ namespace ZeroLevel.Services.ObjectMapping
             if (this._fields.ContainsKey(name))
             {
                 var getter = this._fields[name]?.Getter;
-                if (getter == null)
+                if (getter == null!)
                 {
                     return defaultValue;
                 }
@@ -162,7 +162,7 @@ namespace ZeroLevel.Services.ObjectMapping
             if (this._fields.ContainsKey(name))
             {
                 var getter = this._fields[name]?.Getter;
-                if (getter == null)
+                if (getter == null!)
                 {
                     return defaultValue;
                 }
@@ -223,6 +223,7 @@ namespace ZeroLevel.Services.ObjectMapping
         /// </summary>
         public static object CopyDTO(object instance)
         {
+            if (instance == null) return null!;
             var type = instance.GetType();
             if (TypeHelpers.IsSimpleType(type))
             {
@@ -239,9 +240,9 @@ namespace ZeroLevel.Services.ObjectMapping
 
         public static bool EqualsDTO(object left, object right)
         {
-            if (left == null && right == null) return true;
-            if (left == null) return false;
-            if (right == null) return false;
+            if (left == null && right == null!) return true;
+            if (left == null!) return false;
+            if (right == null!) return false;
             if (left.GetType() != right.GetType()) return false;
             var lt = left.GetType();
             if (TypeHelpers.IsSimpleType(lt))

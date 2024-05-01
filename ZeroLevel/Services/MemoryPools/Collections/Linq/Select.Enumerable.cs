@@ -28,9 +28,9 @@ namespace MemoryPools.Collections.Linq
 			_count--;
 			if (_count == 0)
 			{
-				_src = default;
+				_src = default!;
 				_count = 0;
-				_mutator = default;
+				_mutator = default!;
 				Pool<SelectExprEnumerable<T, TR>>.Return(this);
 			}
 		}
@@ -53,16 +53,16 @@ namespace MemoryPools.Collections.Linq
 
 			public void Reset() => _src.Reset();
 
-			object IPoolingEnumerator.Current => Current;
+			object IPoolingEnumerator.Current => Current!;
 
 			public TR Current => _mutator( _src.Current);
 
 			public void Dispose()
 			{
 				_parent?.Dispose();
-				_parent = default;
+				_parent = default!;
 				_src?.Dispose();
-				_src = default;
+				_src = default!;
 				Pool<SelectExprEnumerator>.Return(this);
 			}
 		}

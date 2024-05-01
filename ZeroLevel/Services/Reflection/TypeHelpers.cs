@@ -24,7 +24,7 @@ namespace ZeroLevel.Services.Reflection
             if (givenType.IsGenericType && givenType.GetGenericTypeDefinition() == genericType)
                 return true;
             Type baseType = givenType.BaseType;
-            if (baseType == null) return false;
+            if (baseType == null!) return false;
             return IsAssignableToGenericType(baseType, genericType);
         }
         public static bool IsNumericType(Type type)
@@ -206,19 +206,18 @@ namespace ZeroLevel.Services.Reflection
 
         public static object CreateDefaultState(Type type)
         {
-            return type.
-                Return(t => t.IsValueType ? Activator.CreateInstance(type) : null, null);
+            return type.Return(t => t.IsValueType ? Activator.CreateInstance(type) : null, null)!;
         }
 
         public static object CreateInitialState(Type type)
         {
-            if (type == null)
+            if (type == null!)
             {
                 throw new ArgumentNullException(nameof(type));
             }
             if (IsString(type))
             {
-                return null;
+                return null!;
             }
             if (IsArray(type))
             {
@@ -237,7 +236,7 @@ namespace ZeroLevel.Services.Reflection
                 return Activator.CreateInstance(dictType);
             }
             var constructor = type.GetConstructor(Type.EmptyTypes);
-            if (constructor != null)
+            if (constructor != null!)
                 return Activator.CreateInstance(type);
             return FormatterServices.GetUninitializedObject(type);
         }
@@ -249,7 +248,7 @@ namespace ZeroLevel.Services.Reflection
 
         public static object CreateNonInitializedInstance(Type type)
         {
-            if (type == null)
+            if (type == null!)
             {
                 throw new ArgumentNullException(nameof(type));
             }
@@ -259,8 +258,8 @@ namespace ZeroLevel.Services.Reflection
         public static Type GetElementTypeOfEnumerable(object o)
         {
             var enumerable = o as IEnumerable;
-            if (enumerable == null)
-                return null;
+            if (enumerable == null!)
+                return null!;
             Type[] interfaces = enumerable.GetType().GetInterfaces();
             return (from i in interfaces
                     where i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IEnumerable<>)

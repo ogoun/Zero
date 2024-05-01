@@ -53,7 +53,7 @@ namespace ZeroLevel.Logging
                     _messageQueue.Push(t.Item1, t.Item2);
                 }
                 currentQueue.Dispose();
-                currentQueue = null;
+                currentQueue = null!;
                 GC.Collect();
                 GC.WaitForFullGCComplete();
             }
@@ -64,7 +64,7 @@ namespace ZeroLevel.Logging
             while (false == _stopped || _messageQueue.Count > 0)
             {
                 var message = _messageQueue.Take();
-                if (message != null)
+                if (message != null!)
                 {
                     lock (LogsCacheeLocker)
                     {
@@ -79,7 +79,7 @@ namespace ZeroLevel.Logging
                             }
                         }
                     }
-                    message = null;
+                    message = null!;
                 }
             }
         }

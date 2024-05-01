@@ -6,12 +6,12 @@ namespace MemoryPools.Collections.Linq
     {
         public static TSource Aggregate<TSource>(this IPoolingEnumerable<TSource> source, Func<TSource, TSource, TSource> func)
         {
-            if (source == null)
+            if (source == null!)
             {
                 throw new ArgumentNullException(nameof(source));
             }
 
-            if (func == null)
+            if (func == null!)
             {
                 throw new ArgumentNullException(nameof(func));
             }
@@ -34,12 +34,12 @@ namespace MemoryPools.Collections.Linq
 
         public static TAccumulate Aggregate<TSource, TAccumulate>(this IPoolingEnumerable<TSource> source, TAccumulate seed, Func<TAccumulate, TSource, TAccumulate> func)
         {
-            if (source == null)
+            if (source == null!)
             {
                 throw new ArgumentNullException(nameof(source));
             }
 
-            if (func == null)
+            if (func == null!)
             {
                 throw new ArgumentNullException(nameof(func));
             }
@@ -55,17 +55,17 @@ namespace MemoryPools.Collections.Linq
 
         public static TResult Aggregate<TSource, TAccumulate, TResult>(this IPoolingEnumerable<TSource> source, TAccumulate seed, Func<TAccumulate, TSource, TAccumulate> func, Func<TAccumulate, TResult> resultSelector)
         {
-            if (source == null)
+            if (source == null!)
             {
                 throw new ArgumentNullException(nameof(source));
             }
 
-            if (func == null)
+            if (func == null!)
             {
                 throw new ArgumentNullException(nameof(func));
             }
 
-            if (resultSelector == null)
+            if (resultSelector == null!)
             {
                 throw new ArgumentNullException(nameof(resultSelector));
             }

@@ -50,12 +50,12 @@ namespace ZeroLevel
 
             for (int a = 0; a < array.Length; a++)
             {
-                if (array[a].Equals(candidate[0]))
+                if (array[a]!.Equals(candidate[0]))
                 {
                     int i = 1;
                     for (; i < candidate.Length && (a + i) < array.Length; i++)
                     {
-                        if (false == array[a + i].Equals(candidate[i]))
+                        if (false == array[a + i]!.Equals(candidate[i]))
                             break;
                     }
                     if (i == candidate.Length)

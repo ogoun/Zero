@@ -25,7 +25,7 @@ namespace ZeroLevel.Network
 
         public T Read<T>()
         {
-            if (this.Payload == null || this.Payload.Length == 0) return default(T);
+            if (this.Payload == null || this.Payload.Length == 0) return default(T)!;
             return MessageSerializer.DeserializeCompatible<T>(this.Payload);
         }
 
@@ -36,7 +36,7 @@ namespace ZeroLevel.Network
 
         public string ReadText()
         {
-            if (this.Payload == null || this.Payload.Length == 0) return null;
+            if (this.Payload == null || this.Payload.Length == 0) return null!;
             return Encoding.UTF32.GetString(this.Payload);
         }
 
@@ -74,8 +74,8 @@ namespace ZeroLevel.Network
         {
             return new Frame
             {
-                Inbox = null,
-                Payload = null
+                Inbox = null!,
+                Payload = null!
             };
         }
 
@@ -84,7 +84,7 @@ namespace ZeroLevel.Network
             return new Frame
             {
                 Inbox = inbox,
-                Payload = null
+                Payload = null!
             };
         }
 

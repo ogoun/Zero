@@ -15,11 +15,11 @@ namespace ZeroLevel.Services.Web
 
         public static IDictionary<string, string> ParseQueryString(string query, Encoding encoding)
         {
-            if (query == null)
+            if (query == null!)
             {
-                return null;
+                return null!;
             }
-            if (encoding == null)
+            if (encoding == null!)
             {
                 encoding = Encoding.Default;
             }
@@ -32,15 +32,15 @@ namespace ZeroLevel.Services.Web
 
         public static string UrlEncode(string str)
         {
-            return str == null ? null : UrlEncode(str, Encoding.UTF8);
+            return (str == null ? null : UrlEncode(str, Encoding.UTF8))!;
         }
 
         // URL encodes a path portion of a URL string and returns the encoded string.
         public static string UrlPathEncode(string str)
         {
-            if (str == null)
+            if (str == null!)
             {
-                return null;
+                return null!;
             }
             // recurse in case there is a query string
             var i = str.IndexOf('?');
@@ -54,12 +54,12 @@ namespace ZeroLevel.Services.Web
 
         public static string UrlEncode(string str, Encoding encoding)
         {
-            return str == null ? null : Encoding.ASCII.GetString(UrlEncodeToBytes(str, encoding));
+            return (str == null ? null : Encoding.ASCII.GetString(UrlEncodeToBytes(str, encoding)))!;
         }
 
         public static string UrlEncodeUnicode(string str)
         {
-            return str == null ? null : UrlEncodeUnicodeStringToStringInternal(str, false);
+            return (str == null ? null : UrlEncodeUnicodeStringToStringInternal(str, false))!;
         }
 
         /// <summary>
@@ -67,7 +67,7 @@ namespace ZeroLevel.Services.Web
         /// </summary>
         public static string Combine(params string[] parts)
         {
-            if (parts == null)
+            if (parts == null!)
                 throw new ArgumentNullException(nameof(parts));
 
             string result = "";
@@ -179,7 +179,7 @@ namespace ZeroLevel.Services.Web
             {
                 return str;
             }
-            if (e == null)
+            if (e == null!)
             {
                 e = Encoding.UTF8;
             }
@@ -195,14 +195,14 @@ namespace ZeroLevel.Services.Web
             {
                 str = str.Replace(" ", "%20");
             }
-            return str;
+            return str!;
         }
 
         public static byte[] UrlEncodeToBytes(string str, Encoding e)
         {
-            if (str == null)
+            if (str == null!)
             {
-                return null;
+                return null!;
             }
             var bytes = e.GetBytes(str);
             return UrlEncodeBytesToBytesInternal(bytes, 0, bytes.Length, false);
@@ -210,7 +210,7 @@ namespace ZeroLevel.Services.Web
 
         public static string UrlDecode(string str, Encoding e)
         {
-            return str == null ? null : UrlDecodeStringFromStringInternal(str, e);
+            return (str == null ? null : UrlDecodeStringFromStringInternal(str, e))!;
         }
 
         //  Implementation for encoding
@@ -452,7 +452,7 @@ namespace ZeroLevel.Services.Web
 
             internal void AddByte(byte b)
             {
-                if (_byteBuffer == null)
+                if (_byteBuffer == null!)
                 {
                     _byteBuffer = new byte[_bufferSize];
                 }

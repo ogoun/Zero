@@ -14,7 +14,7 @@ namespace DOM.DSL.Contexts
 
         public TRootContext()
         {
-            ParentContext = null;
+            ParentContext = null!;
             _tokens = new List<TToken>();
         }
 
@@ -109,7 +109,7 @@ namespace DOM.DSL.Contexts
                                     _tokens.Add(blockContext.Complete());
                                 }
                                 else if (ParentContext != null && ParentContext is TBlockContext &&
-                                    name.Equals("end" + (ParentContext as TBlockContext).Name, StringComparison.OrdinalIgnoreCase))
+                                    name.Equals("end" + (ParentContext as TBlockContext)!.Name, StringComparison.OrdinalIgnoreCase))
                                 {
                                     reader.Move(name.Length);
                                     flushTextToken();

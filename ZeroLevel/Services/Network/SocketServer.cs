@@ -76,7 +76,7 @@ namespace ZeroLevel.Network
                 {
                     var client_socket = _serverSocket.EndAccept(ar);
                     var ep = client_socket.RemoteEndPoint as IPEndPoint;
-                    Log.SystemInfo($"[ZSocketServer.BeginAcceptCallback] Incoming connection {ep.Address}:{ep.Port}");
+                    Log.SystemInfo($"[ZSocketServer.BeginAcceptCallback] Incoming connection {(ep?.Address?.ToString() ?? string.Empty)}:{(ep?.Port.ToString() ?? string.Empty)}");
                     _connection_set_lock.EnterWriteLock();
                     var connection = new SocketClient(client_socket, _router);
                     connection.OnDisconnect += Connection_OnDisconnect;

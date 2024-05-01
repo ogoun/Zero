@@ -56,7 +56,7 @@ namespace ZeroLevel.Services.Reflection
                 // a compiler error.
                 var attribute =
                     assembly.GetCustomAttributes().OfType<EntryAssemblyAttribute>().SingleOrDefault();
-                if (attribute != null)
+                if (attribute != null!)
                 {
                     entryAssemblies.Add(assembly);
                 }

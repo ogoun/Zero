@@ -56,7 +56,7 @@ namespace ZeroLevel.DataStructures
                 }
 
                 //If there is no item on the given position return defaault value
-                return default(T);
+                return default(T)!;
             }
             set
             {

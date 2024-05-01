@@ -15,7 +15,7 @@ namespace ZeroLevel.Specification
 
         public override bool IsSatisfiedBy(T o)
         {
-            return _selector(o).Equals(_value);
+            return _selector(o)?.Equals(_value) ?? false;
         }
     }
 }

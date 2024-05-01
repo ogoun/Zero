@@ -21,7 +21,7 @@ namespace DOM.DSL.Services
                 _blocks.Add(name, tokens);
             else
             {
-                _blocks[name] = null;
+                _blocks[name] = null!;
                 _blocks[name] = tokens;
             }
         }
@@ -157,7 +157,7 @@ namespace DOM.DSL.Services
                         {
                             var block = new TBlockToken(_blocks.Get(token.NextToken.AsPropertyToken().PropertyName));
                             var result = ResolveBlockToken(block, self);
-                            container = Factory.Get(result.Where(c => c.Current != null).Select(c => c.Current).ToList());
+                            container = Factory.Get(result.Where(c => c.Current != null!).Select(c => c.Current).ToList());
                             foreach (var c in result)
                                 Factory.Release(c);
                         }
@@ -165,7 +165,7 @@ namespace DOM.DSL.Services
                     }
             }
 
-            if (container == null) container = Factory.Get(null!);
+            if (container == null!) container = Factory.Get(null!);
 
             if (token.NextToken is TPropertyToken)
             {
@@ -255,7 +255,7 @@ namespace DOM.DSL.Services
                         {
                             var ls = self_parent == null ? null : Factory.Get(self_parent.Current, self_parent.Index);
                             result = ResolveSimpleBlockToken(blockToken, ls!);
-                            Factory.Release(ls);
+                            Factory.Release(ls!);
                         }
                         else
                         {
@@ -268,7 +268,7 @@ namespace DOM.DSL.Services
                         var list = new List<TContainer>();
                         TContainer self_container = null!;
                         Resolve(blockToken.Condition, c => self_container = c, false, self_parent);
-                        if (self_container != null)
+                        if (self_container != null!)
                         {
                             if (self_container.IsEnumerable)
                             {
@@ -319,7 +319,7 @@ namespace DOM.DSL.Services
                 {
                     var function = token.AsElementToken()?.NextToken?.AsFunctionToken();
                     var elementName = token.AsElementToken()?.ElementName;
-                    if (elementName != null)
+                    if (elementName != null!)
                     {
                         var functionName = function?.FunctionName ?? string.Empty;
                         var rule_token = function?.FunctionArgs == null ?

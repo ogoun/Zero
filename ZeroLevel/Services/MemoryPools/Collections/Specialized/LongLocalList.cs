@@ -25,7 +25,7 @@ namespace MemoryPools.Collections.Specialized
 		public void Clear()
 		{
 			Count = 0;
-			_items = default;
+			_items = default!;
 		}
 
 		public bool Contains(T item)

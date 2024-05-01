@@ -234,7 +234,7 @@ namespace ZeroLevel.Services.Shedulling
 
         public long RemindWhile(TimeSpan period,
             Func<long, bool> callback,
-            Action continueWith = null,
+            Action continueWith = null!,
             bool breakWherError = false)
         {
             var obj = new ExpiredObject { ExpirationDate = DateTime.Now.AddMilliseconds(period.TotalMilliseconds) };
@@ -255,7 +255,7 @@ namespace ZeroLevel.Services.Shedulling
                 if (success)
                 {
                     Remove(obj.Key);
-                    if (continueWith != null)
+                    if (continueWith != null!)
                         continueWith();
                 }
                 else

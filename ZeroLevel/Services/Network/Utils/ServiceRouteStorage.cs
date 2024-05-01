@@ -41,7 +41,7 @@ namespace ZeroLevel.Network
             if (_in_transaction == 1)
             {
                 TransAppendByKeys(key, endpoint);
-                _tran_endpoints[endpoint] = new string[] { key, null, null };
+                _tran_endpoints[endpoint] = new string[] { key, null!, null! };
                 return;
             }
 
@@ -57,7 +57,7 @@ namespace ZeroLevel.Network
                     RemoveLocked(endpoint);
                 }
                 AppendByKeys(key, endpoint);
-                _endpoints.Add(endpoint, new string[3] { $"{endpoint.Address}:{endpoint.Port}", null, null });
+                _endpoints.Add(endpoint, new string[3] { $"{endpoint.Address}:{endpoint.Port}", null!, null! });
             }
             finally
             {
@@ -80,7 +80,7 @@ namespace ZeroLevel.Network
             if (_in_transaction == 1)
             {
                 TransAppendByKeys(key, endpoint);
-                _tran_endpoints[endpoint] = new string[] { key, null, null };
+                _tran_endpoints[endpoint] = new string[] { key, null!, null! };
                 return;
             }
 
@@ -100,7 +100,7 @@ namespace ZeroLevel.Network
                     RemoveLocked(endpoint);
                 }
                 AppendByKeys(key, endpoint);
-                _endpoints.Add(endpoint, new string[3] { key, null, null });
+                _endpoints.Add(endpoint, new string[3] { key, null!, null! });
             }
             finally
             {
@@ -116,7 +116,7 @@ namespace ZeroLevel.Network
                 foreach (var endpoint in endpoints)
                 {
                     TransAppendByKeys(key, endpoint);
-                    _tran_endpoints[endpoint] = new string[] { key, null, null };
+                    _tran_endpoints[endpoint] = new string[] { key, null!, null! };
                 }
                 return;
             }
@@ -138,7 +138,7 @@ namespace ZeroLevel.Network
                 }
                 foreach (var ep in endpoints)
                 {
-                    _endpoints.Add(ep, new string[3] { key.ToUpperInvariant(), null, null });
+                    _endpoints.Add(ep, new string[3] { key.ToUpperInvariant(), null!, null! });
                     AppendByKeys(key, ep);
                 }
             }
@@ -150,7 +150,7 @@ namespace ZeroLevel.Network
 
         public void Set(string key, string type, string group, IPEndPoint endpoint)
         {
-            if (key == null)
+            if (key == null!)
             {
                 key = $"{endpoint.Address}:{endpoint.Port}";
             }
@@ -164,15 +164,15 @@ namespace ZeroLevel.Network
             if (_in_transaction == 1)
             {
                 TransAppendByKeys(key, endpoint);
-                if (type != null)
+                if (type != null!)
                 {
                     TransAppendByType(type, endpoint);
                 }
-                if (group != null)
+                if (group != null!)
                 {
                     TransAppendByGroup(group, endpoint);
                 }
-                _tran_endpoints[endpoint] = new string[] { key, type, group };
+                _tran_endpoints[endpoint] = new string[] { key, type!, group! };
                 return;
             }
 
@@ -181,15 +181,15 @@ namespace ZeroLevel.Network
             {
                 RemoveLocked(endpoint);
                 AppendByKeys(key, endpoint);
-                if (type != null)
+                if (type != null!)
                 {
                     AppendByType(type, endpoint);
                 }
-                if (group != null)
+                if (group != null!)
                 {
                     AppendByGroup(group, endpoint);
                 }
-                _endpoints.Add(endpoint, new string[3] { key.ToUpperInvariant(), type.ToUpperInvariant(), group.ToUpperInvariant() });
+                _endpoints.Add(endpoint, new string[3] { key.ToUpperInvariant(), type?.ToUpperInvariant() ?? string.Empty, group?.ToUpperInvariant() ?? string.Empty });
             }
             finally
             {
@@ -208,15 +208,15 @@ namespace ZeroLevel.Network
                 foreach (var endpoint in endpoints)
                 {
                     TransAppendByKeys(key, endpoint);
-                    if (type != null)
+                    if (type != null!)
                     {
                         TransAppendByType(type, endpoint);
                     }
-                    if (group != null)
+                    if (group != null!)
                     {
                         TransAppendByGroup(group, endpoint);
                     }
-                    _tran_endpoints[endpoint] = new string[] { key, type, group };
+                    _tran_endpoints[endpoint] = new string[] { key, type!, group! };
                 }
                 return;
             }

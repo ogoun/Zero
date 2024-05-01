@@ -25,17 +25,17 @@ namespace ZeroLevel.DependencyInjection
                     var parameterAttribute = p.GetCustomAttribute<ParameterAttribute>();
                     var resolveAttribute = p.GetCustomAttribute<ResolveAttribute>();
 
-                    var kind = (parameterAttribute != null) ? ConstructorParameterKind.Parameter :
-                    (resolveAttribute != null) ? ConstructorParameterKind.Dependency : ConstructorParameterKind.None;
+                    var kind = (parameterAttribute != null!) ? ConstructorParameterKind.Parameter :
+                    (resolveAttribute != null!) ? ConstructorParameterKind.Dependency : ConstructorParameterKind.None;
 
                     return new ConstructorParameter
                     {
                         Type = p.ParameterType,
                         ParameterKind = kind,
-                        ParameterResolveName = (kind == ConstructorParameterKind.Parameter) ? parameterAttribute?.Name ?? p.Name :
-                            (kind == ConstructorParameterKind.Dependency) ? resolveAttribute?.ResolveName : null,
+                        ParameterResolveName = ((kind == ConstructorParameterKind.Parameter) ? parameterAttribute?.Name ?? p.Name :
+                            (kind == ConstructorParameterKind.Dependency) ? resolveAttribute?.ResolveName : null)!,
                         ParameterResolveType = (kind == ConstructorParameterKind.Parameter) ? parameterAttribute?.Type ?? p.ParameterType :
-                            (kind == ConstructorParameterKind.Dependency) ? resolveAttribute?.ContractType ?? p.ParameterType : null,
+                            (kind == ConstructorParameterKind.Dependency) ? resolveAttribute?.ContractType ?? p.ParameterType : null!,
                         IsNullable = IsNullable(p.ParameterType)
                     };
                 }).ToList();
@@ -44,7 +44,7 @@ namespace ZeroLevel.DependencyInjection
         private static bool IsNullable(Type type)
         {
             if (!type.IsValueType) return true; // ref-type
-            if (Nullable.GetUnderlyingType(type) != null) return true; // Nullable<T>
+            if (Nullable.GetUnderlyingType(type) != null!) return true; // Nullable<T>
             return false; // value-type
         }
 
@@ -56,7 +56,7 @@ namespace ZeroLevel.DependencyInjection
         /// <returns>true - if the constructor can be called with the arguments passed</returns>
         public bool IsMatch(object[] args, out object[] parameters)
         {
-            parameters = null;
+            parameters = null!;
             int arg_index = 0;
             if (Parameters.Count > 0)
             {

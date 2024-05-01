@@ -18,8 +18,8 @@ namespace ZeroLevel.Services.PartitionStorage
         public Store(StoreOptions<TKey, TInput, TValue, TMeta> options,
             IStoreSerializer<TKey, TInput, TValue> serializer)
         {
-            if (options == null) throw new ArgumentNullException(nameof(options));
-            if (serializer == null) throw new ArgumentNullException(nameof(serializer));
+            if (options == null!) throw new ArgumentNullException(nameof(options));
+            if (serializer == null!) throw new ArgumentNullException(nameof(serializer));
             _options = options;
             _serializer = serializer;
             if (Directory.Exists(_options.RootFolder) == false)
@@ -32,7 +32,7 @@ namespace ZeroLevel.Services.PartitionStorage
         public void RemovePartition(TMeta info)
         {
             var partition = CreateAccessor(info);
-            if (partition != null)
+            if (partition != null!)
             {
                 string path;
                 using (partition)
@@ -48,7 +48,7 @@ namespace ZeroLevel.Services.PartitionStorage
         {
             if (false == Directory.Exists(_options.GetCatalogPath(info)))
             {
-                return null;
+                return null!;
             }
             return new StorePartitionAccessor<TKey, TInput, TValue, TMeta>(_options, info, _serializer, _fileAccessorCachee);
         }
@@ -79,7 +79,7 @@ namespace ZeroLevel.Services.PartitionStorage
                 foreach(var pair in partitionsSearchInfo) 
                 {
                     var accessor = CreateAccessor(pair.Key);
-                    if (accessor != null)
+                    if (accessor != null!)
                     {
                         using (accessor)
                         {
@@ -101,7 +101,7 @@ namespace ZeroLevel.Services.PartitionStorage
         public async IAsyncEnumerable<KV<TKey, TValue>> Bypass(TMeta meta)
         {
             var accessor = CreateAccessor(meta);
-            if (accessor != null)
+            if (accessor != null!)
             {
                 using (accessor)
                 {
@@ -116,7 +116,7 @@ namespace ZeroLevel.Services.PartitionStorage
         public async IAsyncEnumerable<TKey> BypassKeys(TMeta meta)
         {
             var accessor = CreateAccessor(meta);
-            if (accessor != null)
+            if (accessor != null!)
             {
                 using (accessor)
                 {
@@ -131,7 +131,7 @@ namespace ZeroLevel.Services.PartitionStorage
         public async Task<bool> Exists(TMeta meta, TKey key)
         {
             var accessor = CreateAccessor(meta);
-            if (accessor != null)
+            if (accessor != null!)
             {
                 using (accessor)
                 {

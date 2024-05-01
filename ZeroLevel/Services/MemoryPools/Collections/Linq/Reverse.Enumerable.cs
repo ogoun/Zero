@@ -27,9 +27,9 @@ namespace MemoryPools.Collections.Linq
             if (_count == 0)
             {
                 _src?.Dispose();
-                Pool<PoolingList<T>>.Return(_src);
-                _src = default;
-                Pool<ReverseExprEnumerable<T>>.Return(this);
+                Pool<PoolingList<T>>.Return(_src!);
+                _src = default!;
+                Pool<ReverseExprEnumerable<T>>.Return(this!);
             }
         }
 
@@ -56,16 +56,16 @@ namespace MemoryPools.Collections.Linq
 
             public void Reset() => _position = _src.Count;
 
-            object IPoolingEnumerator.Current => Current;
+            object IPoolingEnumerator.Current => Current!;
 
             public T Current => _src[_position];
 
             public void Dispose()
             {
                 _parent?.Dispose();
-                _parent = default;
-                _src = default;
-                _position = default;
+                _parent = default!;
+                _src = default!;
+                _position = default!;
                 
                 Pool<ReverseExprEnumerator>.Return(this);
             }

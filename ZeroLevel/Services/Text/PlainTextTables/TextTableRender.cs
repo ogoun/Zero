@@ -139,7 +139,7 @@ namespace ZeroLevel.Services.PlainTextTables
         /// </summary>
         private static IEnumerable<string> Split(string str, int chunkSize, int leftPad, int rightPad)
         {
-            if (str == null) return new string[1] { string.Empty };
+            if (str == null!) return new string[1] { string.Empty };
             while ((chunkSize - (leftPad + rightPad)) < 5 && (leftPad > 0 || rightPad > 0))
             {
                 if (leftPad > 0)

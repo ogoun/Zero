@@ -118,7 +118,7 @@ namespace ZeroLevel.Services.Windows
         private string GetPlatformName(string processorArchitecture)
         {
             if (String.IsNullOrEmpty(processorArchitecture))
-                return null;
+                return null!;
 
             string platformName;
             if (this._ProcessorArchitecturePlatforms.TryGetValue(processorArchitecture, out platformName))
@@ -126,7 +126,7 @@ namespace ZeroLevel.Services.Windows
                 return platformName;
             }
 
-            return null;
+            return null!;
         }
 
         public void LoadLibraries(IEnumerable<string> dlls)

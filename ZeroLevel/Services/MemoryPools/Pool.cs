@@ -19,7 +19,8 @@ namespace MemoryPools
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Return<T1>(T1 instance) where T1 : T
         {
-            _freeObjectsQueue.Return(instance);
+            if (instance != null)
+                _freeObjectsQueue.Return(instance);
         }
     }
 

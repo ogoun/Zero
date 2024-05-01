@@ -10,7 +10,7 @@
 
 		public override IPoolingNode<T> Init(int capacity)
 		{
-			Next = null;
+			Next = null!;
 			_buf = Pool.GetBuffer<T>(capacity);
 			return this;
 		}

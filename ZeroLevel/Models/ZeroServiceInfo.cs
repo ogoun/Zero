@@ -42,7 +42,7 @@ namespace ZeroLevel
 
         public bool Equals(ZeroServiceInfo other)
         {
-            if (other == null) return false;
+            if (other == null!) return false;
             if (object.ReferenceEquals(this, other)) return true;
             if (string.Compare(this.Name, other.Name, true) != 0) return false;
             if (string.Compare(this.ServiceKey, other.ServiceKey, true) != 0) return false;
@@ -54,7 +54,7 @@ namespace ZeroLevel
 
         public override bool Equals(object obj)
         {
-            return this.Equals(obj as ZeroServiceInfo);
+            return this.Equals((obj as ZeroServiceInfo)!);
         }
 
         public override int GetHashCode()

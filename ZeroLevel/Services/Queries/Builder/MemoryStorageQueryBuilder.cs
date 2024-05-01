@@ -31,17 +31,17 @@ namespace ZeroLevel.Patterns.Queries
         {
             if (query is AndQuery)
             {
-                return ResolveQueryAnd(query as AndQuery);
+                return ResolveQueryAnd((query as AndQuery)!);
             }
             else if (query is OrQuery)
             {
-                return ResolveQueryOr(query as OrQuery);
+                return ResolveQueryOr((query as OrQuery)!);
             }
             else if (query is NotQuery)
             {
-                return ResolveQueryNot(query as NotQuery);
+                return ResolveQueryNot((query as NotQuery)!);
             }
-            return ResolveQueryOp(query as QueryOp);
+            return ResolveQueryOp((query as QueryOp)!);
         }
 
         private static Expression<Func<T, bool>> ResolveQueryOp(QueryOp query)
@@ -117,7 +117,7 @@ namespace ZeroLevel.Patterns.Queries
                         param, constant);
                     return Expression.Lambda<Func<T, bool>>(call, new[] { argument });
             }
-            return null;
+            return null!;
         }
 
         private static Expression<Func<T, bool>> ResolveQueryAnd(AndQuery query)

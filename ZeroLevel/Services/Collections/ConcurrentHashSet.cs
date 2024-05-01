@@ -187,7 +187,7 @@ namespace ZeroLevel.Collections
         public ConcurrentHashSet(IEnumerable<T> collection, IEqualityComparer<T> comparer)
             : this(comparer)
         {
-            if (collection == null) throw new ArgumentNullException(nameof(collection));
+            if (collection == null!) throw new ArgumentNullException(nameof(collection));
 
             InitializeFromCollection(collection);
         }
@@ -214,7 +214,7 @@ namespace ZeroLevel.Collections
         public ConcurrentHashSet(int concurrencyLevel, IEnumerable<T> collection, IEqualityComparer<T> comparer)
             : this(concurrencyLevel, DefaultCapacity, false, comparer)
         {
-            if (collection == null) throw new ArgumentNullException(nameof(collection));
+            if (collection == null!) throw new ArgumentNullException(nameof(collection));
 
             InitializeFromCollection(collection);
         }
@@ -337,7 +337,7 @@ namespace ZeroLevel.Collections
             // The Volatile.Read ensures that the load of the fields of 'n' doesn't move before the load from buckets[i].
             var current = Volatile.Read(ref tables.Buckets[bucketNo]);
 
-            while (current != null)
+            while (current != null!)
             {
                 if (hashcode == current.Hashcode && _comparer.Equals(current.Item, equalValue))
                 {
@@ -348,7 +348,7 @@ namespace ZeroLevel.Collections
                 current = current.Next;
             }
 
-            actualValue = default;
+            actualValue = default!;
             return false;
         }
 
@@ -376,13 +376,13 @@ namespace ZeroLevel.Collections
                     }
 
                     Node previous = null!;
-                    for (var current = tables.Buckets[bucketNo]; current != null; current = current.Next)
+                    for (var current = tables.Buckets[bucketNo]; current != null!; current = current.Next)
                     {
                         Debug.Assert((previous == null && current == tables.Buckets[bucketNo]) || previous!.Next == current);
 
                         if (hashcode == current.Hashcode && _comparer.Equals(current.Item, item))
                         {
-                            if (previous == null)
+                            if (previous == null!)
                             {
                                 Volatile.Write(ref tables.Buckets[bucketNo], current.Next);
                             }
@@ -434,7 +434,7 @@ namespace ZeroLevel.Collections
             // Provides a manually-implemented version of (approximately) this iterator:
             //     Node?[] buckets = _tables.Buckets;
             //     for (int i = 0; i < buckets.Length; i++)
-            //         for (Node? current = Volatile.Read(ref buckets[i]); current != null; current = current.Next)
+            //         for (Node? current = Volatile.Read(ref buckets[i]); current != null!; current = current.Next)
             //             yield return new current.Item;
 
             private readonly ConcurrentHashSet<T> _set;
@@ -502,7 +502,7 @@ namespace ZeroLevel.Collections
 
                     case StateOuterloop:
                         Node[] buckets = _buckets;
-                        Debug.Assert(buckets != null);
+                        Debug.Assert(buckets != null!);
 
                         int i = ++_i;
                         if ((uint)i < (uint)buckets!.Length)
@@ -517,7 +517,7 @@ namespace ZeroLevel.Collections
 
                     case StateInnerLoop:
                         Node node = _node;
-                        if (node != null)
+                        if (node != null!)
                         {
                             Current = node.Item;
                             _node = node.Next;
@@ -538,7 +538,7 @@ namespace ZeroLevel.Collections
 
         void ICollection<T>.CopyTo(T[] array, int arrayIndex)
         {
-            if (array == null) throw new ArgumentNullException(nameof(array));
+            if (array == null!) throw new ArgumentNullException(nameof(array));
             if (arrayIndex < 0) throw new ArgumentOutOfRangeException(nameof(arrayIndex));
 
             var locksAcquired = 0;
@@ -606,8 +606,8 @@ namespace ZeroLevel.Collections
                     }
 
                     // Try to find this item in the bucket
-                    Node previous = null;
-                    for (var current = tables.Buckets[bucketNo]; current != null; current = current.Next)
+                    Node previous = null!;
+                    for (var current = tables.Buckets[bucketNo]; current != null!; current = current.Next)
                     {
                         Debug.Assert(previous == null && current == tables.Buckets[bucketNo] || previous!.Next == current);
                         if (hashcode == current.Hashcode && _comparer.Equals(current.Item, item))
@@ -791,7 +791,7 @@ namespace ZeroLevel.Collections
                 for (var i = 0; i < tables.Buckets.Length; i++)
                 {
                     var current = tables.Buckets[i];
-                    while (current != null)
+                    while (current != null!)
                     {
                         var next = current.Next;
                         GetBucketAndLockNo(current.Hashcode, out int newBucketNo, out int newLockNo, newBuckets.Length, newLocks.Length);
@@ -868,7 +868,7 @@ namespace ZeroLevel.Collections
             var buckets = _tables.Buckets;
             for (var i = 0; i < buckets.Length; i++)
             {
-                for (var current = buckets[i]; current != null; current = current.Next)
+                for (var current = buckets[i]; current != null!; current = current.Next)
                 {
                     array[index] = current.Item;
                     index++; //this should never flow, CopyToItems is only called when there's no overflow risk

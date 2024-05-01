@@ -9,7 +9,7 @@ namespace MemoryPools.Collections.Linq
         /// </summary>
         public static double Average(this IPoolingEnumerable<int> source)
         {
-            if (source == null)
+            if (source == null!)
             {
                 throw new ArgumentNullException(nameof(source));
             }
@@ -41,7 +41,7 @@ namespace MemoryPools.Collections.Linq
         /// </summary>
         public static double? Average(this IPoolingEnumerable<int?> source)
         {
-            if (source == null)
+            if (source == null!)
             {
                 throw new ArgumentNullException(nameof(source));
             }
@@ -73,7 +73,7 @@ namespace MemoryPools.Collections.Linq
                 }
             }
 
-            return null;
+            return null!;
         }
 
         /// <summary>
@@ -81,7 +81,7 @@ namespace MemoryPools.Collections.Linq
         /// </summary>
         public static double Average(this IPoolingEnumerable<long> source)
         {
-            if (source == null)
+            if (source == null!)
             {
                 throw new ArgumentNullException(nameof(source));
             }
@@ -113,7 +113,7 @@ namespace MemoryPools.Collections.Linq
         /// </summary>
         public static double? Average(this IPoolingEnumerable<long?> source)
         {
-            if (source == null)
+            if (source == null!)
             {
                 throw new ArgumentNullException(nameof(source));
             }
@@ -145,7 +145,7 @@ namespace MemoryPools.Collections.Linq
                 }
             }
 
-            return null;
+            return null!;
         }
 
         /// <summary>
@@ -153,7 +153,7 @@ namespace MemoryPools.Collections.Linq
         /// </summary>
         public static float Average(this IPoolingEnumerable<float> source)
         {
-            if (source == null)
+            if (source == null!)
             {
                 throw new ArgumentNullException(nameof(source));
             }
@@ -182,7 +182,7 @@ namespace MemoryPools.Collections.Linq
         /// </summary>
         public static float? Average(this IPoolingEnumerable<float?> source)
         {
-            if (source == null)
+            if (source == null!)
             {
                 throw new ArgumentNullException(nameof(source));
             }
@@ -214,7 +214,7 @@ namespace MemoryPools.Collections.Linq
                 }
             }
 
-            return null;
+            return null!;
         }
 
         /// <summary>
@@ -222,7 +222,7 @@ namespace MemoryPools.Collections.Linq
         /// </summary>
         public static double Average(this IPoolingEnumerable<double> source)
         {
-            if (source == null)
+            if (source == null!)
             {
                 throw new ArgumentNullException(nameof(source));
             }
@@ -254,7 +254,7 @@ namespace MemoryPools.Collections.Linq
         /// </summary>
         public static double? Average(this IPoolingEnumerable<double?> source)
         {
-            if (source == null)
+            if (source == null!)
             {
                 throw new ArgumentNullException(nameof(source));
             }
@@ -286,7 +286,7 @@ namespace MemoryPools.Collections.Linq
                 }
             }
 
-            return null;
+            return null!;
         }
 
         /// <summary>
@@ -294,7 +294,7 @@ namespace MemoryPools.Collections.Linq
         /// </summary>
         public static decimal Average(this IPoolingEnumerable<decimal> source)
         {
-            if (source == null)
+            if (source == null!)
             {
                 throw new ArgumentNullException(nameof(source));
             }
@@ -323,7 +323,7 @@ namespace MemoryPools.Collections.Linq
         /// </summary>
         public static decimal? Average(this IPoolingEnumerable<decimal?> source)
         {
-            if (source == null)
+            if (source == null!)
             {
                 throw new ArgumentNullException(nameof(source));
             }
@@ -352,7 +352,7 @@ namespace MemoryPools.Collections.Linq
                 }
             }
 
-            return null;
+            return null!;
         }
 
         /// <summary>
@@ -360,12 +360,12 @@ namespace MemoryPools.Collections.Linq
         /// </summary>
         public static double Average<TSource>(this IPoolingEnumerable<TSource> source, Func<TSource, int> selector)
         {
-            if (source == null)
+            if (source == null!)
             {
                 throw new ArgumentNullException(nameof(source));
             }
 
-            if (selector == null)
+            if (selector == null!)
             {
                 throw new ArgumentNullException(nameof(selector));
             }
@@ -397,12 +397,12 @@ namespace MemoryPools.Collections.Linq
         /// </summary>
         public static double? Average<TSource>(this IPoolingEnumerable<TSource> source, Func<TSource, int?> selector)
         {
-            if (source == null)
+            if (source == null!)
             {
                 throw new ArgumentNullException(nameof(source));
             }
 
-            if (selector == null)
+            if (selector == null!)
             {
                 throw new ArgumentNullException(nameof(selector));
             }
@@ -434,7 +434,7 @@ namespace MemoryPools.Collections.Linq
                 }
             }
 
-            return null;
+            return null!;
         }
 
         /// <summary>
@@ -442,12 +442,12 @@ namespace MemoryPools.Collections.Linq
         /// </summary>
         public static double Average<TSource>(this IPoolingEnumerable<TSource> source, Func<TSource, long> selector)
         {
-            if (source == null)
+            if (source == null!)
             {
                 throw new ArgumentNullException(nameof(source));
             }
 
-            if (selector == null)
+            if (selector == null!)
             {
                 throw new ArgumentNullException(nameof(selector));
             }
@@ -479,12 +479,12 @@ namespace MemoryPools.Collections.Linq
         /// </summary>
         public static double? Average<TSource>(this IPoolingEnumerable<TSource> source, Func<TSource, long?> selector)
         {
-            if (source == null)
+            if (source == null!)
             {
                 throw new ArgumentNullException(nameof(source));
             }
 
-            if (selector == null)
+            if (selector == null!)
             {
                 throw new ArgumentNullException(nameof(selector));
             }
@@ -516,7 +516,7 @@ namespace MemoryPools.Collections.Linq
                 }
             }
 
-            return null;
+            return null!;
         }
 
         /// <summary>
@@ -524,12 +524,12 @@ namespace MemoryPools.Collections.Linq
         /// </summary>
         public static float Average<TSource>(this IPoolingEnumerable<TSource> source, Func<TSource, float> selector)
         {
-            if (source == null)
+            if (source == null!)
             {
                 throw new ArgumentNullException(nameof(source));
             }
 
-            if (selector == null)
+            if (selector == null!)
             {
                 throw new ArgumentNullException(nameof(selector));
             }
@@ -558,12 +558,12 @@ namespace MemoryPools.Collections.Linq
         /// </summary>
         public static float? Average<TSource>(this IPoolingEnumerable<TSource> source, Func<TSource, float?> selector)
         {
-            if (source == null)
+            if (source == null!)
             {
                 throw new ArgumentNullException(nameof(source));
             }
 
-            if (selector == null)
+            if (selector == null!)
             {
                 throw new ArgumentNullException(nameof(selector));
             }
@@ -595,7 +595,7 @@ namespace MemoryPools.Collections.Linq
                 }
             }
 
-            return null;
+            return null!;
         }
 
         /// <summary>
@@ -603,12 +603,12 @@ namespace MemoryPools.Collections.Linq
         /// </summary>
         public static double Average<TSource>(this IPoolingEnumerable<TSource> source, Func<TSource, double> selector)
         {
-            if (source == null)
+            if (source == null!)
             {
                 throw new ArgumentNullException(nameof(source));
             }
 
-            if (selector == null)
+            if (selector == null!)
             {
                 throw new ArgumentNullException(nameof(selector));
             }
@@ -640,12 +640,12 @@ namespace MemoryPools.Collections.Linq
         /// </summary>
         public static double? Average<TSource>(this IPoolingEnumerable<TSource> source, Func<TSource, double?> selector)
         {
-            if (source == null)
+            if (source == null!)
             {
                 throw new ArgumentNullException(nameof(source));
             }
 
-            if (selector == null)
+            if (selector == null!)
             {
                 throw new ArgumentNullException(nameof(selector));
             }
@@ -677,7 +677,7 @@ namespace MemoryPools.Collections.Linq
                 }
             }
 
-            return null;
+            return null!;
         }
 
         /// <summary>
@@ -685,12 +685,12 @@ namespace MemoryPools.Collections.Linq
         /// </summary>
         public static decimal Average<TSource>(this IPoolingEnumerable<TSource> source, Func<TSource, decimal> selector)
         {
-            if (source == null)
+            if (source == null!)
             {
                 throw new ArgumentNullException(nameof(source));
             }
 
-            if (selector == null)
+            if (selector == null!)
             {
                 throw new ArgumentNullException(nameof(selector));
             }
@@ -719,12 +719,12 @@ namespace MemoryPools.Collections.Linq
         /// </summary>
         public static decimal? Average<TSource>(this IPoolingEnumerable<TSource> source, Func<TSource, decimal?> selector)
         {
-            if (source == null)
+            if (source == null!)
             {
                 throw new ArgumentNullException(nameof(source));
             }
 
-            if (selector == null)
+            if (selector == null!)
             {
                 throw new ArgumentNullException(nameof(selector));
             }
@@ -753,7 +753,7 @@ namespace MemoryPools.Collections.Linq
                 }
             }
 
-            return null;
+            return null!;
         }
     }
 }

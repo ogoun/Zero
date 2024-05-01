@@ -142,7 +142,7 @@ namespace ZeroLevel.Services.PartitionStorage
             {
                 Log.SystemError(ex, "[StorePartitionSparseIndex.GetFileIndex] No cachee");
             }
-            return null;
+            return null!;
         }
 
         private KeyIndex<TKey>[] ReadIndexesFromIndexFile(string filePath)
@@ -178,7 +178,7 @@ namespace ZeroLevel.Services.PartitionStorage
                 }
                 return list.ToArray();
             }
-            return null;
+            return null!;
         }
     }
 }

@@ -33,10 +33,11 @@ namespace ZeroLevel.Specification
         /// </summary>
         public static Expression<Func<T, bool>> CreateFromFunc<T>(Func<T, bool> predicate)
         {
+            if (predicate == null) throw new ArgumentNullException(nameof(predicate));
             var method = predicate.Method;
             var parameters = method.GetParameters().Select(p => Expression.Variable(p.ParameterType)).ToArray();
-            var target = predicate?.Target;
-            var call = Expression.Call(predicate.Method.IsStatic ? null : Expression.New(target.GetType()),
+            var target = predicate.Target;
+            var call = Expression.Call(method.IsStatic ? null : Expression.New(target.GetType()),
                 method,
                 parameters);
             return Expression.Lambda<Func<T, bool>>(call, parameters);

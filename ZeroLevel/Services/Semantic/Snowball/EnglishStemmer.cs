@@ -14,156 +14,156 @@ namespace Iveonik.Stemmers
     {
         private readonly static Among[] a_0 =
         {
-            new Among ( "arsen", -1, -1,null ),
-            new Among ( "commun", -1, -1, null ),
-            new Among ( "gener", -1, -1, null )
+            new Among ( "arsen", -1, -1,null! ),
+            new Among ( "commun", -1, -1, null! ),
+            new Among ( "gener", -1, -1, null! )
         };
 
         private readonly static Among[] a_1 =
         {
-            new Among ( "'", -1, 1, null),
-            new Among ( "'s'", 0, 1, null),
-            new Among ( "'s", -1, 1, null)
+            new Among ( "'", -1, 1, null!),
+            new Among ( "'s'", 0, 1, null!),
+            new Among ( "'s", -1, 1, null!)
         };
 
         private readonly static Among[] a_2 =
         {
-            new Among ( "ied", -1, 2, null),
-            new Among ( "s", -1, 3, null),
-            new Among ( "ies", 1, 2, null),
-            new Among ( "sses", 1, 1, null),
-            new Among ( "ss", 1, -1, null),
-            new Among ( "us", 1, -1, null)
+            new Among ( "ied", -1, 2, null!),
+            new Among ( "s", -1, 3, null!),
+            new Among ( "ies", 1, 2, null!),
+            new Among ( "sses", 1, 1, null!),
+            new Among ( "ss", 1, -1, null!),
+            new Among ( "us", 1, -1, null!)
         };
 
         private readonly static Among[] a_3 =
         {
-            new Among ( "", -1, 3, null),
-            new Among ( "bb", 0, 2, null),
-            new Among ( "dd", 0, 2, null),
-            new Among ( "ff", 0, 2, null),
-            new Among ( "gg", 0, 2, null),
-            new Among ( "bl", 0, 1, null),
-            new Among ( "mm", 0, 2, null),
-            new Among ( "nn", 0, 2, null),
-            new Among ( "pp", 0, 2, null),
-            new Among ( "rr", 0, 2, null),
-            new Among ( "at", 0, 1, null),
-            new Among ( "tt", 0, 2, null),
-            new Among ( "iz", 0, 1, null)
+            new Among ( "", -1, 3, null!),
+            new Among ( "bb", 0, 2, null!),
+            new Among ( "dd", 0, 2, null!),
+            new Among ( "ff", 0, 2, null!),
+            new Among ( "gg", 0, 2, null!),
+            new Among ( "bl", 0, 1, null!),
+            new Among ( "mm", 0, 2, null!),
+            new Among ( "nn", 0, 2, null!),
+            new Among ( "pp", 0, 2, null!),
+            new Among ( "rr", 0, 2, null!),
+            new Among ( "at", 0, 1, null!),
+            new Among ( "tt", 0, 2, null!),
+            new Among ( "iz", 0, 1, null!)
         };
 
         private readonly static Among[] a_4 =
         {
-            new Among ( "ed", -1, 2, null),
-            new Among ( "eed", 0, 1, null),
-            new Among ( "ing", -1, 2, null),
-            new Among ( "edly", -1, 2, null),
-            new Among ( "eedly", 3, 1, null),
-            new Among ( "ingly", -1, 2, null)
+            new Among ( "ed", -1, 2, null!),
+            new Among ( "eed", 0, 1, null!),
+            new Among ( "ing", -1, 2, null!),
+            new Among ( "edly", -1, 2, null!),
+            new Among ( "eedly", 3, 1, null!),
+            new Among ( "ingly", -1, 2, null!)
         };
 
         private readonly static Among[] a_5 =
         {
-            new Among ( "anci", -1, 3, null),
-            new Among ( "enci", -1, 2, null),
-            new Among ( "ogi", -1, 13, null),
-            new Among ( "li", -1, 16, null),
-            new Among ( "bli", 3, 12, null),
-            new Among ( "abli", 4, 4, null),
-            new Among ( "alli", 3, 8, null),
-            new Among ( "fulli", 3, 14, null),
-            new Among ( "lessli", 3, 15, null),
-            new Among ( "ousli", 3, 10, null),
-            new Among ( "entli", 3, 5, null),
-            new Among ( "aliti", -1, 8, null),
-            new Among ( "biliti", -1, 12, null),
-            new Among ( "iviti", -1, 11, null),
-            new Among ( "tional", -1, 1, null),
-            new Among ( "ational", 14, 7, null),
-            new Among ( "alism", -1, 8, null),
-            new Among ( "ation", -1, 7, null),
-            new Among ( "ization", 17, 6, null),
-            new Among ( "izer", -1, 6, null),
-            new Among ( "ator", -1, 7, null),
-            new Among ( "iveness", -1, 11, null),
-            new Among ( "fulness", -1, 9, null),
-            new Among ( "ousness", -1, 10, null)
+            new Among ( "anci", -1, 3, null!),
+            new Among ( "enci", -1, 2, null!),
+            new Among ( "ogi", -1, 13, null!),
+            new Among ( "li", -1, 16, null!),
+            new Among ( "bli", 3, 12, null!),
+            new Among ( "abli", 4, 4, null!),
+            new Among ( "alli", 3, 8, null!),
+            new Among ( "fulli", 3, 14, null!),
+            new Among ( "lessli", 3, 15, null!),
+            new Among ( "ousli", 3, 10, null!),
+            new Among ( "entli", 3, 5, null!),
+            new Among ( "aliti", -1, 8, null!),
+            new Among ( "biliti", -1, 12, null!),
+            new Among ( "iviti", -1, 11, null!),
+            new Among ( "tional", -1, 1, null!),
+            new Among ( "ational", 14, 7, null!),
+            new Among ( "alism", -1, 8, null!),
+            new Among ( "ation", -1, 7, null!),
+            new Among ( "ization", 17, 6, null!),
+            new Among ( "izer", -1, 6, null!),
+            new Among ( "ator", -1, 7, null!),
+            new Among ( "iveness", -1, 11, null!),
+            new Among ( "fulness", -1, 9, null!),
+            new Among ( "ousness", -1, 10, null!)
         };
 
         private readonly static Among[] a_6 =
         {
-            new Among ( "icate", -1, 4, null),
-            new Among ( "ative", -1, 6, null),
-            new Among ( "alize", -1, 3, null),
-            new Among ( "iciti", -1, 4, null),
-            new Among ( "ical", -1, 4, null),
-            new Among ( "tional", -1, 1, null),
-            new Among ( "ational", 5, 2, null),
-            new Among ( "ful", -1, 5, null),
-            new Among ( "ness", -1, 5, null)
+            new Among ( "icate", -1, 4, null!),
+            new Among ( "ative", -1, 6, null!),
+            new Among ( "alize", -1, 3, null!),
+            new Among ( "iciti", -1, 4, null!),
+            new Among ( "ical", -1, 4, null!),
+            new Among ( "tional", -1, 1, null!),
+            new Among ( "ational", 5, 2, null!),
+            new Among ( "ful", -1, 5, null!),
+            new Among ( "ness", -1, 5, null!)
         };
 
         private readonly static Among[] a_7 =
         {
-            new Among ( "ic", -1, 1, null),
-            new Among ( "ance", -1, 1, null),
-            new Among ( "ence", -1, 1, null),
-            new Among ( "able", -1, 1, null),
-            new Among ( "ible", -1, 1, null),
-            new Among ( "ate", -1, 1, null),
-            new Among ( "ive", -1, 1, null),
-            new Among ( "ize", -1, 1, null),
-            new Among ( "iti", -1, 1, null),
-            new Among ( "al", -1, 1, null),
-            new Among ( "ism", -1, 1, null),
-            new Among ( "ion", -1, 2, null),
-            new Among ( "er", -1, 1, null),
-            new Among ( "ous", -1, 1, null),
-            new Among ( "ant", -1, 1, null),
-            new Among ( "ent", -1, 1, null),
-            new Among ( "ment", 15, 1, null),
-            new Among ( "ement", 16, 1, null)
+            new Among ( "ic", -1, 1, null!),
+            new Among ( "ance", -1, 1, null!),
+            new Among ( "ence", -1, 1, null!),
+            new Among ( "able", -1, 1, null!),
+            new Among ( "ible", -1, 1, null!),
+            new Among ( "ate", -1, 1, null!),
+            new Among ( "ive", -1, 1, null!),
+            new Among ( "ize", -1, 1, null!),
+            new Among ( "iti", -1, 1, null!),
+            new Among ( "al", -1, 1, null!),
+            new Among ( "ism", -1, 1, null!),
+            new Among ( "ion", -1, 2, null!),
+            new Among ( "er", -1, 1, null!),
+            new Among ( "ous", -1, 1, null!),
+            new Among ( "ant", -1, 1, null!),
+            new Among ( "ent", -1, 1, null!),
+            new Among ( "ment", 15, 1, null!),
+            new Among ( "ement", 16, 1, null!)
         };
 
         private readonly static Among[] a_8 =
         {
-            new Among ( "e", -1, 1, null),
-            new Among ( "l", -1, 2, null)
+            new Among ( "e", -1, 1, null!),
+            new Among ( "l", -1, 2, null!)
         };
 
         private readonly static Among[] a_9 =
         {
-            new Among ( "succeed", -1, -1, null),
-            new Among ( "proceed", -1, -1, null),
-            new Among ( "exceed", -1, -1, null),
-            new Among ( "canning", -1, -1, null),
-            new Among ( "inning", -1, -1, null),
-            new Among ( "earring", -1, -1, null),
-            new Among ( "herring", -1, -1, null),
-            new Among ( "outing", -1, -1, null)
+            new Among ( "succeed", -1, -1, null!),
+            new Among ( "proceed", -1, -1, null!),
+            new Among ( "exceed", -1, -1, null!),
+            new Among ( "canning", -1, -1, null!),
+            new Among ( "inning", -1, -1, null!),
+            new Among ( "earring", -1, -1, null!),
+            new Among ( "herring", -1, -1, null!),
+            new Among ( "outing", -1, -1, null!)
         };
 
         private readonly static Among[] a_10 =
         {
-            new Among ( "andes", -1, -1, null),
-            new Among ( "atlas", -1, -1, null),
-            new Among ( "bias", -1, -1, null),
-            new Among ( "cosmos", -1, -1, null),
-            new Among ( "dying", -1, 3, null),
-            new Among ( "early", -1, 9, null),
-            new Among ( "gently", -1, 7, null),
-            new Among ( "howe", -1, -1, null),
-            new Among ( "idly", -1, 6, null),
-            new Among ( "lying", -1, 4, null),
-            new Among ( "news", -1, -1, null),
-            new Among ( "only", -1, 10, null),
-            new Among ( "singly", -1, 11, null),
-            new Among ( "skies", -1, 2, null),
-            new Among ( "skis", -1, 1, null),
-            new Among ( "sky", -1, -1, null),
-            new Among ( "tying", -1, 5, null),
-            new Among ( "ugly", -1, 8, null)
+            new Among ( "andes", -1, -1, null!),
+            new Among ( "atlas", -1, -1, null!),
+            new Among ( "bias", -1, -1, null!),
+            new Among ( "cosmos", -1, -1, null!),
+            new Among ( "dying", -1, 3, null!),
+            new Among ( "early", -1, 9, null!),
+            new Among ( "gently", -1, 7, null!),
+            new Among ( "howe", -1, -1, null!),
+            new Among ( "idly", -1, 6, null!),
+            new Among ( "lying", -1, 4, null!),
+            new Among ( "news", -1, -1, null!),
+            new Among ( "only", -1, 10, null!),
+            new Among ( "singly", -1, 11, null!),
+            new Among ( "skies", -1, 2, null!),
+            new Among ( "skis", -1, 1, null!),
+            new Among ( "sky", -1, -1, null!),
+            new Among ( "tying", -1, 5, null!),
+            new Among ( "ugly", -1, 8, null!)
         };
 
         private static readonly char[] g_v = { (char)17, (char)65, (char)16, (char)1 };

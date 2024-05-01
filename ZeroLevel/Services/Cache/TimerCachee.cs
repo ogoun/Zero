@@ -62,7 +62,7 @@ namespace ZeroLevel.Services.Cache
                 {
                     try
                     {
-                        if (_onDisposeAction != null)
+                        if (_onDisposeAction != null!)
                         {
                             _onDisposeAction.Invoke(v.Value);
                         }
@@ -92,7 +92,7 @@ namespace ZeroLevel.Services.Cache
                 {
                     try
                     {
-                        if (_onDisposeAction != null)
+                        if (_onDisposeAction != null!)
                         {
                             _onDisposeAction.Invoke(_cachee[key].Value);
                         }
@@ -114,7 +114,7 @@ namespace ZeroLevel.Services.Cache
                 {
                     try
                     {
-                        if (_onDisposeAction != null)
+                        if (_onDisposeAction != null!)
                         {
                             _onDisposeAction.Invoke(pair.Value.Value);
                         }

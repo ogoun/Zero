@@ -18,7 +18,7 @@ namespace MemoryPools
         /// <inheritdoc/>
         public override ObjectPool<T> Create<T>(IPooledObjectPolicy<T> policy)
         {
-            if (policy == null)
+            if (policy == null!)
             {
                 throw new ArgumentNullException(nameof(policy));
             }

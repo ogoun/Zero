@@ -28,8 +28,8 @@
             _count--;
             if (_count == 0)
             {
-                _source = null;
-                _take = default;
+                _source = null!;
+                _take = default!;
                 Pool<SkipTakeExprPoolingEnumerable<T>>.Return(this);
             }
         }
@@ -80,17 +80,17 @@
                 _source.Reset();
             }
 
-            object IPoolingEnumerator.Current => Current;
+            object IPoolingEnumerator.Current => Current!;
 
             public T Current => _source.Current;
         
             public void Dispose()
             {
                 _parent?.Dispose();
-                _parent = default;
+                _parent = default!;
                 
                 _source?.Dispose();
-                _source = default;
+                _source = default!;
                 
                 Pool<SkipTakeExprPoolingEnumerator>.Return(this);
             }

@@ -208,7 +208,7 @@ namespace ZeroLevel.Services.Collections
         {
             if (disposing)
             {
-                if (_collection != null)
+                if (_collection != null!)
                 {
                     _collection.Clear();
                 }

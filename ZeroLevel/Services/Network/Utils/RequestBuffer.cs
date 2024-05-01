@@ -10,7 +10,7 @@ namespace ZeroLevel.Network
         private ConcurrentDictionary<long, RequestInfo> _requests = new ConcurrentDictionary<long, RequestInfo>();
         private static DefaultObjectPool<RequestInfo> _ri_pool = new DefaultObjectPool<RequestInfo>(new DefaultPooledObjectPolicy<RequestInfo>());
 
-        public void RegisterForFrame(int identity, Action<byte[]> callback, Action<string> fail = null)
+        public void RegisterForFrame(int identity, Action<byte[]> callback, Action<string> fail = null!)
         {
             var ri = _ri_pool.Get();
             ri.Reset(callback, fail);

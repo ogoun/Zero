@@ -25,15 +25,15 @@ namespace ZeroLevel.Network.FileTransfer
             _uploadFileThread.Start();
         }
 
-        public void Send(IClient client, string fileName, Action<string> completeHandler = null, Action<string, string> errorHandler = null)
+        public void Send(IClient client, string fileName, Action<string> completeHandler = null!, Action<string, string> errorHandler = null!)
         {
-            if (client == null) return;
+            if (client == null!) return;
             PushTransferTask(client, fileName, completeHandler, errorHandler);
         }
 
-        private void PushTransferTask(IClient client, string filePath, Action<string> completeHandler = null, Action<string, string> errorHandler = null)
+        private void PushTransferTask(IClient client, string filePath, Action<string> completeHandler = null!, Action<string, string> errorHandler = null!)
         {
-            if (client == null)
+            if (client == null!)
             {
                 throw new ArgumentNullException(nameof(client));
             }

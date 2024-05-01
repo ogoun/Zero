@@ -33,28 +33,28 @@ namespace ZeroLevel.Services.Serialization
 
         public MemoryStreamReader(byte[] data)
         {
-            if (data == null)
+            if (data == null!)
                 throw new ArgumentNullException(nameof(data));
             _accessor = new StreamVewAccessor(new MemoryStream(data));
         }
 
         public MemoryStreamReader(Stream stream)
         {
-            if (stream == null)
+            if (stream == null!)
                 throw new ArgumentNullException(nameof(stream));
             _accessor = new StreamVewAccessor(stream);
         }
 
         public MemoryStreamReader(MemoryStreamReader reader)
         {
-            if (reader == null)
+            if (reader == null!)
                 throw new ArgumentNullException(nameof(reader));
             _accessor = reader._accessor;
         }
 
         public MemoryStreamReader(IViewAccessor accessor)
         {
-            if (accessor == null)
+            if (accessor == null!)
                 throw new ArgumentNullException(nameof(accessor));
             _accessor = accessor;
         }
@@ -172,7 +172,7 @@ namespace ZeroLevel.Services.Serialization
         public string ReadString()
         {
             var length = BitConverter.ToInt32(ReadBuffer(4), 0);
-            if (length == 0) return null;
+            if (length == 0) return null!;
             var buffer = ReadBuffer(length);
             return Encoding.UTF8.GetString(buffer);
         }
@@ -211,7 +211,7 @@ namespace ZeroLevel.Services.Serialization
         {
             if (CheckOutOfRange(count))
             {
-                buffer = null;
+                buffer = null!;
                 return false;
             }
             try
@@ -231,7 +231,7 @@ namespace ZeroLevel.Services.Serialization
             catch (Exception ex)
             {
                 Log.SystemError(ex, $"[MemoryStreamReader.TryReadBuffer] Fault read {count} bytes");
-                buffer = null;
+                buffer = null!;
                 return false;
             }
             return true;
@@ -244,7 +244,7 @@ namespace ZeroLevel.Services.Serialization
         public DateTime? ReadDateTime()
         {
             var is_null = ReadByte();
-            if (is_null == 0) return null;
+            if (is_null == 0) return null!;
             var buffer = ReadBuffer(8);
             long deserialized = BitConverter.ToInt64(buffer, 0);
             return DateTime.FromBinary(deserialized);
@@ -258,7 +258,7 @@ namespace ZeroLevel.Services.Serialization
                 var addr = ReadBytes();
                 return new IPAddress(addr);
             }
-            return null;
+            return null!;
         }
 
         public IPEndPoint ReadIPEndpoint()
@@ -270,7 +270,7 @@ namespace ZeroLevel.Services.Serialization
                 var port = ReadInt32();
                 return new IPEndPoint(addr, port);
             }
-            return null;
+            return null!;
         }
 
         /// <summary>
@@ -516,7 +516,7 @@ namespace ZeroLevel.Services.Serialization
         public T Read<T>() where T : IBinarySerializable
         {
             byte type = ReadByte();
-            if (type == 0) return default(T);
+            if (type == 0) return default(T)!;
             var item = (T)Activator.CreateInstance<T>();
             item.Deserialize(this);
             return item;
@@ -529,7 +529,7 @@ namespace ZeroLevel.Services.Serialization
                 b = buffer[0];
                 return true;
             }
-            b = default;
+            b = default!;
             return false;
         }
 
@@ -539,7 +539,7 @@ namespace ZeroLevel.Services.Serialization
             {
                 if (type == 0)
                 {
-                    item = default(T);
+                    item = default(T)!;
                     return true;
                 }
                 try
@@ -554,14 +554,14 @@ namespace ZeroLevel.Services.Serialization
                     Log.SystemError(ex, "[MemoryStreamReader.TryRead]");
                 }
             }
-            item = default;
+            item = default!;
             return false;
         }
 
         public T Read<T>(object arg) where T : IBinarySerializable
         {
             byte type = ReadByte();
-            if (type == 0) return default(T);
+            if (type == 0) return default(T)!;
             var item = (T)Activator.CreateInstance(typeof(T), arg);
             item.Deserialize(this);
             return item;
@@ -602,7 +602,7 @@ namespace ZeroLevel.Services.Serialization
         {
             if (CheckOutOfRange(count))
             {
-                buffer = null;
+                buffer = null!;
                 return false;
             }
             try
@@ -622,7 +622,7 @@ namespace ZeroLevel.Services.Serialization
             catch (Exception ex)
             {
                 Log.SystemError(ex, $"[MemoryStreamReader.TryReadBufferAsync] Fault read {count} bytes");
-                buffer = null;
+                buffer = null!;
                 return false;
             }
             return true;
@@ -737,7 +737,7 @@ namespace ZeroLevel.Services.Serialization
         public async Task<string> ReadStringAsync()
         {
             var length = BitConverter.ToInt32(await ReadBufferAsync(4), 0);
-            if (length == 0) return null;
+            if (length == 0) return null!;
             var buffer = await ReadBufferAsync(length);
             return Encoding.UTF8.GetString(buffer);
         }
@@ -758,7 +758,7 @@ namespace ZeroLevel.Services.Serialization
         public async Task<DateTime?> ReadDateTimeAsync()
         {
             var is_null = ReadByte();
-            if (is_null == 0) return null;
+            if (is_null == 0) return null!;
             var buffer = await ReadBufferAsync(8);
             long deserialized = BitConverter.ToInt64(buffer, 0);
             return DateTime.FromBinary(deserialized);
@@ -771,7 +771,7 @@ namespace ZeroLevel.Services.Serialization
                 var addr = await ReadBytesAsync();
                 return new IPAddress(addr);
             }
-            return null;
+            return null!;
         }
 
         public async Task<IPEndPoint> ReadIPEndpointAsync()
@@ -783,7 +783,7 @@ namespace ZeroLevel.Services.Serialization
                 var port = await ReadInt32Async();
                 return new IPEndPoint(addr, port);
             }
-            return null;
+            return null!;
         }
 
         #region Extensions
@@ -1002,7 +1002,7 @@ namespace ZeroLevel.Services.Serialization
         public async Task<T> ReadAsync<T>() where T : IAsyncBinarySerializable
         {
             byte type = await ReadByteAsync();
-            if (type == 0) return default(T);
+            if (type == 0) return default(T)!;
             var item = (T)Activator.CreateInstance<T>();
             await item.DeserializeAsync(this);
             return item;
@@ -1011,7 +1011,7 @@ namespace ZeroLevel.Services.Serialization
         public async Task<T> ReadAsync<T>(object arg) where T : IAsyncBinarySerializable
         {
             byte type = ReadByte();
-            if (type == 0) return default(T);
+            if (type == 0) return default(T)!;
             var item = (T)Activator.CreateInstance(typeof(T), arg);
             await item.DeserializeAsync(this);
             return item;

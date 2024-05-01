@@ -30,7 +30,7 @@ namespace MemoryPools.Collections.Linq
 			_count--;
 			if (_count == 0)
 			{
-				(_condition, _context, _src) = (default, default, default);
+				(_condition, _context, _src) = (default!, default!, default!);
 				Pool<WhereExprWithContextEnumerable<T, TContext>>.Return(this);
 			}
 		}
@@ -71,17 +71,17 @@ namespace MemoryPools.Collections.Linq
 				_src.Reset();
 			}
 
-			object IPoolingEnumerator.Current => Current;
+			object IPoolingEnumerator.Current => Current!;
 
 			public T Current => _src.Current;
     
 			public void Dispose()
 			{
 				_parent?.Dispose();
-				_parent = null;
+				_parent = null!;
 				_src?.Dispose();
-				_src = default;
-				_context = default;
+				_src = default!;
+				_context = default!;
 				Pool<WhereExprWithContextEnumerator>.Return(this);
 			}
 		}

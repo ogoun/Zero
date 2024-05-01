@@ -109,6 +109,7 @@ namespace ZeroLevel.Services.Invokation
                                          BindingFlags.Public |
                                          BindingFlags.NonPublic |
                                          BindingFlags.FlattenHierarchy)?.Select(CreateCompiledExpression);
+            if (result == null) return Enumerable.Empty<string>();
             Configure(result);
             return result.Select(r => r.Item1).ToList();
         }
@@ -121,6 +122,7 @@ namespace ZeroLevel.Services.Invokation
                                          BindingFlags.NonPublic |
                                          BindingFlags.FlattenHierarchy)?.Where(m => m.Name.Equals(methodName))
                 ?.Select(CreateCompiledExpression);
+            if (result == null) return Enumerable.Empty<string>();
             Configure(result);
             return result.Select(r => r.Item1).ToList();
         }
@@ -133,6 +135,7 @@ namespace ZeroLevel.Services.Invokation
                                          BindingFlags.NonPublic |
                                          BindingFlags.FlattenHierarchy)?.Where(m => m.Name.Equals(methodName))
                 ?.Select(method => method.MakeGenericMethod(typeof(T))).Select(CreateCompiledExpression);
+            if (result == null) return Enumerable.Empty<string>();
             Configure(result);
             return result.Select(r => r.Item1).ToList();
         }
@@ -145,6 +148,7 @@ namespace ZeroLevel.Services.Invokation
                                          BindingFlags.NonPublic |
                                          BindingFlags.FlattenHierarchy)?.Where(m => m.Name.Equals(methodName))
                 ?.Select(method => method.MakeGenericMethod(genericType)).Select(CreateCompiledExpression);
+            if (result == null) return Enumerable.Empty<string>();
             Configure(result);
             return result.Select(r => r.Item1).ToList();
         }
@@ -157,12 +161,9 @@ namespace ZeroLevel.Services.Invokation
                                          BindingFlags.NonPublic |
                                          BindingFlags.FlattenHierarchy)?.Where(filter)
                 ?.Select(method => method.MakeGenericMethod(typeof(T))).Select(CreateCompiledExpression);
-            if (result != null)
-            {
-                Configure(result);
-                return result.Select(r => r.Item1).ToList();
-            }
-            return Enumerable.Empty<string>();
+            if (result == null) return Enumerable.Empty<string>();
+            Configure(result);
+            return result.Select(r => r.Item1).ToList();
         }
 
         public IEnumerable<string> ConfigureGeneric(Type instanceType, Type genericType, Func<MethodInfo, bool> filter)
@@ -173,12 +174,9 @@ namespace ZeroLevel.Services.Invokation
                                          BindingFlags.NonPublic |
                                          BindingFlags.FlattenHierarchy)?.Where(filter)
                 ?.Select(method => method.MakeGenericMethod(genericType)).Select(CreateCompiledExpression);
-            if (result != null)
-            {
-                Configure(result);
-                return result.Select(r => r.Item1).ToList();
-            }
-            return Enumerable.Empty<string>();
+            if (result == null) return Enumerable.Empty<string>();
+            Configure(result);
+            return result.Select(r => r.Item1).ToList();
         }
 
         public IEnumerable<string> Configure(Type instanceType, Func<MethodInfo, bool> filter)
@@ -189,12 +187,9 @@ namespace ZeroLevel.Services.Invokation
                                          BindingFlags.NonPublic |
                                          BindingFlags.FlattenHierarchy)?.Where(filter)
                 ?.Select(CreateCompiledExpression);
-            if (result != null)
-            {
-                Configure(result);
-                return result.Select(r => r.Item1).ToList();
-            }
-            return Enumerable.Empty<string>();
+            if (result == null) return Enumerable.Empty<string>();
+            Configure(result);
+            return result.Select(r => r.Item1).ToList();
         }
 
         #endregion Configure by Type
@@ -274,7 +269,7 @@ namespace ZeroLevel.Services.Invokation
         {
             if (_invokeCachee.ContainsKey(identity))
             {
-                return _invokeCachee[identity](null, args);
+                return _invokeCachee[identity](null!, args);
             }
 
             throw new KeyNotFoundException(String.Format("Not found method with identity '{0}'", identity));
@@ -301,7 +296,7 @@ namespace ZeroLevel.Services.Invokation
         {
             if (_invokeCachee.ContainsKey(identity))
             {
-                return _invokeCachee[identity](target, null);
+                return _invokeCachee[identity](target, null!);
             }
 
             throw new KeyNotFoundException($"Not found method with identity '{identity}'");
@@ -345,7 +340,7 @@ namespace ZeroLevel.Services.Invokation
                 return _invokeCachee[identity];
             }
 
-            return null;
+            return null!;
         }
 
         /// <summary>

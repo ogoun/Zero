@@ -26,7 +26,7 @@ namespace ZeroLevel.Services.Network.Proxies
             {
                 return _servers.Current;
             }
-            return null;
+            return null!;
         }
     }
 }

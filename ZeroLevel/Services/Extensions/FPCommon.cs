@@ -82,12 +82,12 @@ namespace ZeroLevel.Services.Extensions
         /// </exception>
         public T Match<T>(Func<TL, T> ofLeft, Func<TR, T> ofRight)
         {
-            if (ofLeft == null)
+            if (ofLeft == null!)
             {
                 throw new ArgumentNullException(nameof(ofLeft));
             }
 
-            if (ofRight == null)
+            if (ofRight == null!)
             {
                 throw new ArgumentNullException(nameof(ofRight));
             }
@@ -104,12 +104,12 @@ namespace ZeroLevel.Services.Extensions
         /// </exception>
         public void Match(Action<TL> ofLeft, Action<TR> ofRight)
         {
-            if (ofLeft == null)
+            if (ofLeft == null!)
             {
                 throw new ArgumentNullException(nameof(ofLeft));
             }
 
-            if (ofRight == null)
+            if (ofRight == null!)
             {
                 throw new ArgumentNullException(nameof(ofRight));
             }
@@ -124,9 +124,9 @@ namespace ZeroLevel.Services.Extensions
             }
         }
 
-        public TL LeftOrDefault() => Match(l => l, r => default(TL));
+        public TL LeftOrDefault() => Match(l => l, r => default(TL))!;
 
-        public TR RightOrDefault() => Match(l => default(TR), r => r);
+        public TR RightOrDefault() => Match(l => default(TR), r => r)!;
 
         public Either<TR, TL> Swap() => Match(Right<TR, TL>, Left<TR, TL>);
 

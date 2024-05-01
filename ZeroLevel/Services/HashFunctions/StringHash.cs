@@ -12,7 +12,7 @@
             {
                 int hash1 = (5381 << 16) + 5381;
                 int hash2 = hash1;
-                if (str != null)
+                if (str != null!)
                 {
                     for (int i = 0; i < str.Length; i += 2)
                     {

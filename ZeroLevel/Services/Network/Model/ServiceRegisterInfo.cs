@@ -11,14 +11,14 @@ namespace ZeroLevel.Network
 
         public bool Equals(ServiceRegisterInfo other)
         {
-            if (other == null) return false;
+            if (other == null!) return false;
             if (this.Port != other.Port) return false;
             return this.ServiceInfo?.Equals(other.ServiceInfo) ?? other != null ? false : true;
         }
 
         public override bool Equals(object obj)
         {
-            return this.Equals(obj as ServiceRegisterInfo);
+            return this.Equals((obj as ServiceRegisterInfo)!);
         }
 
         public override int GetHashCode()

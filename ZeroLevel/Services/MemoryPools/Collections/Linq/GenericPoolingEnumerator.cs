@@ -17,14 +17,14 @@ namespace MemoryPools.Collections.Linq
 
 		public void Reset() => _source.Reset();
 		
-		object IPoolingEnumerator.Current => Current;
+		object IPoolingEnumerator.Current => Current!;
 
 		public T Current => _source.Current;
     
 		public void Dispose()
 		{
 			_source.Dispose();
-			_source = default;
+			_source = default!;
 			Pool<GenericPoolingEnumerator<T>>.Return(this);
 		}
 	}
@@ -43,14 +43,14 @@ namespace MemoryPools.Collections.Linq
 
 		public void Reset() => _source.Reset();
 		
-		object IEnumerator.Current => Current;
+		object IEnumerator.Current => Current!;
 
 		public T Current => _source.Current;
     
 		public void Dispose()
 		{
 			_source.Dispose();
-			_source = default;
+			_source = default!;
 			Pool<GenericEnumerator<T>>.Return(this);
 		}
 	}

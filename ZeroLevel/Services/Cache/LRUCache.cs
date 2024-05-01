@@ -58,7 +58,7 @@ namespace ZeroLevel.Services.Cache
                 }
             }
 
-            value = default(TValue);
+            value = default(TValue)!;
             return false;
         }
 

@@ -12,7 +12,7 @@ namespace ZeroLevel.Services.Trees
 
         public Tree(ITree other)
         {
-            if (other == null)
+            if (other == null!)
                 throw new ArgumentNullException(nameof(other));
             this._rootNodes = other.RootNodes.Select(a => (ITreeNode)a.Clone()).ToList();
         }

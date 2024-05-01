@@ -45,9 +45,9 @@ namespace MemoryPools.Memory
         public T Pop()
         {
             var item = _firstItem;
-            if (_firstItem != null)
+            if (_firstItem != null!)
             {
-                _firstItem = default;
+                _firstItem = default!;
                 return item;
             }
             return _array[--_size].Element;
@@ -57,7 +57,7 @@ namespace MemoryPools.Memory
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Push(T item)
         {
-            if (_firstItem == null)
+            if (_firstItem == null!)
             {
                 _firstItem = item;
                 return;

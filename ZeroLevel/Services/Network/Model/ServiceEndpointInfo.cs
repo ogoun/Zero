@@ -14,14 +14,14 @@ namespace ZeroLevel.Network
 
         public bool Equals(ServiceEndpointInfo other)
         {
-            if (other == null) return false;
+            if (other == null!) return false;
             if (string.Compare(this.Endpoint, other.Endpoint, true) != 0) return false;
             return this.ServiceInfo?.Equals(other.ServiceInfo) ?? other != null ? false : true;
         }
 
         public override bool Equals(object obj)
         {
-            return this.Equals(obj as ServiceEndpointInfo);
+            return this.Equals((obj as ServiceEndpointInfo)!);
         }
 
         public override int GetHashCode()

@@ -92,7 +92,7 @@ namespace ZeroLevel.Network.FileTransfer
                 lock (_locker)
                 {
                     SafeDataWriter writer;
-                    if (_incoming.TryGetValue(info.UploadFileTaskId, out writer) && writer != null)
+                    if (_incoming.TryGetValue(info.UploadFileTaskId, out writer) && writer != null!)
                     {
                         writer.CompleteReceiving();
                     }

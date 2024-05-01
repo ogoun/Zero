@@ -52,7 +52,7 @@ namespace DOM.Services
                 case ContentElementType.Content:
                     {
                         var content = (element as FlowContent);
-                        if (content != null)
+                        if (content != null!)
                         {
                             for (int i = 0; i < content.Sections.Count; i++)
                             {
@@ -64,7 +64,7 @@ namespace DOM.Services
 
                 case ContentElementType.Section:
                     var section = (element as Section);
-                    if (section != null)
+                    if (section != null!)
                     {
                         reader.EnterSection(section);
                         for (int i = 0; i < section.Parts.Count; i++)
@@ -77,7 +77,7 @@ namespace DOM.Services
 
                 case ContentElementType.Paragraph:
                     var paragraph = (element as Paragraph);
-                    if (paragraph != null)
+                    if (paragraph != null!)
                     {
                         reader.EnterParagraph(paragraph);
                         for (int i = 0; i < paragraph.Parts.Count; i++)
@@ -90,7 +90,7 @@ namespace DOM.Services
 
                 case ContentElementType.List:
                     var list = (element as List);
-                    if (list != null)
+                    if (list != null!)
                     {
                         reader.EnterList(list);
                         for (int i = 0; i < list.Items.Count; i++)
@@ -105,7 +105,7 @@ namespace DOM.Services
 
                 case ContentElementType.Gallery:
                     var gallery = (element as Gallery);
-                    if (gallery != null)
+                    if (gallery != null!)
                     {
                         reader.EnterGallery(gallery);
                         for (int i = 0; i < gallery.Images.Count; i++)
@@ -118,7 +118,7 @@ namespace DOM.Services
 
                 case ContentElementType.Audioplayer:
                     var audioplayer = (element as Audioplayer);
-                    if (audioplayer != null)
+                    if (audioplayer != null!)
                     {
                         reader.EnterAudioplayer(audioplayer);
                         for (int i = 0; i < audioplayer.Tracks.Count; i++)
@@ -131,7 +131,7 @@ namespace DOM.Services
 
                 case ContentElementType.Videoplayer:
                     var videoplayer = (element as Videoplayer);
-                    if (videoplayer != null)
+                    if (videoplayer != null!)
                     {
                         reader.EnterVideoplayer(videoplayer);
                         for (int i = 0; i < videoplayer.Playlist.Count; i++)
@@ -144,7 +144,7 @@ namespace DOM.Services
 
                 case ContentElementType.Table:
                     var table = (element as Table);
-                    if (table != null)
+                    if (table != null!)
                     {
                         reader.EnterTable(table);
                         reader.EnterColumns(table);

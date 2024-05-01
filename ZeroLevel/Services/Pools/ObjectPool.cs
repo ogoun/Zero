@@ -26,7 +26,7 @@
             if (size <= 0)
                 throw new ArgumentOutOfRangeException("size", size,
                     "Argument 'size' must be greater than zero.");
-            if (factory == null)
+            if (factory == null!)
                 throw new ArgumentNullException("factory");
 
             this.size = size;
@@ -242,7 +242,7 @@
             public void Store(T item)
             {
                 Slot slot = slots.Find(s => object.Equals(s.Item, item));
-                if (slot == null)
+                if (slot == null!)
                 {
                     slot = new Slot(item);
                     slots.Add(slot);

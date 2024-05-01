@@ -39,7 +39,7 @@
 
         public static IQuery ALL()
         {
-            return new QueryOp(string.Empty, null, QueryOperation.ALL);
+            return new QueryOp(string.Empty, null!, QueryOperation.ALL);
         }
     }
 }

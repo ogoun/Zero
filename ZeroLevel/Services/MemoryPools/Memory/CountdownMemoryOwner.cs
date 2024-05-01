@@ -8,7 +8,7 @@ namespace MemoryPools.Memory
 {
     /// <summary>
     ///     Encapsulates manual memory management mechanism. Holds
-    ///     IMemoryOwner instance goes to GC (link = null) only when
+    ///     IMemoryOwner instance goes to GC (link = null!) only when
     ///     all owning entities called Dispose() method. This means,
     ///     that only this mechanism should be used for covering
     ///     managed instances.
@@ -48,7 +48,7 @@ namespace MemoryPools.Memory
 			_owners = 1;
 			_offset = 0;
 			_length = length;
-			_parent = default;
+			_parent = default!;
 			_arr = array;
 			Memory = _arr.AsMemory(0, _length);
 			return this;
@@ -69,7 +69,7 @@ namespace MemoryPools.Memory
 			if (_parent != default)
 			{
 				_parent.Dispose();
-				_parent = null;
+				_parent = null!;
 			}
 			else
 			{

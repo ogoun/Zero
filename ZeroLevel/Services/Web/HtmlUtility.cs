@@ -12,7 +12,7 @@ namespace ZeroLevel.Services.Web
         {
             public readonly char Value;
             public readonly SymToken Preview;
-            private SymToken _lazyNext = null;
+            private SymToken _lazyNext = null!;
             private readonly int _index;
             private readonly string _line;
 
@@ -22,11 +22,11 @@ namespace ZeroLevel.Services.Web
                 {
                     if (_line.Length == 0 || _index == _line.Length - 1)
                     {
-                        return null;
+                        return null!;
                     }
                     else
                     {
-                        if (_lazyNext == null)
+                        if (_lazyNext == null!)
                         {
                             _lazyNext = new SymToken(_line, _index + 1, this);
                         }
@@ -70,11 +70,11 @@ namespace ZeroLevel.Services.Web
             {
                 if (false == string.IsNullOrEmpty(line))
                 {
-                    Token = new SymToken(line, 0, null);
+                    Token = new SymToken(line, 0, null!);
                 }
                 else
                 {
-                    Token = null;
+                    Token = null!;
                 }
             }
 
@@ -82,7 +82,7 @@ namespace ZeroLevel.Services.Web
             {
                 get
                 {
-                    if (Token.Preview != null)
+                    if (Token.Preview != null!)
                     {
                         return Token.Preview.Value;
                     }
@@ -94,7 +94,7 @@ namespace ZeroLevel.Services.Web
             {
                 get
                 {
-                    if (Token != null)
+                    if (Token != null!)
                     {
                         return Token.Value;
                     }
@@ -106,7 +106,7 @@ namespace ZeroLevel.Services.Web
             {
                 get
                 {
-                    if (Token.Next != null)
+                    if (Token.Next != null!)
                     {
                         return Token.Next.Value;
                     }
@@ -130,7 +130,7 @@ namespace ZeroLevel.Services.Web
 
             public bool MoveNext()
             {
-                if (Token != null)
+                if (Token != null!)
                 {
                     Token = Token.Next;
                     return true;
@@ -142,7 +142,7 @@ namespace ZeroLevel.Services.Web
             {
                 get
                 {
-                    return Token == null;
+                    return Token == null!;
                 }
             }
         }

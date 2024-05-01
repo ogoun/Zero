@@ -27,8 +27,8 @@
             _count--;
             if (_count == 0)
             {
-                _src = default;
-                _element = default;
+                _src = default!;
+                _element = default!;
                 Pool<PrependExprEnumerable<T>>.Return(this);
             }
         }
@@ -68,16 +68,16 @@
                 _src.Reset();
             }
 
-            object IPoolingEnumerator.Current => Current;
+            object IPoolingEnumerator.Current => Current!;
 
             public T Current => _shouldReturnElement ? _element : (T) _src.Current;
 
             public void Dispose()
             {
                 _parent?.Dispose();
-                _parent = null;
+                _parent = null!;
                 _src?.Dispose();
-                _src = default;
+                _src = default!;
                 _first = _shouldReturnElement = false;
                 Pool<PrependExprEnumerator>.Return(this);
             }

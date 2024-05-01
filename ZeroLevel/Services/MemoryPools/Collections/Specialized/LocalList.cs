@@ -25,7 +25,7 @@ namespace MemoryPools.Collections.Specialized
 		public IEnumerator<T> GetEnumerator()
 		{
 			// empty
-			if (_other == null) yield break;
+			if (_other == null!) yield break;
 			if (_other.Count <= LocalStoreCapacity)
 			{
 				yield return _items.Item1;
@@ -42,7 +42,7 @@ namespace MemoryPools.Collections.Specialized
 		public void Add(T item)
 		{
 			// empty
-			if (_other == null)
+			if (_other == null!)
 			{
 				_items.Item1 = item;
 				_other = LengthIs1;
@@ -60,10 +60,10 @@ namespace MemoryPools.Collections.Specialized
 				{
 					_other = new List<T>(DefaultListCapacity);
 					_other.Add(_items.Item1);
-					_items.Item1 = default;
+					_items.Item1 = default!;
 
 					_other.Add(_items.Item2);
-					_items.Item2 = default;
+					_items.Item2 = default!;
 				}
 
 				_other.Add(item);
@@ -72,9 +72,9 @@ namespace MemoryPools.Collections.Specialized
 
 		public void Clear()
 		{
-			_other = null;
-			_items.Item1 = default;
-			_items.Item2 = default;
+			_other = null!;
+			_items.Item1 = default!;
+			_items.Item2 = default!;
 		}
 
 		public bool Contains(T item)
@@ -84,7 +84,7 @@ namespace MemoryPools.Collections.Specialized
 
 		public void CopyTo(T[] array, int arrayIndex)
 		{
-			if (_other == null) return;
+			if (_other == null!) return;
 
 			if (_other.Count > LocalStoreCapacity)
 			{
@@ -102,7 +102,7 @@ namespace MemoryPools.Collections.Specialized
 		/// </summary>
 		public bool Remove(T item)
 		{
-			if (_other == null) return false;
+			if (_other == null!) return false;
 
 			if (_other.Count > LocalStoreCapacity)
 			{
@@ -119,8 +119,8 @@ namespace MemoryPools.Collections.Specialized
 
 			if (ReferenceEquals(_other, LengthIs1) && ItemComparer.Equals(_items.Item1, item))
 			{
-				_items.Item1 = default;
-				_other = null;
+				_items.Item1 = default!;
+				_other = null!;
 				return true;
 			}
 
@@ -128,7 +128,7 @@ namespace MemoryPools.Collections.Specialized
 			{
 				if (ItemComparer.Equals(_items.Item2, item))
 				{
-					_items.Item2 = default;
+					_items.Item2 = default!;
 					_other = LengthIs1;
 					return true;
 				}
@@ -150,7 +150,7 @@ namespace MemoryPools.Collections.Specialized
 
 		public int IndexOf(T item)
 		{
-			if (_other == null)
+			if (_other == null!)
 				return -1;
 
 			if (_other.Count > LocalStoreCapacity) return _other.IndexOf(item);
@@ -171,7 +171,7 @@ namespace MemoryPools.Collections.Specialized
 			}
 
 			// Asked non-first when empty
-			if (_other == null) throw new IndexOutOfRangeException();
+			if (_other == null!) throw new IndexOutOfRangeException();
 
 			// If list already created
 			if (_other.Count > LocalStoreCapacity) _other.Insert(index, item);
@@ -210,11 +210,11 @@ namespace MemoryPools.Collections.Specialized
 				if (index == 0)
 				{
 					_items.Item1 = _items.Item2;
-					_other = ReferenceEquals(_other, LengthIs1) ? null : LengthIs1;
+					_other = ReferenceEquals(_other, LengthIs1) ? null! : LengthIs1;
 				}
 				else
 				{
-					_items.Item2 = default;
+					_items.Item2 = default!;
 					_other = LengthIs1;
 				}
 			}

@@ -158,7 +158,7 @@ namespace ZeroLevel.Services.Config
 
         public bool Equals(IConfigurationSet other)
         {
-            if (other == null) return false;
+            if (other == null!) return false;
             return this.SectionNames.NoOrderingEquals(other.SectionNames) &&
                 this.Sections.NoOrderingEquals(other.Sections);
         }
@@ -274,14 +274,17 @@ namespace ZeroLevel.Services.Config
         {
             var mapper = TypeMapper.Create<T>(true);
             var instance = Default.Bind<T>();
-            mapper.TraversalMembers(member =>
+            if (instance != null)
             {
-                if (ContainsSection(member.Name))
+                mapper.TraversalMembers(member =>
                 {
-                    member.Setter(instance, GetSection(member.Name).Bind(member.ClrType));
-                }
-            });
-            return instance;
+                    if (ContainsSection(member.Name))
+                    {
+                        member.Setter(instance, GetSection(member.Name).Bind(member.ClrType));
+                    }
+                });
+            }
+            return instance!;
         }
     }
 }

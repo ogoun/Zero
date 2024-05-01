@@ -17,55 +17,55 @@ namespace Iveonik.Stemmers
 
         private readonly static Among[] a_0 =
         {
-            new Among ( "hed", -1, 1, null ),
-            new Among ( "ethed", 0, 1, null ),
-            new Among ( "ered", -1, 1, null ),
-            new Among ( "e", -1, 1, null ),
-            new Among ( "erede", 3, 1, null ),
-            new Among ( "ende", 3, 1, null ),
-            new Among ( "erende", 5, 1, null ),
-            new Among ( "ene", 3, 1, null ),
-            new Among ( "erne", 3, 1, null ),
-            new Among ( "ere", 3, 1, null ),
-            new Among ( "en", -1, 1, null ),
-            new Among ( "heden", 10, 1, null ),
-            new Among ( "eren", 10, 1, null ),
-            new Among ( "er", -1, 1, null ),
-            new Among ( "heder", 13, 1, null ),
-            new Among ( "erer", 13, 1, null ),
-            new Among ( "s", -1, 2, null ),
-            new Among ( "heds", 16, 1, null ),
-            new Among ( "es", 16, 1, null ),
-            new Among ( "endes", 18, 1, null ),
-            new Among ( "erendes", 19, 1, null ),
-            new Among ( "enes", 18, 1, null ),
-            new Among ( "ernes", 18, 1, null ),
-            new Among ( "eres", 18, 1, null ),
-            new Among ( "ens", 16, 1, null ),
-            new Among ( "hedens", 24, 1, null ),
-            new Among ( "erens", 24, 1, null ),
-            new Among ( "ers", 16, 1, null ),
-            new Among ( "ets", 16, 1, null ),
-            new Among ( "erets", 28, 1, null ),
-            new Among ( "et", -1, 1, null ),
-            new Among ( "eret", 30, 1, null )
+            new Among ( "hed", -1, 1, null! ),
+            new Among ( "ethed", 0, 1, null! ),
+            new Among ( "ered", -1, 1, null! ),
+            new Among ( "e", -1, 1, null! ),
+            new Among ( "erede", 3, 1, null! ),
+            new Among ( "ende", 3, 1, null! ),
+            new Among ( "erende", 5, 1, null! ),
+            new Among ( "ene", 3, 1, null! ),
+            new Among ( "erne", 3, 1, null! ),
+            new Among ( "ere", 3, 1, null! ),
+            new Among ( "en", -1, 1, null! ),
+            new Among ( "heden", 10, 1, null! ),
+            new Among ( "eren", 10, 1, null! ),
+            new Among ( "er", -1, 1, null! ),
+            new Among ( "heder", 13, 1, null! ),
+            new Among ( "erer", 13, 1, null! ),
+            new Among ( "s", -1, 2, null! ),
+            new Among ( "heds", 16, 1, null! ),
+            new Among ( "es", 16, 1, null! ),
+            new Among ( "endes", 18, 1, null! ),
+            new Among ( "erendes", 19, 1, null! ),
+            new Among ( "enes", 18, 1, null! ),
+            new Among ( "ernes", 18, 1, null! ),
+            new Among ( "eres", 18, 1, null! ),
+            new Among ( "ens", 16, 1, null! ),
+            new Among ( "hedens", 24, 1, null! ),
+            new Among ( "erens", 24, 1, null! ),
+            new Among ( "ers", 16, 1, null! ),
+            new Among ( "ets", 16, 1, null! ),
+            new Among ( "erets", 28, 1, null! ),
+            new Among ( "et", -1, 1, null! ),
+            new Among ( "eret", 30, 1, null! )
         };
 
         private readonly static Among[] a_1 =
         {
-            new Among ( "gd", -1, -1, null ),
-            new Among ( "dt", -1, -1, null ),
-            new Among ( "gt", -1, -1, null ),
-            new Among ( "kt", -1, -1, null )
+            new Among ( "gd", -1, -1, null! ),
+            new Among ( "dt", -1, -1, null! ),
+            new Among ( "gt", -1, -1, null! ),
+            new Among ( "kt", -1, -1, null! )
         };
 
         private readonly static Among[] a_2 =
         {
-            new Among ( "ig", -1, 1, null ),
-            new Among ( "lig", 0, 1, null ),
-            new Among ( "elig", 1, 1, null ),
-            new Among ( "els", -1, 1, null ),
-            new Among ( "l\u00F8st", -1, 2, null )
+            new Among ( "ig", -1, 1, null! ),
+            new Among ( "lig", 0, 1, null! ),
+            new Among ( "elig", 1, 1, null! ),
+            new Among ( "els", -1, 1, null! ),
+            new Among ( "l\u00F8st", -1, 2, null! )
         };
 
         private static readonly char[] g_v = {(char)17, (char)65, (char)16, (char)1, (char)0, (char)0, (char)0,

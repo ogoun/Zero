@@ -25,8 +25,8 @@
             _count--;
             if (_count == 0)
             {
-                _src = default;
-                _second = default;
+                _src = default!;
+                _second = default!;
                 Pool<ConcatExprEnumerable<T>>.Return(this);
             }
         }
@@ -69,18 +69,18 @@
                 _second.Reset();
             }
 
-            object IPoolingEnumerator.Current => Current;
+            object IPoolingEnumerator.Current => Current!;
 
             public T Current => _first ? _src.Current : _second.Current;
 
             public void Dispose()
             {
                 _parent?.Dispose();
-                _parent = default;
+                _parent = default!;
                 _src?.Dispose();
-                _src = default;
+                _src = default!;
                 _second?.Dispose();
-                _second = default;
+                _second = default!;
                 Pool<ConcatExprEnumerator>.Return(this);
             }
         }

@@ -37,6 +37,11 @@ namespace ZeroLevel.UnitTests
                 writer.WriteString(this.Login);
                 writer.WriteString(this.Name);
             }
+
+            public override int GetHashCode()
+            {
+                return (Login?.GetHashCode() ?? 0) ^ (Name?.GetHashCode() ?? 0);
+            }
         }
 
         [Fact]

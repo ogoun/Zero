@@ -21,7 +21,7 @@ namespace MemoryPools
         private readonly JetStack<T> _freeObjectsQueue = new JetStack<T>();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public T Get() => _freeObjectsQueue.Count > 0 ? _freeObjectsQueue.Pop() : default(T);
+        public T Get() => (_freeObjectsQueue.Count > 0 ? _freeObjectsQueue.Pop() : default(T))!;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Return(T instance) => _freeObjectsQueue.Push(instance);

@@ -7,7 +7,7 @@ namespace ZeroLevel.Services.Shedulling
            : IExpirationSheduller
     {
         private Timer _timer;
-        private ExpiredObject _head = null;
+        private ExpiredObject _head = null!;
         private readonly object _rw_lock = new object();
         private volatile bool _stopped = false;
 
@@ -23,7 +23,7 @@ namespace ZeroLevel.Services.Shedulling
         private void TimerCallbackHandler(object state)
         {
             // POP
-            ExpiredObject result = null;
+            ExpiredObject result = null!;
             lock (_rw_lock)
             {
                 if (null != _head)
@@ -39,7 +39,7 @@ namespace ZeroLevel.Services.Shedulling
                     ResetTimer();
                 }
             }
-            if (result != null)
+            if (result != null!)
             {
                 try
                 {
@@ -54,7 +54,7 @@ namespace ZeroLevel.Services.Shedulling
 
         internal long Push(ExpiredObject insert)
         {
-            if (insert == null)
+            if (insert == null!)
                 throw new ArgumentNullException(nameof(insert));
             lock (_rw_lock)
             {
@@ -74,7 +74,7 @@ namespace ZeroLevel.Services.Shedulling
                         cursor = _head;
                         reset = true;
                     }
-                    ExpiredObject prev = null;
+                    ExpiredObject prev = null!;
                     do
                     {
                         if ((cursor.ExpirationDate - insert.ExpirationDate).Ticks > 0)
@@ -94,11 +94,11 @@ namespace ZeroLevel.Services.Shedulling
                         }
                         prev = cursor;
                         cursor = cursor.Next;
-                        if (cursor == null)
+                        if (cursor == null!)
                         {
                             prev.Next = insert;
                         }
-                    } while (cursor != null);
+                    } while (cursor != null!);
                     if (reset)
                     {
                         ResetTimer();
@@ -112,11 +112,11 @@ namespace ZeroLevel.Services.Shedulling
         {
             lock (_rw_lock)
             {
-                if (_head != null)
+                if (_head != null!)
                 {
                     ExpiredObject previous, current;
                     FindTaskByKeyWithPreviousTask(key, out previous, out current);
-                    if (current != null)
+                    if (current != null!)
                     {
                         if (_head.Key == current.Key)
                         {
@@ -174,7 +174,7 @@ namespace ZeroLevel.Services.Shedulling
             lock (_rw_lock)
             {
                 DisableTimer();
-                _head = null;
+                _head = null!;
             }
         }
 
@@ -186,13 +186,13 @@ namespace ZeroLevel.Services.Shedulling
         {
             if (_head.Key == key)
             {
-                previous = null;
+                previous = null!;
                 current = _head;
                 return;
             }
             var cursor = _head.Next;
             var prev = _head;
-            while (cursor != null)
+            while (cursor != null!)
             {
                 if (cursor.Key == key)
                 {
@@ -203,8 +203,8 @@ namespace ZeroLevel.Services.Shedulling
                 prev = cursor;
                 cursor = cursor.Next;
             }
-            previous = null;
-            current = null;
+            previous = null!;
+            current = null!;
             return;
         }
 
@@ -213,7 +213,7 @@ namespace ZeroLevel.Services.Shedulling
 
         private void ResetTimer()
         {
-            if (_timer != null)
+            if (_timer != null!)
             {
                 if (null != _head && _stopped == false)
                 {
@@ -228,7 +228,7 @@ namespace ZeroLevel.Services.Shedulling
                                 lock (_rw_lock)
                                 {
                                     ResetTimer();
-                                    _head = null;
+                                    _head = null!;
                                 }
                             },
                             Next = _head
@@ -266,13 +266,13 @@ namespace ZeroLevel.Services.Shedulling
         {
             if (disposing)
             {
-                if (_timer != null)
+                if (_timer != null!)
                 {
                     Clean();
                     if (null != _timer)
                     {
                         _timer.Dispose();
-                        _timer = null;
+                        _timer = null!;
                     }
                 }
             }

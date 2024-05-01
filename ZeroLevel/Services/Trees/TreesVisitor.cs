@@ -15,9 +15,9 @@ namespace ZeroLevel.Services.Trees
         /// <returns>Array of tree branches</returns>
         public static List<T[]> ExtractBranches<T>(T root, Func<T, IEnumerable<T>> childrenExtractor)
         {
-            if (root == null)
+            if (root == null!)
                 throw new ArgumentNullException(nameof(root));
-            if (childrenExtractor == null)
+            if (childrenExtractor == null!)
                 throw new ArgumentNullException(nameof(childrenExtractor));
             var result = new List<T[]>();
             TraversTreeBrunches(root, childrenExtractor, brunch =>
@@ -40,11 +40,11 @@ namespace ZeroLevel.Services.Trees
             Func<T, IEnumerable<T>> childrenExtractor,
             Func<T, TCode> codeExtractor)
         {
-            if (root == null)
+            if (root == null!)
                 throw new ArgumentNullException(nameof(root));
-            if (childrenExtractor == null)
+            if (childrenExtractor == null!)
                 throw new ArgumentNullException(nameof(childrenExtractor));
-            if (codeExtractor == null)
+            if (codeExtractor == null!)
                 throw new ArgumentNullException(nameof(codeExtractor));
             var result = new List<TCode[]>();
             TraversTreeBrunches(root, childrenExtractor, brunch =>
@@ -61,11 +61,11 @@ namespace ZeroLevel.Services.Trees
             Func<T, IEnumerable<T>> childrenExtractor,
             Action<IEnumerable<T>> handler)
         {
-            if (root == null)
+            if (root == null!)
                 throw new ArgumentNullException(nameof(root));
-            if (childrenExtractor == null)
+            if (childrenExtractor == null!)
                 throw new ArgumentNullException(nameof(childrenExtractor));
-            if (handler == null)
+            if (handler == null!)
                 throw new ArgumentNullException(nameof(handler));
             var brunch = new List<T>();
             brunch.Add(root);
@@ -77,7 +77,7 @@ namespace ZeroLevel.Services.Trees
 
         private static void TraversNode<T>(T node, List<T> brunch, Func<T, IEnumerable<T>> childrenExtractor, Action<IEnumerable<T>> handler)
         {
-            if (node == null)
+            if (node == null!)
             {
                 handler(brunch);
                 return;

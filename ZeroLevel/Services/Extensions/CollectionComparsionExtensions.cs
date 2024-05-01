@@ -27,7 +27,7 @@ namespace ZeroLevel
 
             public int GetHashCode(T obj)
             {
-                return obj.GetHashCode();
+                return obj?.GetHashCode() ?? 0;
             }
         }
 
@@ -36,8 +36,8 @@ namespace ZeroLevel
         /// </summary>
         public static bool StringEnumerableEquals(this IEnumerable<string> A, IEnumerable<string> B)
         {
-            if (A == null && B == null) return true;
-            if (A == null || B == null) return false;
+            if (A == null && B == null!) return true;
+            if (A == null || B == null!) return false;
             return A.Count() == B.Count() && A.Intersect(B).Count() == B.Count();
         }
 
@@ -46,15 +46,15 @@ namespace ZeroLevel
         /// </summary>
         public static bool NoOrderingEquals<T>(this IEnumerable<T> A, IEnumerable<T> B)
         {
-            if (A == null && B == null) return true;
-            if (A == null || B == null) return false;
+            if (A == null && B == null!) return true;
+            if (A == null || B == null!) return false;
             return A.Count() == B.Count() && A.Intersect(B, new SimpleComparer<T>()).Count() == B.Count();
         }
 
         public static bool NoOrderingEquals<T>(this IEnumerable<T> A, IEnumerable<T> B, Func<T, T, bool> comparer)
         {
-            if (A == null && B == null) return true;
-            if (A == null || B == null) return false;
+            if (A == null && B == null!) return true;
+            if (A == null || B == null!) return false;
             return A.Count() == B.Count() && A.Intersect(B, new SimpleComparer<T>(comparer)).Count() == B.Count();
         }
 
@@ -63,15 +63,15 @@ namespace ZeroLevel
         /// </summary>
         public static bool OrderingEquals<T>(this IEnumerable<T> A, IEnumerable<T> B)
         {
-            if (A == null && B == null) return true;
-            if (A == null || B == null) return false;
+            if (A == null && B == null!) return true;
+            if (A == null || B == null!) return false;
             if (A.Count() != B.Count()) return false;
             var enumA = A.GetEnumerator();
             var enumB = B.GetEnumerator();
             while (enumA.MoveNext() && enumB.MoveNext())
             {
-                if (enumA.Current == null && enumB.Current == null) continue;
-                if (enumA.Current == null || enumB.Current == null) return false;
+                if (enumA.Current == null && enumB.Current == null!) continue;
+                if (enumA.Current == null || enumB.Current == null!) return false;
                 if (enumA.Current.Equals(enumB.Current) == false) return false;
             }
             return true;
@@ -79,15 +79,15 @@ namespace ZeroLevel
 
         public static bool OrderingEquals<T>(this IEnumerable<T> A, IEnumerable<T> B, Func<T, T, bool> comparer)
         {
-            if (A == null && B == null) return true;
-            if (A == null || B == null) return false;
+            if (A == null && B == null!) return true;
+            if (A == null || B == null!) return false;
             if (A.Count() != B.Count()) return false;
             var enumA = A.GetEnumerator();
             var enumB = B.GetEnumerator();
             while (enumA.MoveNext() && enumB.MoveNext())
             {
-                if (enumA.Current == null && enumB.Current == null) continue;
-                if (enumA.Current == null || enumB.Current == null) return false;
+                if (enumA.Current == null && enumB.Current == null!) continue;
+                if (enumA.Current == null || enumB.Current == null!) return false;
                 if (comparer(enumA.Current, enumB.Current) == false) return false;
             }
             return true;
@@ -99,10 +99,10 @@ namespace ZeroLevel
         public static int GetEnumHashCode<T>(this IEnumerable<T> A)
         {
             int hc = 0;
-            if (A != null)
+            if (A != null!)
             {
                 foreach (var p in A)
-                    hc ^= p.GetHashCode();
+                    hc ^= p?.GetHashCode() ?? 0;
             }
             return hc;
         }

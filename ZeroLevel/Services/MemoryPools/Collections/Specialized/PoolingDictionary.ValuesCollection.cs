@@ -81,11 +81,11 @@ namespace MemoryPools.Collections.Specialized
 
 				public TValue Current => _src._entries[_pos].value;
 
-				object IEnumerator.Current => Current;
+				object IEnumerator.Current => Current!;
 
 				public void Dispose()
 				{
-					_src = default;
+					_src = default!;
 					Pool<Enumerator>.Return(this);
 				}
 			}

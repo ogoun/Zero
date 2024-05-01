@@ -7,23 +7,23 @@ namespace ZeroLevel.Extensions
         public const string HTTP_SCHEMA = "http";
         public const string HTTPS_SCHEMA = "https";
 
-        public static string ToHttpUrl(this EndPoint endPoint, string schema, string rawUrl = null)
+        public static string ToHttpUrl(this EndPoint endPoint, string schema, string rawUrl = null!)
         {
             if (endPoint is IPEndPoint)
             {
                 var ipEndPoint = endPoint as IPEndPoint;
-                return CreateHttpUrl(schema, ipEndPoint.Address.ToString(), ipEndPoint.Port,
+                return CreateHttpUrl(schema, ipEndPoint?.Address?.ToString() ?? string.Empty, ipEndPoint?.Port ?? 0,
                     rawUrl != null ? rawUrl.TrimStart('/') : string.Empty);
             }
 
             if (endPoint is DnsEndPoint)
             {
                 var dnsEndpoint = endPoint as DnsEndPoint;
-                return CreateHttpUrl(schema, dnsEndpoint.Host, dnsEndpoint.Port,
+                return CreateHttpUrl(schema, dnsEndpoint?.Host ?? string.Empty, dnsEndpoint?.Port ?? 0,
                     rawUrl != null ? rawUrl.TrimStart('/') : string.Empty);
             }
 
-            return null;
+            return null!;
         }
 
         public static string ToHttpUrl(this EndPoint endPoint, string schema, string formatString,
@@ -32,18 +32,18 @@ namespace ZeroLevel.Extensions
             if (endPoint is IPEndPoint)
             {
                 var ipEndPoint = endPoint as IPEndPoint;
-                return CreateHttpUrl(schema, ipEndPoint.Address.ToString(), ipEndPoint.Port,
+                return CreateHttpUrl(schema, ipEndPoint?.Address?.ToString() ?? string.Empty, ipEndPoint?.Port ?? 0,
                     string.Format(formatString.TrimStart('/'), args));
             }
 
             if (endPoint is DnsEndPoint)
             {
                 var dnsEndpoint = endPoint as DnsEndPoint;
-                return CreateHttpUrl(schema, dnsEndpoint.Host, dnsEndpoint.Port,
+                return CreateHttpUrl(schema, dnsEndpoint?.Host ?? string.Empty, dnsEndpoint?.Port ?? 0,
                     string.Format(formatString.TrimStart('/'), args));
             }
 
-            return null;
+            return null!;
         }
 
         private static string CreateHttpUrl(string schema, string host, int port, string path)

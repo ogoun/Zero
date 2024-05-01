@@ -11,7 +11,7 @@ namespace MemoryPools.Collections.Linq
         private IEqualityComparer<TItem> _comparer;
         private Func<T, TItem> _selector;
 
-        public DistinctExprEnumerable<T, TItem> Init(IPoolingEnumerator<T> parent, Func<T, TItem> selector, IEqualityComparer<TItem> comparer  = default)
+        public DistinctExprEnumerable<T, TItem> Init(IPoolingEnumerator<T> parent, Func<T, TItem> selector, IEqualityComparer<TItem> comparer  = default!)
         {
             _parent = parent;
             _selector = selector;
@@ -33,8 +33,8 @@ namespace MemoryPools.Collections.Linq
             if (_count == 0)
             {
                 _parent?.Dispose();
-                _parent = default;
-                _selector = default;
+                _parent = default!;
+                _selector = default!;
                 Pool<DistinctExprEnumerable<T, TItem>>.Return(this);
             }
         }

@@ -12,8 +12,8 @@ namespace ZeroLevel.Services
             public Step _next;
         }
 
-        Step _head = null;
-        Step _tail = null;
+        Step _head = null!;
+        Step _tail = null!;
 
         public Fiber()
         {
@@ -21,13 +21,13 @@ namespace ZeroLevel.Services
 
         public Fiber Add(Func<IEverythingStorage, IEverythingStorage> action)
         {
-            if (_head == null)
+            if (_head == null!)
             {
-                _head = _tail = new Step { _handler = action, _next = null };
+                _head = _tail = new Step { _handler = action, _next = null! };
             }
             else
             {
-                var s = new Step { _handler = action, _next = null };
+                var s = new Step { _handler = action, _next = null! };
                 _tail._next = s;
                 _tail = s;
             }
@@ -36,16 +36,16 @@ namespace ZeroLevel.Services
 
         public IEnumerable<Func<IEverythingStorage, IEverythingStorage>> Iterate()
         {
-            if (_head == null) yield break;
+            if (_head == null!) yield break;
             var current = _head;
-            while (current != null)
+            while (current != null!)
             {
                 yield return current._handler;
                 current = current._next;
             }
         }
 
-        public IEverythingStorage Run(IEverythingStorage buffer = null)
+        public IEverythingStorage Run(IEverythingStorage buffer = null!)
         {
             var storage = buffer;
             foreach (var a in Iterate())

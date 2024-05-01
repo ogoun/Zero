@@ -45,7 +45,7 @@ namespace ZeroLevel.Services.PartitionStorage.Partition
             }
             _phisicalFileAccessor = fileAccessorCachee;
             Serializer = serializer;
-            _indexBuilder = _options.Index.Enabled ? new IndexBuilder<TKey, TValue>(_options.Index.StepType, _options.Index.StepValue, _catalog, fileAccessorCachee, Serializer) : null;
+            _indexBuilder = (_options.Index.Enabled ? new IndexBuilder<TKey, TValue>(_options.Index.StepType, _options.Index.StepValue, _catalog, fileAccessorCachee, Serializer) : null)!;
         }
 
         #region IStorePartitionBase
@@ -207,7 +207,7 @@ namespace ZeroLevel.Services.PartitionStorage.Partition
             {
                 Log.SystemError(ex, "[StorePartitionBuilder.TryGetWriteStream]");
             }
-            writer = null;
+            writer = null!;
             return false;
         }
         */
@@ -231,7 +231,7 @@ namespace ZeroLevel.Services.PartitionStorage.Partition
             {
                 Log.SystemError(ex, "[StorePartitionBuilder.TryGetReadStream]");
             }
-            reader = null;
+            reader = null!;
             return false;
         }
         protected IViewAccessor GetViewAccessor(TKey key, long offset)
@@ -256,7 +256,7 @@ namespace ZeroLevel.Services.PartitionStorage.Partition
             {
                 Log.SystemError(ex, $"[StorePartitionAccessor.GetViewAccessor] '{filePath}'");
             }
-            return null;
+            return null!;
         }
         protected IViewAccessor GetViewAccessor(string filePath, long offset, int length)
         {
@@ -268,7 +268,7 @@ namespace ZeroLevel.Services.PartitionStorage.Partition
             {
                 Log.SystemError(ex, $"[StorePartitionAccessor.GetViewAccessor] '{filePath}'");
             }
-            return null;
+            return null!;
         }
     }
 }

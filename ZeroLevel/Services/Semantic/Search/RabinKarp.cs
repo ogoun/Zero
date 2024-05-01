@@ -13,8 +13,8 @@ namespace ZeroLevel.Services.Semantic.Helpers
         /// <returns>Returns the position of the first occurrence of the pattern. If not found returns -1.</returns>
         public static int RabinKarpSearchFirst(string target, string pattern)
         {
-            if (target == null) throw new ArgumentNullException(nameof(target));
-            if (pattern == null) throw new ArgumentNullException(nameof(pattern));
+            if (target == null!) throw new ArgumentNullException(nameof(target));
+            if (pattern == null!) throw new ArgumentNullException(nameof(pattern));
 
             // Save for faster access
             int patternLength = pattern.Length;
@@ -72,8 +72,8 @@ namespace ZeroLevel.Services.Semantic.Helpers
         /// <returns>Returns <see cref="IList{T}"/> of <see cref="int"/> values of the positions at which the pattern occurs. <see cref="IList{T}"/> is empty if none found.</returns>
         public static IList<int> RabinKarpSearchAll(string target, string pattern)
         {
-            if (target == null) throw new ArgumentNullException(nameof(target));
-            if (pattern == null) throw new ArgumentNullException(nameof(pattern));
+            if (target == null!) throw new ArgumentNullException(nameof(target));
+            if (pattern == null!) throw new ArgumentNullException(nameof(pattern));
 
             // Save for faster access
             int patternLength = pattern.Length;
@@ -135,8 +135,8 @@ namespace ZeroLevel.Services.Semantic.Helpers
         /// If a pattern is not found there is no entry in the dictionary.</returns>
         public static Dictionary<string, int> RabinKarpMultipleSearchFirst(string target, IList<string> patterns)
         {
-            if (target == null) throw new ArgumentNullException(nameof(target));
-            if (patterns == null) throw new ArgumentNullException(nameof(patterns));
+            if (target == null!) throw new ArgumentNullException(nameof(target));
+            if (patterns == null!) throw new ArgumentNullException(nameof(patterns));
 
             // Dictionary with pattern hashes for all strings
             var patternHashes = new Dictionary<string, ulong>();
@@ -241,8 +241,8 @@ namespace ZeroLevel.Services.Semantic.Helpers
         /// If a pattern is not found there is no entry in the dictionary.</returns>
         public static Dictionary<string, List<int>> RabinKarpMultipleSearchAll(string target, IList<string> patterns)
         {
-            if (target == null) throw new ArgumentNullException(nameof(target));
-            if (patterns == null) throw new ArgumentNullException(nameof(patterns));
+            if (target == null!) throw new ArgumentNullException(nameof(target));
+            if (patterns == null!) throw new ArgumentNullException(nameof(patterns));
 
             // Dictionary with pattern hashes for all strings
             var patternHashes = new Dictionary<string, ulong>();

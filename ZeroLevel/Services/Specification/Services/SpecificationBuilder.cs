@@ -74,7 +74,7 @@ namespace ZeroLevel.Specification
                         }
                         else
                         {
-                            parameters[i] = SpecificationConstructorParametersResolver.GetEnumInstance(_instanceType, _values[i].ParameterName, _values[i].Value as string);
+                            parameters[i] = SpecificationConstructorParametersResolver.GetEnumInstance(_instanceType, _values[i].ParameterName, (_values[i].Value as string)!);
                         }
                         break;
 

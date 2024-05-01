@@ -15,16 +15,16 @@ namespace DOM.DSL.Tokens
         /// <returns></returns>
         public abstract TToken CloneLocal();
 
-        public TElementToken AsElementToken() => this as TElementToken;
+        public TElementToken AsElementToken() => (this as TElementToken)!;
 
-        public TFunctionToken AsFunctionToken() => this as TFunctionToken;
+        public TFunctionToken AsFunctionToken() => (this as TFunctionToken)!;
 
-        public TTextToken AsTextToken() => this as TTextToken;
+        public TTextToken AsTextToken() => (this as TTextToken)!;
 
-        public TBlockToken AsBlockToken() => this as TBlockToken;
+        public TBlockToken AsBlockToken() => (this as TBlockToken)!;
 
-        public TPropertyToken AsPropertyToken() => this as TPropertyToken;
+        public TPropertyToken AsPropertyToken() => (this as TPropertyToken)!;
 
-        public TSystemToken AsSystemToken() => this as TSystemToken;
+        public TSystemToken AsSystemToken() => (this as TSystemToken)!;
     }
 }

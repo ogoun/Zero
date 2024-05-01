@@ -433,7 +433,7 @@ namespace ZeroLevel.Network
 
         private bool _UseDiscovery(Func<IPEndPoint> epf)
         {
-            if (epf == null) return false;
+            if (epf == null!) return false;
             try
             {
                 var ep = epf.Invoke();
@@ -478,7 +478,7 @@ namespace ZeroLevel.Network
             if (discovery_endpoint.Success)
             {
                 var discoveryClient = _cachee.GetClient(discovery_endpoint.Value, true);
-                if (discoveryClient != null)
+                if (discoveryClient != null!)
                 {
                     foreach (var service in _cachee.ServerList)
                     {
@@ -510,13 +510,13 @@ namespace ZeroLevel.Network
             if (discovery_endpoint.Success)
             {
                 var discoveryClient = _cachee.GetClient(discovery_endpoint.Value, true);
-                if (discoveryClient != null)
+                if (discoveryClient != null!)
                 {
                     try
                     {
                         var ir = discoveryClient.Request<IEnumerable<ServiceEndpointInfo>>("services", records =>
                         {
-                            if (records == null)
+                            if (records == null!)
                             {
                                 Log.SystemWarning("[Exchange.UpdateServiceListFromDiscovery] UpdateServiceListInfo. Discrovery response is empty");
                                 return;
@@ -579,7 +579,7 @@ namespace ZeroLevel.Network
                     Log.SystemError(ex, "[Exchange.GetConnection]");
                 }
             }
-            return null;
+            return null!;
         }
 
         public IClient GetConnection(IPEndPoint endpoint)
@@ -592,7 +592,7 @@ namespace ZeroLevel.Network
             {
                 Log.SystemError(ex, "[Exchange.GetConnection]");
             }
-            return null;
+            return null!;
         }
 
         public IClient GetConnection(ISocketClient client)
@@ -605,7 +605,7 @@ namespace ZeroLevel.Network
             {
                 Log.SystemError(ex, "[Exchange.GetConnection]");
             }
-            return null;
+            return null!;
         }
 
         #region Host service
@@ -670,7 +670,7 @@ namespace ZeroLevel.Network
                     return result.Value;
                 }
             }
-            return null;
+            return null!;
         }
 
         private IEnumerable<IPEndPoint> GetAllAddressesByType(string serviceType)
@@ -700,7 +700,7 @@ namespace ZeroLevel.Network
                     return result.Value;
                 }
             }
-            return null;
+            return null!;
         }
 
         private IEnumerable<IPEndPoint> GetAllAddressesByGroup(string serviceGroup)
@@ -730,7 +730,7 @@ namespace ZeroLevel.Network
                     return result.Value;
                 }
             }
-            return null;
+            return null!;
         }
 
         private IEnumerable<IClient> GetClientEnumerator(string serviceKey)
@@ -743,7 +743,7 @@ namespace ZeroLevel.Network
             catch (Exception ex)
             {
                 Log.SystemError(ex, $"[Exchange.GetClientEnumerator] Error when trying get endpoints for service key '{serviceKey}'");
-                candidates = null;
+                candidates = null!;
             }
             if (candidates != null && candidates.Any())
             {
@@ -759,7 +759,7 @@ namespace ZeroLevel.Network
                         Log.SystemError(ex, $"[Exchange.GetClientEnumerator] Can't get transport for endpoint '{endpoint}'");
                         continue;
                     }
-                    if (transport == null) continue;
+                    if (transport == null!) continue;
                     yield return transport;
                 }
             }
@@ -779,7 +779,7 @@ namespace ZeroLevel.Network
             catch (Exception ex)
             {
                 Log.SystemError(ex, $"[Exchange.GetClientEnumeratorByType] Error when trying get endpoints for service type '{serviceType}'");
-                candidates = null;
+                candidates = null!;
             }
             if (candidates != null && candidates.Any())
             {
@@ -795,7 +795,7 @@ namespace ZeroLevel.Network
                         Log.SystemError(ex, $"[Exchange.GetClientEnumeratorByType] Can't get transport for endpoint '{endpoint}'");
                         continue;
                     }
-                    if (transport == null) continue;
+                    if (transport == null!) continue;
                     yield return transport;
                 }
             }
@@ -815,7 +815,7 @@ namespace ZeroLevel.Network
             catch (Exception ex)
             {
                 Log.SystemError(ex, $"[Exchange.GetClientEnumeratorByGroup] Error when trying get endpoints for service group '{serviceGroup}'");
-                candidates = null;
+                candidates = null!;
             }
             if (candidates != null && candidates.Any())
             {
@@ -831,7 +831,7 @@ namespace ZeroLevel.Network
                         Log.SystemError(ex, $"[Exchange.GetClientEnumeratorByGroup] Can't get transport for endpoint '{service}'");
                         continue;
                     }
-                    if (transport == null) continue;
+                    if (transport == null!) continue;
                     yield return transport;
                 }
             }
@@ -876,7 +876,7 @@ namespace ZeroLevel.Network
                     Log.SystemError(ex, $"[Exchange.CallService] Can't get transport for service '{serviceKey}'");
                     continue;
                 }
-                if (transport == null) continue;
+                if (transport == null!) continue;
                 try
                 {
                     success = callHandler(transport);
@@ -955,7 +955,7 @@ namespace ZeroLevel.Network
         {
             return new ServiceDescription
             {
-                ServiceInfo = this._owner?.ServiceInfo,
+                ServiceInfo = this._owner?.ServiceInfo!,
                 Inboxes = _cachee.ServerList
                     .SelectMany(se => se
                         .CollectInboxInfo()

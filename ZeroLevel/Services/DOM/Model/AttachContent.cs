@@ -57,7 +57,7 @@ namespace ZeroLevel.DocumentObjectModel
 
         public T Read<T>()
         {
-            if (this.Payload == null || this.Payload.Length == 0) return default(T);
+            if (this.Payload == null || this.Payload.Length == 0) return default(T)!;
             return MessageSerializer.DeserializeCompatible<T>(this.Payload);
         }
 

@@ -13,7 +13,7 @@ namespace ZeroLevel.Logging
     {
         public TextFileLoggerOptions()
         {
-            Folder = null;
+            Folder = null!;
             LimitFileSize = 0;
             TextEncoding = DEFAULT_ENCODING;
             RemoveOlderThen = TimeSpan.MinValue;
@@ -211,7 +211,7 @@ namespace ZeroLevel.Logging
                             file.Delete();
                         }
                     });
-                dir = null;
+                dir = null!;
             }
             catch { }
         }
@@ -221,12 +221,12 @@ namespace ZeroLevel.Logging
         /// </summary>
         private void CloseCurrentWriter()
         {
-            if (_writer != null)
+            if (_writer != null!)
             {
                 _writer.Flush();
                 _writer.Close();
                 _writer.Dispose();
-                _writer = null;
+                _writer = null!;
             }
         }
 
@@ -266,7 +266,7 @@ namespace ZeroLevel.Logging
             {
                 RecreateLogFile();
             }
-            fi = null;
+            fi = null!;
         }
 
         /// <summary>
@@ -278,18 +278,18 @@ namespace ZeroLevel.Logging
             {
                 var nextFileName = GetNextFileName();
                 CloseCurrentWriter();
-                Stream stream = null;
+                Stream stream = null!;
                 PackOldLogFile(_currentLogFile);
                 try
                 {
                     _currentLogFile = nextFileName;
                     stream = new FileStream(_currentLogFile, FileMode.Append, FileAccess.Write, FileShare.Read);
                     _writer = new StreamWriter(stream, _options.TextEncoding);
-                    stream = null;
+                    stream = null!;
                 }
                 catch
                 {
-                    if (stream != null)
+                    if (stream != null!)
                     {
                         stream.Dispose();
                     }
@@ -316,7 +316,7 @@ namespace ZeroLevel.Logging
                             }
                             reader.Close();
                         }
-                        buffer = null;
+                        buffer = null!;
                     }
                     stream.Close();
                 }
@@ -419,27 +419,27 @@ namespace ZeroLevel.Logging
         /// </summary>
         private void CloseCurrentWriter()
         {
-            if (_writer != null)
+            if (_writer != null!)
             {
                 _writer.Flush();
                 _writer.Close();
                 _writer.Dispose();
-                _writer = null;
+                _writer = null!;
             }
         }
 
         private void CreateLogFile(string path)
         {
-            Stream stream = null;
+            Stream stream = null!;
             try
             {
                 stream = new FileStream(path, FileMode.Append, FileAccess.Write, FileShare.Read);
                 _writer = new StreamWriter(stream, DEFAULT_ENCODING);
-                stream = null;
+                stream = null!;
             }
             catch
             {
-                if (stream != null)
+                if (stream != null!)
                 {
                     stream.Dispose();
                 }

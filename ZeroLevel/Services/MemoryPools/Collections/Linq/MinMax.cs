@@ -7,7 +7,7 @@ namespace MemoryPools.Collections.Linq
     {
         public static int Min(this IPoolingEnumerable<int> source)
         {
-            if (source == null) throw new ArgumentNullException(nameof(source));
+            if (source == null!) throw new ArgumentNullException(nameof(source));
             int value = 0;
             bool hasValue = false;
             foreach (int x in source) {
@@ -24,8 +24,8 @@ namespace MemoryPools.Collections.Linq
         }
  
         public static int? Min(this IPoolingEnumerable<int?> source) {
-            if (source == null) throw new ArgumentNullException(nameof(source));
-            int? value = null;
+            if (source == null!) throw new ArgumentNullException(nameof(source));
+            int? value = null!;
             foreach (int? x in source) {
                 if (value == null || x < value)
                     value = x;
@@ -34,7 +34,7 @@ namespace MemoryPools.Collections.Linq
         }
  
         public static long Min(this IPoolingEnumerable<long> source) {
-            if (source == null) throw new ArgumentNullException(nameof(source));
+            if (source == null!) throw new ArgumentNullException(nameof(source));
             long value = 0;
             bool hasValue = false;
             foreach (long x in source) {
@@ -51,8 +51,8 @@ namespace MemoryPools.Collections.Linq
         }
  
         public static long? Min(this IPoolingEnumerable<long?> source) {
-            if (source == null) throw new ArgumentNullException(nameof(source));
-            long? value = null;
+            if (source == null!) throw new ArgumentNullException(nameof(source));
+            long? value = null!;
             foreach (long? x in source) {
                 if (value == null || x < value) value = x;
             }
@@ -60,7 +60,7 @@ namespace MemoryPools.Collections.Linq
         }
  
         public static float Min(this IPoolingEnumerable<float> source) {
-            if (source == null) throw new ArgumentNullException(nameof(source));
+            if (source == null!) throw new ArgumentNullException(nameof(source));
             float value = 0;
             bool hasValue = false;
             foreach (float x in source) {
@@ -83,17 +83,17 @@ namespace MemoryPools.Collections.Linq
         }
  
         public static float? Min(this IPoolingEnumerable<float?> source) {
-            if (source == null) throw new ArgumentNullException(nameof(source));
-            float? value = null;
+            if (source == null!) throw new ArgumentNullException(nameof(source));
+            float? value = null!;
             foreach (float? x in source) {
-                if (x == null) continue;
+                if (x == null!) continue;
                 if (value == null || x < value || System.Single.IsNaN((float)x)) value = x;
             }
             return value;
         }
  
         public static double Min(this IPoolingEnumerable<double> source) {
-            if (source == null) throw new ArgumentNullException(nameof(source));
+            if (source == null!) throw new ArgumentNullException(nameof(source));
             double value = 0;
             bool hasValue = false;
             foreach (double x in source) {
@@ -110,17 +110,17 @@ namespace MemoryPools.Collections.Linq
         }
  
         public static double? Min(this IPoolingEnumerable<double?> source) {
-            if (source == null) throw new ArgumentNullException(nameof(source));
-            double? value = null;
+            if (source == null!) throw new ArgumentNullException(nameof(source));
+            double? value = null!;
             foreach (double? x in source) {
-                if (x == null) continue;
+                if (x == null!) continue;
                 if (value == null || x < value || Double.IsNaN((double)x)) value = x;
             }
             return value;
         }
  
         public static decimal Min(this IPoolingEnumerable<decimal> source) {
-            if (source == null) throw new ArgumentNullException(nameof(source));
+            if (source == null!) throw new ArgumentNullException(nameof(source));
             decimal value = 0;
             bool hasValue = false;
             foreach (decimal x in source) {
@@ -137,8 +137,8 @@ namespace MemoryPools.Collections.Linq
         }
  
         public static decimal? Min(this IPoolingEnumerable<decimal?> source) {
-            if (source == null) throw new ArgumentNullException(nameof(source));
-            decimal? value = null;
+            if (source == null!) throw new ArgumentNullException(nameof(source));
+            decimal? value = null!;
             foreach (decimal? x in source) {
                 if (value == null || x < value) value = x;
             }
@@ -146,15 +146,15 @@ namespace MemoryPools.Collections.Linq
         }
  
         public static TSource Min<TSource>(this IPoolingEnumerable<TSource> source) {
-            if (source == null) throw new ArgumentNullException(nameof(source));
+            if (source == null!) throw new ArgumentNullException(nameof(source));
             var comparer = Comparer<TSource>.Default;
             var value = default(TSource);
-            if (value == null) {
+            if (value == null!) {
                 foreach (var x in source) {
                     if (x != null && (value == null || comparer.Compare(x, value) < 0))
                         value = x;
                 }
-                return value;
+                return value!;
             }
 
             bool hasValue = false;
@@ -217,7 +217,7 @@ namespace MemoryPools.Collections.Linq
         }
  
         public static int Max(this IPoolingEnumerable<int> source) {
-            if (source == null) throw new ArgumentNullException(nameof(source));
+            if (source == null!) throw new ArgumentNullException(nameof(source));
             int value = 0;
             bool hasValue = false;
             foreach (int x in source) {
@@ -234,8 +234,8 @@ namespace MemoryPools.Collections.Linq
         }
  
         public static int? Max(this IPoolingEnumerable<int?> source) {
-            if (source == null) throw new ArgumentNullException(nameof(source));
-            int? value = null;
+            if (source == null!) throw new ArgumentNullException(nameof(source));
+            int? value = null!;
             foreach (int? x in source) {
                 if (value == null || x > value) value = x;
             }
@@ -243,7 +243,7 @@ namespace MemoryPools.Collections.Linq
         }
  
         public static long Max(this IPoolingEnumerable<long> source) {
-            if (source == null) throw new ArgumentNullException(nameof(source));
+            if (source == null!) throw new ArgumentNullException(nameof(source));
             long value = 0;
             bool hasValue = false;
             foreach (long x in source) {
@@ -260,8 +260,8 @@ namespace MemoryPools.Collections.Linq
         }
  
         public static long? Max(this IPoolingEnumerable<long?> source) {
-            if (source == null) throw new ArgumentNullException(nameof(source));
-            long? value = null;
+            if (source == null!) throw new ArgumentNullException(nameof(source));
+            long? value = null!;
             foreach (long? x in source) {
                 if (value == null || x > value) value = x;
             }
@@ -269,7 +269,7 @@ namespace MemoryPools.Collections.Linq
         }
  
         public static double Max(this IPoolingEnumerable<double> source) {
-            if (source == null) throw new ArgumentNullException(nameof(source));
+            if (source == null!) throw new ArgumentNullException(nameof(source));
             double value = 0;
             bool hasValue = false;
             foreach (double x in source) {
@@ -286,17 +286,17 @@ namespace MemoryPools.Collections.Linq
         }
  
         public static double? Max(this IPoolingEnumerable<double?> source) {
-            if (source == null) throw new ArgumentNullException(nameof(source));
-            double? value = null;
+            if (source == null!) throw new ArgumentNullException(nameof(source));
+            double? value = null!;
             foreach (double? x in source) {
-                if (x == null) continue;
+                if (x == null!) continue;
                 if (value == null || x > value || Double.IsNaN((double)value)) value = x;
             }
             return value;
         }
  
         public static float Max(this IPoolingEnumerable<float> source) {
-            if (source == null) throw new ArgumentNullException(nameof(source));
+            if (source == null!) throw new ArgumentNullException(nameof(source));
             float value = 0;
             bool hasValue = false;
             foreach (float x in source) {
@@ -313,17 +313,17 @@ namespace MemoryPools.Collections.Linq
         }
  
         public static float? Max(this IPoolingEnumerable<float?> source) {
-            if (source == null) throw new ArgumentNullException(nameof(source));
-            float? value = null;
+            if (source == null!) throw new ArgumentNullException(nameof(source));
+            float? value = null!;
             foreach (float? x in source) {
-                if (x == null) continue;
+                if (x == null!) continue;
                 if (value == null || x > value || System.Single.IsNaN((float)value)) value = x;
             }
             return value;
         }
  
         public static decimal Max(this IPoolingEnumerable<decimal> source) {
-            if (source == null) throw new ArgumentNullException(nameof(source));
+            if (source == null!) throw new ArgumentNullException(nameof(source));
             decimal value = 0;
             bool hasValue = false;
             foreach (decimal x in source) {
@@ -340,8 +340,8 @@ namespace MemoryPools.Collections.Linq
         }
  
         public static decimal? Max(this IPoolingEnumerable<decimal?> source) {
-            if (source == null) throw new ArgumentNullException(nameof(source));
-            decimal? value = null;
+            if (source == null!) throw new ArgumentNullException(nameof(source));
+            decimal? value = null!;
             foreach (decimal? x in source) {
                 if (value == null || x > value) value = x;
             }
@@ -349,10 +349,10 @@ namespace MemoryPools.Collections.Linq
         }
  
         public static TSource Max<TSource>(this IPoolingEnumerable<TSource> source) {
-            if (source == null) throw new ArgumentNullException(nameof(source));
+            if (source == null!) throw new ArgumentNullException(nameof(source));
             Comparer<TSource> comparer = Comparer<TSource>.Default;
-            TSource value = default;
-            if (value == null) {
+            TSource value = default!;
+            if (value == null!) {
                 foreach (TSource x in source) {
                     if (x != null && (value == null || comparer.Compare(x, value) > 0))
                         value = x;

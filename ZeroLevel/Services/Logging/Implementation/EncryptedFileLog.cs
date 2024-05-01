@@ -10,7 +10,7 @@ namespace ZeroLevel.Logging
     {
         public EncryptedFileLogOptions()
         {
-            Folder = null;
+            Folder = null!;
             LimitFileSize = 0;
         }
 
@@ -77,7 +77,7 @@ namespace ZeroLevel.Logging
 
         public EncryptedFileLog(EncryptedFileLogOptions options)
         {
-            if (options == null)
+            if (options == null!)
                 throw new ArgumentNullException(nameof(options));
             if (string.IsNullOrEmpty(options.Key))
                 throw new ArgumentNullException("options.Key");
@@ -120,7 +120,7 @@ namespace ZeroLevel.Logging
                 }
                 catch
                 {
-                    if (stream != null)
+                    if (stream != null!)
                     {
                         stream.Dispose();
                     }
@@ -134,10 +134,10 @@ namespace ZeroLevel.Logging
         /// </summary>
         private void CloseCurrentWriter()
         {
-            if (_writer != null)
+            if (_writer != null!)
             {
                 _writer.Dispose();
-                _writer = null;
+                _writer = null!;
             }
         }
 

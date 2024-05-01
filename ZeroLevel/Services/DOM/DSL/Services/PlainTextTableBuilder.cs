@@ -19,10 +19,10 @@ namespace DOM.DSL.Services
 
             public void FlushRow()
             {
-                if (RowCells != null)
+                if (RowCells != null!)
                 {
                     Data.AppendRow(RowCells);
-                    RowCells = null;
+                    RowCells = null!;
                 }
             }
 

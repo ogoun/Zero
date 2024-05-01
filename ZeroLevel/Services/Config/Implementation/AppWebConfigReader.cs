@@ -14,7 +14,7 @@ namespace ZeroLevel.Services.Config.Implementation
 
         internal AppWebConfigReader(string configFilePath = null!)
         {
-            if (configFilePath == null)
+            if (configFilePath == null!)
             {
                 var appConfig = Path.Combine(Configuration.BaseDirectory, $"{System.AppDomain.CurrentDomain.FriendlyName}.config");
                 if (File.Exists(appConfig))
@@ -49,7 +49,7 @@ namespace ZeroLevel.Services.Config.Implementation
 
         internal IEnumerable<string> GetSections()
         {
-            if (_configFilePath != null)
+            if (_configFilePath != null!)
             {
                 var xdoc = XDocument.Load(_configFilePath);
                 var cs = xdoc.Descendants("connectionStrings").
@@ -62,7 +62,7 @@ namespace ZeroLevel.Services.Config.Implementation
 
         internal IEnumerable<Tuple<string, string>> ReadSection(string sectionName)
         {
-            if (_configFilePath != null)
+            if (_configFilePath != null!)
             {
                 var xdoc = XDocument.Load(_configFilePath);
                 return xdoc.Descendants(sectionName).
@@ -78,7 +78,7 @@ namespace ZeroLevel.Services.Config.Implementation
 
         private static string FindName(XElement n)
         {
-            if (n == null) return string.Empty;
+            if (n == null!) return string.Empty;
             var attributes = n.Attributes().
                 ToDictionary(i => i.Name.LocalName.ToLowerInvariant(), j => j.Value);
             foreach (var v in new[] { "key", "name", "code", "id" })
@@ -91,7 +91,7 @@ namespace ZeroLevel.Services.Config.Implementation
 
         private static string FindValue(XElement n)
         {
-            if (n == null) return string.Empty;
+            if (n == null!) return string.Empty;
             var attributes = n.Attributes().
                 ToDictionary(i => i.Name.LocalName.ToLowerInvariant(), j => j.Value);
             foreach (var v in new[] { "value", "val", "file", "db", "connectionstring" })

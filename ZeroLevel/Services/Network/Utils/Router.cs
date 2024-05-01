@@ -57,8 +57,8 @@ namespace ZeroLevel.Network
                 return new MRInvoker
                 {
                     _noArguments = true,
-                    _typeReq = null,
-                    _typeResp = null,
+                    _typeReq = null!,
+                    _typeResp = null!,
                     _instance = handler.Target,
                     _invoker = CreateCompiledExpression(handler)
                 };
@@ -69,7 +69,7 @@ namespace ZeroLevel.Network
                 return new MRInvoker
                 {
                     _typeReq = typeof(T),
-                    _typeResp = null,
+                    _typeResp = null!,
                     _instance = handler.Target,
                     _invoker = CreateCompiledExpression(handler)
                 };
@@ -80,7 +80,7 @@ namespace ZeroLevel.Network
                 return new MRInvoker
                 {
                     _noArguments = true,
-                    _typeReq = null,
+                    _typeReq = null!,
                     _typeResp = typeof(Tresponse),
                     _instance = handler.Target,
                     _invoker = CreateCompiledExpression(handler)
@@ -100,7 +100,7 @@ namespace ZeroLevel.Network
 
             public void Invoke(byte[] data, ISocketClient client)
             {
-                if (_typeResp == null)
+                if (_typeResp == null!)
                 {
                     if (_noArguments)
                     {
@@ -116,7 +116,7 @@ namespace ZeroLevel.Network
 
             public void Invoke(byte[] data, ISocketClient client, Action<object> callback)
             {
-                if (_typeReq == null)
+                if (_typeReq == null!)
                 {
                     callback(this._invoker.Invoke(this._instance, new object[] { client }));
                 }
@@ -133,7 +133,7 @@ namespace ZeroLevel.Network
                 {
                     Name = name,
                     InboxKind = DetectKind(),
-                    Target = _instance?.GetType()?.Name,
+                    Target = _instance?.GetType()?.Name!,
                     IncomingType = GetIncomingTypeDescription(),
                     OutcomingType = GetOutcomingTypeDescription()
                 };
@@ -141,35 +141,35 @@ namespace ZeroLevel.Network
 
             private InboxType GetIncomingTypeDescription()
             {
-                if (_typeReq == null) return null;
+                if (_typeReq == null!) return null!;
                 return new InboxType
                 {
                     Name = _typeReq.FullName,
                     Fields = _typeReq
                         .GetMembers(BindingFlags.Public | BindingFlags.FlattenHierarchy | BindingFlags.GetField | BindingFlags.GetProperty | BindingFlags.Instance)
                         .Where(m => m.MemberType == MemberTypes.Field || m.MemberType == MemberTypes.Property)
-                        .Select(f => new KeyValuePair<string, string>(f.Name, (f.MemberType == MemberTypes.Property) ? (f as PropertyInfo).PropertyType.FullName : (f as FieldInfo).FieldType.FullName))
+                        .Select(f => new KeyValuePair<string, string>(f.Name, (f.MemberType == MemberTypes.Property) ? (f as PropertyInfo)!.PropertyType.FullName : (f as FieldInfo)!.FieldType.FullName))
                         .ToDictionary(pair => pair.Key, pair => pair.Value)
                 };
             }
 
             private InboxType GetOutcomingTypeDescription()
             {
-                if (_typeResp == null) return null;
+                if (_typeResp == null!) return null!;
                 return new InboxType
                 {
                     Name = _typeResp.FullName,
                     Fields = _typeResp
                         .GetMembers(BindingFlags.Public | BindingFlags.FlattenHierarchy | BindingFlags.GetField | BindingFlags.GetProperty | BindingFlags.Instance)
                         .Where(m => m.MemberType == MemberTypes.Field || m.MemberType == MemberTypes.Property)
-                        .Select(f => new KeyValuePair<string, string>(f.Name, (f.MemberType == MemberTypes.Property) ? (f as PropertyInfo).PropertyType.FullName : (f as FieldInfo).FieldType.FullName))
+                        .Select(f => new KeyValuePair<string, string>(f.Name, (f.MemberType == MemberTypes.Property) ? (f as PropertyInfo)!.PropertyType.FullName : (f as FieldInfo)!.FieldType.FullName))
                         .ToDictionary(pair => pair.Key, pair => pair.Value)
                 };
             }
 
             private InboxKind DetectKind()
             {
-                if (_typeResp == null)
+                if (_typeResp == null!)
                 {
                     return _noArguments ? InboxKind.HandlerNoArgs : InboxKind.Handler;
                 }

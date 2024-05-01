@@ -26,7 +26,7 @@ namespace ZeroLevel.Services.Semantic
                 }
                 else
                 {
-                    this.Value = null;
+                    this.Value = null!;
                 }
                 this.Children = reader.ReadDictionary<char, TrieNode>();
             }
@@ -42,7 +42,7 @@ namespace ZeroLevel.Services.Semantic
                 {
                     writer.WriteBoolean(false);
                 }
-                if (this.Children == null)
+                if (this.Children == null!)
                 {
                     writer.WriteInt32(0);
                 }
@@ -62,7 +62,7 @@ namespace ZeroLevel.Services.Semantic
                 }
                 else
                 {
-                    if (this.Children == null)
+                    if (this.Children == null!)
                     {
                         this.Children = new Dictionary<char, TrieNode>();
                     }
@@ -72,7 +72,7 @@ namespace ZeroLevel.Services.Semantic
                     }
                     return Children[word[index]].Append(word, index + 1);
                 }
-                return null;
+                return null!;
             }
             internal uint? GetKey(string word, int index)
             {
@@ -81,7 +81,7 @@ namespace ZeroLevel.Services.Semantic
                     if (word.Length == index + 1) return this.Children[word[index]].Value;
                     return this.Children[word[index]].GetKey(word, index + 1);
                 }
-                return null;
+                return null!;
             }
 
             internal void RebuildReverseIndex(TrieNode parent, char key, Dictionary<uint, TrieNode> index)
@@ -92,7 +92,7 @@ namespace ZeroLevel.Services.Semantic
                 {
                     index.Add(this.Value.Value, this);
                 }
-                if (this.Children != null)
+                if (this.Children != null!)
                 {
                     foreach (var child in this.Children)
                     {
@@ -104,8 +104,8 @@ namespace ZeroLevel.Services.Semantic
             internal void DestroyReverseIndex()
             {
                 this.Parent = null!;
-                this.Key = null;
-                if (this.Children != null)
+                this.Key = null!;
+                if (this.Children != null!)
                 {
                     foreach (var child in this.Children)
                     {
@@ -154,7 +154,7 @@ namespace ZeroLevel.Services.Semantic
         {
             if (word.Length == 0) return;
             var node = _root.Append(word, 0);
-            if (node != null)
+            if (node != null!)
             {
                 node.Value = (uint)Interlocked.Increment(ref _word_index);
                 if (_use_reverse_index)
@@ -166,8 +166,8 @@ namespace ZeroLevel.Services.Semantic
 
         public uint? Key(string word)
         {
-            if (word?.Length == 0) return null;
-            return _root.GetKey(word, 0);
+            if (word?.Length == 0) return null!;
+            return _root.GetKey(word!, 0);
         }
 
         public string Word(uint key)
@@ -180,7 +180,7 @@ namespace ZeroLevel.Services.Semantic
                     return new string(Backward(node).Reverse().ToArray());
                 }
             }
-            return null;
+            return null!;
         }
 
         private IEnumerable<char> Backward(TrieNode node)
@@ -191,7 +191,7 @@ namespace ZeroLevel.Services.Semantic
                 {
                     yield return node.Key!.Value;
                     node = node.Parent;
-                } while (node.Parent != null);
+                } while (node.Parent != null!);
             }
         }
 
@@ -220,7 +220,7 @@ namespace ZeroLevel.Services.Semantic
         {
             if (this._use_reverse_index)
             {
-                if (_reverse_index == null)
+                if (_reverse_index == null!)
                 {
                     _reverse_index = new Dictionary<uint, TrieNode>();
                 }
@@ -230,7 +230,7 @@ namespace ZeroLevel.Services.Semantic
 
         private void DestroyReverseIndex()
         {
-            if (_reverse_index != null)
+            if (_reverse_index != null!)
             {
                 _reverse_index.Clear();
                 _reverse_index = null!;

@@ -14,14 +14,15 @@ namespace MemoryPools.Collections.Specialized
     /// These chunks are reusable btw all Pooling* collections. All operations have O(1) complexity.
     /// Primary rets IPoolingEnumerable. But you can cast to IEnumerable to work in common manner.
     /// </summary>
-    public partial class PoolingDictionary<TKey, TValue> : 
-        IDictionary<TKey, TValue>, 
+    public partial class PoolingDictionary<TKey, TValue> :
+        IDictionary<TKey, TValue>,
         IReadOnlyDictionary<TKey, TValue>,
         IPoolingEnumerable<KeyValuePair<TKey, TValue>>,
         IDisposable
     {
         [DebuggerDisplay("Key: {key}, Value: {value}")]
-        private struct Entry {
+        private struct Entry
+        {
             public int hashCode;    // Lower 31 bits of hash code, -1 if unused
             public int next;        // Index of next entry, -1 if last
             public TKey key;        // Key of entry
@@ -37,11 +38,11 @@ namespace MemoryPools.Collections.Specialized
         private int _count;
         private int _complexity;
         private bool _refType;
-        private const int EndOfChain = -1; 
+        private const int EndOfChain = -1;
 
         public PoolingDictionary() => Init();
 
-        public PoolingDictionary<TKey, TValue> Init(int capacity = 0, IEqualityComparer<TKey> comparer = default)
+        public PoolingDictionary<TKey, TValue> Init(int capacity = 0, IEqualityComparer<TKey> comparer = default!)
         {
             if (_buckets != default)
             {
@@ -69,18 +70,19 @@ namespace MemoryPools.Collections.Specialized
                 return true;
             }
 
-            value = default;
+            value = default!;
             return false;
         }
 
-        public TValue this[TKey key] 
+        public TValue this[TKey key]
         {
-             get {
-                 var i = FindEntry(key);
-                 if (i >= 0) return _entries[i].value;
-                 throw new KeyNotFoundException();
-             }
-             set => Insert(key, value, false);
+            get
+            {
+                var i = FindEntry(key);
+                if (i >= 0) return _entries[i].value;
+                throw new KeyNotFoundException();
+            }
+            set => Insert(key, value, false);
         }
 
         IEnumerable<TKey> IReadOnlyDictionary<TKey, TValue>.Keys => Keys;
@@ -91,16 +93,16 @@ namespace MemoryPools.Collections.Specialized
 
         public ICollection<TValue> Values => throw new NotImplementedException(); // _values ??= Pool<ValuesCollection>.Get().Init(this);
 
-        private int FindEntry(TKey key) 
+        private int FindEntry(TKey key)
         {
-            if(_refType && key == null)
+            if (_refType && key == null!)
             {
                 throw new ArgumentNullException(nameof(key));
             }
 
-            if (_buckets == null) return -1;
-            var hashCode = key.GetHashCode() & 0x7FFFFFFF;
-            for (var i = _buckets[hashCode % _buckets.Count]; i >= 0; i = _entries[i].next) 
+            if (_buckets == null!) return -1;
+            var hashCode = (key?.GetHashCode() ?? 0) & 0x7FFFFFFF;
+            for (var i = _buckets[hashCode % _buckets.Count]; i >= 0; i = _entries[i].next)
             {
                 if (_entries[i].hashCode == hashCode && _comparer.Equals(_entries[i].key, key)) return i;
             }
@@ -110,7 +112,7 @@ namespace MemoryPools.Collections.Specialized
         public int Complexity => _complexity;
 
         public void Add(TKey key, TValue value) => Insert(key, value, true);
-        
+
         public bool ContainsKey(TKey key) => FindEntry(key) >= 0;
 
         public bool Remove(TKey key)
@@ -118,30 +120,32 @@ namespace MemoryPools.Collections.Specialized
             throw new NotImplementedException();
         }
 
-        private void Insert(TKey key, TValue value, bool add) {
-        
-            if (_refType && key == null)
+        private void Insert(TKey key, TValue value, bool add)
+        {
+
+            if (_refType && key == null!)
             {
                 throw new ArgumentNullException(nameof(key));
             }
- 
-            if (_buckets == null) Init(PoolsDefaults.DefaultPoolBucketSize);
-            var hashCode = key.GetHashCode() & 0x7FFFFFFF;
-            var targetBucket = hashCode % _buckets.Count;
+
+            if (_buckets == null!) Init(PoolsDefaults.DefaultPoolBucketSize);
+            var hashCode = key!.GetHashCode() & 0x7FFFFFFF;
+            var targetBucket = hashCode % (_buckets?.Count ?? 0);
             var complexity = 0;
-            
-            for (var i = _buckets[targetBucket]; i >= 0; i = _entries[i].next) 
+
+            for (var i = _buckets![targetBucket]; i >= 0; i = _entries[i].next)
             {
-                if (_entries[i].hashCode == hashCode && _comparer.Equals(_entries[i].key, key)) 
+                if (_entries[i].hashCode == hashCode && _comparer.Equals(_entries[i].key, key))
                 {
-                    if (add) { 
+                    if (add)
+                    {
                         throw new ArgumentException("Duplicating key found in dictionary");
                     }
 
                     var entrym = _entries[i];
                     entrym.value = value;
                     _entries[i] = entrym;
-                    
+
                     unchecked
                     {
                         _version++;
@@ -152,9 +156,9 @@ namespace MemoryPools.Collections.Specialized
 
                 complexity++;
             }
-            
+
             int index;
-            if (_freeCount > 0) 
+            if (_freeCount > 0)
             {
                 index = _freeList;
                 _freeList = _entries[index].next;
@@ -178,7 +182,7 @@ namespace MemoryPools.Collections.Specialized
             entry.value = value;
             _entries[index] = entry;
             _buckets[targetBucket] = index;
-            
+
             unchecked
             {
                 _version++;
@@ -186,18 +190,18 @@ namespace MemoryPools.Collections.Specialized
 
             _complexity = Math.Max(_complexity, complexity);
         }
-        
+
         private void Resize()
         {
             Resize(HashHelpers.ExpandPrime(_count), false);
         }
- 
+
         private void Resize(int newSize, bool forceNewHashCodes)
         {
             var newBuckets = Pool<PoolingList<int>>.Get().Init();
-            
-            while(newBuckets.Count < newSize) newBuckets.Add(EndOfChain);
-            while(_entries.Count < newSize) _entries.Add(new Entry {hashCode = EndOfChain, next = EndOfChain});
+
+            while (newBuckets.Count < newSize) newBuckets.Add(EndOfChain);
+            while (_entries.Count < newSize) _entries.Add(new Entry { hashCode = EndOfChain, next = EndOfChain });
 
 
             if (forceNewHashCodes)
@@ -207,14 +211,16 @@ namespace MemoryPools.Collections.Specialized
                     if (_entries[i].hashCode != -1)
                     {
                         var entry = _entries[i];
-                        entry.hashCode = _entries[i].key.GetHashCode() & 0x7FFFFFFF;
+                        entry.hashCode = (_entries[i].key?.GetHashCode() ?? 0) & 0x7FFFFFFF;
                         _entries[i] = entry;
                     }
                 }
             }
 
-            for (int i = 0; i < newSize; i++) {
-                if (_entries[i].hashCode >= 0) {
+            for (int i = 0; i < newSize; i++)
+            {
+                if (_entries[i].hashCode >= 0)
+                {
                     int bucket = _entries[i].hashCode % newSize;
                     var entry = _entries[i];
                     entry.next = newBuckets[bucket];
@@ -233,20 +239,20 @@ namespace MemoryPools.Collections.Specialized
             {
                 _version++;
             }
-            
+
             _buckets?.Dispose();
-            Pool<PoolingList<int>>.Return(_buckets);
+            Pool<PoolingList<int>>.Return(_buckets!);
 
             _entries?.Dispose();
-            Pool<PoolingList<Entry>>.Return(_entries);
+            Pool<PoolingList<Entry>>.Return(_entries!);
 
-            _buckets = default;
-            _entries = default;
-            _comparer = default;
-            _complexity = _count = _version = _freeCount = _freeList = default;
+            _buckets = default!;
+            _entries = default!;
+            _comparer = default!;
+            _complexity = _count = _version = _freeCount = _freeList = default!;
         }
 
-        public void Add(KeyValuePair<TKey, TValue> item) => 
+        public void Add(KeyValuePair<TKey, TValue> item) =>
             Insert(item.Key, item.Value, true);
 
         public void Clear()
@@ -255,7 +261,7 @@ namespace MemoryPools.Collections.Specialized
             _entries.Clear();
             _complexity = 0;
             _count = _freeList = _freeCount = 0;
-            
+
             unchecked
             {
                 _version++;
@@ -264,11 +270,11 @@ namespace MemoryPools.Collections.Specialized
 
         public bool Contains(KeyValuePair<TKey, TValue> item)
         {
-            var keyHash = item.Key.GetHashCode() & 0x7FFFFFFF;
+            var keyHash = (item.Key?.GetHashCode() ?? 0) & 0x7FFFFFFF;
             for (var i = 0; i < _entries.Count; i++)
             {
-                if(_entries[i].hashCode == keyHash && _comparer.Equals(_entries[i].key, item.Key) && 
-                   _entries[i].value.Equals(item.Value))
+                if (_entries[i].hashCode == keyHash && _comparer.Equals(_entries[i].key, item.Key) &&
+                   (_entries[i].value?.Equals(item.Value) ?? false))
                 {
                     return true;
                 }
@@ -283,7 +289,7 @@ namespace MemoryPools.Collections.Specialized
             {
                 throw new IndexOutOfRangeException("Dictionary size bigger than array");
             }
-            
+
             for (var i = 0; i < _entries.Count; i++)
             {
                 array[arrayIndex + i] = new KeyValuePair<TKey, TValue>(_entries[i].key, _entries[i].value);
@@ -303,7 +309,7 @@ namespace MemoryPools.Collections.Specialized
             private PoolingDictionary<TKey, TValue> _src;
             private int _pos;
             private int _ver;
-            
+
             public Enumerator Init(PoolingDictionary<TKey, TValue> src)
             {
                 _pos = -1;
@@ -311,7 +317,7 @@ namespace MemoryPools.Collections.Specialized
                 _ver = _src._version;
                 return this;
             }
-            
+
             public bool MoveNext()
             {
                 if (_pos >= _src.Count) return false;
@@ -329,7 +335,7 @@ namespace MemoryPools.Collections.Specialized
                 _pos = -1;
             }
 
-            object IPoolingEnumerator.Current => Current;
+            object IPoolingEnumerator.Current => Current!;
 
             public KeyValuePair<TKey, TValue> Current
             {
@@ -354,7 +360,7 @@ namespace MemoryPools.Collections.Specialized
         public IPoolingEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator() =>
             Pool<Enumerator>.Get().Init(this);
 
-        IEnumerator<KeyValuePair<TKey, TValue>> IEnumerable<KeyValuePair<TKey, TValue>>.GetEnumerator() => 
+        IEnumerator<KeyValuePair<TKey, TValue>> IEnumerable<KeyValuePair<TKey, TValue>>.GetEnumerator() =>
             (IEnumerator<KeyValuePair<TKey, TValue>>)GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator() => (IEnumerator)GetEnumerator();

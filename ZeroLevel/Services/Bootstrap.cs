@@ -29,7 +29,7 @@ namespace ZeroLevel
 
             public BootstrapFluent(IZeroService service)
             {
-                if (service == null)
+                if (service == null!)
                 {
                     throw new ArgumentNullException(nameof(service));
                 }
@@ -56,7 +56,7 @@ namespace ZeroLevel
                 catch (Exception ex)
                 {
                     Log.Error(ex, $"[Bootstrap] Service {_service?.Name} run error");
-                    return null;
+                    return null!;
                 }
                 return this;
             }
@@ -108,7 +108,7 @@ namespace ZeroLevel
             {
                 Log.Info($"[Bootstrap] Resolve assembly '{args.Name}' {args.Name}");
                 string name = args.Name.Split(',')[0];
-                if (name.EndsWith(".resources")) return null;
+                if (name.EndsWith(".resources")) return null!;
                 foreach (string file in Directory.
                     GetFiles(Path.Combine(Configuration.BaseDirectory), "*.dll", SearchOption.TopDirectoryOnly))
                 {
@@ -123,7 +123,7 @@ namespace ZeroLevel
             {
                 Log.Error(ex, $"[Bootstrap] Fault load assembly '{args.Name}'");
             }
-            return null;
+            return null!;
         }
 
         public static BootstrapFluent Startup<T>(string[] args,
@@ -155,13 +155,13 @@ namespace ZeroLevel
             IZeroService service = null!;
             IConfigurationSet config = Configuration.DefaultSet;
             config.CreateSection("commandline", Configuration.ReadFromCommandLine(args));
-            if (configurationSet != null)
+            if (configurationSet != null!)
             {
                 config.Merge(configurationSet);
             }
             Log.CreateLoggingFromConfiguration(Configuration.DefaultSet);
 
-            if (preStartConfiguration != null)
+            if (preStartConfiguration != null!)
             {
                 try
                 {
@@ -185,20 +185,20 @@ namespace ZeroLevel
             {
                 Log.SystemError(ex, "[Bootstrap] Service start canceled, service constructor call fault");
             }
-            if (postStartConfiguration != null)
+            if (postStartConfiguration != null!)
             {
                 try
                 {
                     if (postStartConfiguration() == false)
                     {
                         Log.SystemInfo("[Bootstrap] Service start canceled, because custom postconfig return false");
-                        return null;
+                        return null!;
                     }
                 }
                 catch (Exception ex)
                 {
                     Log.SystemError(ex, "[Bootstrap] Service start canceled, postconfig faulted");
-                    return null;
+                    return null!;
                 }
             }
             return service;

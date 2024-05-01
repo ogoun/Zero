@@ -31,7 +31,7 @@ namespace ZeroLevel.Network
                 Identity = 0;
                 Size = 0;
                 offset = 0;
-                Payload = null;
+                Payload = null!;
                 SizeFilled = false;
                 IdentityFilled = false;
                 PayloadFilled = false;
@@ -87,7 +87,7 @@ namespace ZeroLevel.Network
 
             public int WritePayload(byte[] buf, int start, int length)
             {
-                if (Payload == null)
+                if (Payload == null!)
                 {
                     Payload = new byte[Size];
                     var mask = ((byte)(NetworkPacketFactory.MAGIC ^ _size_buf[0] ^ _size_buf[1] ^ _size_buf[2] ^ _size_buf[3]));

@@ -14,6 +14,6 @@ namespace ZeroLevel.Services.Collections
 
         IEnumerable<T> Dump();
 
-        bool Contains(T item, IComparer<T> comparer = null);
+        bool Contains(T item, IComparer<T> comparer = null!);
     }
 }

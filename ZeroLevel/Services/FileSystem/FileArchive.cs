@@ -237,7 +237,7 @@ namespace ZeroLevel.Services.FileSystem
         /// <param name="text">Text</param>
         /// <param name="subfolder_name">Archive file name (HH_mm_ss_fff_counter.{ext} by default)</param>
         /// <returns></returns>
-        public void StoreText(string text, string subfolder_name = null, string file_name = null)
+        public void StoreText(string text, string subfolder_name = null!, string file_name = null!)
         {
             Apply(new StoreText(text, CreateArchiveFilePath(subfolder_name, file_name)));
         }
@@ -248,12 +248,12 @@ namespace ZeroLevel.Services.FileSystem
         /// <param name="file_path">File path</param>
         /// <param name="subfolder_name">Archive file name (original file name by default)</param>
         /// <returns></returns>
-        public void Store(string file_path, string subfolder_name = null, string file_name = null)
+        public void Store(string file_path, string subfolder_name = null!, string file_name = null!)
         {
             Apply(new StoreFile(file_path, CreateArchiveFilePath(subfolder_name, file_name)));
         }
 
-        public void Store(string file_path, bool immediate, string subfolder_name = null, string file_name = null)
+        public void Store(string file_path, bool immediate, string subfolder_name = null!, string file_name = null!)
         {
             if (immediate)
             {
@@ -271,7 +271,7 @@ namespace ZeroLevel.Services.FileSystem
         /// <param name="stream">Data stream for reading</param>
         /// <param name="subfolder_name">Archive file name (HH_mm_ss_fff_counter.{ext} by default)</param>
         /// <returns></returns>
-        public void Store(Stream stream, string subfolder_name = null, string file_name = null)
+        public void Store(Stream stream, string subfolder_name = null!, string file_name = null!)
         {
             Apply(new StoreStream(stream, CreateArchiveFilePath(subfolder_name, file_name)));
         }
@@ -282,7 +282,7 @@ namespace ZeroLevel.Services.FileSystem
         /// <param name="data">Data</param>
         /// <param name="subfolder_name">Archive file name (HH_mm_ss_fff_counter.{ext} by default)</param>
         /// <returns></returns>
-        public void StoreData(byte[] data, string subfolder_name = null, string file_name = null)
+        public void StoreData(byte[] data, string subfolder_name = null!, string file_name = null!)
         {
             Apply(new StoreData(data, CreateArchiveFilePath(subfolder_name, file_name)));
         }
@@ -410,7 +410,7 @@ namespace ZeroLevel.Services.FileSystem
         /// <param name="text">Text</param>
         /// <param name="name">Archive file name (HH_mm_ss_fff_counter.{ext} by default)</param>
         /// <returns></returns>
-        public void StoreText(string text, string name = null)
+        public void StoreText(string text, string name = null!)
         {
             Apply(new StoreText(text, CreateArchiveFilePath(name)));
         }
@@ -421,7 +421,7 @@ namespace ZeroLevel.Services.FileSystem
         /// <param name="file_path">File path</param>
         /// <param name="subfolder_name">Archive file name (original file name by default)</param>
         /// <returns></returns>
-        public void Store(string file_path, string name = null)
+        public void Store(string file_path, string name = null!)
         {
             Apply(new StoreFile(file_path, CreateArchiveFilePath(name)));
         }
@@ -432,7 +432,7 @@ namespace ZeroLevel.Services.FileSystem
         /// <param name="file_path">File path</param>
         /// <param name="subfolder_name">Archive file name (original file name by default)</param>
         /// <returns></returns>
-        public void Store(string file_path, bool immediate, string name = null)
+        public void Store(string file_path, bool immediate, string name = null!)
         {
             if (immediate)
             {
@@ -450,7 +450,7 @@ namespace ZeroLevel.Services.FileSystem
         /// <param name="stream">Data stream for reading</param>
         /// <param name="name">Archive file name (HH_mm_ss_fff_counter.{ext} by default)</param>
         /// <returns></returns>
-        public void Store(Stream stream, string name = null)
+        public void Store(Stream stream, string name = null!)
         {
             Apply(new StoreStream(stream, CreateArchiveFilePath(name)));
         }
@@ -461,7 +461,7 @@ namespace ZeroLevel.Services.FileSystem
         /// <param name="data">Data</param>
         /// <param name="name">Archive file name (HH_mm_ss_fff_counter.{ext} by default)</param>
         /// <returns></returns>
-        public void StoreData(byte[] data, string name = null)
+        public void StoreData(byte[] data, string name = null!)
         {
             Apply(new StoreData(data, CreateArchiveFilePath(name)));
         }

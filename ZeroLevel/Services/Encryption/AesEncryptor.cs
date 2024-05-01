@@ -17,7 +17,7 @@ namespace ZeroLevel.Services.Encryption
 
         #endregion Crypt fields
 
-        public AesEncryptor(Stream stream, string password, byte[] salt = null)
+        public AesEncryptor(Stream stream, string password, byte[] salt = null!)
         {
             _aes = Aes.Create();
             using (var pdb = new Rfc2898DeriveBytes(password, SALT))
@@ -54,7 +54,7 @@ namespace ZeroLevel.Services.Encryption
             output.Flush();
         }
 
-        public static byte[] Encrypt(byte[] plain, string password, byte[] salt = null)
+        public static byte[] Encrypt(byte[] plain, string password, byte[] salt = null!)
         {
             using (var aes = Aes.Create())
             {
@@ -75,7 +75,7 @@ namespace ZeroLevel.Services.Encryption
             }
         }
 
-        public static byte[] Encrypt(Stream stream, string password, byte[] salt = null)
+        public static byte[] Encrypt(Stream stream, string password, byte[] salt = null!)
         {
             using (var aes = Aes.Create())
             {
@@ -96,7 +96,7 @@ namespace ZeroLevel.Services.Encryption
             }
         }
 
-        public static void Encrypt(Stream inputStream, Stream outputStream, string password, byte[] salt = null)
+        public static void Encrypt(Stream inputStream, Stream outputStream, string password, byte[] salt = null!)
         {
             using (var aes = Aes.Create())
             {
@@ -113,7 +113,7 @@ namespace ZeroLevel.Services.Encryption
             }
         }
 
-        public static byte[] Decrypt(byte[] cipher, string password, byte[] salt = null)
+        public static byte[] Decrypt(byte[] cipher, string password, byte[] salt = null!)
         {
             using (var aes = Aes.Create())
             {
@@ -134,7 +134,7 @@ namespace ZeroLevel.Services.Encryption
             }
         }
 
-        public static byte[] Decrypt(Stream stream, string password, byte[] salt = null)
+        public static byte[] Decrypt(Stream stream, string password, byte[] salt = null!)
         {
             using (var aes = Aes.Create())
             {
@@ -155,7 +155,7 @@ namespace ZeroLevel.Services.Encryption
             }
         }
 
-        public static void Decrypt(Stream inputStream, Stream outputStream, string password, byte[] salt = null)
+        public static void Decrypt(Stream inputStream, Stream outputStream, string password, byte[] salt = null!)
         {
             using (var aes = Aes.Create())
             {

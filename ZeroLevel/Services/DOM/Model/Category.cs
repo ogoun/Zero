@@ -14,7 +14,7 @@ namespace ZeroLevel.DocumentObjectModel
         {
         }
 
-        public Category(string title, string code, string direction_code, string description = null,
+        public Category(string title, string code, string direction_code, string description = null!,
             bool is_system = false)
         {
             this.Title = title;
@@ -104,7 +104,7 @@ namespace ZeroLevel.DocumentObjectModel
 
         public bool Equals(Category other)
         {
-            if (other == null) return false;
+            if (other == null!) return false;
             if (string.Compare(this.Title, other.Title, StringComparison.Ordinal) != 0) return false;
             if (string.Compare(this.Code, other.Code, StringComparison.Ordinal) != 0) return false;
             if (string.Compare(this.Description, other.Description, StringComparison.Ordinal) != 0) return false;
@@ -119,7 +119,7 @@ namespace ZeroLevel.DocumentObjectModel
 
         public override bool Equals(object obj)
         {
-            return this.Equals(obj as Category);
+            return this.Equals((obj as Category)!);
         }
 
         public override int GetHashCode()

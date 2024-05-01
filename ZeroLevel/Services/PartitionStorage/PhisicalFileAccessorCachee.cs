@@ -49,7 +49,7 @@ namespace ZeroLevel.Services.PartitionStorage
                 }
                 return reader.GetAccessor(offset);
             }
-            return null;
+            return null!;
         }
 
         public IViewAccessor GetDataAccessor(string filePath, long offset, int length)
@@ -68,7 +68,7 @@ namespace ZeroLevel.Services.PartitionStorage
                 }
                 return reader.GetAccessor(offset, length);
             }
-            return null;
+            return null!;
         }
         public void DropAllDataReaders()
         {
@@ -104,7 +104,7 @@ namespace ZeroLevel.Services.PartitionStorage
                 }
                 return reader.GetAccessor(offset);
             }
-            return null;
+            return null!;
         }
 
         public IViewAccessor GetIndexAccessor(string filePath, long offset, int length)
@@ -123,7 +123,7 @@ namespace ZeroLevel.Services.PartitionStorage
                 }
                 return reader.GetAccessor(offset, length);
             }
-            return null;
+            return null!;
         }
         public void DropAllIndexReaders()
         {

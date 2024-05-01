@@ -62,7 +62,7 @@ namespace ZeroLevel.Collections
         =========================================================================*/
         public FastBitArray(byte[] bytes)
         {
-            if (bytes == null)
+            if (bytes == null!)
             {
                 throw new ArgumentNullException(nameof(bytes));
             }
@@ -135,7 +135,7 @@ namespace ZeroLevel.Collections
 
         private void SetValues(int[] values)
         {
-            if (values == null)
+            if (values == null!)
             {
                 throw new ArgumentNullException(nameof(values));
             }
@@ -157,7 +157,7 @@ namespace ZeroLevel.Collections
             =========================================================================*/
         public FastBitArray(FastBitArray bits)
         {
-            if (bits == null)
+            if (bits == null!)
             {
                 throw new ArgumentNullException(nameof(bits));
             }
@@ -183,7 +183,7 @@ namespace ZeroLevel.Collections
 
         private void SetValues(bool[] values)
         {
-            if (values == null)
+            if (values == null!)
             {
                 throw new ArgumentNullException(nameof(values));
             }
@@ -276,7 +276,7 @@ namespace ZeroLevel.Collections
         =========================================================================*/
         public FastBitArray And(FastBitArray value)
         {
-            if (value == null)
+            if (value == null!)
                 throw new ArgumentNullException(nameof(value));
             if (Length != value.Length)
                 throw new ArgumentException("The array lengths differ.");
@@ -303,7 +303,7 @@ namespace ZeroLevel.Collections
         =========================================================================*/
         public FastBitArray Or(FastBitArray value)
         {
-            if (value == null)
+            if (value == null!)
                 throw new ArgumentNullException(nameof(value));
             if (Length != value.Length)
                 throw new ArgumentException("The array lengths differ");
@@ -385,7 +385,7 @@ namespace ZeroLevel.Collections
         =========================================================================*/
         public FastBitArray Xor(FastBitArray value)
         {
-            if (value == null)
+            if (value == null!)
                 throw new ArgumentNullException(nameof(value));
             if (Length != value.Length)
                 throw new ArgumentException("The array lengths differ");
@@ -465,7 +465,7 @@ namespace ZeroLevel.Collections
         // ICollection implementation
         public void CopyTo(Array array, int index)
         {
-            if (array == null)
+            if (array == null!)
                 throw new ArgumentNullException(nameof(array));
             if (index < 0)
                 throw new ArgumentOutOfRangeException(nameof(index), "The index cannot be less than 0.");
@@ -508,7 +508,7 @@ namespace ZeroLevel.Collections
 
         public Object Clone()
         {
-            Contract.Ensures(Contract.Result<Object>() != null);
+            Contract.Ensures(Contract.Result<Object>() != null!);
             Contract.Ensures(((FastBitArray)Contract.Result<Object>()).Length == this.Length);
             return new FastBitArray(this);
         }
@@ -517,9 +517,9 @@ namespace ZeroLevel.Collections
         {
             get
             {
-                if (_syncRoot == null)
+                if (_syncRoot == null!)
                 {
-                    System.Threading.Interlocked.CompareExchange<Object>(ref _syncRoot, new Object(), null);
+                    System.Threading.Interlocked.CompareExchange<Object>(ref _syncRoot!, new Object(), null!);
                 }
                 return _syncRoot;
             }

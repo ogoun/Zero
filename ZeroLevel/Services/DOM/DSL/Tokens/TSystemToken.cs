@@ -11,7 +11,7 @@
             return new TSystemToken
             {
                 Command = this.Command,
-                Arg = this.Arg?.Clone()
+                Arg = this.Arg?.Clone()!
             };
         }
 

@@ -27,8 +27,8 @@
             _count--;
             if (_count == 0)
             {
-                _src = default;
-                _element = default;
+                _src = default!;
+                _element = default!;
                 Pool<AppendExprEnumerable<T>>.Return(this);
             }
         }
@@ -72,16 +72,16 @@
                 _src.Reset();
             }
 
-            object IPoolingEnumerator.Current => Current;
+            object IPoolingEnumerator.Current => Current!;
 
             public T Current => _overcount == 1 ? _element : (T) _src.Current;
 
             public void Dispose()
             {
                 _parent?.Dispose();
-                _parent = null;
+                _parent = null!;
                 _src?.Dispose();
-                _src = default;
+                _src = default!;
                 Pool<AppendExprEnumerator>.Return(this);
             }
         }

@@ -50,7 +50,7 @@ namespace ZeroLevel.Patterns.Queries
             _lock.EnterReadLock();
             try
             {
-                return _memory.Select(i => (T)TypeMapper.CopyDTO(i));
+                return _memory.Select(i => (T)TypeMapper.CopyDTO(i!));
             }
             finally
             {
@@ -64,7 +64,7 @@ namespace ZeroLevel.Patterns.Queries
             try
             {
                 var q = _queryBuilder.Build(query);
-                return _memory.Where(q.Query).Select(i => (T)TypeMapper.CopyDTO(i));
+                return _memory.Where(q.Query).Select(i => (T)TypeMapper.CopyDTO(i!));
             }
             finally
             {
@@ -77,7 +77,7 @@ namespace ZeroLevel.Patterns.Queries
             _lock.EnterWriteLock();
             try
             {
-                var insert = (T)TypeMapper.CopyDTO(obj);
+                var insert = (T)TypeMapper.CopyDTO(obj!);
                 if (_memory.Add(insert))
                 {
                     return QueryResult.Result(1);

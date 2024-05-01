@@ -45,8 +45,8 @@ namespace ZeroLevel.Services.Collections
 
         public bool Equals(T x, T y)
         {
-            if (x == null && y == null) return true;
-            if (x == null || y == null) return false;
+            if (x == null && y == null!) return true;
+            if (x == null || y == null!) return false;
             if ((object)x == (object)y) return true;
             if (ReferenceEquals(x, y)) return true;
             return x.Equals(y);
@@ -57,7 +57,7 @@ namespace ZeroLevel.Services.Collections
             lock (_accessLocker)
             {
                 Func<T, T, bool> eq_func;
-                if (comparer == null)
+                if (comparer == null!)
                 {
                     eq_func = Equals;
                 }
@@ -94,13 +94,13 @@ namespace ZeroLevel.Services.Collections
                 if (_count > 0)
                 {
                     t = _array[_startIndex];
-                    _array[_startIndex] = default(T);
+                    _array[_startIndex] = default(T)!;
                     _startIndex = (_startIndex + 1) % _array.Length;
                     _count--;
                     return true;
                 }
             }
-            t = default(T);
+            t = default(T)!;
             return false;
         }
 
@@ -112,7 +112,7 @@ namespace ZeroLevel.Services.Collections
                 if (_count > 0)
                 {
                     ret = _array[_startIndex];
-                    _array[_startIndex] = default(T);
+                    _array[_startIndex] = default(T)!;
                     _startIndex = (_startIndex + 1) % _array.Length;
                     _count--;
                     return ret;

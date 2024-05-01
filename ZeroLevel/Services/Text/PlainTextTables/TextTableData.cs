@@ -96,7 +96,7 @@ namespace ZeroLevel.Services.PlainTextTables
         /// </summary>
         public void SetColumnsHeaders(string[] headers)
         {
-            if (headers == null)
+            if (headers == null!)
             {
                 throw new ArgumentNullException(nameof(headers));
             }
@@ -116,7 +116,7 @@ namespace ZeroLevel.Services.PlainTextTables
         /// </summary>
         public void AppendRow(string[] cells)
         {
-            if (cells == null)
+            if (cells == null!)
             {
                 throw new ArgumentNullException(nameof(cells));
             }

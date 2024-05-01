@@ -9,12 +9,12 @@ namespace ZeroLevel.DependencyInjection
 
         public ResolveAttribute()
         {
-            ResolveName = string.Empty; ContractType = null;
+            ResolveName = string.Empty; ContractType = null!;
         }
 
         public ResolveAttribute(string resolveName)
         {
-            ResolveName = resolveName; ContractType = null;
+            ResolveName = resolveName; ContractType = null!;
         }
 
         public ResolveAttribute(Type contractType)

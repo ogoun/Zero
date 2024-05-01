@@ -15,20 +15,20 @@ namespace ZeroLevel.Services.Semantic.Helpers
         private string[] _words;
         private ILexProvider _lexer;
 
-        public BagOfTerms(string text) : this(TextAnalizer.ExtractWords(text).ToArray(), null) { }
+        public BagOfTerms(string text) : this(TextAnalizer.ExtractWords(text).ToArray(), null!) { }
 
         public BagOfTerms(string text, ILexProvider lexer) : this(TextAnalizer.ExtractWords(text).ToArray(), lexer) { }
 
-        public BagOfTerms(IEnumerable<string> words) : this(words.ToArray(), null) { }
+        public BagOfTerms(IEnumerable<string> words) : this(words.ToArray(), null!) { }
 
         public BagOfTerms(IEnumerable<string> words, ILexProvider lexer) : this(words.ToArray(), lexer) { }
 
-        public BagOfTerms(string[] words) : this(words, null) { }
+        public BagOfTerms(string[] words) : this(words, null!) { }
 
         public BagOfTerms(string[] words, ILexProvider lexer)
         {
             _lexer = lexer;
-            _frequency = null;
+            _frequency = null!;
             _words = _lexer == null ? words : _lexer.ExtractLexTokens(words).Select(t => t.Token).ToArray();
         }
 
@@ -38,7 +38,7 @@ namespace ZeroLevel.Services.Semantic.Helpers
 
         public IDictionary<string, int> Freguency()
         {
-            if (_frequency == null)
+            if (_frequency == null!)
             {
                 var frequency = new Dictionary<string, int>();
                 for (int i = 0; i < _words.Length; i++)

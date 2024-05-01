@@ -21,7 +21,7 @@ namespace MemoryPools.Collections.Linq
                 element = enumerator.Current;
             }
             enumerator.Dispose();
-            return element;
+            return element!;
         }
         
         public static T Single<T>(this IPoolingEnumerable<T> source, Func<T, bool> condition)
@@ -44,7 +44,7 @@ namespace MemoryPools.Collections.Linq
                 }
             }
             enumerator.Dispose();
-            return element;
+            return element!;
         }
 		
         public static T Single<T, TContext>(this IPoolingEnumerable<T> source, TContext context, Func<TContext, T, bool> condition)
@@ -67,7 +67,7 @@ namespace MemoryPools.Collections.Linq
                 }
             }
             enumerator.Dispose();
-            return element;
+            return element!;
         }
         
         public static T SingleOrDefault<T>(this IPoolingEnumerable<T> source)
@@ -80,14 +80,14 @@ namespace MemoryPools.Collections.Linq
                 if (wasFound)
                 {
                     enumerator.Dispose();
-                    return default;
+                    return default!;
                 }
 
                 wasFound = true;
                 element = enumerator.Current;
             }
             enumerator.Dispose();
-            return element;
+            return element!;
         }
         
         public static T SingleOrDefault<T>(this IPoolingEnumerable<T> source, Func<T, bool> condition)
@@ -102,7 +102,7 @@ namespace MemoryPools.Collections.Linq
                     if (wasFound)
                     {
                         enumerator.Dispose();
-                        return default;
+                        return default!;
                     }
 
                     wasFound = true;
@@ -110,7 +110,7 @@ namespace MemoryPools.Collections.Linq
                 }
             }
             enumerator.Dispose();
-            return element;
+            return element!;
         }
 		
         public static T SingleOrDefault<T, TContext>(this IPoolingEnumerable<T> source, TContext context, Func<TContext, T, bool> condition)
@@ -125,7 +125,7 @@ namespace MemoryPools.Collections.Linq
                     if (wasFound)
                     {
                         enumerator.Dispose();
-                        return default;
+                        return default!;
                     }
 
                     wasFound = true;
@@ -133,7 +133,7 @@ namespace MemoryPools.Collections.Linq
                 }
             }
             enumerator.Dispose();
-            return element;
+            return element!;
         }
     }
 }

@@ -16,7 +16,7 @@ namespace MemoryPools.Collections.Linq
 		public IPoolingEnumerator<T> GetEnumerator()
 		{
 			var enumerator = _enumerable.GetEnumerator();
-			_enumerable = default;
+			_enumerable = default!;
 			Pool<GenericPoolingEnumerable<T>>.Return(this);
 			return Pool<GenericPoolingEnumerator<T>>.Get().Init(enumerator);
 		}
@@ -39,7 +39,7 @@ namespace MemoryPools.Collections.Linq
 		public IEnumerator<T> GetEnumerator()
 		{
 			var enumerator = _enumerable.GetEnumerator();
-			_enumerable = default;
+			_enumerable = default!;
 			Pool<GenericEnumerable<T>>.Return(this);
 			return Pool<GenericEnumerator<T>>.Get().Init(enumerator);
 		}

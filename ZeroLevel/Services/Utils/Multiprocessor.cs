@@ -81,7 +81,7 @@ namespace ZeroLevel.Utils
         {
             _is_disposed = true;
             _queue.Dispose();
-            _threads = null;
+            _threads = null!;
         }
     }
 }

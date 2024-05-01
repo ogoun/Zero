@@ -21,7 +21,7 @@
             return new TElementToken
             {
                 ElementName = this.ElementName,
-                NextToken = this.NextToken?.Clone()
+                NextToken = this.NextToken?.Clone()!
             };
         }
 
@@ -30,7 +30,7 @@
             return new TElementToken
             {
                 ElementName = this.ElementName,
-                NextToken = null
+                NextToken = null!
             };
         }
     }

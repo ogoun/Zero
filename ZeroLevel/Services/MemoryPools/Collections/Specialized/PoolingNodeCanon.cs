@@ -28,7 +28,7 @@
 
 		public override IPoolingNode<object> Init(int capacity)
 		{
-			Next = null;
+			Next = null!;
 			_buf = Pool.GetBuffer<object>(capacity);
 			return this;
 		}

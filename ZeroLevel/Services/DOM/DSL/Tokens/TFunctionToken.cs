@@ -16,7 +16,7 @@ namespace DOM.DSL.Tokens
             {
                 FunctionArgs = FunctionArgs.Select(a => a.Clone()).ToArray(),
                 FunctionName = this.FunctionName,
-                NextToken = this.NextToken?.Clone()
+                NextToken = this.NextToken?.Clone()!
             };
         }
 
@@ -26,7 +26,7 @@ namespace DOM.DSL.Tokens
             {
                 FunctionArgs = FunctionArgs.Select(a => a.Clone()).ToArray(),
                 FunctionName = this.FunctionName,
-                NextToken = null
+                NextToken = null!
             };
         }
     }

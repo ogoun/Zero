@@ -36,11 +36,11 @@ namespace DOM.DSL
 
         public static string Apply(Document document, IEnumerable<TToken> tokens, TEnvironment environment, bool ignore_fault = true)
         {
-            if (document == null)
+            if (document == null!)
             {
                 throw new ArgumentNullException(nameof(document));
             }
-            if (tokens == null)
+            if (tokens == null!)
             {
                 throw new ArgumentNullException(nameof(tokens));
             }

@@ -353,7 +353,7 @@ namespace DOM.DSL.Model
                             break;
 
                         case "special": // Using a hardcoded table conversion
-                                        //TablePrefix = TablePostfix = null;
+                                        //TablePrefix = TablePostfix = null!;
                             ColumnsPrefix = ColumnsPostfix = null!;
                             ColumnPrefix = ColumnTemplate = ColumnPostfix = null!;
                             RowPrefix = RowPostfix = null!;
@@ -361,7 +361,7 @@ namespace DOM.DSL.Model
                             // Args: (style, paddings l-t-r-b, maxcellwidth, maxtablewidth)
                             UseSpecialTableBuilder = true;
                             SpecialTableBuilder = SpecialTableBuilderFactory.CreateSpecialTableBuilder(special);
-                            if (SpecialTableBuilder == null) UseSpecialTableBuilder = false;
+                            if (SpecialTableBuilder == null!) UseSpecialTableBuilder = false;
                             break;
                     }
                     break;

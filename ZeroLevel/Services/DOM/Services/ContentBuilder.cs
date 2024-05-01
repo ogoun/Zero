@@ -16,7 +16,7 @@ namespace DOM.Services
 
         public ContentBuilder(Document document)
         {
-            if (document == null)
+            if (document == null!)
             {
                 throw new ArgumentNullException(nameof(document));
             }
@@ -318,7 +318,7 @@ namespace DOM.Services
             {
                 RaiseIncorrectTypeException(section.Type, ContentElementType.Section);
             }
-            _content.Sections.Add(section as Section);
+            _content.Sections.Add((section as Section)!);
         }
 
         public void EnterParagraph()
@@ -482,7 +482,7 @@ namespace DOM.Services
 
         public void WriteColumn(Column column)
         {
-            if (column == null)
+            if (column == null!)
             {
                 throw new ArgumentNullException(nameof(column));
             }
@@ -491,7 +491,7 @@ namespace DOM.Services
 
         public void WriteText(Text text)
         {
-            if (text == null)
+            if (text == null!)
             {
                 throw new ArgumentNullException(nameof(text));
             }
@@ -515,7 +515,7 @@ namespace DOM.Services
 
         public void WriteQuote(Quote quote)
         {
-            if (quote == null)
+            if (quote == null!)
             {
                 throw new ArgumentNullException(nameof(quote));
             }
@@ -529,7 +529,7 @@ namespace DOM.Services
 
         public void WriteLink(Link link)
         {
-            if (link == null)
+            if (link == null!)
             {
                 throw new ArgumentNullException(nameof(link));
             }
@@ -543,7 +543,7 @@ namespace DOM.Services
 
         public void WriteForm(FormContent form)
         {
-            if (form == null)
+            if (form == null!)
             {
                 throw new ArgumentNullException(nameof(form));
             }
@@ -552,7 +552,7 @@ namespace DOM.Services
 
         public void WriteImage(Image image)
         {
-            if (image == null)
+            if (image == null!)
             {
                 throw new ArgumentNullException(nameof(image));
             }
@@ -561,7 +561,7 @@ namespace DOM.Services
 
         public void WriteAudio(Audio audio)
         {
-            if (audio == null)
+            if (audio == null!)
             {
                 throw new ArgumentNullException(nameof(audio));
             }
@@ -570,7 +570,7 @@ namespace DOM.Services
 
         public void WriteVideo(Video video)
         {
-            if (video == null)
+            if (video == null!)
             {
                 throw new ArgumentNullException(nameof(video));
             }

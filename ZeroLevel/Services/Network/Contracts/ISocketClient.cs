@@ -14,7 +14,7 @@ namespace ZeroLevel.Network
         IRouter Router { get; }
 
         void Send(Frame data);
-        void Request(Frame data, Action<byte[]> callback, Action<string> fail = null);
+        void Request(Frame data, Action<byte[]> callback, Action<string> fail = null!);
         void Response(byte[] data, int identity);
     }
 }

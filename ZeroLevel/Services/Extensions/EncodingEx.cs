@@ -25,7 +25,7 @@ namespace ZeroLevel.Services.Extensions
 
         public EncodingEx(Encoding baseEncoding) : base(baseEncoding.CodePage)
         {
-            if (baseEncoding == null) throw new ArgumentNullException("baseEncoding");
+            if (baseEncoding == null!) throw new ArgumentNullException("baseEncoding");
             _baseEncoding = baseEncoding;
         }
 

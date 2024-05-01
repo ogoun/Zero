@@ -31,7 +31,7 @@ namespace ZeroLevel.Services.Shedulling
         public ExpiredObject Reset(DateTime nextDate)
         {
             ExpirationDate = nextDate;
-            Next = null;
+            Next = null!;
             return this;
         }
 

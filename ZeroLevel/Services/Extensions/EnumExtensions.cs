@@ -18,13 +18,13 @@ namespace ZeroLevel
             var type = enumVal.GetType();
             var memInfo = type.GetMember(enumVal.ToString());
             var attributes = memInfo[0].GetCustomAttributes(typeof(T), false);
-            return (attributes.Length > 0) ? (T)attributes[0] : null;
+            return ((attributes.Length > 0) ? (T)attributes[0] : null)!;
         }
 
         public static string Description(this Enum enumVal)
         {
             var attr = enumVal.GetAttributeOfType<DescriptionAttribute>();
-            return attr?.Description;
+            return attr?.Description!;
         }
 
         public static T GetValueFromDescription<T>(string description)
@@ -35,7 +35,7 @@ namespace ZeroLevel
             {
                 var attribute = Attribute.GetCustomAttribute(field,
                     typeof(DescriptionAttribute)) as DescriptionAttribute;
-                if (attribute != null)
+                if (attribute != null!)
                 {
                     if (attribute.Description == description)
                         return (T)field.GetValue(null);
@@ -47,7 +47,7 @@ namespace ZeroLevel
                 }
             }
             throw new ArgumentException("Not found.", nameof(description));
-            // or return default(T);
+            // or return default(T)!;
         }
     }
 }

@@ -21,7 +21,7 @@ namespace ZeroLevel.Contracts.Specification.Building
             {
                 if (_enum.ContainsKey(name))
                     return _enum[name];
-                return null;
+                return null!;
             }
         }
 
@@ -99,7 +99,7 @@ namespace ZeroLevel.Contracts.Specification.Building
                     return _enums[filterType][paramName].Names;
                 }
             }
-            return null;
+            return null!;
         }
 
         public static ITree GetTree(Type filterType, string paramName)
@@ -111,7 +111,7 @@ namespace ZeroLevel.Contracts.Specification.Building
                     return _trees[filterType][paramName];
                 }
             }
-            return null;
+            return null!;
         }
 
         public static object GetEnumInstance(Type filterType, string paramName, string name)
@@ -123,7 +123,7 @@ namespace ZeroLevel.Contracts.Specification.Building
                     return _enums[filterType][paramName].GetInstance(name);
                 }
             }
-            return null;
+            return null!;
         }
     }
 }

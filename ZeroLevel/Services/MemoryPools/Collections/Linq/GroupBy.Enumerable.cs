@@ -53,9 +53,9 @@ namespace MemoryPools.Collections.Linq
             
             if (_count == 0)
             {
-                _comparer = default;
-                _elementSelector = default;
-                _keySelector = default;
+                _comparer = default!;
+                _elementSelector = default!;
+                _keySelector = default!;
                 Pool<GroupedEnumerable<TSource, TKey, TElement>>.Return(this);
             }
         }
@@ -89,16 +89,16 @@ namespace MemoryPools.Collections.Linq
                 
                 // cleanup collection
                 _src?.Dispose();
-                Pool<PoolingDictionary<TKey, PoolingGrouping>>.Return(_src);
-                _src = default;
+                Pool<PoolingDictionary<TKey, PoolingGrouping>>.Return(_src!);
+                _src = default!;
                 
                 _enumerator?.Dispose();
-                _enumerator = default;
+                _enumerator = default!;
                 
                 _parent?.Dispose();
-                _parent = default;
+                _parent = default!;
                 
-                Pool<PoolingGroupingEnumerator>.Return(this);
+                Pool<PoolingGroupingEnumerator>.Return(this!);
             }
 
             public bool MoveNext() => _enumerator.MoveNext();
@@ -107,7 +107,7 @@ namespace MemoryPools.Collections.Linq
 
             public IPoolingGrouping<TKey, TElement> Current => _enumerator.Current.Value;
 
-            object IPoolingEnumerator.Current => Current;
+            object IPoolingEnumerator.Current => Current!;
         }
 
         internal class PoolingGrouping : IPoolingGrouping<TKey, TElement>, IDisposable
@@ -132,10 +132,10 @@ namespace MemoryPools.Collections.Linq
             public void Dispose()
             {
                 _elements?.Dispose();
-                Pool<PoolingList<TElement>>.Return(_elements);
-                _elements = null;
+                Pool<PoolingList<TElement>>.Return(_elements!);
+                _elements = null!;
                 
-                Key = default;
+                Key = default!;
             }
         }
     }

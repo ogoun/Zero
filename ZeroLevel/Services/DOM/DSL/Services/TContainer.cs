@@ -30,7 +30,7 @@ namespace DOM.DSL.Services
 
             public void Append(object _item)
             {
-                if (_item == null) return;
+                if (_item == null!) return;
                 object item;
                 if (_item is TContainer)
                 {
@@ -40,7 +40,7 @@ namespace DOM.DSL.Services
                 {
                     item = _item;
                 }
-                if (_list == null)
+                if (_list == null!)
                 {
                     _elementType = item.GetType();
                     _list = (IList)Activator.CreateInstance(typeof(List<>).MakeGenericType(_elementType));
@@ -159,7 +159,7 @@ namespace DOM.DSL.Services
         public void MoveToProperty(string propertyName, string propertyIndex)
         {
             if (propertyName.Equals("order", StringComparison.OrdinalIgnoreCase)) { Reset(Index); return; }
-            if (_current == null) return;
+            if (_current == null!) return;
 
             var buff_val = _current;
             var buff_index = Index;
@@ -211,7 +211,7 @@ namespace DOM.DSL.Services
         {
             var buff_val = _current;
             var buff_index = Index;
-            TContainer[] args = null;
+            TContainer[] args = null!;
             try
             {
                 switch (GetFunctionType(functionName))
@@ -242,7 +242,7 @@ namespace DOM.DSL.Services
                 _current = buff_val;
                 Index = buff_index;
             }
-            if (args != null)
+            if (args != null!)
             {
                 foreach (var a in args)
                     _factory.Release(a);
@@ -253,7 +253,7 @@ namespace DOM.DSL.Services
 
         public T As<T>()
         {
-            if (_current == null) return default(T);
+            if (_current == null!) return default(T)!;
             if (_current is T) return (T)_current;
             var type = typeof(T);
             if (_current is string)
@@ -267,13 +267,13 @@ namespace DOM.DSL.Services
             catch (Exception ex)
             {
                 Log.SystemWarning($"[DOM.TContainer] Fault cast current value from type '{_current?.GetType()?.FullName ?? string.Empty}' to type '{type.FullName}'. {ex.ToString()}");
-                return default(T);
+                return default(T)!;
             }
         }
 
         public object As(Type type)
         {
-            if (_current == null) return TypeHelpers.CreateDefaultState(type);
+            if (_current == null!) return TypeHelpers.CreateDefaultState(type);
             if (_current.GetType().IsAssignableFrom(type)) return _current;
             if (_current is string)
             {
@@ -927,7 +927,7 @@ namespace DOM.DSL.Services
                     break;
             }
 
-            if (enumerable != null)
+            if (enumerable != null!)
             {
                 int index;
                 if (int.TryParse(propertyIndex, out index))
@@ -1336,7 +1336,7 @@ namespace DOM.DSL.Services
             }
             else
             {
-                Reset(null);
+                Reset(null!);
             }
         }
 
@@ -1388,7 +1388,7 @@ namespace DOM.DSL.Services
 
         private void ApplyStringFunction(string function, TContainer[] args)
         {
-            if (_current == null)
+            if (_current == null!)
             {
                 args = null!;
                 return;
@@ -1774,7 +1774,7 @@ namespace DOM.DSL.Services
 
         private void ApplyExtractionFunction(string function, Func<TContainer, TContainer[]> args_getter, out TContainer[] args)
         {
-            if (_current == null)
+            if (_current == null!)
             {
                 if (function.Equals("append", StringComparison.OrdinalIgnoreCase))
                 {
@@ -1806,7 +1806,7 @@ namespace DOM.DSL.Services
             }
             if (function.Equals("where", StringComparison.OrdinalIgnoreCase))
             {
-                if (args_getter != null)
+                if (args_getter != null!)
                 {
                     if (IsEnumerable)
                     {
@@ -1814,10 +1814,10 @@ namespace DOM.DSL.Services
                         int index = 0;
                         foreach (var i in ((IEnumerable)_current))
                         {
-                            if (i == null) continue;
+                            if (i == null!) continue;
                             var container = _factory.Get(i, index);
                             var conditions = args_getter(container);
-                            if (conditions != null)
+                            if (conditions != null!)
                             {
                                 bool success = conditions.Any();
                                 foreach (var c in conditions)
@@ -1836,7 +1836,7 @@ namespace DOM.DSL.Services
                         Reset(list.Complete());
                     }
                 }
-                args = null;
+                args = null!;
                 return;
             }
             else
@@ -1856,7 +1856,7 @@ namespace DOM.DSL.Services
                             {
                                 _render.BufferDictionary[key] = this._current;
                             }
-                            Reset(null);
+                            Reset(null!);
                         }
                         break;
 
@@ -1967,7 +1967,7 @@ namespace DOM.DSL.Services
                                     var list = new TDList();
                                     foreach (var i in ((IEnumerable)_current))
                                     {
-                                        if (i == null) continue;
+                                        if (i == null!) continue;
                                         var container = _factory.Get(i);
                                         container.MoveToProperty(property, property_index!);
                                         list.Append(container.Current);
@@ -1998,7 +1998,7 @@ namespace DOM.DSL.Services
                                     var list = new TDList();
                                     foreach (var i in ((IEnumerable)_current))
                                     {
-                                        if (i == null) continue;
+                                        if (i == null!) continue;
                                         var container = _factory.Get(i);
                                         switch (functionType)
                                         {
@@ -2062,7 +2062,7 @@ namespace DOM.DSL.Services
 
                     case "tonum":
                     case "tonumber":
-                        if (_current != null)
+                        if (_current != null!)
                         {
                             var buf = _current.ToString();
                             int num;
@@ -2081,7 +2081,7 @@ namespace DOM.DSL.Services
                         if (_current is List<TContainer>)
                         {
                             var list = _current as List<TContainer>;
-                            if (list == null)
+                            if (list == null!)
                             {
                                 _current = new List<TContainer>();
                                 list = _current as List<TContainer>;
@@ -2455,7 +2455,7 @@ namespace DOM.DSL.Services
 
         private void ChangeDateTime(TContainer value, ChangeDateTimeType type)
         {
-            if (_current == null) return;
+            if (_current == null!) return;
             if (_current is DateTime)
             {
                 var dt = (DateTime)_current;
@@ -2498,7 +2498,7 @@ namespace DOM.DSL.Services
 
         public bool Any(TContainer[] set = null!, bool ignoreCase = true)
         {
-            if (_current == null) return false;
+            if (_current == null!) return false;
             if (set?.Any() ?? false)
             {
                 if (_current is IEnumerable && false == (_current is string))
@@ -2525,7 +2525,7 @@ namespace DOM.DSL.Services
 
         public bool Contains(TContainer[] set, bool ignoreCase)
         {
-            if (_current == null) return false;
+            if (_current == null!) return false;
             if (set == null || set?.Length == 0) return false;
             if (_current is IEnumerable && false == (_current is string))
             {
@@ -2564,8 +2564,8 @@ namespace DOM.DSL.Services
 
         public bool NoContains(TContainer[] test, bool ignoreCase)
         {
-            if (_current == null) return false;
-            if (_current == null) return false;
+            if (_current == null!) return false;
+            if (_current == null!) return false;
             if (_current is IEnumerable && false == (_current is string))
             {
                 foreach (var c in (IEnumerable)_current)
@@ -2588,43 +2588,43 @@ namespace DOM.DSL.Services
 
         public bool IsEmpty()
         {
-            if (_current == null) return true;
+            if (_current == null!) return true;
             return String.IsNullOrWhiteSpace(_current.ToString());
         }
 
         public bool Is(TContainer test, bool ignoreCase)
         {
-            if (_current == null) return test.Current == null;
+            if (_current == null!) return test.Current == null!;
             return CompareWith(test, ignoreCase) == 0;
         }
 
         public bool IsNot(TContainer test, bool ignoreCase)
         {
-            if (_current == null) return test.Current != null;
+            if (_current == null!) return test.Current != null!;
             return CompareWith(test, ignoreCase) != 0;
         }
 
         public bool LessThan(TContainer test, bool ignoreCase)
         {
-            if (_current == null) return false;
+            if (_current == null!) return false;
             return CompareWith(test, ignoreCase) < 0;
         }
 
         public bool MoreThan(TContainer test, bool ignoreCase)
         {
-            if (_current == null) return false;
+            if (_current == null!) return false;
             return CompareWith(test, ignoreCase) > 0;
         }
 
         public bool LessOrEq(TContainer test, bool ignoreCase)
         {
-            if (_current == null) return false;
+            if (_current == null!) return false;
             return CompareWith(test, ignoreCase) <= 0;
         }
 
         public bool MoreOrEq(TContainer test, bool ignoreCase)
         {
-            if (_current == null) return false;
+            if (_current == null!) return false;
             return CompareWith(test, ignoreCase) >= 0;
         }
 
@@ -2734,7 +2734,7 @@ namespace DOM.DSL.Services
         private static string FormattedDateTime(DateTime dt, string format = null!, string culture = null!)
         {
             CultureInfo ci;
-            if (culture != null)
+            if (culture != null!)
             {
                 try
                 {
@@ -2764,7 +2764,7 @@ namespace DOM.DSL.Services
 
         public override string ToString()
         {
-            if (_current == null) return string.Empty;
+            if (_current == null!) return string.Empty;
 
             if (_current is string) return (string)_current;
             else if (_current is DateTime) return FormattedDateTime((DateTime)_current);

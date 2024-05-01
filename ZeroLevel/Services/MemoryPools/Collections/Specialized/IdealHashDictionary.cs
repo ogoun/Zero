@@ -37,7 +37,7 @@ namespace MemoryPools.Collections.Specialized
 		{
 			var index = key.IdealHashCode;
 			_freeNodes.Enqueue(index);
-			_list[index] = default;
+			_list[index] = default!;
 			return true;
 		}
 

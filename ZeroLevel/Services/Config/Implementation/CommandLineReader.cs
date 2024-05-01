@@ -16,7 +16,7 @@ namespace ZeroLevel.Services.Config.Implementation
         public IConfiguration ReadConfiguration()
         {
             var result = Configuration.Create();
-            if (_args != null)
+            if (_args != null!)
             {
                 try
                 {

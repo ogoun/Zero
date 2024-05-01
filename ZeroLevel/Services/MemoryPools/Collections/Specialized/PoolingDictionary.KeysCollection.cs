@@ -70,11 +70,11 @@ namespace MemoryPools.Collections.Specialized
 
 				public TKey Current => _src._entries[_pos].key;
 
-				object IEnumerator.Current => Current;
+				object IEnumerator.Current => Current!;
 
 				public void Dispose()
 				{
-					_src = default;
+					_src = default!;
 					Pool<Enumerator>.Return(this);
 				}
 			}

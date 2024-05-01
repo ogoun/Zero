@@ -104,7 +104,7 @@ p2 pixel units = -p2 focal units / focal length
 
     public sealed class ImageMetainfo
     {
-        private CameraMath _camera = null;
+        private CameraMath _camera = null!;
         public CameraMath CreateCamera()
         {
             if (_camera == null)

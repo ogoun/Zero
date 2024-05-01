@@ -10,7 +10,7 @@ namespace MemoryPools.Collections.Linq
         private IEqualityComparer<T> _comparer;
         private PoolingDictionary<T, int> _except;
 
-        public ExceptExprEnumerable<T> Init(IPoolingEnumerable<T> src, PoolingDictionary<T, int> except, IEqualityComparer<T> comparer  = default)
+        public ExceptExprEnumerable<T> Init(IPoolingEnumerable<T> src, PoolingDictionary<T, int> except, IEqualityComparer<T> comparer  = default!)
         {
             _src = src;
             _except = except;
@@ -31,11 +31,11 @@ namespace MemoryPools.Collections.Linq
             _count--;
             if (_count == 0)
             {
-                _src = default;
+                _src = default!;
                 _except?.Dispose();
-                Pool<PoolingDictionary<T, int>>.Return(_except);
-                _except = default;
-                Pool<ExceptExprEnumerable<T>>.Return(this);
+                Pool<PoolingDictionary<T, int>>.Return(_except!);
+                _except = default!;
+                Pool<ExceptExprEnumerable<T>>.Return(this!);
             }
         }
         internal class ExceptExprEnumerator : IPoolingEnumerator<T>
@@ -63,17 +63,17 @@ namespace MemoryPools.Collections.Linq
 
             public void Reset() => _src.Reset();
 
-            object IPoolingEnumerator.Current => Current;
+            object IPoolingEnumerator.Current => Current!;
 
             public T Current => _src.Current;
 
             public void Dispose()
             {
                 _src?.Dispose();
-                _src = null;
+                _src = null!;
                 
                 _parent?.Dispose();
-                _parent = default;
+                _parent = default!;
                 
                 Pool<ExceptExprEnumerator>.Return(this);
             }

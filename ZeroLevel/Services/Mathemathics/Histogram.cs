@@ -74,7 +74,7 @@ namespace ZeroLevel.Mathemathics
         {
             if ((Values?.Length ?? 0) <= 2) return 0;
             int i = 0;
-            while (Values[i] <= float.Epsilon) { i++; continue; }
+            while (Values![i] <= float.Epsilon) { i++; continue; }
             if ((Values.Length - i) <= 2) return 0;
 
             var delta = Values[i + 1] - Values[i];
@@ -112,7 +112,7 @@ namespace ZeroLevel.Mathemathics
 
             if ((Values?.Length ?? 0) <= 2) return list;
             int i = 0;
-            while (Values[i] <= float.Epsilon) { i++; continue; }
+            while (Values![i] <= float.Epsilon) { i++; continue; }
             if ((Values.Length - i) <= 2) return list;
 
             var delta = Values[i + 1] - Values[i];
@@ -144,15 +144,15 @@ namespace ZeroLevel.Mathemathics
 
         public int GetMaximum()
         {
-            if ((Values?.Length ?? 0) <= 1) return Values[0];
+            if ((Values?.Length ?? 0) <= 1) return Values![0]!;
             int maxi = 0;
             int max = 0;
-            for (int i = 0; i < Values.Length; i++)
+            for (int i = 0; i < (Values?.Length ?? 0); i++)
             {
-                if (Values[i] > max)
+                if (Values![i] > max)
                 {
                     max = Values[i];
-                    maxi = i; 
+                    maxi = i;
                 }
             }
             return maxi;

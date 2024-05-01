@@ -14,7 +14,7 @@ namespace MemoryPools.Collections.Specialized
 			Count = 0;
 			_enqueueIndex = 0;
 			_dequeueIndex = 0;
-			_enqueueTo = _dequeueFrom = null;
+			_enqueueTo = _dequeueFrom = null!;
 		}
 
 		public bool IsEmpty => Count == 0;
@@ -29,7 +29,7 @@ namespace MemoryPools.Collections.Specialized
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public void Enqueue(T obj)
 		{
-			if (Count == 0 && _enqueueTo == null)
+			if (Count == 0 && _enqueueTo == null!)
 				_enqueueTo = _dequeueFrom = CreateNodeHolder();
 
 			_enqueueTo[_enqueueIndex] = obj;
@@ -58,7 +58,7 @@ namespace MemoryPools.Collections.Specialized
 		{
 			if (IsEmpty)
 			{
-				val = default;
+				val = default!;
 				return false;
 			}
 
@@ -78,7 +78,7 @@ namespace MemoryPools.Collections.Specialized
 			if (IsEmpty) throw new IndexOutOfRangeException();
 
 			var obj = _dequeueFrom[_dequeueIndex];
-			_dequeueFrom[_dequeueIndex] = default;
+			_dequeueFrom[_dequeueIndex] = default!;
 
 			_dequeueIndex++;
 			Count--;
@@ -115,14 +115,14 @@ namespace MemoryPools.Collections.Specialized
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public void Clear()
 		{
-			while (_enqueueTo != null)
+			while (_enqueueTo != null!)
 			{
 				var next = _enqueueTo.Next;
 				_enqueueTo.Dispose();
 				_enqueueTo = next;
 			}
 
-			_dequeueFrom = null;
+			_dequeueFrom = null!;
 		}
 	}
 }

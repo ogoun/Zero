@@ -4,7 +4,7 @@ namespace System.Linq
 {
     public static class LinqExtension
     {
-        public static void ThrowIfNull<T>(this T val, string message = null)
+        public static void ThrowIfNull<T>(this T val, string message = null!)
         {
             if (null == val)
                 throw new ArgumentNullException(message);
@@ -35,11 +35,11 @@ namespace System.Linq
                 }
                 else if (hasLeft)
                 {
-                    yield return new T[] { leftEnumerator.Current, default(T) };
+                    yield return new T[] { leftEnumerator.Current, default(T)! };
                 }
                 else if (hasRight)
                 {
-                    yield return new T[] { default(T), rightEnumerator.Current };
+                    yield return new T[] { default(T)!, rightEnumerator.Current };
                 }
 
                 hasLeft = leftEnumerator.MoveNext();
@@ -50,7 +50,7 @@ namespace System.Linq
         public static IEnumerable<TSource> DistinctBy<TSource, TKey>
              (this IEnumerable<TSource> source, Func<TSource, TKey> keySelector)
         {
-            if (source != null)
+            if (source != null!)
             {
                 var seenKeys = new HashSet<TKey>();
                 foreach (TSource element in source)
@@ -78,7 +78,7 @@ namespace System.Linq
         }
         public static IEnumerable<IEnumerable<T>> Chunkify<T>(this IEnumerable<T> source, int size)
         {
-            if (source == null)
+            if (source == null!)
             {
                 yield break;
             }

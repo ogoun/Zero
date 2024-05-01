@@ -16,7 +16,7 @@ namespace ZeroLevel.Services.FileSystem
             {
                 throw new ArgumentNullException(nameof(filePath));
             }
-            if (parser == null)
+            if (parser == null!)
             {
                 throw new ArgumentNullException(nameof(parser));
             }
@@ -42,10 +42,10 @@ namespace ZeroLevel.Services.FileSystem
                     {
                         string line;
                         buffer = new T[batchSize];
-                        while ((line = sr.ReadLine()) != null)
+                        while ((line = sr.ReadLine()) != null!)
                         {
                             var value = _parser.Invoke(line);
-                            if (skipNull && value == null) continue;
+                            if (skipNull && value == null!) continue;
                             buffer[buffer_index] = value;
                             buffer_index++;
                             if (buffer_index >= batchSize)
@@ -77,7 +77,7 @@ namespace ZeroLevel.Services.FileSystem
                     using (StreamReader sr = new StreamReader(bs))
                     {
                         string line;
-                        while ((line = sr.ReadLine()) != null)
+                        while ((line = sr.ReadLine()) != null!)
                         {
                             yield return _parser.Invoke(line);
                         }

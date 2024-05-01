@@ -127,7 +127,7 @@ namespace ZeroLevel.Services.Applications
                     }
                 }
             }
-            return default(T);
+            return default(T)!;
         }
         #endregion Config
 

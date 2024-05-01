@@ -18,7 +18,7 @@ namespace ZeroLevel.Services.Collections
         public Capacitor(int dischargeValue, Action<T[], int> dischargeAction)
         {
             if (dischargeValue < 1) dischargeValue = 16;
-            if (dischargeAction == null) throw new ArgumentNullException(nameof(dischargeAction));
+            if (dischargeAction == null!) throw new ArgumentNullException(nameof(dischargeAction));
             _buffer = new T[dischargeValue];
             _dischargeAction = dischargeAction;
         }

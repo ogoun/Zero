@@ -13,7 +13,7 @@
             {
                 PropertyIndex = this.PropertyIndex,
                 PropertyName = this.PropertyName,
-                NextToken = this.NextToken?.Clone()
+                NextToken = this.NextToken?.Clone()!
             };
         }
 
@@ -23,7 +23,7 @@
             {
                 PropertyIndex = this.PropertyIndex,
                 PropertyName = this.PropertyName,
-                NextToken = null
+                NextToken = null!
             };
         }
     }

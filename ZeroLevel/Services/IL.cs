@@ -48,7 +48,7 @@ namespace ZeroLevel.Services
             // Поле для хранения метода обратного вызова
             _callbackField = _typeBuilder.DefineField("_callbackHandler", CreateDecorateMethodCallHandlerDelegate(_moduleBuilder), FieldAttributes.Private);
             _interfaces = interfaces;
-            _parentType = parentType;
+            _parentType = parentType!;
         }
         /// <summary>
         /// Собирает конечный тип
@@ -105,7 +105,7 @@ namespace ZeroLevel.Services
                 list.AddRange(_interfaces);
                 list.AddRange(GetInterfaces(_interfaces));
             }
-            if (_parentType != null)
+            if (_parentType != null!)
             {
                 list.AddRange(GetInterfaces(new Type[] { _parentType }));
             }
@@ -152,7 +152,7 @@ namespace ZeroLevel.Services
         /// </summary>
         private void ProceedParentAbstractMethods()
         {
-            if (_parentType != null)
+            if (_parentType != null!)
             {
                 foreach (var method in _parentType.GetMethods())
                 {

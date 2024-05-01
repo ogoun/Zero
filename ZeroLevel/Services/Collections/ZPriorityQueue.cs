@@ -18,15 +18,15 @@ namespace ZeroLevel.Services.Collections
     public class ZPriorityQueue<T>
         : IPriorityQueue<T>
     {
-        private sealed class PriorityQueueObject<T>
+        private sealed class PriorityQueueObject<T1>
         {
             public readonly int Priority;
 
-            public readonly T Value;
+            public readonly T1 Value;
 
-            public PriorityQueueObject<T> Next;
+            public PriorityQueueObject<T1> Next;
 
-            public PriorityQueueObject(T val, int priority)
+            public PriorityQueueObject(T1 val, int priority)
             {
                 Value = val;
                 Priority = priority;
@@ -34,7 +34,7 @@ namespace ZeroLevel.Services.Collections
         }
 
         private readonly Func<T, PriorityQueueObjectHandleResult> _handler;
-        private PriorityQueueObject<T> _head = null;
+        private PriorityQueueObject<T> _head = null!;
         private readonly object _rw_lock = new object();
         private int _counter = 0;
 
@@ -42,7 +42,7 @@ namespace ZeroLevel.Services.Collections
 
         public ZPriorityQueue(Func<T, PriorityQueueObjectHandleResult> handler)
         {
-            if (handler == null)
+            if (handler == null!)
                 throw new ArgumentNullException(nameof(handler));
             _handler = handler;
         }
@@ -59,7 +59,7 @@ namespace ZeroLevel.Services.Collections
                 else
                 {
                     var cursor = _head;
-                    PriorityQueueObject<T> prev = null;
+                    PriorityQueueObject<T> prev = null!;
                     do
                     {
                         if (cursor.Priority > insert.Priority)
@@ -77,11 +77,11 @@ namespace ZeroLevel.Services.Collections
                         }
                         prev = cursor;
                         cursor = cursor.Next;
-                        if (cursor == null)
+                        if (cursor == null!)
                         {
                             prev.Next = insert;
                         }
-                    } while (cursor != null);
+                    } while (cursor != null!);
                 }
                 _counter++;
             }
@@ -90,17 +90,17 @@ namespace ZeroLevel.Services.Collections
 
         public T HandleCurrentItem()
         {
-            T v = default(T);
+            T v = default(T)!;
             lock (_rw_lock)
             {
                 var item = _head;
-                PriorityQueueObject<T> prev = null;
-                while (item != null)
+                PriorityQueueObject<T> prev = null!;
+                while (item != null!)
                 {
                     var result = this._handler.Invoke(item.Value);
                     if (result.IsCompleted)
                     {
-                        if (prev != null)
+                        if (prev != null!)
                         {
                             prev.Next = item.Next;
                         }

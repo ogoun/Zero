@@ -21,7 +21,7 @@ namespace ZeroLevel.Services.PartitionStorage
             PhisicalFileAccessorCachee phisicalFileAccessor)
             : base(options, info, serializer, phisicalFileAccessor)
         {
-            if (options == null) throw new ArgumentNullException(nameof(options));
+            if (options == null!) throw new ArgumentNullException(nameof(options));
             if (options.Index.Enabled)
             {
                 Indexes = new StorePartitionSparseIndex<TKey, TMeta>(_catalog, _info, options.FilePartition, options.KeyComparer, options.Index.EnableIndexInMemoryCachee, phisicalFileAccessor);
@@ -52,10 +52,10 @@ namespace ZeroLevel.Services.PartitionStorage
                 {
                     Key = key,
                     Success = false,
-                    Value = default
+                    Value = default!
                 };
             }
-            if (memoryAccessor != null)
+            if (memoryAccessor != null!)
             {
                 using (var reader = new MemoryStreamReader(memoryAccessor))
                 {
@@ -85,7 +85,7 @@ namespace ZeroLevel.Services.PartitionStorage
             {
                 Key = key,
                 Success = false,
-                Value = default
+                Value = default!
             };
         }
 
@@ -114,7 +114,7 @@ namespace ZeroLevel.Services.PartitionStorage
                     foreach (var file in files)
                     {
                         var accessor = PhisicalFileAccessorCachee.GetDataAccessor(file, 0);
-                        if (accessor != null)
+                        if (accessor != null!)
                         {
                             using (var reader = new MemoryStreamReader(accessor))
                             {
@@ -145,7 +145,7 @@ namespace ZeroLevel.Services.PartitionStorage
                     foreach (var file in files)
                     {
                         var accessor = PhisicalFileAccessorCachee.GetDataAccessor(file, 0);
-                        if (accessor != null)
+                        if (accessor != null!)
                         {
                             using (var reader = new MemoryStreamReader(accessor))
                             {
@@ -173,7 +173,7 @@ namespace ZeroLevel.Services.PartitionStorage
             if (File.Exists(filePath))
             {
                 var accessor = PhisicalFileAccessorCachee.GetDataAccessor(filePath, 0);
-                if (accessor != null)
+                if (accessor != null!)
                 {
                     using (var reader = new MemoryStreamReader(accessor))
                     {
@@ -262,7 +262,7 @@ namespace ZeroLevel.Services.PartitionStorage
                         {
                             memoryAccessor = GetViewAccessor(filePath, offset.Offset);
                         }
-                        if (memoryAccessor != null)
+                        if (memoryAccessor != null!)
                         {
                             using (var reader = new MemoryStreamReader(memoryAccessor))
                             {
@@ -292,7 +292,7 @@ namespace ZeroLevel.Services.PartitionStorage
                 else
                 {
                     var memoryAccessor = GetViewAccessor(filePath, 0);
-                    if (memoryAccessor != null)
+                    if (memoryAccessor != null!)
                     {
                         using (var reader = new MemoryStreamReader(memoryAccessor))
                         {
@@ -353,7 +353,7 @@ namespace ZeroLevel.Services.PartitionStorage
                         {
                             memoryAccessor = GetViewAccessor(filePath, offset.Offset);
                         }
-                        if (memoryAccessor != null)
+                        if (memoryAccessor != null!)
                         {
                             using (var reader = new MemoryStreamReader(memoryAccessor))
                             {
@@ -392,7 +392,7 @@ namespace ZeroLevel.Services.PartitionStorage
                 else
                 {
                     var memoryAccessor = GetViewAccessor(filePath, 0);
-                    if (memoryAccessor != null)
+                    if (memoryAccessor != null!)
                     {
                         using (var reader = new MemoryStreamReader(memoryAccessor))
                         {
@@ -501,7 +501,7 @@ namespace ZeroLevel.Services.PartitionStorage
         {
             if ((ranges?.Count ?? 0) == 0) return new List<FilePositionRange> { new FilePositionRange { Start = 0, End = length } };
             var inverted = new List<FilePositionRange>();
-            var current = new FilePositionRange { Start = 0, End = ranges[0].Start };
+            var current = new FilePositionRange { Start = 0, End = ranges![0].Start };
             for (var i = 0; i < ranges.Count; i++)
             {
                 current.End = ranges[i].Start;

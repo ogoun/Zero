@@ -19,10 +19,10 @@ namespace ZeroLevel
 
         public static bool IsEmpty<T>(this IEnumerable<T> collection)
         {
-            if (collection == null)
+            if (collection == null!)
                 return true;
             var coll = collection as ICollection;
-            if (coll != null)
+            if (coll != null!)
                 return coll.Count == 0;
             return !collection.Any();
         }

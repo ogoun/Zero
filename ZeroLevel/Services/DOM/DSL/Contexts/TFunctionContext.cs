@@ -38,7 +38,7 @@ namespace DOM.DSL.Contexts
             {
                 if (argTokens.Count > 0)
                 {
-                    _argTokens.Add(new TBlockToken("", null, argTokens.Select(t => t.Clone()).ToArray()));
+                    _argTokens.Add(new TBlockToken("", null!, argTokens.Select(t => t.Clone()).ToArray()));
                     argTokens.Clear();
                 }
             });
@@ -187,8 +187,8 @@ namespace DOM.DSL.Contexts
             return new TFunctionToken
             {
                 FunctionName = _name,
-                NextToken = _nextToken?.Clone(),
-                FunctionArgs = _argTokens?.Select(t => t.Clone())
+                NextToken = _nextToken?.Clone()!,
+                FunctionArgs = _argTokens?.Select(t => t.Clone())!
             };
         }
     }

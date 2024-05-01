@@ -41,7 +41,7 @@ namespace ZeroLevel.Services.PartitionStorage
             IStoreSerializer<TKey, TInput, TValue> serializer,
             PhisicalFileAccessorCachee cachee)
         {
-            if (decompress == null) throw new ArgumentNullException(nameof(decompress));
+            if (decompress == null!) throw new ArgumentNullException(nameof(decompress));
             _decompress = decompress;
             _accessor = new StorePartitionAccessor<TKey, TInput, TValue, TMeta>(options, info, serializer, cachee);
             _temporaryFolder = Path.Combine(_accessor.GetCatalogPath(), Guid.NewGuid().ToString());
@@ -82,7 +82,7 @@ namespace ZeroLevel.Services.PartitionStorage
                 {
                     var name = Path.GetFileName(file);
                     // if datafile by key exists
-                    if (existsFiles.ContainsKey(name))
+                    if (existsFiles?.ContainsKey(name) ?? false)
                     {
                         // append all records from existing file to new
                         foreach (var r in IterateReadKeyInputs(existsFiles[name]))
@@ -100,7 +100,7 @@ namespace ZeroLevel.Services.PartitionStorage
                 // compress new file
                 foreach (var file in newFiles)
                 {
-                    await (_temporaryAccessor as StorePartitionBuilder<TKey, TInput, TValue, TMeta>)
+                    await (_temporaryAccessor as StorePartitionBuilder<TKey, TInput, TValue, TMeta>)!
                             .CompressFile(file);
                 }
 
@@ -110,7 +110,7 @@ namespace ZeroLevel.Services.PartitionStorage
                     _phisicalFileAccessor.DropDataReader(file);
 
                     // 1. Remove index file
-                    (_accessor as StorePartitionAccessor<TKey, TInput, TValue, TMeta>)
+                    (_accessor as StorePartitionAccessor<TKey, TInput, TValue, TMeta>)!
                             .DropFileIndex(file);
 
                     // 2. Replace source
@@ -132,7 +132,8 @@ namespace ZeroLevel.Services.PartitionStorage
                     }
 
                     // 3. Rebuil index
-                    await (_accessor as BasePartition<TKey, TInput, TValue, TMeta>).RebuildFileIndex(name);
+                    await (_accessor as BasePartition<TKey, TInput, TValue, TMeta>)!
+                        .RebuildFileIndex(name);
                 }
             }
             // remove temporary files

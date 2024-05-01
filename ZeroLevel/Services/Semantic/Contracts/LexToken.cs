@@ -25,18 +25,18 @@ namespace ZeroLevel.Services.Semantic
 
         public override bool Equals(object obj)
         {
-            if (this == null)
+            if (this == null!)
                 throw new NullReferenceException();
-            return this.Equals(obj as LexToken);
+            return this.Equals((obj as LexToken)!);
         }
 
         public bool Equals(LexToken other)
         {
             if ((object)this == (object)other)
                 return true;
-            if (this == null)
+            if (this == null!)
                 throw new NullReferenceException();
-            if (other == null)
+            if (other == null!)
                 return false;
             if (ReferenceEquals(this, other))
                 return true;

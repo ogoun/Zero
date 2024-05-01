@@ -16,7 +16,7 @@ namespace ZeroLevel.Services.Semantic
 
         public static ILexProvider CreateStemProvider(Languages language)
         {
-            ILexer lexer = null;
+            ILexer lexer = null!;
             switch (language)
             {
                 case Languages.Czech:

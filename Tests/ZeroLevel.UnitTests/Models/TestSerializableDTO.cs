@@ -37,5 +37,10 @@ namespace ZeroLevel.UnitTests.Models
             writer.WriteString(this.Title);
             writer.WriteLong(this.Timestamp);
         }
+
+        public override int GetHashCode()
+        {
+            return Id.GetHashCode() ^ (Title?.GetHashCode() ?? 0) ^ Timestamp.GetHashCode();
+        }
     }
 }

@@ -124,7 +124,7 @@ namespace ZeroLevel.Network
         public event Action<ISocketClient> OnDisconnect = (_) => { };
         public IPEndPoint Endpoint { get; }
 
-        public void Request(Frame frame, Action<byte[]> callback, Action<string> fail = null)
+        public void Request(Frame frame, Action<byte[]> callback, Action<string> fail = null!)
         {
             if (Status != SocketClientStatus.Working) throw new Exception($"[SocketClient.Request] Socket status: {Status}");
             var data = NetworkPacketFactory.Reqeust(MessageSerializer.Serialize(frame), out int id);
@@ -141,7 +141,7 @@ namespace ZeroLevel.Network
 
         public void Response(byte[] data, int identity)
         {
-            if (data == null) throw new ArgumentNullException(nameof(data));
+            if (data == null!) throw new ArgumentNullException(nameof(data));
             if (Status != SocketClientStatus.Working) throw new Exception($"[SocketClient.Response] Socket status: {Status}");
             Send(0, false, NetworkPacketFactory.Response(data, identity));
         }
@@ -250,7 +250,7 @@ namespace ZeroLevel.Network
                                 {
                                     Router?.HandleRequest(MessageSerializer.Deserialize<Frame>(frame.data), this, frame.identity, (id, response) =>
                                     {
-                                        if (response != null)
+                                        if (response != null!)
                                         {
                                             this.Response(response, id);
                                         }

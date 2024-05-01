@@ -50,14 +50,14 @@ namespace MemoryPools
 
             if (_isDefaultPolicy || (_fastPolicy?.Return(obj) ?? _policy.Return(obj)))
             {
-                if (_firstItem == null && Interlocked.CompareExchange(ref _firstItem, obj, null) == null)
+                if (_firstItem == null && Interlocked.CompareExchange(ref _firstItem, obj, null) == null!)
                 {
                     returnedTooPool = true;
                 }
                 else
                 {
                     var items = _items;
-                    for (var i = 0; i < items.Length && !(returnedTooPool = Interlocked.CompareExchange(ref items[i].Element, obj, null) == null); i++)
+                    for (var i = 0; i < items.Length && !(returnedTooPool = Interlocked.CompareExchange(ref items[i].Element, obj, null) == null!); i++)
                     {
                     }
                 }
@@ -71,13 +71,13 @@ namespace MemoryPools
             _isDisposed = true;
 
             DisposeItem(_firstItem);
-            _firstItem = null;
+            _firstItem = null!;
 
             ObjectWrapper[] items = _items;
             for (var i = 0; i < items.Length; i++)
             {
                 DisposeItem(items[i].Element);
-                items[i].Element = null;
+                items[i].Element = null!;
             }
         }
 

@@ -59,14 +59,14 @@ namespace ZeroLevel.Services.Collections
 
             public void Insert<T>(string key, T entity)
             {
-                _insert.Invoke(_instance, new object[] { key, entity });
+                _insert.Invoke(_instance, new object[] { key, entity! });
             }
 
             public void InsertOrUpdate<T>(string key, T entity)
             {
                 if ((bool)_containsKey.Invoke(_instance, key))
                     _remove.Invoke(_instance, key);
-                _insert.Invoke(_instance, new object[] { key, entity });
+                _insert.Invoke(_instance, new object[] { key, entity! });
             }
 
             public bool ContainsKey(string key)

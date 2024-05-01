@@ -36,7 +36,7 @@ namespace ZeroLevel.Network
 
         public static bool TestConnection(IPEndPoint endpoint, int timeout = 100)
         {
-            if (endpoint == null) return false;
+            if (endpoint == null!) return false;
             using (var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
             {
                 socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.DontLinger, true);
@@ -72,9 +72,9 @@ namespace ZeroLevel.Network
 
         public static int Compare(this IPEndPoint x, IPEndPoint y)
         {
-            if (x == null && y == null) return 0;
-            if (x == null) return 1;
-            if (y == null) return -1;
+            if (x == null && y == null!) return 0;
+            if (x == null!) return 1;
+            if (y == null!) return -1;
 
             var xx = x.Address.ToString();
             var yy = y.Address.ToString();
@@ -84,9 +84,9 @@ namespace ZeroLevel.Network
 
         public static int Compare(this IPAddress x, IPAddress y)
         {
-            if (x == null && y == null) return 0;
-            if (x == null) return 1;
-            if (y == null) return -1;
+            if (x == null && y == null!) return 0;
+            if (x == null!) return 1;
+            if (y == null!) return -1;
 
             var xx = x.ToString();
             var yy = y.ToString();
@@ -95,7 +95,7 @@ namespace ZeroLevel.Network
 
         public static IPEndPoint CreateIPEndPoint(string endPoint)
         {
-            if (string.IsNullOrWhiteSpace(endPoint)) return null;
+            if (string.IsNullOrWhiteSpace(endPoint)) return null!;
 
             string[] ep = endPoint.Split(':');
             if (ep.Length < 2) throw new FormatException("Invalid endpoint format");
@@ -128,7 +128,7 @@ namespace ZeroLevel.Network
             l.Start();
             int port = ((IPEndPoint)l.LocalEndpoint).Port;
             l.Stop();
-            l = null;
+            l = null!;
             return port;
         }
 
@@ -159,7 +159,7 @@ namespace ZeroLevel.Network
                     }
                 }
             }
-            return null;
+            return null!;
         }
     }
 }

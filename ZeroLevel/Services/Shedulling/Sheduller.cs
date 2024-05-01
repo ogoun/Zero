@@ -31,11 +31,11 @@ namespace ZeroLevel
         {
             get
             {
-                if (__instanse == null)
+                if (__instanse == null!)
                 {
                     lock (_create_lock)
                     {
-                        if (__instanse == null)
+                        if (__instanse == null!)
                         {
                             __instanse = Sheduller.Create();
                         }
@@ -54,12 +54,12 @@ namespace ZeroLevel
 
         #region Sync default instance api
 
-        public static long RemindWhile(TimeSpan timespan, Func<long, bool> callback, Action continueWith = null)
+        public static long RemindWhile(TimeSpan timespan, Func<long, bool> callback, Action continueWith = null!)
         {
             return DefaultInstance.RemindWhile(timespan, callback, continueWith);
         }
 
-        public static long RemindWhile(TimeSpan timespan, Func<bool> callback, Action continueWith = null)
+        public static long RemindWhile(TimeSpan timespan, Func<bool> callback, Action continueWith = null!)
         {
             return DefaultInstance.RemindWhile(timespan, _ => callback(), continueWith);
         }

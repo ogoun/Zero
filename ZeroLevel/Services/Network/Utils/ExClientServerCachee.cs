@@ -15,7 +15,7 @@ namespace ZeroLevel.Network
 
         internal IEnumerable<SocketServer> ServerList => _serverInstances.Values;
 
-        public IClient GetClient(IPEndPoint endpoint, bool use_cachee, IRouter router = null)
+        public IClient GetClient(IPEndPoint endpoint, bool use_cachee, IRouter router = null!)
         {
             if (use_cachee)
             {
@@ -28,7 +28,7 @@ namespace ZeroLevel.Network
                 {
                     try
                     {
-                        ExClient instance = null;
+                        ExClient instance = null!;
                         if (_clientInstances.ContainsKey(key))
                         {
                             instance = _clientInstances[key];
@@ -38,7 +38,7 @@ namespace ZeroLevel.Network
                             }
                             _clientInstances.TryRemove(key, out instance);
                             instance.Dispose();
-                            instance = null;
+                            instance = null!;
                         }
                         instance = new ExClient(new SocketClient(endpoint, router ?? new Router()));
                         if (instance.Status == SocketClientStatus.Initialized
@@ -63,7 +63,7 @@ namespace ZeroLevel.Network
                     return instance;
                 }
             }
-            return null;
+            return null!;
         }
 
         public SocketServer GetServer(IPEndPoint endpoint, IRouter router)

@@ -65,7 +65,7 @@ namespace ZeroLevel.Services.Web
                 stringBuilder.Append("?");
                 foreach (var pair in parameters)
                 {
-                    if (pair.Value == null)
+                    if (pair.Value == null!)
                     {
                         stringBuilder.Append(pair.Value);
                     }

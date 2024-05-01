@@ -9,7 +9,7 @@ namespace ZeroLevel.Services.Config
 
         public ConfigRecordParseAttribute(Type parserType)
         {
-            if (parserType == null) throw new ArgumentNullException(nameof(parserType));
+            if (parserType == null!) throw new ArgumentNullException(nameof(parserType));
             Parser = (IConfigRecordParser)Activator.CreateInstance(parserType);
         }
     }

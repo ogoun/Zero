@@ -78,7 +78,7 @@ namespace ZeroLevel.Services.Network.Proxies
 
         public void Dispose()
         {
-            if (_left != null)
+            if (_left != null!)
             {
                 try
                 {
@@ -90,7 +90,7 @@ namespace ZeroLevel.Services.Network.Proxies
                 }
                 catch { }
             }
-            if (_right != null)
+            if (_right != null!)
             {
                 try
                 {

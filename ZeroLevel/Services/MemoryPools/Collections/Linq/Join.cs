@@ -9,27 +9,27 @@
         //     Func<TInner, TKey> innerKeySelector, 
         //     Func<TOuter, TInner, TResult> resultSelector)
         // {
-        //     if (outer == null)
+        //     if (outer == null!)
         //     {
         //         throw new ArgumentNullException(nameof(outer));
         //     }
         //
-        //     if (inner == null)
+        //     if (inner == null!)
         //     {
         //         throw new ArgumentNullException(nameof(inner));
         //     }
         //
-        //     if (outerKeySelector == null)
+        //     if (outerKeySelector == null!)
         //     {
         //         throw new ArgumentNullException(nameof(outerKeySelector));
         //     }
         //
-        //     if (innerKeySelector == null)
+        //     if (innerKeySelector == null!)
         //     {
         //         throw new ArgumentNullException(nameof(innerKeySelector));
         //     }
         //
-        //     if (resultSelector == null)
+        //     if (resultSelector == null!)
         //     {
         //         throw new ArgumentNullException(nameof(resultSelector));
         //     }
@@ -45,27 +45,27 @@
         //     Func<TOuter, TInner, TResult> resultSelector,
         //     IEqualityComparer<TKey> comparer)
         // {
-        //     if (outer == null)
+        //     if (outer == null!)
         //     {
         //         throw new ArgumentNullException(nameof(outer));
         //     }
         //
-        //     if (inner == null)
+        //     if (inner == null!)
         //     {
         //         throw new ArgumentNullException(nameof(inner));
         //     }
         //
-        //     if (outerKeySelector == null)
+        //     if (outerKeySelector == null!)
         //     {
         //         throw new ArgumentNullException(nameof(outerKeySelector));
         //     }
         //
-        //     if (innerKeySelector == null)
+        //     if (innerKeySelector == null!)
         //     {
         //         throw new ArgumentNullException(nameof(innerKeySelector));
         //     }
         //
-        //     if (resultSelector == null)
+        //     if (resultSelector == null!)
         //     {
         //         throw new ArgumentNullException(nameof(resultSelector));
         //     }
@@ -93,7 +93,7 @@
         //                 {
         //                     TOuter item = e.Current;
         //                     Grouping<TKey, TInner> g = lookup.GetGrouping(outerKeySelector(item), create: false);
-        //                     if (g != null)
+        //                     if (g != null!)
         //                     {
         //                         int count = g._count;
         //                         TInner[] elements = g._elements;

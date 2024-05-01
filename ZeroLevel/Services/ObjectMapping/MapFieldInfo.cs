@@ -35,12 +35,12 @@ namespace ZeroLevel.Services.ObjectMapping
             switch (memberInfo.MemberType)
             {
                 case MemberTypes.Field:
-                    return FromField(memberInfo as FieldInfo);
+                    return FromField((memberInfo as FieldInfo)!);
 
                 case MemberTypes.Property:
-                    return FromProperty(memberInfo as PropertyInfo);
+                    return FromProperty((memberInfo as PropertyInfo)!);
             }
-            return null;
+            return null!;
         }
 
         #endregion Factory
@@ -50,12 +50,13 @@ namespace ZeroLevel.Services.ObjectMapping
         private static bool IsNullable(Type type)
         {
             if (!type.IsValueType) return true; // ref-type
-            if (Nullable.GetUnderlyingType(type) != null) return true; // Nullable<T>
+            if (Nullable.GetUnderlyingType(type) != null!) return true; // Nullable<T>
             return false; // value-type
         }
 
         private static MapMemberInfo FromField(FieldInfo fieldInfo)
         {
+            if (fieldInfo == null) return null!;
             var field = new MapMemberInfo(TypeGetterSetterBuilder.BuildSetter(fieldInfo), TypeGetterSetterBuilder.BuildGetter(fieldInfo))
             {
                 Name = fieldInfo.Name,
@@ -69,6 +70,7 @@ namespace ZeroLevel.Services.ObjectMapping
 
         private static IMemberInfo FromProperty(PropertyInfo propertyInfo)
         {
+            if (propertyInfo == null) return null!;
             var field = new MapMemberInfo(TypeGetterSetterBuilder.BuildSetter(propertyInfo), TypeGetterSetterBuilder.BuildGetter(propertyInfo))
             {
                 Name = propertyInfo.Name,
@@ -86,7 +88,7 @@ namespace ZeroLevel.Services.ObjectMapping
             {
                 return Activator.CreateInstance(type);
             }
-            return null;
+            return null!;
         }
 
         #endregion Helpers

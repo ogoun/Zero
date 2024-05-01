@@ -35,7 +35,7 @@ namespace ZeroLevel.Services.Serialization
 
             public void Write<T>(IBinaryWriter writer, T value)
             {
-                Invoker.Invoke(writer, WriteId, new object[] { value });
+                Invoker.Invoke(writer, WriteId, new object[] { value! });
             }
 
             public void WriteObject(IBinaryWriter writer, object value)

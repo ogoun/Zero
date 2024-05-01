@@ -16,58 +16,58 @@ namespace Iveonik.Stemmers
 
         private readonly static Among[] a_0 =
         {
-            new Among ( "", -1, 6, null ),
-            new Among ( "\u00E1", 0, 1, null ),
-            new Among ( "\u00E4", 0, 1, null ),
-            new Among ( "\u00E9", 0, 2, null ),
-            new Among ( "\u00EB", 0, 2, null ),
-            new Among ( "\u00ED", 0, 3, null ),
-            new Among ( "\u00EF", 0, 3, null ),
-            new Among ( "\u00F3", 0, 4, null ),
-            new Among ( "\u00F6", 0, 4, null ),
-            new Among ( "\u00FA", 0, 5, null ),
-            new Among ( "\u00FC", 0, 5, null )
+            new Among ( "", -1, 6, null! ),
+            new Among ( "\u00E1", 0, 1, null! ),
+            new Among ( "\u00E4", 0, 1, null! ),
+            new Among ( "\u00E9", 0, 2, null! ),
+            new Among ( "\u00EB", 0, 2, null! ),
+            new Among ( "\u00ED", 0, 3, null! ),
+            new Among ( "\u00EF", 0, 3, null! ),
+            new Among ( "\u00F3", 0, 4, null! ),
+            new Among ( "\u00F6", 0, 4, null! ),
+            new Among ( "\u00FA", 0, 5, null! ),
+            new Among ( "\u00FC", 0, 5, null! )
         };
 
         private readonly static Among[] a_1 =
         {
-            new Among ( "", -1, 3, null ),
-            new Among ( "I", 0, 2, null ),
-            new Among ( "Y", 0, 1, null )
+            new Among ( "", -1, 3, null! ),
+            new Among ( "I", 0, 2, null! ),
+            new Among ( "Y", 0, 1, null! )
         };
 
         private readonly static Among[] a_2 =
         {
-            new Among ( "dd", -1, -1, null ),
-            new Among ( "kk", -1, -1, null ),
-            new Among ( "tt", -1, -1, null )
+            new Among ( "dd", -1, -1, null! ),
+            new Among ( "kk", -1, -1, null! ),
+            new Among ( "tt", -1, -1, null! )
         };
 
         private readonly static Among[] a_3 =
         {
-            new Among ( "ene", -1, 2, null ),
-            new Among ( "se", -1, 3, null ),
-            new Among ( "en", -1, 2, null ),
-            new Among ( "heden", 2, 1, null ),
-            new Among ( "s", -1, 3, null )
+            new Among ( "ene", -1, 2, null! ),
+            new Among ( "se", -1, 3, null! ),
+            new Among ( "en", -1, 2, null! ),
+            new Among ( "heden", 2, 1, null! ),
+            new Among ( "s", -1, 3, null! )
         };
 
         private readonly static Among[] a_4 =
         {
-            new Among ( "end", -1, 1, null ),
-            new Among ( "ig", -1, 2, null ),
-            new Among ( "ing", -1, 1, null ),
-            new Among ( "lijk", -1, 3, null ),
-            new Among ( "baar", -1, 4, null ),
-            new Among ( "bar", -1, 5, null )
+            new Among ( "end", -1, 1, null! ),
+            new Among ( "ig", -1, 2, null! ),
+            new Among ( "ing", -1, 1, null! ),
+            new Among ( "lijk", -1, 3, null! ),
+            new Among ( "baar", -1, 4, null! ),
+            new Among ( "bar", -1, 5, null! )
         };
 
         private readonly static Among[] a_5 =
         {
-            new Among ( "aa", -1, -1, null ),
-            new Among ( "ee", -1, -1, null ),
-            new Among ( "oo", -1, -1, null ),
-            new Among ( "uu", -1, -1, null )
+            new Among ( "aa", -1, -1, null! ),
+            new Among ( "ee", -1, -1, null! ),
+            new Among ( "oo", -1, -1, null! ),
+            new Among ( "uu", -1, -1, null! )
         };
 
         private static readonly char[] g_v = {(char)17, (char)65, (char)16, (char)1, (char)0, (char)0, (char)0,

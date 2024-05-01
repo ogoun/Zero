@@ -40,7 +40,7 @@ namespace DOM.DSL.Contexts
                             }
                             else
                             {
-                                _next = new TSystemToken { Command = name, Arg = null };
+                                _next = new TSystemToken { Command = name, Arg = null! };
                             }
                         }
                         else
@@ -72,7 +72,7 @@ namespace DOM.DSL.Contexts
 
         public TToken Complete()
         {
-            return new TElementToken { ElementName = _name, NextToken = _next?.Clone() };
+            return new TElementToken { ElementName = _name, NextToken = _next?.Clone()! };
         }
     }
 }

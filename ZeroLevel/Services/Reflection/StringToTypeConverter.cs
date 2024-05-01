@@ -39,7 +39,7 @@ namespace ZeroLevel.Services.Reflection
             {
                 return Activator.CreateInstance(type);
             }
-            return null;
+            return null!;
         }
 
         #endregion TypeHelpers

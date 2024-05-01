@@ -24,7 +24,7 @@ namespace ZeroLevel.Services.FileSystem
         private readonly bool _useSubdirectories = false;
 
         public PeriodicFileSystemWatcher(TimeSpan period, string watch_folder, string temp_folder, Action<FileMeta> callback
-            , IEnumerable<string> extensions = null
+            , IEnumerable<string> extensions = null!
             , bool removeTempFileAfterCallback = false
             , bool useSubdirectories = false)
         {
@@ -32,7 +32,7 @@ namespace ZeroLevel.Services.FileSystem
             {
                 throw new ArgumentNullException(nameof(watch_folder));
             }
-            if (callback == null)
+            if (callback == null!)
             {
                 throw new ArgumentNullException(nameof(callback));
             }
@@ -141,7 +141,7 @@ namespace ZeroLevel.Services.FileSystem
         /// </summary>
         private string MoveToTemporary(string from)
         {
-            if (from == null)
+            if (from == null!)
             {
                 throw new ArgumentException("from");
             }
@@ -156,7 +156,7 @@ namespace ZeroLevel.Services.FileSystem
                 File.Delete(from);
                 return tempFile;
             }
-            return null;
+            return null!;
         }
 
         /// <summary>
@@ -164,14 +164,14 @@ namespace ZeroLevel.Services.FileSystem
         /// </summary>
         private static string TrySolveCollision(string file)
         {
-            if (file == null)
+            if (file == null!)
             {
                 throw new ArgumentNullException("file");
             }
             string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(file);
             string extension = Path.GetExtension(file);
             string directoryName = Path.GetDirectoryName(file);
-            if (directoryName != null)
+            if (directoryName != null!)
             {
                 int num = 0;
                 do
@@ -200,17 +200,17 @@ namespace ZeroLevel.Services.FileSystem
             {
                 files = Directory.GetFiles(_sourceFolder, "*.*", _useSubdirectories ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly)
                     ?.Where(f => _extensions.Contains(Path.GetExtension(f).ToLowerInvariant()))
-                    ?.ToArray();
+                    ?.ToArray()!;
             }
             else
             {
                 files = Directory.GetFiles(_sourceFolder, "*.*", _useSubdirectories ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
             }
-            if (files != null)
+            if (files != null!)
             {
                 Array.Sort<string>(files, FileNameSortCompare);
             }
-            return files;
+            return files!;
         }
 
         /// <summary>
