@@ -8,7 +8,7 @@
 		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
 		<Title>ZeroLevel</Title>
 		<FileVersion>$(AssemblyVersion)</FileVersion>
-		<AssemblyVersion>4.0.0.0</AssemblyVersion>
+		<AssemblyVersion>4.0.0.1</AssemblyVersion>
 		<Version>$(AssemblyVersion)</Version>
 		<AnalysisLevel>latest</AnalysisLevel>
 		<Authors>Ogoun</Authors>
@@ -30,6 +30,10 @@
 
 	<ItemGroup>
 	  <Content Include="v3.ico" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="6.0.0" />
 	</ItemGroup>
 
 	<ItemGroup>

@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Linq;
-using System.Reflection;
 using ZeroLevel.Logging;
-using ZeroLevel.Services.Invokation;
-using ZeroLevel.Services.Serialization;
+using ZeroLevel.Services.HashFunctions;
+using ZeroLevel.Services.Mathemathics;
 
 namespace TestApp
 {
@@ -54,10 +52,34 @@ namespace TestApp
 
     internal static class Program
     {
-       
-
         private static void Main(string[] args)
         {
+            var date = DateTime.Now;
+
+            var bytes = new byte[1531];
+            new Random().NextBytes(bytes);
+            var hash = Murmur3.ComputeULongHash(bytes);
+            Console.WriteLine($"{hash}");
+
+            new Random().NextBytes(bytes);
+            hash = Murmur3.ComputeULongHash(bytes);
+            Console.WriteLine($"{hash}");
+
+            bytes[0] = 10;
+            hash = Murmur3.ComputeULongHash(bytes);
+            Console.WriteLine($"{hash}");
+
+            new Random().NextBytes(bytes);
+            hash = Murmur3.ComputeULongHash(bytes);
+            Console.WriteLine($"{hash}");
+            Console.ReadKey();
+
+            /*
+            foreach (var c in Combinations.GenerateUniqueSets(new int[] { 1, 2, 3, 4, 5, 6 }, 3))
+            { 
+                Console.WriteLine(string.Join('\t', c));
+            }
+            */
         }
     }
 }

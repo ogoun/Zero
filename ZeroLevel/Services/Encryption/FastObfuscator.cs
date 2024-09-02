@@ -40,8 +40,19 @@ namespace ZeroLevel.Services.Encryption
 
         public void DeHashData(byte[] data)
         {
-            if (data.Length == 0) return;
-            for (var i = data.Length - 1; i > 0; i--)
+            int i;
+            for (i = data.Length - 1; i > 9; i -= 8)
+            {
+                data[i - 0] ^= data[i - 1];
+                data[i - 1] ^= data[i - 2];
+                data[i - 2] ^= data[i - 3];
+                data[i - 3] ^= data[i - 4];
+                data[i - 4] ^= data[i - 5];
+                data[i - 5] ^= data[i - 6];
+                data[i - 6] ^= data[i - 7];
+                data[i - 7] ^= data[i - 8];
+            }
+            for (; i >= 1; i--)
             {
                 data[i] ^= data[i - 1];
             }
