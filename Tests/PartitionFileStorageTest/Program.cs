@@ -519,7 +519,7 @@ namespace PartitionFileStorageTest
                     EnableIndexInMemoryCachee = true
                 },
                 RootFolder = folder,
-                FilePartition = new StoreFilePartition<string, StoreMetadata>("Host hash", (key, _) => Math.Abs(StringHash.DotNetFullHash(key) % 367).ToString()),
+                FilePartition = new StoreFilePartition<string, StoreMetadata>("Host hash", (key, _) => Math.Abs(StringHash.DotNetFullHash(key.ToLowerInvariant()) % 367).ToString()),
                 MergeFunction = list =>
                 {
                     ulong s = 0;

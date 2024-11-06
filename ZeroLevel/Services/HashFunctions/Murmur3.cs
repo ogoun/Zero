@@ -302,5 +302,22 @@ namespace ZeroLevel.Services.HashFunctions
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ulong GetUInt64(this byte[] bb, int pos) =>
             (ulong)(bb[pos++] | bb[pos++] << 8 | bb[pos++] << 16 | bb[pos++] << 24);
+
+        /// <summary>
+        /// A 32-bit murmur3 implementation.
+        /// </summary>
+        /// <param name="h"></param>
+        /// <returns></returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int Compute(int h)
+        {
+            uint a = (uint)h;
+            a ^= a >> 16;
+            a *= 0x85ebca6b;
+            a ^= a >> 13;
+            a *= 0xc2b2ae35;
+            a ^= a >> 16;
+            return (int)a;
+        }
     }
 }

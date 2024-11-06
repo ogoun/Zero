@@ -1,4 +1,7 @@
-﻿using ZeroLevel.Services.Semantic;
+﻿using Iveonik.Stemmers;
+using ZeroLevel;
+using ZeroLevel.Services.FileSystem;
+using ZeroLevel.Services.Semantic;
 using ZeroLevel.Services.Serialization;
 using ZeroLevel.Sleopok.Engine;
 using ZeroLevel.Sleopok.Engine.Models;
@@ -9,73 +12,111 @@ namespace Sleopok.Tests
 {
     internal class Program
     {
+        public sealed class BookDocumentSimple
+        {
+            public string Id { get; set; }
+
+            [SleoIndex("title", 10.0f, avaliableForExactMatch: true)]
+            public string Title { get; set; }
+
+            [SleoIndex("author", 10.0f, avaliableForExactMatch: true)]
+            public string Author { get; set; }
+        }
+
         public sealed class BookDocument
         {
             public string Id { get; set; }
 
-            [SleoIndex("title", 200.0f)]
+            [SleoIndex("title", 10.0f, avaliableForExactMatch: true)]
             public string Title { get; set; }
 
-            [SleoIndex("titlelm", 100.0f)]
-            public string TitleLemmas { get; set; }
+            [SleoIndex("stemms", 2.0f)]
+            public string Stemms { get; set; }
 
-            [SleoIndex("author", 10.0f)]
+            [SleoIndex("author", 10.0f, avaliableForExactMatch: true)]
             public string Author { get; set; }
-
-            [SleoIndex("genre", 1.0f)]
-            public string Genre { get; set; }
         }
-
-        private static Dictionary<string, string> _titles = new Dictionary<string, string>
-        {
-            { "66056bc0481e83af64c55022", "Документ без названия" },
-            { "6605698d481e83af64c45ad7", "На развилке дорог. Часть 2"},
-            { "660581bc481e83af64cb8b4d", "Паниклав"},
-            { "66057aa2481e83af64c9bb11", "Князь. Война магов (сборник)"},
-            { "66057f75481e83af64cb04f7", "Антология севетского детектива-8. Компиляция. Книги 1-17"},
-            { "66057bd4481e83af64ca0779", "Вор черной масти"},
-            { "66057247481e83af64c76860", "Выбор"},
-            { "66056807481e83af64c3a64f", "Последняя лекция"},
-            { "66057f13481e83af64caed5d", "Оружие Круппа. История династии пушечных королей"},
-            { "66057a37481e83af64c9a14b", "Месть Черного Дракона"},
-            { "660588e8481e83af64cd2d3e", "Мгла над старыми могилами"},
-            { "66056e88481e83af64c64e81", "Кровь и железо"},
-            { "66057a8e481e83af64c9b673", "Маленькая страна"},
-            { "6605687d481e83af64c3e360", "Санкт-Петербург – история в преданиях и легендах"},
-            { "66057987481e83af64c9770c", "Контракт на рабство"},
-            { "66059052481e83af64cf5e31", "Агент космического сыска"},
-            { "660580f9481e83af64cb61c9", "Две жизни Алессы Коэн"},
-            { "66056807481e84af64c3a64f", "Последняя история"},
-            { "66057f13481e85af64caed5d", "История Китая"},
-            { "66057a37481e86af64c9a14b", "Время Черного Дракона"},
-            { "660588e8481e87af64cd2d3e", "Страна которой нет"},
-        };
 
         static async Task Main(string[] args)
         {
-            // TestCompression();
-            // await FillOneFieldIndex();
+            //TestCompression();
             // await TestSearch();
-            await TestEngine();
+            // await TestEngine();
+            await TestEngineReadWrite();
+        }
+
+        static async Task TestEngineReadWrite()
+        {
+            ILexProvider lexProvider = new LexProvider(new RussianStemmer());
+            var tempFolder = Path.Combine(Configuration.BaseDirectory, "SleoTestStorage");
+            FSUtils.CleanAndTestFolder(tempFolder);
+            var lex = new Func<string, string>(s => string.Join(" ", lexProvider.ExtractUniqueLexTokens(s).Select(s => s.Token)));
+            var engine = new SleoEngine<BookDocumentSimple>(tempFolder, b => b.Id);
+            using (var builder = engine.CreateBuilder())
+            {
+                await builder.Write(new[]
+                {
+                    //new BookDocument { Id = "01", Title = "Юность Пушкина", Author = "Егорова Елена", Stemms = lex("Юность Пушкина") },
+                    new BookDocumentSimple { Id = "01", Title = "Стихи Не Для Дам", Author = "Пушкин Александр Сергеевич" },
+                    new BookDocumentSimple { Id = "02", Title = "Светлинен стих", Author = "Азимов Айзък" },
+                });
+            }
+            var reader = engine.CreateReader();
+            var result = await reader.Search(new[] { "стихи", "пушкина" }, false);
+            foreach (var pair in result)
+            {
+                Console.WriteLine($"[{pair.Key}]: {pair.Value}");
+            }
+            //await foreach (var fieldRecords in reader.GetAll())
+            //{
+            //    Console.WriteLine(fieldRecords.Field);
+            //}
         }
 
         static async Task TestEngine()
         {
-            var engine = new SleoEngine<BookDocument>(@"H:\Test", b => b.Id);
+            ILexProvider lexProvider = new LexProvider(new RussianStemmer());
+
+            var tempFolder = Path.Combine(Configuration.BaseDirectory, "SleoTestStorage");
+            FSUtils.CleanAndTestFolder(tempFolder);
+
+            var lex = new Func<string, string>(s => string.Join(" ", lexProvider.ExtractUniqueLexTokens(s).Select(s => s.Token)));
+
+            var engine = new SleoEngine<BookDocument>(tempFolder, b => b.Id);
             using (var builder = engine.CreateBuilder())
             {
-                builder.Write(new[]
+                await builder.Write(new[]
                 {
-                    new BookDocument{ Id = "01", Title = "Страж птица",  },
-                    new BookDocument{ Id = "02" },
-                    new BookDocument{ Id = "03" },
-                    new BookDocument{ Id = "04" },
+                    new BookDocument{ Id = "01", Title = "Юность Пушкина", Author = "Егорова Елена", Stemms = lex("Юность Пушкина") },
+                    new BookDocument{ Id = "02", Title = "Детство Александра Пушкина", Author = "Егорова Елена Николаевна", Stemms = lex("Детство Александра Пушкина") },
+                    new BookDocument{ Id = "03", Title = "Избранные стихи", Author = "Александра Пушкина", Stemms = lex("Избранные стихи") },
+                    new BookDocument{ Id = "04", Title = "Анализ стихотворений Александра Сергеевича Пушкина", Author = "Ланцов Михаил", Stemms = lex("Анализ стихотворений Александра Сергеевича Пушкина") },
+
+                    new BookDocument{ Id = "05", Title = "Море обаяния", Author = "Искандер Фазиль", Stemms = lex("Море обаяния") },
+                    new BookDocument{ Id = "06", Title = "«Какаду»", Author = "Клысь Рышард", Stemms = lex("«Какаду»") },
+                    new BookDocument{ Id = "07", Title = "Ряд случайных чисел [СИ]", Author = "Павлова Елена Евгеньевна", Stemms = lex("Ряд случайных чисел [СИ]") },
+                    new BookDocument{ Id = "08", Title = "Последняя любовь. Плен и свобода", Author = "Мятная Витамина", Stemms = lex("Последняя любовь. Плен и свобода") },
+
+                    new BookDocument{ Id = "09", Title = "Золотой ус. Лучшие рецепты исцеления", Author = "Альменов Чингиз", Stemms = lex("Золотой ус. Лучшие рецепты исцеления") },
+                    new BookDocument{ Id = "10", Title = "Пушки смотрят на восток", Author = "Ефимова Марина Михайловна", Stemms = lex("Пушки смотрят на восто") },
+                    new BookDocument{ Id = "11", Title = "Чингиз Хан, становление", Author = "Пушной Виталий", Stemms = lex("Чингиз Хан, становление") },
                 });
+            }
+
+            var reader = engine.CreateReader();
+            var result = await reader.Search(new[] { "Елена", "Евгеньевна" }, false);
+            foreach (var pair in result)
+            {
+                Console.WriteLine($"[{pair.Key}]: {pair.Value}");
             }
         }
 
         static void TestCompression()
         {
+            var one_zip = Compressor.Compress(new[] { "02" } );
+            var one_unzip = Compressor.DecompressToDocuments(one_zip);
+
+
             var strings = new string[]
             {
                 string.Empty,
@@ -111,30 +152,41 @@ namespace Sleopok.Tests
             }
         }
 
-        static async Task FillOneFieldIndex()
-        {
-            var store = new DataStorage(@"H:\TEST");
-            using (var writer = store.GetWriter("title"))
-            {
-                foreach (var kv in _titles)
-                {
-                    var tokens = WordTokenizer.Tokenize(kv.Value);
-                    foreach (var t in tokens)
-                    {
-                        await writer.Write(t, kv.Key);
-                    }
-                }
-                await writer.Complete();
-            }
-        }
-
         static async Task TestSearch()
         {
-            var store = new DataStorage(@"H:\TEST");
-            var docs = await store.GetDocuments("title", new string[] { "кровь", "страна", "железо", "история", "оружие" }, 1.0f, false);
+            var tempFolder = Path.Combine(Configuration.BaseDirectory, "SleoTestStorage");
+            FSUtils.CleanAndTestFolder(tempFolder);
+
+            var store = new DataStorage(tempFolder);
+
+            using (var writer = store.GetWriter("author"))
+            {
+                await writer.Write("Козлов Игорь", "1");
+                await writer.Write("Ермакова Светлана Евгеньевна", "2");
+                await writer.Write("Муркок Майкл   Лаумер Кейт   Пик Мервин   Ле Гуин Урсула   Дилэни Сэмюэль   Баллард Джеймс Грэм   Эллисон Харлан   Диксон Гордон   Нивен Ларри   Корнблат Сирил М   Вульф Джин   Лейбер Фриц Ройтер", "3");
+                await writer.Write("Коллектив Авторов", "4");
+                await writer.Write("Боннэр Елена Георгиевна", "5");
+                await writer.Write("Звёздкина Анна  ", "6");
+                await writer.Complete();
+            }
+
+            using (var writer = store.GetWriter("title"))
+            {
+                await writer.Write("Подкова на счастье", "1");
+                await writer.Write("Среднеазиатская овчарка", "2");
+                await writer.Write("Багряная игра. Сборник англо-американской фантастики", "3");
+                await writer.Write("Управление проектами. Фундаментальный курс", "4");
+                await writer.Write("Постскриптум: Книга о горьковской ссылке", "5");
+                await writer.Write("Фарватер", "6");
+                await writer.Complete();
+            }
+
+
+
+            var docs = await store.GetDocuments("title", new string[] { "Подкова на счастье" }, 1.0f, false);
             foreach (var kv in docs.OrderByDescending(kv => kv.Value))
             {
-                Console.WriteLine($"[{kv.Key}: {kv.Value}] {_titles[kv.Key]}");
+                Console.WriteLine($"[ID] = {kv.Key}: {kv.Value}");
             }
         }
     }

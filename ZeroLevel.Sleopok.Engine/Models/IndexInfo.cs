@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
-using ZeroLevel;
 using ZeroLevel.Services.FileSystem;
 using ZeroLevel.Services.Reflection;
-using ZeroLevel.Services.Extensions;
 
 namespace ZeroLevel.Sleopok.Engine.Models
 {
@@ -34,6 +32,14 @@ namespace ZeroLevel.Sleopok.Engine.Models
                         var sleoAttribute = member.GetCustomAttribute<SleoIndexAttribute>();
                         if (sleoAttribute == null) continue;
 
+                        var type = SleoFieldType.Single;
+                        if (TypeHelpers.IsGenericCollection(member.DeclaringType)
+                            || TypeHelpers.IsArray(member.DeclaringType)
+                            || TypeHelpers.IsEnumerable(member.DeclaringType))
+                        {
+                            type = SleoFieldType.Array;
+                        }
+
                         Func<object, object> getter;
                         switch (member.MemberType)
                         {
@@ -48,6 +54,7 @@ namespace ZeroLevel.Sleopok.Engine.Models
                         var name = FSUtils.FileNameCorrection(string.IsNullOrWhiteSpace(sleoAttribute.Name) ? member.Name : sleoAttribute.Name);
                         _fields.Add(new SleoField
                         {
+                            FieldType = type,
                             Boost = sleoAttribute.Boost,
                             Name = name,
                             Getter = getter,

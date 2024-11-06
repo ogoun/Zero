@@ -3,7 +3,7 @@ using System.Collections.Concurrent;
 
 namespace ZeroLevel.Logging
 {
-    internal sealed class NoLimitedLogMessageBuffer 
+    internal sealed class NoLimitedLogMessageBuffer
         : ILogMessageBuffer
     {
         private readonly BlockingCollection<Tuple<LogLevel, string>> _messageQueue =
@@ -15,7 +15,7 @@ namespace ZeroLevel.Logging
         {
             get
             {
-                if (_messageQueue.IsCompleted)
+                if (_isDisposed || _messageQueue.IsCompleted)
                     return 0;
                 return _messageQueue.Count;
             }

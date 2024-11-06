@@ -1,5 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
+using ZeroLevel.Implementation.Semantic.Helpers;
 using ZeroLevel.Sleopok.Engine.Models;
 using ZeroLevel.Sleopok.Engine.Services.Storage;
 
@@ -8,6 +11,8 @@ namespace ZeroLevel.Sleopok.Engine.Services.Indexes
     internal sealed class IndexBuilder<T>
         : IIndexBuilder<T>
     {
+        private static char[] _separators = new char[] { ',', ' ', '.', '?', '!', '\\', '/', '+', '&' };
+
         private readonly DataStorage _storage;
         private readonly IndexInfo<T> _indexInfo;
         private readonly Dictionary<string, IPartitionDataWriter> Indexers = new Dictionary<string, IPartitionDataWriter>();
@@ -30,6 +35,15 @@ namespace ZeroLevel.Sleopok.Engine.Services.Indexes
             }
         }
 
+        private static IEnumerable<string> Preprocess(string value)
+        {
+            if (string.IsNullOrWhiteSpace(value) == false)
+            {
+                return TextAnalizer.ExtractWords(value).Select(w=>w.ToLowerInvariant());
+            }
+            return Enumerable.Empty<string>();
+        }
+
         public async Task Write(IEnumerable<T> batch)
         {
             foreach (var doc in batch)
@@ -37,12 +51,20 @@ namespace ZeroLevel.Sleopok.Engine.Services.Indexes
                 var doc_id = _indexInfo.GetId(doc);
                 foreach (var field in _indexInfo.Fields)
                 {
-                    var value = field.Getter(doc!)?.ToString() ?? string.Empty;
-                    if (string.IsNullOrWhiteSpace(value) == false)
+                    if (field.FieldType == SleoFieldType.Array)
                     {
-                        foreach (var t in value.Split(' '))
+                        // TO DO OPTIMIZATION
+                        // Если поле уже хранит массив элементов, считать каждый элемент токеном
+                    }
+                    else
+                    {
+                        var value = field.Getter(doc!)?.ToString() ?? string.Empty;
+                        if (string.IsNullOrWhiteSpace(value) == false)
                         {
-                            await Indexers[field.Name].Write(t, doc_id);
+                            foreach (var t in Preprocess(value))
+                            {
+                                await Indexers[field.Name].Write(t, doc_id);
+                            }
                         }
                     }
                 }

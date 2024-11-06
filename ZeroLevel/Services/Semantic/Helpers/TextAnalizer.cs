@@ -19,24 +19,18 @@ namespace ZeroLevel.Implementation.Semantic.Helpers
         /// <returns>Words</returns>
         public static IEnumerable<string> ExtractWords(string text)
         {
-            var result = new List<string>();
             foreach (Match match in ReWord.Matches(text))
             {
-                result.Add(match.Value);
+                yield return match.Value;
             }
-
-            return result;
         }
 
         public static IEnumerable<string> ExtractRuWords(string text)
         {
-            var result = new List<string>();
             foreach (Match match in ReRuWord.Matches(text))
             {
-                result.Add(match.Value);
+                yield return match.Value;
             }
-
-            return result;
         }
 
         /// <summary>
@@ -66,23 +60,18 @@ namespace ZeroLevel.Implementation.Semantic.Helpers
         /// <returns>Tokens</returns>
         public static IEnumerable<WordToken> ExtractWordTokens(string text)
         {
-            var result = new List<WordToken>();
             foreach (Match match in ReWord.Matches(text))
             {
-                result.Add(new WordToken(match.Value, match.Index));
+                yield return new WordToken(match.Value, match.Index);
             }
-
-            return result;
         }
 
         public static IEnumerable<WordToken> ExtractWordTokens(string[] words)
         {
-            var result = new List<WordToken>();
             for (int i = 0; i < words.Length; i++)
             {
-                result.Add(new WordToken(words[i], i));
+                yield return new WordToken(words[i], i);
             }
-            return result;
         }
 
         /// <summary>

@@ -1,10 +1,17 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using ZeroLevel.Sleopok.Engine.Models;
 using ZeroLevel.Sleopok.Engine.Services.Storage;
 
 namespace ZeroLevel.Sleopok.Engine.Services.Indexes
 {
+    public class FieldRecords
+    {
+        public string Field { get; set; }
+        public Dictionary<string, List<string>> Records { get; set; }
+    }
+
     internal sealed class IndexReader<T>
         : IIndexReader<T>
     {
@@ -16,13 +23,12 @@ namespace ZeroLevel.Sleopok.Engine.Services.Indexes
             _indexInfo = indexInfo;
         }
 
-        public async Task<Dictionary<string, float>> Search(string[] tokens, bool exactMatch)
+        public async Task<IOrderedEnumerable<KeyValuePair<string, float>>> Search(string[] tokens, bool exactMatch)
         {
             var documents = new Dictionary<string, float>();
-
             foreach (var field in _indexInfo.Fields)
             {
-                if (exactMatch && field.ExactMatch == false) 
+                if (exactMatch && field.ExactMatch == false)
                     continue;
                 var docs = await _storage.GetDocuments(field.Name, tokens, field.Boost, exactMatch);
                 foreach (var doc in docs)
@@ -40,7 +46,20 @@ namespace ZeroLevel.Sleopok.Engine.Services.Indexes
                     }
                 }
             }
-            return documents;
+            return documents.OrderByDescending(d => d.Value);
+        }
+
+        public async IAsyncEnumerable<FieldRecords> GetAll()
+        {
+            foreach (var field in _indexInfo.Fields)
+            {
+                var docs = await _storage.GetAllDocuments(field.Name);
+                yield return new FieldRecords
+                {
+                    Field = field.Name,
+                    Records = docs
+                };
+            }
         }
     }
 }

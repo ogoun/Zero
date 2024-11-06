@@ -19,7 +19,8 @@ namespace ZeroLevel.Services.PartitionStorage
         private readonly Func<MemoryStreamReader, Task<DeserializeResult<TInput>>> _inputDeserializer;
         private readonly Func<MemoryStreamReader, Task<DeserializeResult<TValue>>> _valueDeserializer;
 
-        public StoreSerializers(Func<MemoryStreamWriter, TKey, Task> keySerializer,
+        public StoreSerializers(
+            Func<MemoryStreamWriter, TKey, Task> keySerializer,
             Func<MemoryStreamWriter, TInput, Task> inputSerializer,
             Func<MemoryStreamWriter, TValue, Task> valueSerializer,
             Func<MemoryStreamReader, Task<DeserializeResult<TKey>>> keyDeserializer,
