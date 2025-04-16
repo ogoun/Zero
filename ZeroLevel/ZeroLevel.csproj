@@ -8,7 +8,7 @@
 		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
 		<Title>ZeroLevel</Title>
 		<FileVersion>$(AssemblyVersion)</FileVersion>
-		<AssemblyVersion>4.0.0.2</AssemblyVersion>
+		<AssemblyVersion>4.0.0.3</AssemblyVersion>
 		<Version>$(AssemblyVersion)</Version>
 		<AnalysisLevel>latest</AnalysisLevel>
 		<Authors>Ogoun</Authors>
@@ -31,6 +31,7 @@
 
 	<PropertyGroup>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<PackageReleaseNotes>Read config from JSON and YAML files.</PackageReleaseNotes>
 	</PropertyGroup>
 
 	<ItemGroup>
