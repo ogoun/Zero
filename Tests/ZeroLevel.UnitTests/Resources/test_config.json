@@ -1,0 +1,18 @@
+{
+  "url": "http://tes.io",
+  "port": 9091,
+  "limits": {
+    "min": {
+      "cpu": 20,
+      "gpu": 0,
+      "mem": 200
+    },
+    "max": {
+      "cpu": 40,
+      "gpu": 50,
+      "mem": 600
+    },
+    "optional": null,
+    "persistent": true
+  }
+}

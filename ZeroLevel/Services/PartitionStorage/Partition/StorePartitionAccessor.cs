@@ -526,8 +526,8 @@ namespace ZeroLevel.Services.PartitionStorage
             source.Seek(range.Start, SeekOrigin.Begin);
             var size = range.End - range.Start;
             byte[] buffer = new byte[size];
-            source.Read(buffer, 0, buffer.Length);
-            target.Write(buffer, 0, buffer.Length);
+            var count = source.Read(buffer, 0, buffer.Length);
+            target.Write(buffer, 0, count);
         }
         #endregion
 

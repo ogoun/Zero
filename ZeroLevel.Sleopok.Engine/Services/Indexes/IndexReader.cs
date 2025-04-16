@@ -8,8 +8,9 @@ namespace ZeroLevel.Sleopok.Engine.Services.Indexes
 {
     public class FieldRecords
     {
+        public FieldRecords(string field, IDictionary<string, List<string>> records) => (Field, Records) = (field, records);
         public string Field { get; set; }
-        public Dictionary<string, List<string>> Records { get; set; }
+        public IDictionary<string, List<string>> Records { get; set; }
     }
 
     internal sealed class IndexReader<T>
@@ -54,11 +55,7 @@ namespace ZeroLevel.Sleopok.Engine.Services.Indexes
             foreach (var field in _indexInfo.Fields)
             {
                 var docs = await _storage.GetAllDocuments(field.Name);
-                yield return new FieldRecords
-                {
-                    Field = field.Name,
-                    Records = docs
-                };
+                yield return new FieldRecords(field.Name, docs);
             }
         }
     }

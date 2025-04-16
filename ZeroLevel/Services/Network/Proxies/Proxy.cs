@@ -8,17 +8,17 @@ namespace ZeroLevel.Services.Network.Proxies
     public class Proxy
         : IDisposable
     {
-        private readonly ProxyBalancer _balancer = new ProxyBalancer();
+        private readonly ProxyBalancer _balancer = new();
 
         public void AppendServer(IPEndPoint ep) => _balancer.AddEndpoint(ep);
 
-        private Socket _incomingSocket;
+        private readonly Socket _incomingSocket;
 
         public Proxy(IPEndPoint listenEndpoint)
         {
             _incomingSocket = new Socket(listenEndpoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
             _incomingSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.NoDelay, true);
-            _incomingSocket.Bind(listenEndpoint);            
+            _incomingSocket.Bind(listenEndpoint);
         }
 
         public void Run()
@@ -32,10 +32,10 @@ namespace ZeroLevel.Services.Network.Proxies
                     {
                         var socket = await _incomingSocket.AcceptAsync();
                         // no await!
-                        Task.Run(async () =>
+                        await Task.Run(async () =>
                         {
-                           await CreateProxyConnection(socket);
-                        });
+                            await CreateProxyConnection(socket);
+                        }).ConfigureAwait(false);
                     }
                 }
                 catch (Exception ex)
@@ -53,10 +53,8 @@ namespace ZeroLevel.Services.Network.Proxies
                 var server = new Socket(endpoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
                 server.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.NoDelay, true);
                 server.Connect(endpoint);
-                using (var bind = new ProxyBinding(connection, server))
-                {
-                    await bind.Bind();
-                }
+                using var bind = new ProxyBinding(connection, server);
+                await bind.Bind();
             }
             catch (Exception ex)
             {

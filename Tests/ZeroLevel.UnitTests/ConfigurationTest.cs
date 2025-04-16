@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Xunit;
 using ZeroLevel.Services.Config;
@@ -123,6 +124,103 @@ namespace ZeroLevel.UnitTests
             Assert.Equal(d, td);
             Assert.Equal(f, set.Default.First<float>("f"));
             Assert.Equal(i, set.Default.First<int>("i"));
+        }
+
+        /*
+{
+  "url": "http://tes.io",
+  "port": 9091,
+  "limits": {
+    "min": {
+      "cpu": 20,
+      "gpu": 0,
+      "mem": 200
+    },
+    "max": {
+      "cpu": 40,
+      "gpu": 50,
+      "mem": 600
+    },
+    "optional": null,
+    "persistent": true
+  }
+}
+         */
+        [Fact]
+        public void JsonConfigTest()
+        {
+            // Arrange
+            var json = ZeroLevel.UnitTests.Properties.Resources.test_json_config;
+            var tempFilePath = Path.Combine(Path.GetTempPath(), Path.GetTempFileName());
+            File.WriteAllBytes(tempFilePath, json);
+
+            // Act
+            IConfigurationSet set;
+            try
+            {
+                set = Configuration.ReadSetFromJsonFile(tempFilePath);
+            }
+            finally
+            {
+                File.Delete(tempFilePath);
+            }
+
+            // Assert
+            Assert.Equal("http://tes.io", set.Default.First("url"));
+            Assert.Equal(9091, set.Default.First<int>("port"));
+            Assert.Equal(20, set["limits.min"].First<int>("cpu"));
+            Assert.Equal(0, set["limits.min"].First<int>("gpu"));
+            Assert.Equal(200, set["limits.min"].First<int>("mem"));
+            Assert.Equal(40, set["limits.max"].First<int>("cpu"));
+            Assert.Equal(50, set["limits.max"].First<int>("gpu"));
+            Assert.Equal(600, set["limits.max"].First<int>("mem"));
+            Assert.Equal(string.Empty, set["limits"].First("optional"));
+            Assert.Equal(true, set["limits"].First<bool>("persistent"));
+        }
+
+
+        /*
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: my-ingress
+spec:
+  rules:
+  - host: my-app.s<номер своего логина>.edu.slurm.io
+    http:
+      paths:
+      - backend:
+          serviceName: my-service
+          servicePort: 80
+...        
+        */
+        [Fact]
+        public void YamlConfigTest()
+        {
+            // Arrange
+            var json = ZeroLevel.UnitTests.Properties.Resources.test_yaml_config;
+            var tempFilePath = Path.Combine(Path.GetTempPath(), Path.GetTempFileName());
+            File.WriteAllBytes(tempFilePath, json);
+
+            // Act
+            IConfigurationSet set;
+            try
+            {
+                set = Configuration.ReadSetFromYamlFile(tempFilePath);
+            }
+            finally
+            {
+                File.Delete(tempFilePath);
+            }
+
+            // Assert
+            Assert.Equal("extensions/v1beta1", set.Default.First("apiVersion"));
+            Assert.Equal("Ingress", set.Default.First("kind"));
+            Assert.Equal("my-ingress", set["metadata"].First("name"));
+            Assert.Equal("my-app.s<номер своего логина>.edu.slurm.io", set["spec.rules.0"].First("host"));
+            Assert.Equal("my-service", set["spec.rules.0.http.paths.0.backend"].First("serviceName"));
+            Assert.Equal(80, set["spec.rules.0.http.paths.0.backend"].First<int>("servicePort"));
         }
 
 

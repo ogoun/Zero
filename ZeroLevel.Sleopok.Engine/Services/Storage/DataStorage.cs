@@ -112,7 +112,7 @@ namespace ZeroLevel.Sleopok.Engine.Services.Storage
 
         public IPartitionDataWriter GetWriter(string field)
         {
-            return new DateSourceWriter(_store.CreateBuilder(new StoreMetadata { Field = field }));
+            return new DateSourceWriter(_store.CreateBuilder(new StoreMetadata(field)));
         }
 
         /// <summary>
@@ -126,7 +126,7 @@ namespace ZeroLevel.Sleopok.Engine.Services.Storage
         public async Task<Dictionary<string, float>> GetDocuments(string field, string[] tokens, float boost, bool exactMatch)
         {
             var documents = new Dictionary<string, PositionDocScore>();
-            var accessor = _store.CreateAccessor(new StoreMetadata { Field = field });
+            var accessor = _store.CreateAccessor(new StoreMetadata(field));
             if (accessor != null)
             {
                 using (accessor)
@@ -156,7 +156,7 @@ namespace ZeroLevel.Sleopok.Engine.Services.Storage
         public async Task<Dictionary<string, List<string>>> GetAllDocuments(string field)
         {
             var documents = new Dictionary<string, List<string>>();
-            var accessor = _store.CreateAccessor(new StoreMetadata { Field = field });
+            var accessor = _store.CreateAccessor(new StoreMetadata(field));
             if (accessor != null)
             {
                 using (accessor)
@@ -183,7 +183,7 @@ namespace ZeroLevel.Sleopok.Engine.Services.Storage
         {
             using (TextWriter writer = new StreamWriter(stream))
             {
-                await foreach (var i in _store.Bypass(new StoreMetadata { Field = key }))
+                await foreach (var i in _store.Bypass(new StoreMetadata(key)))
                 {
                     writer.WriteLine(i.Key);
                     writer.WriteLine(string.Join(' ', Compressor.DecompressToDocuments(i.Value)));
@@ -193,7 +193,7 @@ namespace ZeroLevel.Sleopok.Engine.Services.Storage
 
         public int HasData(string field)
         {
-            var partition = _store.CreateAccessor(new StoreMetadata { Field = field });
+            var partition = _store.CreateAccessor(new StoreMetadata(field));
             if (partition != null)
             {
                 using (partition)

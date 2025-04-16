@@ -139,7 +139,7 @@ namespace ZeroLevel
             }
             catch (Exception ex)
             {
-                Log.Error(ex, $"[Configuration.ReadFromEnvironmentVariables] Can't read environment variables");
+                Log.Error(ex, $"[{nameof(Configuration)}.ReadFromEnvironmentVariables] Can't read environment variables");
                 throw;
             }
         }
@@ -156,7 +156,7 @@ namespace ZeroLevel
             }
             catch (Exception ex)
             {
-                Log.Error(ex, $"[Configuration.ReadFromApplicationConfig] Can't read app.config file");
+                Log.Error(ex, $"[{nameof(Configuration)}.ReadFromApplicationConfig] Can't read app.config file");
                 throw;
             }
         }
@@ -168,7 +168,7 @@ namespace ZeroLevel
             }
             catch (Exception ex)
             {
-                Log.Error(ex, $"[Configuration.ReadOrEmptyFromApplicationConfig] Can't read app.config file");
+                Log.Error(ex, $"[{nameof(Configuration)}.ReadOrEmptyFromApplicationConfig] Can't read app.config file");
             }
             return _empty;
         }
@@ -185,7 +185,7 @@ namespace ZeroLevel
             }
             catch (Exception ex)
             {
-                Log.Error(ex, $"[Configuration.ReadSetFromApplicationConfig] Can't read app.config file");
+                Log.Error(ex, $"[{nameof(Configuration)}.ReadSetFromApplicationConfig] Can't read app.config file");
                 throw;
             }
         }
@@ -197,7 +197,7 @@ namespace ZeroLevel
             }
             catch (Exception ex)
             {
-                Log.Error(ex, $"[Configuration.ReadOrEmptySetFromApplicationConfig] Can't read app.config file");
+                Log.Error(ex, $"[{nameof(Configuration)}.ReadOrEmptySetFromApplicationConfig] Can't read app.config file");
             }
             return _emptySet;
         }
@@ -214,7 +214,7 @@ namespace ZeroLevel
             }
             catch (Exception ex)
             {
-                Log.Error(ex, $"[Configuration.ReadFromApplicationConfig] Can't read config file '{configFilePath}'");
+                Log.Error(ex, $"[{nameof(Configuration)}.ReadFromApplicationConfig] Can't read config file '{configFilePath}'");
                 throw;
             }
         }
@@ -226,7 +226,7 @@ namespace ZeroLevel
             }
             catch (Exception ex)
             {
-                Log.Error(ex, $"[Configuration.ReadOrEmptyFromApplicationConfig] Can't read config file '{configFilePath}'");
+                Log.Error(ex, $"[{nameof(Configuration)}.ReadOrEmptyFromApplicationConfig] Can't read config file '{configFilePath}'");
             }
             return _empty;
         }
@@ -243,7 +243,7 @@ namespace ZeroLevel
             }
             catch (Exception ex)
             {
-                Log.Error(ex, $"[Configuration.ReadSetFromApplicationConfig] Can't read config file '{configFilePath}'");
+                Log.Error(ex, $"[{nameof(Configuration)}.ReadSetFromApplicationConfig] Can't read config file '{configFilePath}'");
                 throw;
             }
         }
@@ -255,7 +255,7 @@ namespace ZeroLevel
             }
             catch (Exception ex)
             {
-                Log.Error(ex, $"[Configuration.ReadOrEmptySetFromApplicationConfig] Can't read config file '{configFilePath}'");
+                Log.Error(ex, $"[{nameof(Configuration)}.ReadOrEmptySetFromApplicationConfig] Can't read config file '{configFilePath}'");
             }
             return _emptySet;
         }
@@ -273,7 +273,7 @@ namespace ZeroLevel
             }
             catch (Exception ex)
             {
-                Log.Error(ex, $"[Configuration.ReadFromIniFile] Can't read config file '{path}'");
+                Log.Error(ex, $"[{nameof(Configuration)}.ReadFromIniFile] Can't read config file '{path}'");
                 throw;
             }
         }
@@ -285,7 +285,7 @@ namespace ZeroLevel
             }
             catch (Exception ex)
             {
-                Log.Error(ex, $"[Configuration.ReadOrEmptyFromIniFile] Can't read config file '{path}'");
+                Log.Error(ex, $"[{nameof(Configuration)}.ReadOrEmptyFromIniFile] Can't read config file '{path}'");
             }
             return _empty;
         }
@@ -303,7 +303,7 @@ namespace ZeroLevel
             }
             catch (Exception ex)
             {
-                Log.Error(ex, $"[Configuration.ReadSetFromIniFile] Can't read config file '{path}'");
+                Log.Error(ex, $"[{nameof(Configuration)}.ReadSetFromIniFile] Can't read config file '{path}'");
                 throw;
             }
         }
@@ -315,7 +315,7 @@ namespace ZeroLevel
             }
             catch (Exception ex)
             {
-                Log.Error(ex, $"[Configuration.ReadOrEmptySetFromIniFile] Can't read config file '{path}'");
+                Log.Error(ex, $"[{nameof(Configuration)}.ReadOrEmptySetFromIniFile] Can't read config file '{path}'");
             }
             return _emptySet;
         }
@@ -333,7 +333,7 @@ namespace ZeroLevel
             }
             catch (Exception ex)
             {
-                Log.Error(ex, $"[Configuration.ReadFromCommandLine] Can't read command line args");
+                Log.Error(ex, $"[{nameof(Configuration)}.ReadFromCommandLine] Can't read command line args");
                 throw;
             }
         }
@@ -345,7 +345,7 @@ namespace ZeroLevel
             }
             catch (Exception ex)
             {
-                Log.Error(ex, $"[Configuration.ReadOrEmptyFromCommandLine] Can't read command line args");
+                Log.Error(ex, $"[{nameof(Configuration)}.ReadOrEmptyFromCommandLine] Can't read command line args");
             }
             return _empty;
         }
@@ -358,7 +358,7 @@ namespace ZeroLevel
             }
             catch (Exception ex)
             {
-                Log.Error(ex, $"[Configuration.ReadFromBinaryReader] Can't read config from binaryReader");
+                Log.Error(ex, $"[{nameof(Configuration)}.ReadFromBinaryReader] Can't read config from binaryReader");
                 throw;
             }
         }
@@ -370,7 +370,7 @@ namespace ZeroLevel
             }
             catch (Exception ex)
             {
-                Log.Error(ex, $"[Configuration.ReadOrEmptyFromBinaryReader] Can't read config from binaryReader");
+                Log.Error(ex, $"[{nameof(Configuration)}.ReadOrEmptyFromBinaryReader] Can't read config from binaryReader");
             }
             return _empty;
         }
@@ -383,7 +383,7 @@ namespace ZeroLevel
             }
             catch (Exception ex)
             {
-                Log.Error(ex, $"[Configuration.ReadSetFromBinaryReader] Can't read config from binaryReader");
+                Log.Error(ex, $"[{nameof(Configuration)}.ReadSetFromBinaryReader] Can't read config from binaryReader");
                 throw;
             }
         }
@@ -395,10 +395,131 @@ namespace ZeroLevel
             }
             catch (Exception ex)
             {
-                Log.Error(ex, $"[Configuration.ReadSetOrEmptyFromBinaryReader] Can't read config from binaryReader");
+                Log.Error(ex, $"[{nameof(Configuration)}.ReadSetOrEmptyFromBinaryReader] Can't read config from binaryReader");
             }
             return _emptySet;
         }
+
+        /// <summary>
+        /// Create configuration from Json file
+        /// </summary>
+        /// <param name="path">Path to the Json file</param>
+        /// <returns>Configuration</returns>
+        public static IConfiguration ReadFromJsonFile(string path)
+        {
+            try
+            {
+                return new JsonFileReader(path).ReadConfiguration();
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, $"[{nameof(Configuration)}.ReadFromJsonFile] Can't read config file '{path}'");
+                throw;
+            }
+        }
+        public static IConfiguration ReadOrEmptyFromJsonFile(string path)
+        {
+            try
+            {
+                return new JsonFileReader(path).ReadConfiguration();
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, $"[{nameof(Configuration)}.ReadOrEmptyFromJsonFile] Can't read config file '{path}'");
+            }
+            return _empty;
+        }
+
+        /// <summary>
+        /// Creating a configuration from an Json file, including sections
+        /// </summary>
+        /// <param name="path">Path to the Json file</param>
+        /// <returns>Configuration</returns>
+        public static IConfigurationSet ReadSetFromJsonFile(string path)
+        {
+            try
+            {
+                return new JsonFileReader(path).ReadConfigurationSet();
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, $"[{nameof(Configuration)}.ReadSetFromJsonFile] Can't read config file '{path}'");
+                throw;
+            }
+        }
+        public static IConfigurationSet ReadSetOrEmptyFromJsonFile(string path)
+        {
+            try
+            {
+                return new JsonFileReader(path).ReadConfigurationSet();
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, $"[{nameof(Configuration)}.ReadSetOrEmptyFromJsonFile] Can't read config file '{path}'");
+            }
+            return _emptySet;
+        }
+
+        /// <summary>
+        /// Create configuration from Yaml file
+        /// </summary>
+        /// <param name="path">Path to the Yaml file</param>
+        /// <returns>Configuration</returns>
+        public static IConfiguration ReadFromYamlFile(string path)
+        {
+            try
+            {
+                return new YamlFileReader(path).ReadConfiguration();
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, $"[{nameof(Configuration)}.ReadFromYamlFile] Can't read config file '{path}'");
+                throw;
+            }
+        }
+        public static IConfiguration ReadOrEmptyFromYamlFile(string path)
+        {
+            try
+            {
+                return new YamlFileReader(path).ReadConfiguration();
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, $"[{nameof(Configuration)}.ReadOrEmptyFromYamlFile] Can't read config file '{path}'");
+            }
+            return _empty;
+        }
+
+        /// <summary>
+        /// Creating a configuration from an Yaml file, including sections
+        /// </summary>
+        /// <param name="path">Path to the Yaml file</param>
+        /// <returns>Configuration</returns>
+        public static IConfigurationSet ReadSetFromYamlFile(string path)
+        {
+            try
+            {
+                return new YamlFileReader(path).ReadConfigurationSet();
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, $"[{nameof(Configuration)}.ReadSetFromYamlFile] Can't read config file '{path}'");
+                throw;
+            }
+        }
+        public static IConfigurationSet ReadSetOrEmptyFromYamlFile(string path)
+        {
+            try
+            {
+                return new YamlFileReader(path).ReadConfigurationSet();
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, $"[{nameof(Configuration)}.ReadSetOrEmptyFromYamlFile] Can't read config file '{path}'");
+            }
+            return _emptySet;
+        }
+        
         #endregion Read configuration
 
         public static IConfiguration Merge(ConfigurationRecordExistBehavior existRecordBehavior, params IConfiguration[] configurations)

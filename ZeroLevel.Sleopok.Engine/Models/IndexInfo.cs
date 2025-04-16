@@ -44,22 +44,15 @@ namespace ZeroLevel.Sleopok.Engine.Models
                         switch (member.MemberType)
                         {
                             case MemberTypes.Field:
-                                getter = TypeGetterSetterBuilder.BuildGetter(member as FieldInfo);
+                                getter = TypeGetterSetterBuilder.BuildGetter((member as FieldInfo)!);
                                 break;
                             case MemberTypes.Property:
-                                getter = TypeGetterSetterBuilder.BuildGetter(member as PropertyInfo);
+                                getter = TypeGetterSetterBuilder.BuildGetter((member as PropertyInfo)!);
                                 break;
                             default: return;
                         }
                         var name = FSUtils.FileNameCorrection(string.IsNullOrWhiteSpace(sleoAttribute.Name) ? member.Name : sleoAttribute.Name);
-                        _fields.Add(new SleoField
-                        {
-                            FieldType = type,
-                            Boost = sleoAttribute.Boost,
-                            Name = name,
-                            Getter = getter,
-                            ExactMatch = sleoAttribute.AvaliableForExactMatch
-                        });
+                        _fields.Add(new SleoField(type, name, sleoAttribute.Boost, sleoAttribute.AvaliableForExactMatch, getter));
                     }
                 });
         }
