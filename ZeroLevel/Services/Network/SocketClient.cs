@@ -127,7 +127,7 @@ namespace ZeroLevel.Network
         public void Request(Frame frame, Action<byte[]> callback, Action<string> fail = null!)
         {
             if (Status != SocketClientStatus.Working) throw new Exception($"[SocketClient.Request] Socket status: {Status}");
-            var data = NetworkPacketFactory.Reqeust(MessageSerializer.Serialize(frame), out int id);
+            var data = NetworkPacketFactory.Request(MessageSerializer.Serialize(frame), out int id);
             _requests.RegisterForFrame(id, callback, fail);
             Send(id, true, data);
         }
@@ -178,8 +178,11 @@ namespace ZeroLevel.Network
                 }
                 else
                 {
-                    // TODO or not TODO
-                    Thread.Sleep(1);
+                    if (count == 0)
+                    {
+                        Broken(); // Закрытие соединения
+                        return;
+                    }
                 }
                 StartReceive();
             }
@@ -345,6 +348,8 @@ namespace ZeroLevel.Network
             {
                 Log.Error(ex, "[SocketClient.Dispose]");
             }
+            _receiveThread?.Join(500);
+            _sendingThread?.Join(500);
         }
     }
 }

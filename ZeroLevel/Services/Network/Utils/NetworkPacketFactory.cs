@@ -28,7 +28,7 @@ namespace ZeroLevel.Network
             return packet;
         }
 
-        public static byte[] Reqeust(byte[] data, out int requestId)
+        public static byte[] Request(byte[] data, out int requestId)
         {
             var packet = new byte[data.Length + 6 + 4];
             packet[0] = (MAGIC | MAGIC_REQUEST);
