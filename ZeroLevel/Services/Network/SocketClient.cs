@@ -4,6 +4,7 @@ using System.Collections.Concurrent;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
+using ZeroLevel.Services.Network;
 using ZeroLevel.Services.Serialization;
 
 namespace ZeroLevel.Network
@@ -35,13 +36,15 @@ namespace ZeroLevel.Network
 
         private Socket _clientSocket;
         private FrameParser _parser;
-        private readonly RequestBuffer _requests = new RequestBuffer();
-        private readonly byte[] _buffer = new byte[DEFAULT_RECEIVE_BUFFER_SIZE];
+        private readonly RequestBuffer _requests = new RequestBuffer();        
         private bool _socket_freezed = false; // используется для связи сервер-клиент, запрещает пересоздание сокета
         private readonly object _reconnection_lock = new object();
         private long _heartbeat_key;
         private Thread _receiveThread;
         private Thread _sendingThread;
+
+        //private readonly byte[] _buffer = new byte[DEFAULT_RECEIVE_BUFFER_SIZE];
+        private readonly AdaptiveBufferManager _bufferManager;
 
         #endregion Private
 
@@ -49,10 +52,24 @@ namespace ZeroLevel.Network
 
         public SocketClient(IPEndPoint ep, IRouter router)
         {
+            _bufferManager = new AdaptiveBufferManager(
+                minSize: 4096,
+                maxSize: 65536,
+                increaseThreshold: 0.9,
+                decreaseThreshold: 0.25,
+                increaseAfterReads: 10,
+                decreaseAfterReads: 100
+            );
+
             try
             {
                 _clientSocket = new Socket(ep.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-                _clientSocket.Connect(ep);
+                _clientSocket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, true); // Отключение алгоритма Nagle
+                _clientSocket.SendBufferSize = 65536; // Увеличение буфера отправки
+                _clientSocket.ReceiveBufferSize = 65536; // Увеличение буфера приема
+                //_clientSocket.Connect(ep);
+                OpenConnection(_clientSocket, ep);
+                _clientSocket.SetKeepAlive(true, 30000, 10000);
                 OnConnect(this);
             }
             catch (Exception ex)
@@ -71,8 +88,28 @@ namespace ZeroLevel.Network
             StartReceive();
         }
 
+        private static void OpenConnection(Socket socket, IPEndPoint ep)
+        {
+            var connectResult = socket.BeginConnect(ep, null, null);
+            if (!connectResult.AsyncWaitHandle.WaitOne(5000, false))
+            {
+                socket.Close();
+                throw new TimeoutException("Connection timeout");
+            }
+            socket.EndConnect(connectResult);
+        }
+
         public SocketClient(Socket socket, IRouter router)
         {
+            _bufferManager = new AdaptiveBufferManager(
+                minSize: 4096,
+                maxSize: 65536,
+                increaseThreshold: 0.9,
+                decreaseThreshold: 0.25,
+                increaseAfterReads: 10,
+                decreaseAfterReads: 100
+            );
+
             Router = router;
             _clientSocket = socket;
             Endpoint = (IPEndPoint)_clientSocket.RemoteEndPoint;
@@ -97,26 +134,6 @@ namespace ZeroLevel.Network
 
 
             _heartbeat_key = Sheduller.RemindEvery(TimeSpan.FromMilliseconds(MINIMUM_HEARTBEAT_UPDATE_PERIOD_MS), Heartbeat);
-        }
-
-        private void StartReceive()
-        {
-            try
-            {
-                _clientSocket.BeginReceive(_buffer, 0, DEFAULT_RECEIVE_BUFFER_SIZE, SocketFlags.None, ReceiveAsyncCallback, null);
-            }
-            catch (NullReferenceException)
-            {
-                Broken();
-                Log.SystemError("[SocketClient.TryConnect] Client : Null Reference Exception - On Connect (begin receive section)");
-                _clientSocket.Disconnect(false);
-            }
-            catch (SocketException e)
-            {
-                Broken();
-                Log.SystemError(e, "[SocketClient.TryConnect] Client : Exception - On Connect (begin receive section)");
-                _clientSocket.Disconnect(false);
-            }
         }
 
         #region API
@@ -167,6 +184,26 @@ namespace ZeroLevel.Network
             }
         }
 
+        private void StartReceive()
+        {
+            try
+            {
+                _clientSocket.BeginReceive(_bufferManager.Buffer, 0, _bufferManager.CurrentSize, SocketFlags.None, ReceiveAsyncCallback, null);
+            }
+            catch (NullReferenceException)
+            {
+                Broken();
+                Log.SystemError("[SocketClient.TryConnect] Client : Null Reference Exception - On Connect (begin receive section)");
+                _clientSocket.Disconnect(false);
+            }
+            catch (SocketException e)
+            {
+                Broken();
+                Log.SystemError(e, "[SocketClient.TryConnect] Client : Exception - On Connect (begin receive section)");
+                _clientSocket.Disconnect(false);
+            }
+        }
+
         public void ReceiveAsyncCallback(IAsyncResult ar)
         {
             try
@@ -174,7 +211,8 @@ namespace ZeroLevel.Network
                 var count = _clientSocket.EndReceive(ar);
                 if (count > 0)
                 {
-                    _parser.Push(_buffer, count);
+                    _parser.Push(_bufferManager.Buffer, count);
+                    _bufferManager.ProcessReadResult(count);
                 }
                 else
                 {
@@ -339,6 +377,17 @@ namespace ZeroLevel.Network
             }
             Disposed();
             Sheduller.Remove(_heartbeat_key);
+
+            _bufferManager?.Dispose();
+
+            try
+            {
+                _clientSocket?.Shutdown(SocketShutdown.Both);                
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "[SocketClient.Dispose] Shutdown");
+            }
             try
             {
                 _clientSocket?.Close();

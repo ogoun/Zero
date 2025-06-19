@@ -21,7 +21,7 @@ namespace ZeroLevel.Network
         /// <summary>
         /// Buffer size for receiving data
         /// </summary>
-        protected const int DEFAULT_RECEIVE_BUFFER_SIZE = 4096;
+        // protected const int DEFAULT_RECEIVE_BUFFER_SIZE = 4096;
 
         /// <summary>
         /// If during the specified period there was no network activity, send a ping-request

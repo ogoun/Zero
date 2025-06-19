@@ -5,6 +5,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using ZeroLevel.Network.SDL;
+using ZeroLevel.Services.Network;
 
 namespace ZeroLevel.Network
 {
@@ -62,6 +63,9 @@ namespace ZeroLevel.Network
             LocalEndpoint = endpoint;
             _serverSocket = new Socket(endpoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
             _serverSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive, true);
+            _serverSocket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, true); // Отключение алгоритма Nagle
+            _serverSocket.SendBufferSize = 65536; // Увеличение буфера отправки
+            _serverSocket.ReceiveBufferSize = 65536; // Увеличение буфера приема
             _serverSocket.Bind(endpoint);
             _serverSocket.Listen(100);
             Working();
@@ -75,6 +79,14 @@ namespace ZeroLevel.Network
                 try
                 {
                     var client_socket = _serverSocket.EndAccept(ar);
+                    // Настройка клиентского сокета
+                    client_socket.NoDelay = true;
+                    client_socket.SendBufferSize = 65536;
+                    client_socket.ReceiveBufferSize = 65536;
+
+                    // Настройка KeepAlive для клиентского соединения
+                    client_socket.SetKeepAlive(true, 30000, 10000);
+
                     var ep = client_socket.RemoteEndPoint as IPEndPoint;
                     Log.SystemInfo($"[ZSocketServer.BeginAcceptCallback] Incoming connection {(ep?.Address?.ToString() ?? string.Empty)}:{(ep?.Port.ToString() ?? string.Empty)}");
                     _connection_set_lock.EnterWriteLock();

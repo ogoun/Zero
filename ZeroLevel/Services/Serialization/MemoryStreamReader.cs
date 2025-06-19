@@ -249,7 +249,7 @@ namespace ZeroLevel.Services.Serialization
             long deserialized = BitConverter.ToInt64(buffer, 0);
             return DateTime.FromBinary(deserialized);
         }
-        
+
         public IPAddress ReadIP()
         {
             var exists = ReadByte();
@@ -575,7 +575,7 @@ namespace ZeroLevel.Services.Serialization
     }
 
     public partial class MemoryStreamReader
-        : IAsyncBinaryReader
+     : IAsyncBinaryReader
     {
         /// <summary>
         ///  Reading byte-package (read the size of the specified number of bytes, and then the packet itself read size)
