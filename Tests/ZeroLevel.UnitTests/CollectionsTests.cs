@@ -91,6 +91,39 @@ namespace ZeroLevel.CollectionUnitTests
         }
 
         [Fact]
+        public void FixSizeQueueFirstLastTest()
+        {
+            // Arrange
+            var fix = new FixSizeQueue<long>(3);
+
+            // Act
+            fix.Push(1);
+            fix.Push(2);
+            fix.Push(3);
+            fix.Push(4);
+            fix.Push(5);
+
+            // Assert
+            Assert.True(fix.Peek() == 3);
+            Assert.True(fix.GetLast() == 5);
+
+            fix.Take();
+
+            Assert.True(fix.Peek() == 4);
+            Assert.True(fix.GetLast() == 5);
+
+            fix.Take();
+
+            Assert.True(fix.Peek() == 5);
+            Assert.True(fix.GetLast() == 5);
+
+            fix.Take();
+
+            Assert.False(fix.TryPeek(out _));
+            Assert.False(fix.TryGetLast(out _));
+        }
+
+        [Fact]
         public void ChunkifyTest()
         {
             // Arrange

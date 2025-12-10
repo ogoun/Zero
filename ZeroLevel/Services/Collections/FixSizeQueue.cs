@@ -100,7 +100,7 @@ namespace ZeroLevel.Services.Collections
                     return true;
                 }
             }
-            t = default(T)!;
+            t = default!;
             return false;
         }
 
@@ -119,6 +119,64 @@ namespace ZeroLevel.Services.Collections
                 }
             }
             throw new System.Exception("Collection is empty");
+        }
+
+        public T Peek()
+        {
+            T ret;
+            lock (_accessLocker)
+            {
+                if (_count > 0)
+                {
+                    ret = _array[_startIndex];
+                    return ret;
+                }
+            }
+            throw new System.Exception("Collection is empty");
+        }
+
+        public bool TryPeek(out T item)
+        {
+            lock (_accessLocker)
+            {
+                if (_count > 0)
+                {
+                    item = _array[_startIndex];
+                    return true;
+                }
+            }
+            item = default!;
+            return false;
+        }
+
+        public T GetLast()
+        {
+            T ret;
+            lock (_accessLocker)
+            {
+                if (_count > 0)
+                {
+                    var index = (_startIndex+ _count - 1) % _array.Length;
+                    ret = _array[index];
+                    return ret;
+                }
+            }
+            throw new System.Exception("Collection is empty");
+        }
+
+        public bool TryGetLast(out T item)
+        {
+            lock (_accessLocker)
+            {
+                if (_count > 0)
+                {
+                    var index = (_startIndex + _count - 1) % _array.Length;
+                    item = _array[index];
+                    return true;
+                }
+            }
+            item = default!;
+            return false;
         }
 
         public IEnumerable<T> Dump()

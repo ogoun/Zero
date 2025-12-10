@@ -8,7 +8,7 @@
 		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
 		<Title>ZeroLevel</Title>
 		<FileVersion>$(AssemblyVersion)</FileVersion>
-		<AssemblyVersion>4.0.0.3</AssemblyVersion>
+		<AssemblyVersion>4.0.0.5</AssemblyVersion>
 		<Version>$(AssemblyVersion)</Version>
 		<AnalysisLevel>latest</AnalysisLevel>
 		<Authors>Ogoun</Authors>
@@ -31,7 +31,7 @@
 
 	<PropertyGroup>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
-		<PackageReleaseNotes>Read config from JSON and YAML files.</PackageReleaseNotes>
+		<PackageReleaseNotes>Extend FixSizeQueue</PackageReleaseNotes>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -40,7 +40,7 @@
 
 	<ItemGroup>
 	  <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="6.1.2" />
-	  <PackageReference Include="System.Text.Json" Version="9.0.5" />
+	  <PackageReference Include="System.Text.Json" Version="9.0.8" />
 	  <PackageReference Include="YamlDotNet" Version="16.3.0" />
 	</ItemGroup>
 
