@@ -250,6 +250,16 @@ namespace ZeroLevel.Services.Serialization
             return DateTime.FromBinary(deserialized);
         }
 
+        public DateTimeOffset? ReadDateTimeOffset()
+        {
+            var is_null = ReadByte();
+            if (is_null == 0) return null!;
+            var buffer = ReadBuffer(16);
+            long ticks = BitConverter.ToInt64(buffer, 0);
+            long offsetTicks = BitConverter.ToInt64(buffer, 8);
+            return new DateTimeOffset(ticks, new TimeSpan(offsetTicks));
+        }
+
         public IPAddress ReadIP()
         {
             var exists = ReadByte();
@@ -316,6 +326,8 @@ namespace ZeroLevel.Services.Serialization
 
         public List<DateTime?> ReadDateTimeCollection() => ReadList(ReadDateTime);
 
+        public List<DateTimeOffset?> ReadDateTimeOffsetCollection() => ReadList(ReadDateTimeOffset);
+
         public List<Int64> ReadInt64Collection() => ReadList(ReadLong);
 
         public List<Int32> ReadInt32Collection() => ReadList(ReadInt32);
@@ -377,6 +389,8 @@ namespace ZeroLevel.Services.Serialization
         public IEnumerable<Guid> ReadGuidCollectionLazy() => ReadEnumerable(ReadGuid);
 
         public IEnumerable<DateTime?> ReadDateTimeCollectionLazy() => ReadEnumerable(ReadDateTime);
+
+        public IEnumerable<DateTimeOffset?> ReadDateTimeOffsetCollectionLazy() => ReadEnumerable(ReadDateTimeOffset);
 
         public IEnumerable<Int64> ReadInt64CollectionLazy() => ReadEnumerable(ReadLong);
 
@@ -442,6 +456,8 @@ namespace ZeroLevel.Services.Serialization
         public Guid[] ReadGuidArray() => ReadArray(ReadGuid);
 
         public DateTime?[] ReadDateTimeArray() => ReadArray(ReadDateTime);
+
+        public DateTimeOffset?[] ReadDateTimeOffsetArray() => ReadArray(ReadDateTimeOffset);
 
         public Int64[] ReadInt64Array() => ReadArray(ReadLong);
 
@@ -763,6 +779,17 @@ namespace ZeroLevel.Services.Serialization
             long deserialized = BitConverter.ToInt64(buffer, 0);
             return DateTime.FromBinary(deserialized);
         }
+
+        public async Task<DateTimeOffset?> ReadDateTimeOffsetAsync()
+        {
+            var is_null = ReadByte();
+            if (is_null == 0) return null!;
+            var buffer = await ReadBufferAsync(16);
+            long ticks = BitConverter.ToInt64(buffer, 0);
+            long offsetTicks = BitConverter.ToInt64(buffer, 8);
+            return new DateTimeOffset(ticks, new TimeSpan(offsetTicks));
+        }
+
         public async Task<IPAddress> ReadIPAsync()
         {
             var exists = await ReadByteAsync();
@@ -839,6 +866,8 @@ namespace ZeroLevel.Services.Serialization
         public async Task<List<Guid>> ReadGuidCollectionAsync() => await ReadListAsync(ReadGuidAsync, ReadGuid);
 
         public async Task<List<DateTime?>> ReadDateTimeCollectionAsync() => await ReadListAsync(ReadDateTimeAsync, ReadDateTime);
+
+        public async Task<List<DateTimeOffset?>> ReadDateTimeOffsetCollectionAsync() => await ReadListAsync(ReadDateTimeOffsetAsync, ReadDateTimeOffset);
 
         public async Task<List<Int64>> ReadInt64CollectionAsync() => await ReadListAsync(ReadLongAsync, ReadLong);
 
@@ -920,6 +949,8 @@ namespace ZeroLevel.Services.Serialization
         public async Task<Guid[]> ReadGuidArrayAsync() => await ReadArrayAsync(ReadGuidAsync, ReadGuid);
 
         public async Task<DateTime?[]> ReadDateTimeArrayAsync() => await ReadArrayAsync(ReadDateTimeAsync, ReadDateTime);
+
+        public async Task<DateTimeOffset?[]> ReadDateTimeArrayOffsetAsync() => await ReadArrayAsync(ReadDateTimeOffsetAsync, ReadDateTimeOffset);
 
         public async Task<Int64[]> ReadInt64ArrayAsync() => await ReadArrayAsync(ReadLongAsync, ReadLong);
 

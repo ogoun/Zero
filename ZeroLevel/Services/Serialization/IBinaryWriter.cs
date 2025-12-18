@@ -40,6 +40,8 @@ namespace ZeroLevel.Services.Serialization
 
         void WriteDateTime(DateTime? datetime);
 
+        void WriteDateTimeOffset(DateTimeOffset? datetime);
+
         void WriteDecimal(Decimal number);
 
         void WriteTimeSpan(TimeSpan period);
@@ -58,6 +60,8 @@ namespace ZeroLevel.Services.Serialization
         void WriteArray(Guid[] array);
         void WriteArray(DateTime[] array);
         void WriteArray(DateTime?[] array);
+        void WriteArray(DateTimeOffset[] array);
+        void WriteArray(DateTimeOffset?[] array);
         void WriteArray(UInt64[] array);
         void WriteArray(UInt32[] array);
         void WriteArray(char[] array);
@@ -82,6 +86,8 @@ namespace ZeroLevel.Services.Serialization
         void WriteCollection(IEnumerable<Guid> collection);
         void WriteCollection(IEnumerable<DateTime> collection);
         void WriteCollection(IEnumerable<DateTime?> collection);
+        void WriteCollection(IEnumerable<DateTimeOffset> collection);
+        void WriteCollection(IEnumerable<DateTimeOffset?> collection);
         void WriteCollection(IEnumerable<Int64> collection);
         void WriteCollection(IEnumerable<Int32> collection);
         void WriteCollection(IEnumerable<UInt64> collection);
@@ -141,6 +147,7 @@ namespace ZeroLevel.Services.Serialization
 
         Task WriteDateTimeAsync(DateTime? datetime);
 
+        Task WriteDateTimeOffsetAsync(DateTimeOffset? datetime);
         Task WriteDecimalAsync(Decimal number);
 
         Task WriteTimeSpanAsync(TimeSpan period);

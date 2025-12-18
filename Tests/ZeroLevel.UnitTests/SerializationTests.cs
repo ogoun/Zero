@@ -117,6 +117,12 @@ namespace ZeroLevel.Serialization
             MakePrimitiveTest<DateTime>(DateTime.Now.AddYears(2000));
             MakePrimitiveTest<DateTime>(DateTime.MinValue);
             MakePrimitiveTest<DateTime>(DateTime.MaxValue);
+
+            MakePrimitiveTest<DateTimeOffset>(DateTimeOffset.Now);
+            MakePrimitiveTest<DateTimeOffset>(DateTimeOffset.UtcNow);
+            MakePrimitiveTest<DateTimeOffset>(DateTimeOffset.Now.AddYears(2000));
+            MakePrimitiveTest<DateTimeOffset>(DateTimeOffset.MinValue);
+            MakePrimitiveTest<DateTimeOffset>(DateTimeOffset.MaxValue);
         }
 
         [Fact]
@@ -341,6 +347,11 @@ namespace ZeroLevel.Serialization
             MakeCollectionTest<DateTime?>(null);
             MakeCollectionTest<DateTime?>(new DateTime?[] { });
             MakeCollectionTest<DateTime?>(new DateTime?[] { DateTime.Now, DateTime.UtcNow, DateTime.Today, DateTime.Now.AddYears(2000), null, DateTime.MinValue, DateTime.MaxValue });
+
+
+            MakeCollectionTest<DateTimeOffset?>(null);
+            MakeCollectionTest<DateTimeOffset?>(new DateTimeOffset?[] { });
+            MakeCollectionTest<DateTimeOffset?>(new DateTimeOffset?[] { DateTimeOffset.Now, DateTimeOffset.UtcNow, DateTimeOffset.Now.AddYears(2000), null, DateTimeOffset.MinValue, DateTimeOffset.MaxValue });
         }
 
         [Fact]

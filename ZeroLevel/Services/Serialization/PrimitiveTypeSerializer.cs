@@ -63,6 +63,7 @@ namespace ZeroLevel.Services.Serialization
             _cachee.Add(typeof(ushort), Create<ushort>());
             _cachee.Add(typeof(Decimal), Create<Decimal>());
             _cachee.Add(typeof(DateTime), Create<DateTime>());
+            _cachee.Add(typeof(DateTimeOffset), Create<DateTimeOffset>());
             _cachee.Add(typeof(Guid), Create<Guid>());
             _cachee.Add(typeof(String), Create<String>());
             _cachee.Add(typeof(TimeSpan), Create<TimeSpan>());
@@ -83,6 +84,8 @@ namespace ZeroLevel.Services.Serialization
             _cachee.Add(typeof(Decimal[]), Create<Decimal[]>());
             _cachee.Add(typeof(DateTime[]), Create<DateTime[]>());
             _cachee.Add(typeof(DateTime?[]), Create<DateTime?[]>());
+            _cachee.Add(typeof(DateTimeOffset[]), Create<DateTimeOffset[]>());
+            _cachee.Add(typeof(DateTimeOffset?[]), Create<DateTimeOffset?[]>());
             _cachee.Add(typeof(Guid[]), Create<Guid[]>());
             _cachee.Add(typeof(String[]), Create<String[]>());
             _cachee.Add(typeof(TimeSpan[]), Create<TimeSpan[]>());
@@ -104,6 +107,8 @@ namespace ZeroLevel.Services.Serialization
             _cachee.Add(typeof(IEnumerable<Decimal>), Create<IEnumerable<Decimal>>());
             _cachee.Add(typeof(IEnumerable<DateTime>), Create<IEnumerable<DateTime>>());
             _cachee.Add(typeof(IEnumerable<DateTime?>), Create<IEnumerable<DateTime?>>());
+            _cachee.Add(typeof(IEnumerable<DateTimeOffset>), Create<IEnumerable<DateTimeOffset>>());
+            _cachee.Add(typeof(IEnumerable<DateTimeOffset?>), Create<IEnumerable<DateTimeOffset?>>());
             _cachee.Add(typeof(IEnumerable<Guid>), Create<IEnumerable<Guid>>());
             _cachee.Add(typeof(IEnumerable<String>), Create<IEnumerable<String>>());
             _cachee.Add(typeof(IEnumerable<TimeSpan>), Create<IEnumerable<TimeSpan>>());
@@ -124,6 +129,8 @@ namespace ZeroLevel.Services.Serialization
             _arrayTypesCachee.Add(typeof(Decimal), typeof(Decimal[]));
             _arrayTypesCachee.Add(typeof(DateTime), typeof(DateTime[]));
             _arrayTypesCachee.Add(typeof(DateTime?), typeof(DateTime?[]));
+            _arrayTypesCachee.Add(typeof(DateTimeOffset), typeof(DateTimeOffset[]));
+            _arrayTypesCachee.Add(typeof(DateTimeOffset?), typeof(DateTimeOffset?[]));
             _arrayTypesCachee.Add(typeof(Guid), typeof(Guid[]));
             _arrayTypesCachee.Add(typeof(String), typeof(String[]));
             _arrayTypesCachee.Add(typeof(TimeSpan), typeof(TimeSpan[]));
@@ -145,6 +152,8 @@ namespace ZeroLevel.Services.Serialization
             _enumTypesCachee.Add(typeof(Decimal), typeof(IEnumerable<Decimal>));
             _enumTypesCachee.Add(typeof(DateTime), typeof(IEnumerable<DateTime>));
             _enumTypesCachee.Add(typeof(DateTime?), typeof(IEnumerable<DateTime?>));
+            _enumTypesCachee.Add(typeof(DateTimeOffset), typeof(IEnumerable<DateTimeOffset>));
+            _enumTypesCachee.Add(typeof(DateTimeOffset?), typeof(IEnumerable<DateTimeOffset?>));
             _enumTypesCachee.Add(typeof(Guid), typeof(IEnumerable<Guid>));
             _enumTypesCachee.Add(typeof(String), typeof(IEnumerable<String>));
             _enumTypesCachee.Add(typeof(TimeSpan), typeof(IEnumerable<TimeSpan>));
@@ -190,6 +199,11 @@ namespace ZeroLevel.Services.Serialization
             {
                 wrapper.ReadId = wrapper.Invoker.Configure(typeof(MemoryStreamReader), "ReadDateTime").First();
                 wrapper.WriteId = wrapper.Invoker.Configure(typeof(MemoryStreamWriter), "WriteDateTime").First();
+            }
+            else if (type == typeof(DateTimeOffset))
+            {
+                wrapper.ReadId = wrapper.Invoker.Configure(typeof(MemoryStreamReader), "ReadDateTimeOffset").First();
+                wrapper.WriteId = wrapper.Invoker.Configure(typeof(MemoryStreamWriter), "WriteDateTimeOffset").First();
             }
             else if (type == typeof(Decimal))
             {
@@ -294,6 +308,16 @@ namespace ZeroLevel.Services.Serialization
                 wrapper.ReadId = wrapper.Invoker.Configure(typeof(MemoryStreamReader), "ReadDateTimeArray").First();
                 wrapper.WriteId = wrapper.Invoker.Configure(typeof(MemoryStreamWriter), CreateArrayPredicate<Tw>()).First();
             }
+            else if (type == typeof(DateTimeOffset[]))
+            {
+                wrapper.ReadId = wrapper.Invoker.Configure(typeof(MemoryStreamReader), "ReadDateTimeOffsetArray").First();
+                wrapper.WriteId = wrapper.Invoker.Configure(typeof(MemoryStreamWriter), CreateArrayPredicate<Tw>()).First();
+            }
+            else if (type == typeof(DateTimeOffset?[]))
+            {
+                wrapper.ReadId = wrapper.Invoker.Configure(typeof(MemoryStreamReader), "ReadDateTimeOffsetArray").First();
+                wrapper.WriteId = wrapper.Invoker.Configure(typeof(MemoryStreamWriter), CreateArrayPredicate<Tw>()).First();
+            }
             else if (type == typeof(Double[]))
             {
                 wrapper.ReadId = wrapper.Invoker.Configure(typeof(MemoryStreamReader), "ReadDoubleArray").First();
@@ -395,6 +419,16 @@ namespace ZeroLevel.Services.Serialization
             else if (type == typeof(IEnumerable<DateTime?>))
             {
                 wrapper.ReadId = wrapper.Invoker.Configure(typeof(MemoryStreamReader), "ReadDateTimeCollection").First();
+                wrapper.WriteId = wrapper.Invoker.Configure(typeof(MemoryStreamWriter), CreateCollectionPredicate<Tw>()).First();
+            }
+            else if (type == typeof(IEnumerable<DateTimeOffset>))
+            {
+                wrapper.ReadId = wrapper.Invoker.Configure(typeof(MemoryStreamReader), "ReadDateTimeOffsetCollection").First();
+                wrapper.WriteId = wrapper.Invoker.Configure(typeof(MemoryStreamWriter), CreateCollectionPredicate<Tw>()).First();
+            }
+            else if (type == typeof(IEnumerable<DateTimeOffset?>))
+            {
+                wrapper.ReadId = wrapper.Invoker.Configure(typeof(MemoryStreamReader), "ReadDateTimeOffsetCollection").First();
                 wrapper.WriteId = wrapper.Invoker.Configure(typeof(MemoryStreamWriter), CreateCollectionPredicate<Tw>()).First();
             }
             else if (type == typeof(IEnumerable<Double>))

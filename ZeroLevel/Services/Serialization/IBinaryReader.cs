@@ -38,6 +38,8 @@ namespace ZeroLevel.Services.Serialization
 
         DateTime? ReadDateTime();
 
+        DateTimeOffset? ReadDateTimeOffset();
+
         decimal ReadDecimal();
 
         TimeSpan ReadTimeSpan();
@@ -55,6 +57,7 @@ namespace ZeroLevel.Services.Serialization
         IPEndPoint[] ReadIPEndPointArray();
         Guid[] ReadGuidArray();
         DateTime?[] ReadDateTimeArray();
+        DateTimeOffset?[] ReadDateTimeOffsetArray();
         Int64[] ReadInt64Array();
         Int32[] ReadInt32Array();
         UInt64[] ReadUInt64Array();
@@ -76,6 +79,7 @@ namespace ZeroLevel.Services.Serialization
         List<string> ReadStringCollection();
         List<Guid> ReadGuidCollection();
         List<DateTime?> ReadDateTimeCollection();
+        List<DateTimeOffset?> ReadDateTimeOffsetCollection();
         List<char> ReadCharCollection();
         List<Int64> ReadInt64Collection();
         List<Int32> ReadInt32Collection();
@@ -102,6 +106,7 @@ namespace ZeroLevel.Services.Serialization
         IEnumerable<IPEndPoint> ReadIPEndPointCollectionLazy();
         IEnumerable<Guid> ReadGuidCollectionLazy();
         IEnumerable<DateTime?> ReadDateTimeCollectionLazy();
+        IEnumerable<DateTimeOffset?> ReadDateTimeOffsetCollectionLazy();
         IEnumerable<Int64> ReadInt64CollectionLazy();
         IEnumerable<Int32> ReadInt32CollectionLazy();
         IEnumerable<UInt64> ReadUInt64CollectionLazy();
@@ -150,6 +155,7 @@ namespace ZeroLevel.Services.Serialization
         Task<string> ReadStringAsync();
         Task<Guid> ReadGuidAsync();
         Task<DateTime?> ReadDateTimeAsync();
+        Task<DateTimeOffset?> ReadDateTimeOffsetAsync();
         Task<decimal> ReadDecimalAsync();
         Task<TimeSpan> ReadTimeSpanAsync();
         Task<IPAddress> ReadIPAsync();
@@ -164,6 +170,7 @@ namespace ZeroLevel.Services.Serialization
         Task<IPEndPoint[]> ReadIPEndPointArrayAsync();
         Task<Guid[]> ReadGuidArrayAsync();
         Task<DateTime?[]> ReadDateTimeArrayAsync();
+        Task<DateTimeOffset?[]> ReadDateTimeArrayOffsetAsync();
         Task<Int64[]> ReadInt64ArrayAsync();
         Task<Int32[]> ReadInt32ArrayAsync();
         Task<UInt64[]> ReadUInt64ArrayAsync();
@@ -185,6 +192,7 @@ namespace ZeroLevel.Services.Serialization
         Task<List<string>> ReadStringCollectionAsync();
         Task<List<Guid>> ReadGuidCollectionAsync();
         Task<List<DateTime?>> ReadDateTimeCollectionAsync();
+        Task<List<DateTimeOffset?>> ReadDateTimeOffsetCollectionAsync();
         Task<List<char>> ReadCharCollectionAsync();
         Task<List<Int64>> ReadInt64CollectionAsync();
         Task<List<Int32>> ReadInt32CollectionAsync();

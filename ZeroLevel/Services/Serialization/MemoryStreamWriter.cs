@@ -144,6 +144,26 @@ namespace ZeroLevel.Services.Serialization
             }
         }
 
+        public void WriteDateTimeOffset(DateTimeOffset? datetime)
+        {
+            if (datetime == null!)
+            {
+                WriteByte(0);
+            }
+            else
+            {
+                WriteByte(1);
+
+                byte[] bytes = new byte[16];
+                // Записываем тики самого времени (первые 8 байт)
+                BitConverter.TryWriteBytes(new Span<byte>(bytes, 0, 8), datetime.Value.Ticks);
+                // Записываем тики смещения (следующие 8 байт)
+                BitConverter.TryWriteBytes(new Span<byte>(bytes, 8, 8), datetime.Value.Offset.Ticks);
+
+                _stream.Write(bytes, 0, 16);
+            }
+        }
+
         public void WriteIP(IPAddress ip)
         {
             if (ip == null!)
@@ -277,6 +297,10 @@ namespace ZeroLevel.Services.Serialization
 
         public void WriteCollection(IEnumerable<DateTime?> collection) => WriteCollection(collection, s => WriteDateTime(s));
 
+        public void WriteCollection(IEnumerable<DateTimeOffset> collection) => WriteCollection(collection, s => WriteDateTimeOffset(s));
+
+        public void WriteCollection(IEnumerable<DateTimeOffset?> collection) => WriteCollection(collection, s => WriteDateTimeOffset(s));
+
         public void WriteCollection(IEnumerable<UInt64> collection) => WriteCollection(collection, s => WriteULong(s));
 
         public void WriteCollection(IEnumerable<UInt32> collection) => WriteCollection(collection, s => WriteUInt32(s));
@@ -351,6 +375,10 @@ namespace ZeroLevel.Services.Serialization
         public void WriteArray(DateTime[] array) => WriteArray(array, dt => WriteDateTime(dt));
 
         public void WriteArray(DateTime?[] array) => WriteArray(array, WriteDateTime);
+
+        public void WriteArray(DateTimeOffset[] array) => WriteArray(array, dt => WriteDateTimeOffset(dt));
+
+        public void WriteArray(DateTimeOffset?[] array) => WriteArray(array, WriteDateTimeOffset);
 
         public void WriteArray(UInt64[] array) => WriteArray(array, WriteULong);
 
@@ -531,6 +559,26 @@ namespace ZeroLevel.Services.Serialization
                 long serialized = datetime.Value.ToBinary();
                 byte[] data = BitConverter.GetBytes(serialized);
                 await _stream.WriteAsync(data, 0, 8);
+            }
+        }
+
+        public async Task WriteDateTimeOffsetAsync(DateTimeOffset? datetime)
+        {
+            if (datetime == null!)
+            {
+                WriteByte(0);
+            }
+            else
+            {
+                WriteByte(1);
+
+                byte[] bytes = new byte[16];
+                // Записываем тики самого времени (первые 8 байт)
+                BitConverter.TryWriteBytes(new Span<byte>(bytes, 0, 8), datetime.Value.Ticks);
+                // Записываем тики смещения (следующие 8 байт)
+                BitConverter.TryWriteBytes(new Span<byte>(bytes, 8, 8), datetime.Value.Offset.Ticks);
+
+                await _stream.WriteAsync(bytes, 0, 16);
             }
         }
 
@@ -727,6 +775,10 @@ namespace ZeroLevel.Services.Serialization
         public async Task WriteCollectionAsync(IEnumerable<DateTime> collection) => await OptimizedWriteCollectionByChunksAsync(collection, (w, i) => w.WriteDateTime(i), (w, i) => w.WriteDateTimeAsync(i), BATCH_MEMORY_SIZE_LIMIT / 9);
 
         public async Task WriteCollectionAsync(IEnumerable<DateTime?> collection) => await OptimizedWriteCollectionByChunksAsync(collection, (w, i) => w.WriteDateTime(i), (w, i) => w.WriteDateTimeAsync(i), BATCH_MEMORY_SIZE_LIMIT / 9);
+
+        public async Task WriteCollectionAsync(IEnumerable<DateTimeOffset> collection) => await OptimizedWriteCollectionByChunksAsync(collection, (w, i) => w.WriteDateTimeOffset(i), (w, i) => w.WriteDateTimeOffsetAsync(i), BATCH_MEMORY_SIZE_LIMIT / 9);
+
+        public async Task WriteCollectionAsync(IEnumerable<DateTimeOffset?> collection) => await OptimizedWriteCollectionByChunksAsync(collection, (w, i) => w.WriteDateTimeOffset(i), (w, i) => w.WriteDateTimeOffsetAsync(i), BATCH_MEMORY_SIZE_LIMIT / 9);
 
         public async Task WriteCollectionAsync(IEnumerable<UInt64> collection) => await OptimizedWriteCollectionByChunksAsync(collection, (w, i) => w.WriteULong(i), (w, i) => w.WriteULongAsync(i), BATCH_MEMORY_SIZE_LIMIT / 8);
 
