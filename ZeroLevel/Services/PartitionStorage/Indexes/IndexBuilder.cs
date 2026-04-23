@@ -14,6 +14,7 @@ namespace ZeroLevel.Services.PartitionStorage
     internal sealed class IndexBuilder<TKey, TValue>
     {
         private const string INDEX_SUBFOLDER_NAME = "__indexes__";
+        private static readonly TimeSpan _fileLockWaitTimeout = TimeSpan.FromSeconds(30);
         private readonly IndexStepType _indexType;
         private readonly string _indexCatalog;
         private readonly string _dataCatalog;
@@ -106,16 +107,14 @@ namespace ZeroLevel.Services.PartitionStorage
             {
                 var step = (int)Math.Truncate(dict.Count / (float)_stepValue);
                 var index_file = Path.Combine(_indexCatalog, Path.GetFileName(file));
+                var temp_index = index_file + ".tmp";
 
-                _phisicalFileAccessorCachee.LockFile(index_file);
-                if (File.Exists(index_file))
-                {
-                    File.Delete(index_file);
-                }
+                _phisicalFileAccessorCachee.LockFileAndWait(index_file, _fileLockWaitTimeout);
                 try
                 {
+                    if (File.Exists(temp_index)) File.Delete(temp_index);
                     var d_arr = dict.OrderBy(p => p.Key).ToArray();
-                    using (var writer = new MemoryStreamWriter(new FileStream(index_file, FileMode.Create, FileAccess.Write, FileShare.None)))
+                    using (var writer = new MemoryStreamWriter(new FileStream(temp_index, FileMode.Create, FileAccess.Write, FileShare.None)))
                     {
                         for (int i = 0; i < _stepValue; i++)
                         {
@@ -124,9 +123,18 @@ namespace ZeroLevel.Services.PartitionStorage
                             writer.WriteLong(pair.Value);
                         }
                     }
+                    if (File.Exists(index_file))
+                    {
+                        File.Replace(temp_index, index_file, destinationBackupFileName: null);
+                    }
+                    else
+                    {
+                        File.Move(temp_index, index_file);
+                    }
                 }
                 finally
                 {
+                    try { if (File.Exists(temp_index)) File.Delete(temp_index); } catch { }
                     _phisicalFileAccessorCachee.UnlockFile(index_file);
                 }
             }
@@ -140,17 +148,16 @@ namespace ZeroLevel.Services.PartitionStorage
             {
                 Directory.CreateDirectory(_indexCatalog);
             }
-            using (var reader = new MemoryStreamReader(new FileStream(Path.Combine(_dataCatalog, file), FileMode.Open, FileAccess.Read, FileShare.None)))
+            var index_file = Path.Combine(_indexCatalog, Path.GetFileName(file));
+            var temp_index = index_file + ".tmp";
+
+            _phisicalFileAccessorCachee.LockFileAndWait(index_file, _fileLockWaitTimeout);
+            try
             {
-                var index_file = Path.Combine(_indexCatalog, Path.GetFileName(file));
-                _phisicalFileAccessorCachee.LockFile(index_file);
-                if (File.Exists(index_file))
+                if (File.Exists(temp_index)) File.Delete(temp_index);
+                using (var reader = new MemoryStreamReader(new FileStream(Path.Combine(_dataCatalog, file), FileMode.Open, FileAccess.Read, FileShare.None)))
                 {
-                    File.Delete(index_file);
-                }
-                try
-                {
-                    using (var writer = new MemoryStreamWriter(new FileStream(index_file, FileMode.Create, FileAccess.Write, FileShare.None)))
+                    using (var writer = new MemoryStreamWriter(new FileStream(temp_index, FileMode.Create, FileAccess.Write, FileShare.None)))
                     {
                         var counter = 1;
                         while (reader.EOS == false)
@@ -168,10 +175,19 @@ namespace ZeroLevel.Services.PartitionStorage
                         }
                     }
                 }
-                finally
+                if (File.Exists(index_file))
                 {
-                    _phisicalFileAccessorCachee.UnlockFile(index_file);
+                    File.Replace(temp_index, index_file, destinationBackupFileName: null);
                 }
+                else
+                {
+                    File.Move(temp_index, index_file);
+                }
+            }
+            finally
+            {
+                try { if (File.Exists(temp_index)) File.Delete(temp_index); } catch { }
+                _phisicalFileAccessorCachee.UnlockFile(index_file);
             }
         }
     }

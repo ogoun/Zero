@@ -1,5 +1,6 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
+using System.Threading;
 using ZeroLevel.Services.Shedulling;
 
 namespace ZeroLevel.Services.Cache
@@ -9,7 +10,7 @@ namespace ZeroLevel.Services.Cache
     {
         private sealed class CacheeItem<I>
         {
-            public I Value { get; set; }
+            public Lazy<I> Lazy { get; set; }
             public DateTime LastAcessTime { get; set; }
         }
 
@@ -37,96 +38,126 @@ namespace ZeroLevel.Services.Cache
 
         public T Get(string key)
         {
+            Lazy<T> lazy;
             lock (_cacheeLock)
             {
                 if (_cachee.TryGetValue(key, out var v))
                 {
                     v.LastAcessTime = DateTime.UtcNow;
-                    return v.Value;
+                    lazy = v.Lazy;
+                }
+                else
+                {
+                    var capturedKey = key;
+                    lazy = new Lazy<T>(() => _factory.Invoke(capturedKey), LazyThreadSafetyMode.ExecutionAndPublication);
+                    _cachee[key] = new CacheeItem<T> { Lazy = lazy, LastAcessTime = DateTime.UtcNow };
                 }
             }
-            var obj = _factory.Invoke(key);
-            var item = new CacheeItem<T> { Value = obj, LastAcessTime = DateTime.UtcNow };
-            lock (_cacheeLock)
+            try
             {
-                _cachee[key] = item;
+                // factory invoked outside the cachee lock; concurrent Get on same key shares this Lazy
+                return lazy.Value;
             }
-            return obj;
+            catch
+            {
+                // remove the broken entry so the next caller can retry
+                lock (_cacheeLock)
+                {
+                    if (_cachee.TryGetValue(key, out var v) && ReferenceEquals(v.Lazy, lazy))
+                        _cachee.Remove(key);
+                }
+                throw;
+            }
         }
 
         public void Drop(string key)
         {
+            CacheeItem<T> v;
             lock (_cacheeLock)
             {
-                if (_cachee.TryGetValue(key, out var v))
-                {
-                    try
-                    {
-                        if (_onDisposeAction != null!)
-                        {
-                            _onDisposeAction.Invoke(v.Value);
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Log.SystemError(ex, $"[TimerCachee.Drop] Key '{key}'. Fault dispose.");
-                    }
-                    _cachee.Remove(key);
-                }
+                if (!_cachee.TryGetValue(key, out v)) return;
+                _cachee.Remove(key);
             }
+            DisposeItem(key, v, "Drop");
+        }
+
+        /// <summary>
+        /// Removes the key from cache and returns its value WITHOUT invoking dispose.
+        /// Caller takes ownership and is responsible for disposal.
+        /// If the entry exists but its factory has not yet completed (or threw), returns false.
+        /// </summary>
+        public bool TryRemove(string key, out T value)
+        {
+            CacheeItem<T> v;
+            lock (_cacheeLock)
+            {
+                if (!_cachee.TryGetValue(key, out v))
+                {
+                    value = default!;
+                    return false;
+                }
+                _cachee.Remove(key);
+            }
+            // only return a value the caller can take ownership of when the factory succeeded
+            if (v.Lazy.IsValueCreated)
+            {
+                value = v.Lazy.Value;
+                return true;
+            }
+            value = default!;
+            return false;
         }
 
         private void CheckAndCleacnCachee()
         {
+            List<KeyValuePair<string, CacheeItem<T>>> expired = null!;
             lock (_cacheeLock)
             {
-                var keysToRemove = new List<string>(_cachee.Count);
                 foreach (var pair in _cachee)
                 {
                     if ((DateTime.UtcNow - pair.Value.LastAcessTime) > _expirationPeriod)
                     {
-                        keysToRemove.Add(pair.Key);
+                        if (expired == null!) expired = new List<KeyValuePair<string, CacheeItem<T>>>();
+                        expired.Add(pair);
                     }
                 }
-                foreach (var key in keysToRemove)
+                if (expired != null!)
                 {
-                    try
-                    {
-                        if (_onDisposeAction != null!)
-                        {
-                            _onDisposeAction.Invoke(_cachee[key].Value);
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Log.SystemError(ex, $"[TimerCachee.CheckAndCleacnCachee] Key '{key}'");
-                    }
-                    _cachee.Remove(key);
+                    foreach (var pair in expired) _cachee.Remove(pair.Key);
                 }
+            }
+            // dispose outside the lock — disposal of MMF/file handles can be slow
+            if (expired != null!)
+            {
+                foreach (var pair in expired) DisposeItem(pair.Key, pair.Value, "CheckAndCleacnCachee");
             }
         }
 
         public void DropAll()
         {
+            List<KeyValuePair<string, CacheeItem<T>>> snapshot;
             lock (_cacheeLock)
             {
-                foreach (var pair in _cachee)
-                {
-                    try
-                    {
-                        if (_onDisposeAction != null!)
-                        {
-                            _onDisposeAction.Invoke(pair.Value.Value);
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Log.SystemError(ex, $"[TimerCachee.DropAll] Key '{pair.Key}'");
-                    }
-                }
+                snapshot = new List<KeyValuePair<string, CacheeItem<T>>>(_cachee);
                 _cachee.Clear();
             }
+            foreach (var pair in snapshot) DisposeItem(pair.Key, pair.Value, "DropAll");
         }
+
+        private void DisposeItem(string key, CacheeItem<T> item, string source)
+        {
+            if (_onDisposeAction == null!) return;
+            if (!item.Lazy.IsValueCreated) return; // factory never completed; nothing to dispose
+            try
+            {
+                _onDisposeAction.Invoke(item.Lazy.Value);
+            }
+            catch (Exception ex)
+            {
+                Log.SystemError(ex, $"[TimerCachee.{source}] Key '{key}'. Fault dispose.");
+            }
+        }
+
         public void Dispose()
         {
             _sheduller?.Clean();

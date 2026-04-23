@@ -35,7 +35,13 @@ namespace ZeroLevel.Services.Serialization
             var t = typeof(T);
             if (t.IsAssignableTo(typeof(IBinarySerializable)))
             {
-                return (w, o) => (o as IBinarySerializable)?.Serialize(w);
+                return (w, o) =>
+                {
+                    if (o == null!)
+                        throw new ArgumentNullException(nameof(o),
+                            $"GetSerializer<{typeof(T).Name}> does not support null. Use IBinaryWriter.Write<T> for nullable IBinarySerializable.");
+                    ((IBinarySerializable)o!).Serialize(w);
+                };
             }
             return (w, o) => PrimitiveTypeSerializer.Serialize<T>(w, o);
         }

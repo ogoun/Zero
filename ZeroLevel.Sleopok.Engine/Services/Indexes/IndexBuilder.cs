@@ -11,11 +11,10 @@ namespace ZeroLevel.Sleopok.Engine.Services.Indexes
     internal sealed class IndexBuilder<T>
         : IIndexBuilder<T>
     {
-        private static char[] _separators = new char[] { ',', ' ', '.', '?', '!', '\\', '/', '+', '&' };
-
         private readonly DataStorage _storage;
         private readonly IndexInfo<T> _indexInfo;
         private readonly Dictionary<string, IPartitionDataWriter> Indexers = new Dictionary<string, IPartitionDataWriter>();
+        private bool _completed = false;
         public IndexBuilder(DataStorage storage, IndexInfo<T> indexInfo)
         {
             _storage = storage;
@@ -28,6 +27,8 @@ namespace ZeroLevel.Sleopok.Engine.Services.Indexes
 
         public async Task Complete()
         {
+            if (_completed) return;
+            _completed = true;
             foreach (var i in Indexers)
             {
                 await i.Value.Complete();
@@ -53,8 +54,18 @@ namespace ZeroLevel.Sleopok.Engine.Services.Indexes
                 {
                     if (field.FieldType == SleoFieldType.Array)
                     {
-                        // TO DO OPTIMIZATION
-                        // Если поле уже хранит массив элементов, считать каждый элемент токеном
+                        if (field.Getter(doc!) is System.Collections.IEnumerable items)
+                        {
+                            foreach (var item in items)
+                            {
+                                var value = item?.ToString();
+                                if (string.IsNullOrWhiteSpace(value)) continue;
+                                foreach (var t in Preprocess(value))
+                                {
+                                    await Indexers[field.Name].Write(t, doc_id);
+                                }
+                            }
+                        }
                     }
                     else
                     {
@@ -73,7 +84,8 @@ namespace ZeroLevel.Sleopok.Engine.Services.Indexes
 
         public void Dispose()
         {
-            Complete().Wait();
+            if (_completed) return;
+            Complete().GetAwaiter().GetResult();
         }
     }
 }

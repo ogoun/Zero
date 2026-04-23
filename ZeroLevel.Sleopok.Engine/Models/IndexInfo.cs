@@ -32,24 +32,28 @@ namespace ZeroLevel.Sleopok.Engine.Models
                         var sleoAttribute = member.GetCustomAttribute<SleoIndexAttribute>();
                         if (sleoAttribute == null) continue;
 
-                        var type = SleoFieldType.Single;
-                        if (TypeHelpers.IsGenericCollection(member.DeclaringType)
-                            || TypeHelpers.IsArray(member.DeclaringType)
-                            || TypeHelpers.IsEnumerable(member.DeclaringType))
-                        {
-                            type = SleoFieldType.Array;
-                        }
-
+                        Type memberType;
                         Func<object, object> getter;
                         switch (member.MemberType)
                         {
                             case MemberTypes.Field:
-                                getter = TypeGetterSetterBuilder.BuildGetter((member as FieldInfo)!);
+                                memberType = ((FieldInfo)member).FieldType;
+                                getter = TypeGetterSetterBuilder.BuildGetter((FieldInfo)member);
                                 break;
                             case MemberTypes.Property:
-                                getter = TypeGetterSetterBuilder.BuildGetter((member as PropertyInfo)!);
+                                memberType = ((PropertyInfo)member).PropertyType;
+                                getter = TypeGetterSetterBuilder.BuildGetter((PropertyInfo)member);
                                 break;
                             default: return;
+                        }
+
+                        var type = SleoFieldType.Single;
+                        if (memberType != typeof(string)
+                            && (TypeHelpers.IsArray(memberType)
+                                || TypeHelpers.IsGenericCollection(memberType)
+                                || TypeHelpers.IsEnumerable(memberType)))
+                        {
+                            type = SleoFieldType.Array;
                         }
                         var name = FSUtils.FileNameCorrection(string.IsNullOrWhiteSpace(sleoAttribute.Name) ? member.Name : sleoAttribute.Name);
                         _fields.Add(new SleoField(type, name, sleoAttribute.Boost, sleoAttribute.AvaliableForExactMatch, getter));

@@ -6,11 +6,18 @@ using ZeroLevel.Sleopok.Engine.Services.Storage;
 
 namespace ZeroLevel.Sleopok.Engine.Services.Indexes
 {
-    public class FieldRecords
+    public sealed class TokenDocuments
     {
-        public FieldRecords(string field, IDictionary<string, List<string>> records) => (Field, Records) = (field, records);
-        public string Field { get; set; }
-        public IDictionary<string, List<string>> Records { get; set; }
+        public TokenDocuments(string token, string[] documents) => (Token, Documents) = (token, documents);
+        public string Token { get; }
+        public string[] Documents { get; }
+    }
+
+    public sealed class FieldRecords
+    {
+        public FieldRecords(string field, IAsyncEnumerable<TokenDocuments> records) => (Field, Records) = (field, records);
+        public string Field { get; }
+        public IAsyncEnumerable<TokenDocuments> Records { get; }
     }
 
     internal sealed class IndexReader<T>
@@ -54,9 +61,9 @@ namespace ZeroLevel.Sleopok.Engine.Services.Indexes
         {
             foreach (var field in _indexInfo.Fields)
             {
-                var docs = await _storage.GetAllDocuments(field.Name);
-                yield return new FieldRecords(field.Name, docs);
+                yield return new FieldRecords(field.Name, _storage.IterateAllDocuments(field.Name));
             }
+            await Task.CompletedTask;
         }
     }
 }

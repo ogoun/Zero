@@ -22,7 +22,10 @@ namespace ZeroLevel.Services.PartitionStorage.Partition
         protected readonly string _catalog;
 
         private SemaphoreSlim _writersLock = new SemaphoreSlim(1);
-        private readonly Dictionary<string, MemoryStreamWriter> _writeStreams = new Dictionary<string, MemoryStreamWriter>();
+        // Copy-on-write: readers do plain Dictionary.TryGetValue on the snapshot from
+        // Volatile.Read; writers build a new dict under _writersLock and publish it via
+        // Volatile.Write. Never mutate the published instance in place.
+        private Dictionary<string, MemoryStreamWriter> _writeStreams = new Dictionary<string, MemoryStreamWriter>();
 
         protected IStoreSerializer<TKey, TInput, TValue> Serializer { get; }
         protected readonly StoreOptions<TKey, TInput, TValue, TMeta> _options;
@@ -54,7 +57,7 @@ namespace ZeroLevel.Services.PartitionStorage.Partition
         public void DropData() => FSUtils.CleanAndTestFolder(_catalog);
         public void Dispose()
         {
-            CloseWriteStreams();
+            CloseWriteStreams(throwOnError: false);
             Release();
         }
         #endregion
@@ -92,70 +95,73 @@ namespace ZeroLevel.Services.PartitionStorage.Partition
             }
         }
         /// <summary>
-        /// Close all streams for writing
+        /// Close all streams for writing. By default, throws AggregateException if any stream
+        /// failed to flush/dispose so callers know data may have been lost. Pass throwOnError:false
+        /// from Dispose paths where throwing would be inappropriate.
         /// </summary>
-        protected void CloseWriteStreams()
+        protected void CloseWriteStreams(bool throwOnError = true)
         {
-            foreach (var s in _writeStreams)
+            // snapshot via Interlocked.Exchange: subsequent writes go to a fresh empty dict
+            var snap = Interlocked.Exchange(ref _writeStreams, new Dictionary<string, MemoryStreamWriter>());
+            List<Exception> errors = null!;
+            foreach (var s in snap)
             {
                 try
                 {
                     s.Value.Stream.Flush();
                     s.Value.Dispose();
-                    s.Value.DisposeAsync();
                 }
-                catch { }
+                catch (Exception ex)
+                {
+                    Log.SystemError(ex, $"[BasePartition.CloseWriteStreams] Failed to close writer for '{s.Key}'");
+                    if (errors == null!) errors = new List<Exception>();
+                    errors.Add(ex);
+                }
             }
-            _writeStreams.Clear();
+            if (throwOnError && errors != null!)
+            {
+                throw new AggregateException("One or more write streams failed to close cleanly", errors);
+            }
+        }
+
+        private async Task<MemoryStreamWriter> GetOrCreateWriterAsync(string fileName)
+        {
+            // fast path: lock-free read on a snapshot that is never mutated in place
+            var snap = Volatile.Read(ref _writeStreams);
+            if (snap.TryGetValue(fileName, out var w)) return w;
+
+            await _writersLock.WaitAsync();
+            try
+            {
+                if (_writeStreams.TryGetValue(fileName, out w)) return w;
+
+                var filePath = Path.Combine(_catalog, fileName);
+                var stream = new FileStream(filePath, FileMode.Append, FileAccess.Write, FileShare.None, 4096 * 1024);
+                var new_w = new MemoryStreamWriter(stream);
+
+                // copy-on-write publish
+                var copy = new Dictionary<string, MemoryStreamWriter>(_writeStreams.Count + 1);
+                foreach (var kv in _writeStreams) copy[kv.Key] = kv.Value;
+                copy[fileName] = new_w;
+                Volatile.Write(ref _writeStreams, copy);
+
+                return new_w;
+            }
+            finally
+            {
+                _writersLock.Release();
+            }
         }
 
         protected async Task WriteStreamAction(string fileName, Func<MemoryStreamWriter, Task> writeAction)
         {
-            MemoryStreamWriter writer;
-            if (_writeStreams.TryGetValue(fileName, out writer) == false)
-            {
-                await _writersLock.WaitAsync();
-                try
-                {
-                    if (_writeStreams.TryGetValue(fileName, out writer) == false)
-                    {
-                        var filePath = Path.Combine(_catalog, fileName);
-                        var stream = new FileStream(filePath, FileMode.Append, FileAccess.Write, FileShare.None, 4096 * 1024);
-                        var new_w = new MemoryStreamWriter(stream);
-                        _writeStreams[fileName] = new_w;
-                        writer = new_w;
-                    }
-                }
-                finally
-                {
-                    _writersLock.Release();
-                }
-            }
+            var writer = await GetOrCreateWriterAsync(fileName);
             await writeAction.Invoke(writer);
         }
 
         protected async Task SafeWriteStreamAction(string fileName, Func<MemoryStreamWriter, Task> writeAction)
         {
-            MemoryStreamWriter writer;
-            if (_writeStreams.TryGetValue(fileName, out writer) == false)
-            {
-                await _writersLock.WaitAsync();
-                try
-                {
-                    if (_writeStreams.TryGetValue(fileName, out writer) == false)
-                    {
-                        var filePath = Path.Combine(_catalog, fileName);
-                        var stream = new FileStream(filePath, FileMode.Append, FileAccess.Write, FileShare.None, 4096 * 1024);
-                        var new_w = new MemoryStreamWriter(stream);
-                        _writeStreams[fileName] = new_w;
-                        writer = new_w;
-                    }
-                }
-                finally
-                {
-                    _writersLock.Release();
-                }
-            }
+            var writer = await GetOrCreateWriterAsync(fileName);
             await writer.WaitLockAsync();
             try
             {

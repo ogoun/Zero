@@ -439,37 +439,62 @@ namespace ZeroLevel.Services.PartitionStorage
                     }
                 }
 
-                // 2. Temporary file from ranges
-                var tempFile = FSUtils.GetAppLocalTemporaryFile();
+                // 2. Temporary file from ranges (colocated with target for atomic File.Replace)
+                var tempFile = filePath + ".tmp";
+                if (File.Exists(tempFile)) File.Delete(tempFile);
 
-                using (var readStream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite, 4096 * 1024))
+                try
                 {
-                    RangeCompression(ranges);
-                    using (var writeStream = new FileStream(tempFile, FileMode.Create, FileAccess.Write, FileShare.None, 4096 * 1024))
+                    using (var readStream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite, 4096 * 1024))
                     {
-                        if (inverseRemove)
+                        RangeCompression(ranges);
+                        using (var writeStream = new FileStream(tempFile, FileMode.Create, FileAccess.Write, FileShare.None, 4096 * 1024))
                         {
-                            var inverted = RangeInversion(ranges, readStream.Length);
-                            foreach (var range in inverted)
+                            if (inverseRemove)
                             {
-                                CopyRange(range, readStream, writeStream);
+                                var inverted = RangeInversion(ranges, readStream.Length);
+                                foreach (var range in inverted)
+                                {
+                                    CopyRange(range, readStream, writeStream);
+                                }
                             }
+                            else
+                            {
+                                foreach (var range in ranges)
+                                {
+                                    CopyRange(range, readStream, writeStream);
+                                }
+                            }
+                            writeStream.Flush();
+                        }
+                    }
+
+                    // 3. Replace from temporary to original — wait for in-flight readers first
+                    PhisicalFileAccessorCachee.LockFileAndWait(filePath, _fileLockWaitTimeout);
+                    try
+                    {
+                        if (File.Exists(filePath))
+                        {
+                            File.Replace(tempFile, filePath, destinationBackupFileName: null);
                         }
                         else
                         {
-                            foreach (var range in ranges)
-                            {
-                                CopyRange(range, readStream, writeStream);
-                            }
+                            File.Move(tempFile, filePath);
                         }
-                        writeStream.Flush();
+                        tempFile = null!;
+                    }
+                    finally
+                    {
+                        PhisicalFileAccessorCachee.UnlockFile(filePath);
                     }
                 }
-
-                // 3. Replace from temporary to original
-                PhisicalFileAccessorCachee.DropDataReader(filePath);
-                File.Delete(filePath);
-                File.Move(tempFile, filePath);
+                finally
+                {
+                    if (tempFile != null!)
+                    {
+                        try { if (File.Exists(tempFile)) File.Delete(tempFile); } catch { }
+                    }
+                }
 
                 // Rebuild index if needs
                 if (_options.Index.Enabled && autoReindex)
@@ -478,6 +503,8 @@ namespace ZeroLevel.Services.PartitionStorage
                 }
             }
         }
+
+        private static readonly TimeSpan _fileLockWaitTimeout = TimeSpan.FromSeconds(30);
 
         #endregion
 
@@ -521,13 +548,24 @@ namespace ZeroLevel.Services.PartitionStorage
             return inverted;
         }
 
+        private const int CopyRangeBufferSize = 1024 * 1024; // 1 MB chunks
+
         private static void CopyRange(FilePositionRange range, Stream source, Stream target)
         {
             source.Seek(range.Start, SeekOrigin.Begin);
-            var size = range.End - range.Start;
-            byte[] buffer = new byte[size];
-            var count = source.Read(buffer, 0, buffer.Length);
-            target.Write(buffer, 0, count);
+            long remaining = range.End - range.Start;
+            if (remaining <= 0) return;
+            var buffer = new byte[(int)Math.Min(CopyRangeBufferSize, remaining)];
+            while (remaining > 0)
+            {
+                int toRead = (int)Math.Min(buffer.Length, remaining);
+                int read = source.Read(buffer, 0, toRead);
+                if (read == 0)
+                    throw new EndOfStreamException(
+                        $"CopyRange: stream ended before range end (remaining {remaining} bytes of [{range.Start}..{range.End}])");
+                target.Write(buffer, 0, read);
+                remaining -= read;
+            }
         }
         #endregion
 
@@ -540,7 +578,8 @@ namespace ZeroLevel.Services.PartitionStorage
                     PhisicalFileAccessorCachee.DropDataReader(file);
                 }
             }
-            Indexes.ResetCachee();
+            // Indexes is null when Index.Enabled == false
+            Indexes?.ResetCachee();
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading;
 using ZeroLevel.Services.Memory;
 using ZeroLevel.Services.Serialization;
 
@@ -18,6 +19,13 @@ namespace ZeroLevel.Services.PartitionStorage
         private readonly TMeta _meta;
         private readonly PhisicalFileAccessorCachee _phisicalFileAccessorCachee;
 
+        // Parsed-index cache: avoids re-deserializing the entire index file on every Find.
+        // Copy-on-write: readers do plain Dictionary.TryGetValue on the snapshot from
+        // Volatile.Read; writers build a new dict under _parsedIndexCacheLock and publish
+        // it via Volatile.Write. Only used when EnableIndexInMemoryCachee is true.
+        private Dictionary<string, KeyIndex<TKey>[]> _parsedIndexCache;
+        private readonly object _parsedIndexCacheLock = new object();
+
         public StorePartitionSparseIndex(string partitionFolder, TMeta meta,
             StoreFilePartition<TKey, TMeta> filePartition,
             Func<TKey, TKey, int> keyComparer,
@@ -34,6 +42,7 @@ namespace ZeroLevel.Services.PartitionStorage
             if (_enableIndexInMemoryCachee)
             {
                 _phisicalFileAccessorCachee = phisicalFileAccessorCachee;
+                _parsedIndexCache = new Dictionary<string, KeyIndex<TKey>[]>();
             }
         }
 
@@ -54,19 +63,29 @@ namespace ZeroLevel.Services.PartitionStorage
         public KeyIndex<TKey>[] GetOffset(TKey[] keys, bool inOneGroup)
         {
             var result = new KeyIndex<TKey>[keys.Length];
-            int position = 0;
             if (inOneGroup)
             {
+                // The shared 'position' optimization in BinarySearchInIndex assumes
+                // ascending key order. Sort indirectly so we can keep the original
+                // result ordering for the caller.
                 var index = GetFileIndex(keys[0]);
-                for (int i = 0; i < keys.Length; i++)
+                var ordered = new int[keys.Length];
+                for (int i = 0; i < ordered.Length; i++) ordered[i] = i;
+                Array.Sort(ordered, (a, b) => _keyComparer(keys[a], keys[b]));
+
+                int position = 0;
+                for (int i = 0; i < ordered.Length; i++)
                 {
-                    result[i] = BinarySearchInIndex(index, keys[i], ref position);
+                    var origIndex = ordered[i];
+                    result[origIndex] = BinarySearchInIndex(index, keys[origIndex], ref position);
                 }
             }
             else
             {
+                // Different files per key; each search must start from position 0.
                 for (int i = 0; i < keys.Length; i++)
                 {
+                    int position = 0;
                     var index = GetFileIndex(keys[i]);
                     result[i] = BinarySearchInIndex(index, keys[i], ref position);
                 }
@@ -118,6 +137,8 @@ namespace ZeroLevel.Services.PartitionStorage
                         _phisicalFileAccessorCachee.DropIndexReader(file);
                     }
                 }
+                // drop parsed-index cache atomically
+                Volatile.Write(ref _parsedIndexCache, new Dictionary<string, KeyIndex<TKey>[]>());
             }
         }
 
@@ -127,58 +148,85 @@ namespace ZeroLevel.Services.PartitionStorage
             if (_enableIndexInMemoryCachee)
             {
                 _phisicalFileAccessorCachee.DropIndexReader(file);
+                // copy-on-write removal
+                lock (_parsedIndexCacheLock)
+                {
+                    if (_parsedIndexCache.ContainsKey(name))
+                    {
+                        var copy = new Dictionary<string, KeyIndex<TKey>[]>(_parsedIndexCache);
+                        copy.Remove(name);
+                        Volatile.Write(ref _parsedIndexCache, copy);
+                    }
+                }
             }
         }
 
         private KeyIndex<TKey>[] GetFileIndex(TKey key)
         {
             var indexName = _filePartition.FileNameExtractor.Invoke(key, _meta);
+            if (_enableIndexInMemoryCachee)
+            {
+                var snap = Volatile.Read(ref _parsedIndexCache);
+                if (snap.TryGetValue(indexName, out var cached)) return cached;
+            }
             var filePath = Path.Combine(_indexFolder, indexName);
+            KeyIndex<TKey>[] parsed;
             try
             {
-                return ReadIndexesFromIndexFile(filePath);
+                parsed = ReadIndexesFromIndexFile(filePath);
             }
             catch (Exception ex)
             {
                 Log.SystemError(ex, "[StorePartitionSparseIndex.GetFileIndex] No cachee");
+                return null!;
             }
-            return null!;
+            if (_enableIndexInMemoryCachee && parsed != null!)
+            {
+                // copy-on-write publish
+                lock (_parsedIndexCacheLock)
+                {
+                    if (!_parsedIndexCache.ContainsKey(indexName))
+                    {
+                        var copy = new Dictionary<string, KeyIndex<TKey>[]>(_parsedIndexCache.Count + 1);
+                        foreach (var kv in _parsedIndexCache) copy[kv.Key] = kv.Value;
+                        copy[indexName] = parsed;
+                        Volatile.Write(ref _parsedIndexCache, copy);
+                    }
+                }
+            }
+            return parsed;
         }
 
         private KeyIndex<TKey>[] ReadIndexesFromIndexFile(string filePath)
         {
-            if (File.Exists(filePath))
+            if (!File.Exists(filePath)) return null!;
+            var accessor = _enableIndexInMemoryCachee
+                ? _phisicalFileAccessorCachee.GetIndexAccessor(filePath, 0)
+                : new StreamVewAccessor(new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.None));
+            if (accessor == null!) return null!;
+            var list = new List<KeyIndex<TKey>>();
+            using (var reader = new MemoryStreamReader(accessor))
             {
-                var list = new List<KeyIndex<TKey>>();
-                var accessor = _enableIndexInMemoryCachee ? _phisicalFileAccessorCachee.GetIndexAccessor(filePath, 0) : new StreamVewAccessor(new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.None));
-                using (var reader = new MemoryStreamReader(accessor))
+                if (reader.EOS) return new KeyIndex<TKey>[0];
+
+                var prevKey = _keyDeserializer.Invoke(reader);
+                if (reader.EOS)
+                    return new KeyIndex<TKey>[0]; // truncated index file — defensive
+                var prevOffset = reader.ReadLong();
+
+                while (reader.EOS == false)
                 {
-                    var index = new KeyIndex<TKey>();
-                    if (reader.EOS == false)
-                    {
-                        index.Key = _keyDeserializer.Invoke(reader);
-                    }
-                    if (reader.EOS == false)
-                    {
-                        index.Offset = reader.ReadLong();
-                    }
-                    while (reader.EOS == false)
-                    {
-                        var k = _keyDeserializer.Invoke(reader);
-                        var o = reader.ReadLong();
-                        index.Length = (int)(o - index.Offset);
-                        list.Add(index);
-                        index = new KeyIndex<TKey> { Key = k, Offset = o };
-                    }
-                    if (index.Offset > 0)
-                    {
-                        index.Length = 0;
-                        list.Add(index);
-                    }
+                    var k = _keyDeserializer.Invoke(reader);
+                    if (reader.EOS) break; // truncated trailing key
+                    var o = reader.ReadLong();
+                    list.Add(new KeyIndex<TKey> { Key = prevKey, Offset = prevOffset, Length = (int)(o - prevOffset) });
+                    prevKey = k;
+                    prevOffset = o;
                 }
-                return list.ToArray();
+                // always add the final entry (Length = 0 means "scan to EOF")
+                list.Add(new KeyIndex<TKey> { Key = prevKey, Offset = prevOffset, Length = 0 });
             }
-            return null!;
+            return list.ToArray();
         }
     }
 }

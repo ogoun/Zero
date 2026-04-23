@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Buffers.Binary;
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
@@ -20,24 +22,21 @@ namespace ZeroLevel.Services.Serialization
     {
         private const byte ZERO = 0;
         private const byte ONE = 1;
-        private long _saved_stream_position = -1;
         private const int BATCH_MEMORY_SIZE_LIMIT = 1024 * 1024; // 1Mb
-        private void MockCount()
+
+        private long MockCount()
         {
-            _saved_stream_position = this._stream.Position;
+            var savedPos = this._stream.Position;
             WriteInt32(0); // count mock
+            return savedPos;
         }
 
-        private void UpdateCount(int count)
+        private void UpdateCount(long savedPos, int count)
         {
-            if (_saved_stream_position != -1)
-            {
-                var current_position = this._stream.Position;
-                this._stream.Position = _saved_stream_position;
-                WriteInt32(count);
-                this._stream.Position = current_position;
-                _saved_stream_position = -1;
-            }
+            var current_position = this._stream.Position;
+            this._stream.Position = savedPos;
+            WriteInt32(count);
+            this._stream.Position = current_position;
         }
 
         public Stream Stream => _stream;
@@ -64,32 +63,88 @@ namespace ZeroLevel.Services.Serialization
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void WriteByte(byte val) => _stream.WriteByte(val);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void WriteShort(short number) => _stream.Write(BitConverter.GetBytes(number), 0, 2);
+        public void WriteSByte(sbyte val) => _stream.WriteByte(unchecked((byte)val));
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void WriteUShort(ushort number) => _stream.Write(BitConverter.GetBytes(number), 0, 2);
+        public void WriteShort(short number)
+        {
+            Span<byte> buf = stackalloc byte[2];
+            BinaryPrimitives.WriteInt16LittleEndian(buf, number);
+            _stream.Write(buf);
+        }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void WriteInt32(Int32 number) => _stream.Write(BitConverter.GetBytes(number), 0, 4);
+        public void WriteUShort(ushort number)
+        {
+            Span<byte> buf = stackalloc byte[2];
+            BinaryPrimitives.WriteUInt16LittleEndian(buf, number);
+            _stream.Write(buf);
+        }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void WriteUInt32(UInt32 number) => _stream.Write(BitConverter.GetBytes(number), 0, 4);
+        public void WriteInt32(Int32 number)
+        {
+            Span<byte> buf = stackalloc byte[4];
+            BinaryPrimitives.WriteInt32LittleEndian(buf, number);
+            _stream.Write(buf);
+        }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void WriteLong(Int64 number) => _stream.Write(BitConverter.GetBytes(number), 0, 8);
+        public void WriteUInt32(UInt32 number)
+        {
+            Span<byte> buf = stackalloc byte[4];
+            BinaryPrimitives.WriteUInt32LittleEndian(buf, number);
+            _stream.Write(buf);
+        }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void WriteULong(UInt64 number) => _stream.Write(BitConverter.GetBytes(number), 0, 8);
+        public void WriteLong(Int64 number)
+        {
+            Span<byte> buf = stackalloc byte[8];
+            BinaryPrimitives.WriteInt64LittleEndian(buf, number);
+            _stream.Write(buf);
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void WriteULong(UInt64 number)
+        {
+            Span<byte> buf = stackalloc byte[8];
+            BinaryPrimitives.WriteUInt64LittleEndian(buf, number);
+            _stream.Write(buf);
+        }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void WriteTimeSpan(TimeSpan period) => WriteLong(period.Ticks);
+        public void WriteDecimal(Decimal number)
+        {
+            Span<byte> buf = stackalloc byte[16];
+            var bits = decimal.GetBits(number);
+            BinaryPrimitives.WriteInt32LittleEndian(buf.Slice(0, 4), bits[0]);
+            BinaryPrimitives.WriteInt32LittleEndian(buf.Slice(4, 4), bits[1]);
+            BinaryPrimitives.WriteInt32LittleEndian(buf.Slice(8, 4), bits[2]);
+            BinaryPrimitives.WriteInt32LittleEndian(buf.Slice(12, 4), bits[3]);
+            _stream.Write(buf);
+        }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void WriteDecimal(Decimal number) => _stream.Write(BitConverterExt.GetBytes(number), 0, 16);
+        public void WriteDouble(double val)
+        {
+            Span<byte> buf = stackalloc byte[8];
+            BinaryPrimitives.WriteInt64LittleEndian(buf, BitConverter.DoubleToInt64Bits(val));
+            _stream.Write(buf);
+        }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void WriteDouble(double val) => _stream.Write(BitConverter.GetBytes(val), 0, 8);
+        public void WriteFloat(float val)
+        {
+            Span<byte> buf = stackalloc byte[4];
+            BinaryPrimitives.WriteInt32LittleEndian(buf, BitConverter.SingleToInt32Bits(val));
+            _stream.Write(buf);
+        }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void WriteFloat(float val) => _stream.Write(BitConverter.GetBytes(val), 0, 4);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void WriteGuid(Guid guid) => _stream.Write(guid.ToByteArray(), 0, 16);
+        public void WriteGuid(Guid guid)
+        {
+            Span<byte> buf = stackalloc byte[16];
+            guid.TryWriteBytes(buf);
+            _stream.Write(buf);
+        }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void WriteChar(char val)
         {
-            var data = BitConverter.GetBytes(val);
-            _stream.Write(data, 0, 2);
+            Span<byte> buf = stackalloc byte[2];
+            BinaryPrimitives.WriteUInt16LittleEndian(buf, val);
+            _stream.Write(buf);
         }
 
         /// <summary>
@@ -191,6 +246,92 @@ namespace ZeroLevel.Services.Serialization
             }
         }
 
+        public void WriteUri(Uri uri)
+        {
+            // null and empty are indistinguishable on the wire — see WriteString semantics
+            WriteString(uri?.OriginalString!);
+        }
+
+        public void WriteVersion(Version version)
+        {
+            if (version == null!)
+            {
+                WriteByte(0);
+            }
+            else
+            {
+                WriteByte(1);
+                WriteInt32(version.Major);
+                WriteInt32(version.Minor);
+                WriteInt32(version.Build);    // -1 if not specified
+                WriteInt32(version.Revision); // -1 if not specified
+            }
+        }
+
+        public void WriteBitArray(BitArray bits)
+        {
+            if (bits == null!)
+            {
+                WriteInt32(-1);
+                return;
+            }
+            WriteInt32(bits.Length);
+            if (bits.Length == 0) return;
+            var bytes = new byte[(bits.Length + 7) >> 3];
+            bits.CopyTo(bytes, 0);
+            _stream.Write(bytes, 0, bytes.Length);
+        }
+
+        public void WriteEnum<T>(T value) where T : struct, Enum
+        {
+            var underlyingType = Enum.GetUnderlyingType(typeof(T));
+            switch (Type.GetTypeCode(underlyingType))
+            {
+                case TypeCode.Byte: WriteByte(Unsafe.As<T, byte>(ref value)); break;
+                case TypeCode.SByte: WriteSByte(Unsafe.As<T, sbyte>(ref value)); break;
+                case TypeCode.Int16: WriteShort(Unsafe.As<T, short>(ref value)); break;
+                case TypeCode.UInt16: WriteUShort(Unsafe.As<T, ushort>(ref value)); break;
+                case TypeCode.Int32: WriteInt32(Unsafe.As<T, int>(ref value)); break;
+                case TypeCode.UInt32: WriteUInt32(Unsafe.As<T, uint>(ref value)); break;
+                case TypeCode.Int64: WriteLong(Unsafe.As<T, long>(ref value)); break;
+                case TypeCode.UInt64: WriteULong(Unsafe.As<T, ulong>(ref value)); break;
+                default: throw new NotSupportedException($"Enum {typeof(T).Name} has unsupported underlying type {underlyingType.Name}");
+            }
+        }
+
+        #region Nullable primitives
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void WriteBooleanNullable(bool? val) { if (val.HasValue) { WriteByte(ONE); WriteBoolean(val.Value); } else { WriteByte(ZERO); } }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void WriteByteNullable(byte? val) { if (val.HasValue) { WriteByte(ONE); WriteByte(val.Value); } else { WriteByte(ZERO); } }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void WriteSByteNullable(sbyte? val) { if (val.HasValue) { WriteByte(ONE); WriteSByte(val.Value); } else { WriteByte(ZERO); } }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void WriteCharNullable(char? val) { if (val.HasValue) { WriteByte(ONE); WriteChar(val.Value); } else { WriteByte(ZERO); } }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void WriteShortNullable(short? val) { if (val.HasValue) { WriteByte(ONE); WriteShort(val.Value); } else { WriteByte(ZERO); } }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void WriteUShortNullable(ushort? val) { if (val.HasValue) { WriteByte(ONE); WriteUShort(val.Value); } else { WriteByte(ZERO); } }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void WriteInt32Nullable(int? val) { if (val.HasValue) { WriteByte(ONE); WriteInt32(val.Value); } else { WriteByte(ZERO); } }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void WriteUInt32Nullable(uint? val) { if (val.HasValue) { WriteByte(ONE); WriteUInt32(val.Value); } else { WriteByte(ZERO); } }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void WriteLongNullable(long? val) { if (val.HasValue) { WriteByte(ONE); WriteLong(val.Value); } else { WriteByte(ZERO); } }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void WriteULongNullable(ulong? val) { if (val.HasValue) { WriteByte(ONE); WriteULong(val.Value); } else { WriteByte(ZERO); } }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void WriteFloatNullable(float? val) { if (val.HasValue) { WriteByte(ONE); WriteFloat(val.Value); } else { WriteByte(ZERO); } }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void WriteDoubleNullable(double? val) { if (val.HasValue) { WriteByte(ONE); WriteDouble(val.Value); } else { WriteByte(ZERO); } }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void WriteDecimalNullable(decimal? val) { if (val.HasValue) { WriteByte(ONE); WriteDecimal(val.Value); } else { WriteByte(ZERO); } }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void WriteTimeSpanNullable(TimeSpan? val) { if (val.HasValue) { WriteByte(ONE); WriteTimeSpan(val.Value); } else { WriteByte(ZERO); } }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void WriteGuidNullable(Guid? val) { if (val.HasValue) { WriteByte(ONE); WriteGuid(val.Value); } else { WriteByte(ZERO); } }
+        #endregion
+
         public byte[] Complete()
         {
             return (_stream as MemoryStream)?.ToArray() ?? ReadToEnd(_stream);
@@ -246,6 +387,7 @@ namespace ZeroLevel.Services.Serialization
         {
             _stream.Flush();
             _stream.Dispose();
+            _writeLock?.Dispose();
         }
 
         #region Extension
@@ -254,13 +396,20 @@ namespace ZeroLevel.Services.Serialization
         public void WriteCollection<T>(IEnumerable<T> collection)
             where T : IBinarySerializable
         {
-            WriteInt32(collection?.Count() ?? 0);
             if (collection != null!)
             {
+                var savedPos = MockCount();
+                int count = 0;
                 foreach (var item in collection)
                 {
                     item.Serialize(this);
+                    count++;
                 }
+                UpdateCount(savedPos, count);
+            }
+            else
+            {
+                WriteInt32(0);
             }
         }
 
@@ -268,7 +417,7 @@ namespace ZeroLevel.Services.Serialization
         {
             if (collection != null!)
             {
-                MockCount();
+                var savedPos = MockCount();
                 int count = 0;
 
                 foreach (var item in collection)
@@ -277,7 +426,7 @@ namespace ZeroLevel.Services.Serialization
                     count++;
                 }
 
-                UpdateCount(count);
+                UpdateCount(savedPos, count);
             }
             else
             {
@@ -290,6 +439,12 @@ namespace ZeroLevel.Services.Serialization
         public void WriteCollection(IEnumerable<IPAddress> collection) => WriteCollection(collection, s => WriteIP(s));
 
         public void WriteCollection(IEnumerable<IPEndPoint> collection) => WriteCollection(collection, s => WriteIPEndpoint(s));
+
+        public void WriteCollection(IEnumerable<Uri> collection) => WriteCollection(collection, s => WriteUri(s));
+
+        public void WriteCollection(IEnumerable<Version> collection) => WriteCollection(collection, s => WriteVersion(s));
+
+        public void WriteCollection(IEnumerable<BitArray> collection) => WriteCollection(collection, s => WriteBitArray(s));
 
         public void WriteCollection(IEnumerable<Guid> collection) => WriteCollection(collection, s => WriteGuid(s));
 
@@ -324,6 +479,8 @@ namespace ZeroLevel.Services.Serialization
         public void WriteCollection(IEnumerable<byte> collection) => WriteCollection(collection, s => WriteByte(s));
 
         public void WriteCollection(IEnumerable<byte[]> collection) => WriteCollection(collection, s => WriteBytes(s));
+
+        public void WriteCollection(IEnumerable<sbyte> collection) => WriteCollection(collection, s => WriteSByte(s));
 
         public void WriteCollection(IEnumerable<decimal> collection) => WriteCollection(collection, s => WriteDecimal(s));
 
@@ -370,6 +527,12 @@ namespace ZeroLevel.Services.Serialization
 
         public void WriteArray(IPEndPoint[] array) => WriteArray(array, WriteIPEndpoint);
 
+        public void WriteArray(Uri[] array) => WriteArray(array, WriteUri);
+
+        public void WriteArray(Version[] array) => WriteArray(array, WriteVersion);
+
+        public void WriteArray(BitArray[] array) => WriteArray(array, WriteBitArray);
+
         public void WriteArray(Guid[] array) => WriteArray(array, WriteGuid);
 
         public void WriteArray(DateTime[] array) => WriteArray(array, dt => WriteDateTime(dt));
@@ -404,6 +567,8 @@ namespace ZeroLevel.Services.Serialization
 
         public void WriteArray(byte[][] array) => WriteArray(array, WriteBytes);
 
+        public void WriteArray(sbyte[] array) => WriteArray(array, WriteSByte);
+
         public void WriteArray(decimal[] array) => WriteArray(array, WriteDecimal);
 
         public void WriteArray(TimeSpan[] array) => WriteArray(array, WriteTimeSpan);
@@ -411,6 +576,9 @@ namespace ZeroLevel.Services.Serialization
 
         public void WriteCompatible<T>(T item)
         {
+            if (item == null!)
+                throw new ArgumentNullException(nameof(item),
+                    "WriteCompatible does not support null. Use Write<T> for nullable IBinarySerializable, or wrap nullable values explicitly.");
             var buffer = MessageSerializer.SerializeCompatible(item);
             _stream.Write(buffer, 0, buffer.Length);
         }
@@ -429,6 +597,30 @@ namespace ZeroLevel.Services.Serialization
             }
         }
 
+        public void WriteKeyValuePair<TKey, TValue>(KeyValuePair<TKey, TValue> pair)
+        {
+            if (pair.Key == null!)
+                throw new ArgumentException("KeyValuePair key cannot be null.", nameof(pair));
+            if (pair.Value == null!)
+                throw new ArgumentException($"KeyValuePair value for key '{pair.Key}' cannot be null.", nameof(pair));
+            var keySer = MessageSerializer.GetSerializer<TKey>();
+            var valSer = MessageSerializer.GetSerializer<TValue>();
+            keySer(this, pair.Key);
+            valSer(this, pair.Value);
+        }
+
+        public void WriteValueTuple<T1, T2>((T1, T2) value)
+        {
+            if (value.Item1 == null!)
+                throw new ArgumentException("ValueTuple Item1 cannot be null.", nameof(value));
+            if (value.Item2 == null!)
+                throw new ArgumentException("ValueTuple Item2 cannot be null.", nameof(value));
+            var ser1 = MessageSerializer.GetSerializer<T1>();
+            var ser2 = MessageSerializer.GetSerializer<T2>();
+            ser1(this, value.Item1);
+            ser2(this, value.Item2);
+        }
+
         public void WriteDictionary<TKey, TValue>(IDictionary<TKey, TValue> collection)
         {
             WriteInt32(collection?.Count() ?? 0);
@@ -436,6 +628,10 @@ namespace ZeroLevel.Services.Serialization
             {
                 foreach (var item in collection)
                 {
+                    if (item.Key == null!)
+                        throw new ArgumentException("Dictionary key cannot be null.", nameof(collection));
+                    if (item.Value == null!)
+                        throw new ArgumentException($"Dictionary value for key '{item.Key}' cannot be null. WriteDictionary does not support null values.", nameof(collection));
                     WriteCompatible(item.Key);
                     WriteCompatible(item.Value);
                 }
@@ -449,6 +645,10 @@ namespace ZeroLevel.Services.Serialization
             {
                 foreach (var item in collection)
                 {
+                    if (item.Key == null!)
+                        throw new ArgumentException("Dictionary key cannot be null.", nameof(collection));
+                    if (item.Value == null!)
+                        throw new ArgumentException($"Dictionary value for key '{item.Key}' cannot be null. WriteDictionary does not support null values.", nameof(collection));
                     WriteCompatible(item.Key);
                     WriteCompatible(item.Value);
                 }
@@ -462,7 +662,7 @@ namespace ZeroLevel.Services.Serialization
     /// Async methods
     /// </summary>
     public partial class MemoryStreamWriter :
-        IAsyncBinaryWriter
+        IAsyncBinaryWriter, IAsyncDisposable
     {
         private SemaphoreSlim _writeLock = new SemaphoreSlim(1);
         public async Task WaitLockAsync() => await _writeLock.WaitAsync();
@@ -525,6 +725,12 @@ namespace ZeroLevel.Services.Serialization
         public async Task WriteFloatAsync(float val) => await _stream.WriteAsync(BitConverter.GetBytes(val), 0, 4);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public async Task WriteGuidAsync(Guid guid) => await _stream.WriteAsync(guid.ToByteArray(), 0, 16);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Task WriteSByteAsync(sbyte val)
+        {
+            _stream.WriteByte(unchecked((byte)val));
+            return Task.CompletedTask;
+        }
 
         /// <summary>
         /// Write string (4 bytes long + Length bytes)
@@ -609,6 +815,76 @@ namespace ZeroLevel.Services.Serialization
             }
         }
 
+        public async Task WriteUriAsync(Uri uri)
+        {
+            await WriteStringAsync(uri?.OriginalString!);
+        }
+
+        public async Task WriteVersionAsync(Version version)
+        {
+            if (version == null!)
+            {
+                WriteByte(0);
+            }
+            else
+            {
+                WriteByte(1);
+                await WriteInt32Async(version.Major);
+                await WriteInt32Async(version.Minor);
+                await WriteInt32Async(version.Build);
+                await WriteInt32Async(version.Revision);
+            }
+        }
+
+        public async Task WriteBitArrayAsync(BitArray bits)
+        {
+            if (bits == null!)
+            {
+                await WriteInt32Async(-1);
+                return;
+            }
+            await WriteInt32Async(bits.Length);
+            if (bits.Length == 0) return;
+            var bytes = new byte[(bits.Length + 7) >> 3];
+            bits.CopyTo(bytes, 0);
+            await _stream.WriteAsync(bytes, 0, bytes.Length);
+        }
+
+        public async Task WriteEnumAsync<T>(T value) where T : struct, Enum
+        {
+            var underlyingType = Enum.GetUnderlyingType(typeof(T));
+            switch (Type.GetTypeCode(underlyingType))
+            {
+                case TypeCode.Byte: WriteByte(Unsafe.As<T, byte>(ref value)); break;
+                case TypeCode.SByte: WriteSByte(Unsafe.As<T, sbyte>(ref value)); break;
+                case TypeCode.Int16: await WriteShortAsync(Unsafe.As<T, short>(ref value)); break;
+                case TypeCode.UInt16: await WriteUShortAsync(Unsafe.As<T, ushort>(ref value)); break;
+                case TypeCode.Int32: await WriteInt32Async(Unsafe.As<T, int>(ref value)); break;
+                case TypeCode.UInt32: await WriteUInt32Async(Unsafe.As<T, uint>(ref value)); break;
+                case TypeCode.Int64: await WriteLongAsync(Unsafe.As<T, long>(ref value)); break;
+                case TypeCode.UInt64: await WriteULongAsync(Unsafe.As<T, ulong>(ref value)); break;
+                default: throw new NotSupportedException($"Enum {typeof(T).Name} has unsupported underlying type {underlyingType.Name}");
+            }
+        }
+
+        #region Nullable primitives (async)
+        public async Task WriteBooleanNullableAsync(bool? val) { if (val.HasValue) { WriteByte(ONE); WriteBoolean(val.Value); } else { WriteByte(ZERO); } await Task.CompletedTask; }
+        public async Task WriteByteNullableAsync(byte? val) { if (val.HasValue) { WriteByte(ONE); WriteByte(val.Value); } else { WriteByte(ZERO); } await Task.CompletedTask; }
+        public async Task WriteSByteNullableAsync(sbyte? val) { if (val.HasValue) { WriteByte(ONE); WriteSByte(val.Value); } else { WriteByte(ZERO); } await Task.CompletedTask; }
+        public async Task WriteCharNullableAsync(char? val) { if (val.HasValue) { WriteByte(ONE); await WriteCharAsync(val.Value); } else { WriteByte(ZERO); } }
+        public async Task WriteShortNullableAsync(short? val) { if (val.HasValue) { WriteByte(ONE); await WriteShortAsync(val.Value); } else { WriteByte(ZERO); } }
+        public async Task WriteUShortNullableAsync(ushort? val) { if (val.HasValue) { WriteByte(ONE); await WriteUShortAsync(val.Value); } else { WriteByte(ZERO); } }
+        public async Task WriteInt32NullableAsync(int? val) { if (val.HasValue) { WriteByte(ONE); await WriteInt32Async(val.Value); } else { WriteByte(ZERO); } }
+        public async Task WriteUInt32NullableAsync(uint? val) { if (val.HasValue) { WriteByte(ONE); await WriteUInt32Async(val.Value); } else { WriteByte(ZERO); } }
+        public async Task WriteLongNullableAsync(long? val) { if (val.HasValue) { WriteByte(ONE); await WriteLongAsync(val.Value); } else { WriteByte(ZERO); } }
+        public async Task WriteULongNullableAsync(ulong? val) { if (val.HasValue) { WriteByte(ONE); await WriteULongAsync(val.Value); } else { WriteByte(ZERO); } }
+        public async Task WriteFloatNullableAsync(float? val) { if (val.HasValue) { WriteByte(ONE); await WriteFloatAsync(val.Value); } else { WriteByte(ZERO); } }
+        public async Task WriteDoubleNullableAsync(double? val) { if (val.HasValue) { WriteByte(ONE); await WriteDoubleAsync(val.Value); } else { WriteByte(ZERO); } }
+        public async Task WriteDecimalNullableAsync(decimal? val) { if (val.HasValue) { WriteByte(ONE); await WriteDecimalAsync(val.Value); } else { WriteByte(ZERO); } }
+        public async Task WriteTimeSpanNullableAsync(TimeSpan? val) { if (val.HasValue) { WriteByte(ONE); await WriteTimeSpanAsync(val.Value); } else { WriteByte(ZERO); } }
+        public async Task WriteGuidNullableAsync(Guid? val) { if (val.HasValue) { WriteByte(ONE); await WriteGuidAsync(val.Value); } else { WriteByte(ZERO); } }
+        #endregion
+
         public async Task<byte[]> CompleteAsync()
         {
             return (_stream as MemoryStream)?.ToArray() ?? (await ReadToEndAsync(_stream));
@@ -660,9 +936,11 @@ namespace ZeroLevel.Services.Serialization
             }
         }
 
-        public void DisposeAsync()
+        public async ValueTask DisposeAsync()
         {
-            _writeLock.Dispose();
+            await _stream.FlushAsync();
+            await _stream.DisposeAsync();
+            _writeLock?.Dispose();
         }
 
         #region Extension
@@ -686,7 +964,7 @@ namespace ZeroLevel.Services.Serialization
                 }
                 else
                 {
-                    MockCount();
+                    var savedPos = MockCount();
                     int count = 0;
                     if (_stream is MemoryStream)
                     {
@@ -704,18 +982,18 @@ namespace ZeroLevel.Services.Serialization
                             {
                                 foreach (var items in collection.Chunkify(chunk_size))
                                 {
+                                    ms.SetLength(0);
                                     foreach (var item in items)
                                     {
                                         saveAction.Invoke(writer, item);
                                         count++;
                                     }
                                     await WriteRawBytesAsyncNoLength(writer.Complete());
-                                    writer.Stream.Position = 0;
                                 }
                             }
                         }
                     }
-                    UpdateCount(count);
+                    UpdateCount(savedPos, count);
                 }
             }
             else
@@ -729,14 +1007,14 @@ namespace ZeroLevel.Services.Serialization
         {
             if (collection != null!)
             {
-                MockCount();
+                var savedPos = MockCount();
                 int count = 0;
                 foreach (var item in collection)
                 {
                     await item.SerializeAsync(this);
                     count++;
                 }
-                UpdateCount(count);
+                UpdateCount(savedPos, count);
             }
             else
             {
@@ -748,17 +1026,14 @@ namespace ZeroLevel.Services.Serialization
         {
             if (collection != null!)
             {
-                MockCount();
+                var savedPos = MockCount();
                 int count = 0;
-                if (collection != null!)
+                foreach (var item in collection)
                 {
-                    foreach (var item in collection)
-                    {
-                        await WriteStringAsync(item);
-                        count++;
-                    }
+                    await WriteStringAsync(item);
+                    count++;
                 }
-                UpdateCount(count);
+                UpdateCount(savedPos, count);
             }
             else
             {
@@ -769,6 +1044,63 @@ namespace ZeroLevel.Services.Serialization
         public async Task WriteCollectionAsync(IEnumerable<IPAddress> collection) => await OptimizedWriteCollectionByChunksAsync(collection, (w, i) => w.WriteIP(i), (w, i) => w.WriteIPAsync(i), BATCH_MEMORY_SIZE_LIMIT / 5);
 
         public async Task WriteCollectionAsync(IEnumerable<IPEndPoint> collection) => await OptimizedWriteCollectionByChunksAsync(collection, (w, i) => w.WriteIPEndpoint(i), (w, i) => w.WriteIPEndpointAsync(i), BATCH_MEMORY_SIZE_LIMIT / 9);
+
+        public async Task WriteCollectionAsync(IEnumerable<Uri> collection)
+        {
+            if (collection != null!)
+            {
+                var savedPos = MockCount();
+                int count = 0;
+                foreach (var item in collection)
+                {
+                    await WriteUriAsync(item);
+                    count++;
+                }
+                UpdateCount(savedPos, count);
+            }
+            else
+            {
+                WriteInt32(0);
+            }
+        }
+
+        public async Task WriteCollectionAsync(IEnumerable<Version> collection)
+        {
+            if (collection != null!)
+            {
+                var savedPos = MockCount();
+                int count = 0;
+                foreach (var item in collection)
+                {
+                    await WriteVersionAsync(item);
+                    count++;
+                }
+                UpdateCount(savedPos, count);
+            }
+            else
+            {
+                WriteInt32(0);
+            }
+        }
+
+        public async Task WriteCollectionAsync(IEnumerable<BitArray> collection)
+        {
+            if (collection != null!)
+            {
+                var savedPos = MockCount();
+                int count = 0;
+                foreach (var item in collection)
+                {
+                    await WriteBitArrayAsync(item);
+                    count++;
+                }
+                UpdateCount(savedPos, count);
+            }
+            else
+            {
+                WriteInt32(0);
+            }
+        }
 
         public async Task WriteCollectionAsync(IEnumerable<Guid> collection) => await OptimizedWriteCollectionByChunksAsync(collection, (w, i) => w.WriteGuid(i), (w, i) => w.WriteGuidAsync(i), BATCH_MEMORY_SIZE_LIMIT / 16);
 
@@ -812,7 +1144,7 @@ namespace ZeroLevel.Services.Serialization
                 }
                 else
                 {
-                    MockCount();
+                    var savedPos = MockCount();
 
                     int count = 0;
                     if (_stream is MemoryStream)
@@ -844,7 +1176,7 @@ namespace ZeroLevel.Services.Serialization
                         }
                     }
 
-                    UpdateCount(count);
+                    UpdateCount(savedPos, count);
                 }
             }
             else
@@ -867,7 +1199,7 @@ namespace ZeroLevel.Services.Serialization
                 }
                 else
                 {
-                    MockCount();
+                    var savedPos = MockCount();
                     int count = 0;
                     if (_stream is MemoryStream)
                     {
@@ -898,7 +1230,7 @@ namespace ZeroLevel.Services.Serialization
                         }
                     }
 
-                    UpdateCount(count);
+                    UpdateCount(savedPos, count);
                 }
             }
             else
@@ -921,7 +1253,7 @@ namespace ZeroLevel.Services.Serialization
                 }
                 else
                 {
-                    MockCount();
+                    var savedPos = MockCount();
 
                     int count = 0;
                     if (_stream is MemoryStream)
@@ -940,7 +1272,60 @@ namespace ZeroLevel.Services.Serialization
                             count++;
                         }
                     }
-                    UpdateCount(count);
+                    UpdateCount(savedPos, count);
+                }
+            }
+            else
+            {
+                WriteInt32(0);
+            }
+        }
+
+        public async Task WriteCollectionAsync(IEnumerable<sbyte> collection)
+        {
+            if (collection != null!)
+            {
+                if (_stream.CanSeek == false)
+                {
+                    WriteInt32(collection.Count());
+                    foreach (var item in collection)
+                    {
+                        WriteSByte(item);
+                    }
+                }
+                else
+                {
+                    var savedPos = MockCount();
+                    int count = 0;
+                    if (_stream is MemoryStream)
+                    {
+                        foreach (var item in collection)
+                        {
+                            WriteSByte(item);
+                            count++;
+                        }
+                    }
+                    else
+                    {
+                        var buffer = new byte[BATCH_MEMORY_SIZE_LIMIT];
+                        int index = 0;
+                        foreach (var b in collection)
+                        {
+                            buffer[index] = unchecked((byte)b);
+                            index++;
+                            if (index == BATCH_MEMORY_SIZE_LIMIT)
+                            {
+                                await _stream.WriteAsync(buffer, 0, buffer.Length);
+                                index = 0;
+                            }
+                            count++;
+                        }
+                        if (index != 0)
+                        {
+                            _stream.Write(buffer, 0, index);
+                        }
+                    }
+                    UpdateCount(savedPos, count);
                 }
             }
             else
@@ -980,12 +1365,12 @@ namespace ZeroLevel.Services.Serialization
                         {
                             for (int i = 0; i < array.Length; i += chunk_size)
                             {
+                                ms.SetLength(0);
                                 for (int j = 0; j < chunk_size && (i + j) < array.Length; j++)
                                 {
                                     saveAction.Invoke(writer, array[i + j]);
                                 }
                                 await WriteRawBytesAsyncNoLength(writer.Complete());
-                                writer.Stream.Position = 0;
                             }
                         }
                     }
@@ -1045,6 +1430,87 @@ namespace ZeroLevel.Services.Serialization
 
         public async Task WriteArrayAsync(IPEndPoint[] array) => await OptimizedWriteArrayByChunksAsync(array, (w, i) => w.WriteIPEndpoint(i), BATCH_MEMORY_SIZE_LIMIT / 9);
 
+        public async Task WriteArrayAsync(Uri[] array)
+        {
+            if (array != null!)
+            {
+                if (_stream is MemoryStream)
+                {
+                    await WriteInt32Async(array.Length);
+                    for (int i = 0; i < array.Length; i++)
+                    {
+                        WriteUri(array[i]);
+                    }
+                }
+                else
+                {
+                    await WriteInt32Async(array.Length);
+                    for (int i = 0; i < array.Length; i++)
+                    {
+                        await WriteUriAsync(array[i]);
+                    }
+                }
+            }
+            else
+            {
+                WriteInt32(0);
+            }
+        }
+
+        public async Task WriteArrayAsync(Version[] array)
+        {
+            if (array != null!)
+            {
+                if (_stream is MemoryStream)
+                {
+                    await WriteInt32Async(array.Length);
+                    for (int i = 0; i < array.Length; i++)
+                    {
+                        WriteVersion(array[i]);
+                    }
+                }
+                else
+                {
+                    await WriteInt32Async(array.Length);
+                    for (int i = 0; i < array.Length; i++)
+                    {
+                        await WriteVersionAsync(array[i]);
+                    }
+                }
+            }
+            else
+            {
+                WriteInt32(0);
+            }
+        }
+
+        public async Task WriteArrayAsync(BitArray[] array)
+        {
+            if (array != null!)
+            {
+                if (_stream is MemoryStream)
+                {
+                    await WriteInt32Async(array.Length);
+                    for (int i = 0; i < array.Length; i++)
+                    {
+                        WriteBitArray(array[i]);
+                    }
+                }
+                else
+                {
+                    await WriteInt32Async(array.Length);
+                    for (int i = 0; i < array.Length; i++)
+                    {
+                        await WriteBitArrayAsync(array[i]);
+                    }
+                }
+            }
+            else
+            {
+                WriteInt32(0);
+            }
+        }
+
         public async Task WriteArrayAsync(Guid[] array) => await OptimizedWriteArrayByChunksAsync(array, (w, i) => w.WriteGuid(i), BATCH_MEMORY_SIZE_LIMIT / 16);
 
         public async Task WriteArrayAsync(DateTime[] array) => await OptimizedWriteArrayByChunksAsync(array, (w, i) => w.WriteDateTime(i), BATCH_MEMORY_SIZE_LIMIT / 9);
@@ -1085,20 +1551,15 @@ namespace ZeroLevel.Services.Serialization
                 else
                 {
                     var buffer = new byte[BATCH_MEMORY_SIZE_LIMIT];
-                    using (var ms = new MemoryStream())
+                    for (int i = 0; i < array.Length; i += BATCH_MEMORY_SIZE_LIMIT)
                     {
-                        using (var writer = new MemoryStreamWriter(ms))
+                        int written = 0;
+                        for (int j = 0; j < BATCH_MEMORY_SIZE_LIMIT && (i + j) < array.Length; j++)
                         {
-                            for (int i = 0; i < array.Length; i += BATCH_MEMORY_SIZE_LIMIT)
-                            {
-                                for (int j = 0; j < BATCH_MEMORY_SIZE_LIMIT && (i + j) < array.Length; j++)
-                                {
-                                    buffer[j] = array[i + j] ? ONE : ZERO;
-                                }
-                                await WriteRawBytesAsyncNoLength(writer.Complete());
-                                writer.Stream.Position = 0;
-                            }
+                            buffer[j] = array[i + j] ? ONE : ZERO;
+                            written++;
                         }
+                        await _stream.WriteAsync(buffer, 0, written);
                     }
                 }
             }
@@ -1123,21 +1584,10 @@ namespace ZeroLevel.Services.Serialization
                 }
                 else
                 {
-                    var buffer = new byte[BATCH_MEMORY_SIZE_LIMIT];
-                    using (var ms = new MemoryStream())
+                    for (int i = 0; i < array.Length; i += BATCH_MEMORY_SIZE_LIMIT)
                     {
-                        using (var writer = new MemoryStreamWriter(ms))
-                        {
-                            for (int i = 0; i < array.Length; i += BATCH_MEMORY_SIZE_LIMIT)
-                            {
-                                for (int j = 0; j < BATCH_MEMORY_SIZE_LIMIT && (i + j) < array.Length; j++)
-                                {
-                                    buffer[j] = array[i + j];
-                                }
-                                await WriteRawBytesAsyncNoLength(writer.Complete());
-                                writer.Stream.Position = 0;
-                            }
-                        }
+                        int written = Math.Min(BATCH_MEMORY_SIZE_LIMIT, array.Length - i);
+                        await _stream.WriteAsync(array, i, written);
                     }
                 }
             }
@@ -1173,6 +1623,40 @@ namespace ZeroLevel.Services.Serialization
             }
         }
 
+        public async Task WriteArrayAsync(sbyte[] array)
+        {
+            if (array != null!)
+            {
+                WriteInt32(array.Length);
+
+                if (_stream is MemoryStream)
+                {
+                    for (int i = 0; i < array.Length; i++)
+                    {
+                        WriteSByte(array[i]);
+                    }
+                }
+                else
+                {
+                    var buffer = new byte[BATCH_MEMORY_SIZE_LIMIT];
+                    for (int i = 0; i < array.Length; i += BATCH_MEMORY_SIZE_LIMIT)
+                    {
+                        int written = 0;
+                        for (int j = 0; j < BATCH_MEMORY_SIZE_LIMIT && (i + j) < array.Length; j++)
+                        {
+                            buffer[j] = unchecked((byte)array[i + j]);
+                            written++;
+                        }
+                        await _stream.WriteAsync(buffer, 0, written);
+                    }
+                }
+            }
+            else
+            {
+                WriteInt32(0);
+            }
+        }
+
         public async Task WriteArrayAsync(decimal[] array) => await OptimizedWriteArrayByChunksAsync(array, (w, i) => w.WriteDecimal(i), BATCH_MEMORY_SIZE_LIMIT / 16);
 
         public async Task WriteArrayAsync(TimeSpan[] array) => await OptimizedWriteArrayByChunksAsync(array, (w, i) => w.WriteTimeSpan(i), BATCH_MEMORY_SIZE_LIMIT / 8);
@@ -1180,6 +1664,9 @@ namespace ZeroLevel.Services.Serialization
 
         public async Task WriteCompatibleAsync<T>(T item)
         {
+            if (item == null!)
+                throw new ArgumentNullException(nameof(item),
+                    "WriteCompatibleAsync does not support null. Use WriteAsync<T> for nullable IAsyncBinarySerializable, or wrap nullable values explicitly.");
             var buffer = MessageSerializer.SerializeCompatible(item);
             await _stream.WriteAsync(buffer, 0, buffer.Length);
         }
@@ -1198,6 +1685,32 @@ namespace ZeroLevel.Services.Serialization
             }
         }
 
+        public Task WriteKeyValuePairAsync<TKey, TValue>(KeyValuePair<TKey, TValue> pair)
+        {
+            if (pair.Key == null!)
+                throw new ArgumentException("KeyValuePair key cannot be null.", nameof(pair));
+            if (pair.Value == null!)
+                throw new ArgumentException($"KeyValuePair value for key '{pair.Key}' cannot be null.", nameof(pair));
+            var keySer = MessageSerializer.GetSerializer<TKey>();
+            var valSer = MessageSerializer.GetSerializer<TValue>();
+            keySer(this, pair.Key);
+            valSer(this, pair.Value);
+            return Task.CompletedTask;
+        }
+
+        public Task WriteValueTupleAsync<T1, T2>((T1, T2) value)
+        {
+            if (value.Item1 == null!)
+                throw new ArgumentException("ValueTuple Item1 cannot be null.", nameof(value));
+            if (value.Item2 == null!)
+                throw new ArgumentException("ValueTuple Item2 cannot be null.", nameof(value));
+            var ser1 = MessageSerializer.GetSerializer<T1>();
+            var ser2 = MessageSerializer.GetSerializer<T2>();
+            ser1(this, value.Item1);
+            ser2(this, value.Item2);
+            return Task.CompletedTask;
+        }
+
         public async Task WriteDictionaryAsync<TKey, TValue>(IDictionary<TKey, TValue> collection)
         {
             if (collection != null!)
@@ -1205,6 +1718,10 @@ namespace ZeroLevel.Services.Serialization
                 WriteInt32(collection.Count);
                 foreach (var item in collection)
                 {
+                    if (item.Key == null!)
+                        throw new ArgumentException("Dictionary key cannot be null.", nameof(collection));
+                    if (item.Value == null!)
+                        throw new ArgumentException($"Dictionary value for key '{item.Key}' cannot be null. WriteDictionaryAsync does not support null values.", nameof(collection));
                     await WriteCompatibleAsync(item.Key);
                     await WriteCompatibleAsync(item.Value);
                 }
@@ -1222,6 +1739,10 @@ namespace ZeroLevel.Services.Serialization
                 WriteInt32(collection.Count);
                 foreach (var item in collection)
                 {
+                    if (item.Key == null!)
+                        throw new ArgumentException("Dictionary key cannot be null.", nameof(collection));
+                    if (item.Value == null!)
+                        throw new ArgumentException($"Dictionary value for key '{item.Key}' cannot be null. WriteDictionaryAsync does not support null values.", nameof(collection));
                     await WriteCompatibleAsync(item.Key);
                     await WriteCompatibleAsync(item.Value);
                 }

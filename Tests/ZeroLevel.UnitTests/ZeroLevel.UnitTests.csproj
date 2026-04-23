@@ -19,6 +19,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\ZeroLevel\ZeroLevel.csproj" />
+    <ProjectReference Include="..\..\ZeroLevel.Sleopok.Engine\ZeroLevel.Sleopok.Engine.csproj" />
   </ItemGroup>
 
   <ItemGroup>

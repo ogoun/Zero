@@ -117,21 +117,23 @@ namespace ZeroLevel.DependencyInjection
             Type instanceType = resolveType.ImplementationType;
             if (resolveType.IsShared)
             {
-                if (null == resolveType.SharedInstance)
+                // Fast path — already created
+                var existing = resolveType.SharedInstance;
+                if (existing != null) return existing;
+                // Serialize ctor across concurrent resolves of the same singleton
+                lock (resolveType._resolveLock)
                 {
-                    resolveType.SharedInstance = MakeInstance(instanceType, args ?? resolveType.ConstructorParameters);
-                    if (compose)
+                    if (resolveType.SharedInstance == null)
                     {
-                        Compose(resolveType.SharedInstance);
+                        var instance = MakeInstance(instanceType, args ?? resolveType.ConstructorParameters);
+                        if (compose) Compose(instance);
+                        resolveType.SharedInstance = instance;
                     }
+                    return resolveType.SharedInstance;
                 }
-                return resolveType.SharedInstance;
             }
             var sessionInstance = MakeInstance(instanceType, args ?? resolveType.ConstructorParameters);
-            if (compose)
-            {
-                Compose(sessionInstance);
-            }
+            if (compose) Compose(sessionInstance);
             return sessionInstance;
         }
 
@@ -144,39 +146,41 @@ namespace ZeroLevel.DependencyInjection
         /// <returns>Instance</returns>
         private object MakeGenericResolving(ResolveTypeInfo resolveType, Type genericType, object[] args, bool compose = true)
         {
-            if (null == resolveType.GenericCachee)
+            // GenericCachee (Type -> Type) and GenericInstanceCachee (Type -> object) are both
+            // populated lazily and concurrently — guard with the same per-resolveType lock.
+            Type instanceType;
+            lock (resolveType._resolveLock)
             {
-                resolveType.GenericCachee = new Dictionary<Type, Type>();
-            }
-            if (false == resolveType.GenericCachee.ContainsKey(genericType))
-            {
-                var genericArgumentTypes = genericType.GetGenericArguments();
-                var realType = resolveType.ImplementationType.MakeGenericType(genericArgumentTypes);
-                resolveType.GenericCachee.Add(genericType, realType);
-            }
-            Type instanceType = resolveType.GenericCachee[genericType];
-            if (resolveType.IsShared)
-            {
-                if (resolveType.GenericInstanceCachee == null!)
+                if (null == resolveType.GenericCachee)
                 {
-                    resolveType.GenericInstanceCachee = new Dictionary<Type, object>();
+                    resolveType.GenericCachee = new Dictionary<Type, Type>();
                 }
-                if (false == resolveType.GenericInstanceCachee.ContainsKey(instanceType))
+                if (false == resolveType.GenericCachee.ContainsKey(genericType))
                 {
-                    var sharedInstance = MakeInstance(instanceType, args ?? resolveType.ConstructorParameters);
-                    if (compose)
+                    var genericArgumentTypes = genericType.GetGenericArguments();
+                    var realType = resolveType.ImplementationType.MakeGenericType(genericArgumentTypes);
+                    resolveType.GenericCachee.Add(genericType, realType);
+                }
+                instanceType = resolveType.GenericCachee[genericType];
+
+                if (resolveType.IsShared)
+                {
+                    if (resolveType.GenericInstanceCachee == null!)
                     {
-                        Compose(sharedInstance);
+                        resolveType.GenericInstanceCachee = new Dictionary<Type, object>();
                     }
-                    resolveType.GenericInstanceCachee.Add(instanceType, sharedInstance);
+                    if (false == resolveType.GenericInstanceCachee.ContainsKey(instanceType))
+                    {
+                        var sharedInstance = MakeInstance(instanceType, args ?? resolveType.ConstructorParameters);
+                        if (compose) Compose(sharedInstance);
+                        resolveType.GenericInstanceCachee.Add(instanceType, sharedInstance);
+                    }
+                    return resolveType.GenericInstanceCachee[instanceType];
                 }
-                return resolveType.GenericInstanceCachee[instanceType];
             }
+            // Non-shared instance creation does not need the lock
             var sessionInstance = MakeInstance(instanceType, args ?? resolveType.ConstructorParameters);
-            if (compose)
-            {
-                Compose(sessionInstance);
-            }
+            if (compose) Compose(sessionInstance);
             return sessionInstance;
         }
 

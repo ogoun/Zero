@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
@@ -68,7 +69,7 @@ namespace ZeroLevel.Services.Serialization
         /// </summary>
         public bool ReadBoolean()
         {
-            return BitConverter.ToBoolean(new byte[1] { ReadByte() }, 0);
+            return ReadByte() != 0;
         }
 
         /// <summary>
@@ -78,6 +79,14 @@ namespace ZeroLevel.Services.Serialization
         {
             var buffer = ReadBuffer(1);
             return buffer[0];
+        }
+
+        /// <summary>
+        /// Reading sbyte
+        /// </summary>
+        public sbyte ReadSByte()
+        {
+            return unchecked((sbyte)ReadByte());
         }
 
         public char ReadChar()
@@ -193,7 +202,7 @@ namespace ZeroLevel.Services.Serialization
         {
             if (CheckOutOfRange(count))
                 throw new OutOfMemoryException("Array index out of bounds");
-            var buffer = _accessor.ReadBuffer(count).Result;
+            var buffer = _accessor.ReadBufferSync(count);
             if (_reverseByteOrder && count > 1)
             {
                 byte b;
@@ -216,7 +225,7 @@ namespace ZeroLevel.Services.Serialization
             }
             try
             {
-                buffer = _accessor.ReadBuffer(count).Result;
+                buffer = _accessor.ReadBufferSync(count);
                 if (_reverseByteOrder && count > 1)
                 {
                     byte b;
@@ -283,6 +292,86 @@ namespace ZeroLevel.Services.Serialization
             return null!;
         }
 
+        public Uri ReadUri()
+        {
+            var s = ReadString();
+            if (s == null!) return null!;
+            return new Uri(s, UriKind.RelativeOrAbsolute);
+        }
+
+        public Version ReadVersion()
+        {
+            if (ReadByte() == 0) return null!;
+            int major = ReadInt32();
+            int minor = ReadInt32();
+            int build = ReadInt32();
+            int revision = ReadInt32();
+            if (build < 0) return new Version(major, minor);
+            if (revision < 0) return new Version(major, minor, build);
+            return new Version(major, minor, build, revision);
+        }
+
+        public BitArray ReadBitArray()
+        {
+            int length = ReadInt32();
+            if (length == -1) return null!;
+            if (length == 0) return new BitArray(0);
+            var bytes = ReadBuffer((length + 7) >> 3);
+            var bits = new BitArray(bytes);
+            bits.Length = length; // trim padding bits in the last byte
+            return bits;
+        }
+
+        public T ReadEnum<T>() where T : struct, Enum
+        {
+            var underlyingType = Enum.GetUnderlyingType(typeof(T));
+            switch (Type.GetTypeCode(underlyingType))
+            {
+                case TypeCode.Byte: { var v = ReadByte(); return Unsafe.As<byte, T>(ref v); }
+                case TypeCode.SByte: { var v = ReadSByte(); return Unsafe.As<sbyte, T>(ref v); }
+                case TypeCode.Int16: { var v = ReadShort(); return Unsafe.As<short, T>(ref v); }
+                case TypeCode.UInt16: { var v = ReadUShort(); return Unsafe.As<ushort, T>(ref v); }
+                case TypeCode.Int32: { var v = ReadInt32(); return Unsafe.As<int, T>(ref v); }
+                case TypeCode.UInt32: { var v = ReadUInt32(); return Unsafe.As<uint, T>(ref v); }
+                case TypeCode.Int64: { var v = ReadLong(); return Unsafe.As<long, T>(ref v); }
+                case TypeCode.UInt64: { var v = ReadULong(); return Unsafe.As<ulong, T>(ref v); }
+                default: throw new NotSupportedException($"Enum {typeof(T).Name} has unsupported underlying type {underlyingType.Name}");
+            }
+        }
+
+        #region Nullable primitives
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool? ReadBooleanNullable() => ReadByte() == 0 ? (bool?)null : ReadBoolean();
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public byte? ReadByteNullable() => ReadByte() == 0 ? (byte?)null : ReadByte();
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public sbyte? ReadSByteNullable() => ReadByte() == 0 ? (sbyte?)null : ReadSByte();
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public char? ReadCharNullable() => ReadByte() == 0 ? (char?)null : ReadChar();
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public short? ReadShortNullable() => ReadByte() == 0 ? (short?)null : ReadShort();
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public ushort? ReadUShortNullable() => ReadByte() == 0 ? (ushort?)null : ReadUShort();
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public int? ReadInt32Nullable() => ReadByte() == 0 ? (int?)null : ReadInt32();
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public uint? ReadUInt32Nullable() => ReadByte() == 0 ? (uint?)null : ReadUInt32();
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public long? ReadLongNullable() => ReadByte() == 0 ? (long?)null : ReadLong();
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public ulong? ReadULongNullable() => ReadByte() == 0 ? (ulong?)null : ReadULong();
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public float? ReadFloatNullable() => ReadByte() == 0 ? (float?)null : ReadFloat();
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public double? ReadDoubleNullable() => ReadByte() == 0 ? (double?)null : ReadDouble();
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public decimal? ReadDecimalNullable() => ReadByte() == 0 ? (decimal?)null : ReadDecimal();
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public TimeSpan? ReadTimeSpanNullable() => ReadByte() == 0 ? (TimeSpan?)null : ReadTimeSpan();
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Guid? ReadGuidNullable() => ReadByte() == 0 ? (Guid?)null : ReadGuid();
+        #endregion
+
         /// <summary>
         /// Check if data reading is outside the stream
         /// </summary>
@@ -322,6 +411,12 @@ namespace ZeroLevel.Services.Serialization
 
         public List<IPEndPoint> ReadIPEndPointCollection() => ReadList(ReadIPEndpoint);
 
+        public List<Uri> ReadUriCollection() => ReadList(ReadUri);
+
+        public List<Version> ReadVersionCollection() => ReadList(ReadVersion);
+
+        public List<BitArray> ReadBitArrayCollection() => ReadList(ReadBitArray);
+
         public List<Guid> ReadGuidCollection() => ReadList(ReadGuid);
 
         public List<DateTime?> ReadDateTimeCollection() => ReadList(ReadDateTime);
@@ -351,6 +446,8 @@ namespace ZeroLevel.Services.Serialization
         public List<byte> ReadByteCollection() => ReadList(ReadByte);
 
         public List<byte[]> ReadByteArrayCollection() => ReadList(ReadBytes);
+
+        public List<sbyte> ReadSByteCollection() => ReadList(ReadSByte);
 
         public List<decimal> ReadDecimalCollection() => ReadList(ReadDecimal);
 
@@ -386,6 +483,12 @@ namespace ZeroLevel.Services.Serialization
         public IEnumerable<IPAddress> ReadIPCollectionLazy() => ReadEnumerable(ReadIP);
         public IEnumerable<IPEndPoint> ReadIPEndPointCollectionLazy() => ReadEnumerable(ReadIPEndpoint);
 
+        public IEnumerable<Uri> ReadUriCollectionLazy() => ReadEnumerable(ReadUri);
+
+        public IEnumerable<Version> ReadVersionCollectionLazy() => ReadEnumerable(ReadVersion);
+
+        public IEnumerable<BitArray> ReadBitArrayCollectionLazy() => ReadEnumerable(ReadBitArray);
+
         public IEnumerable<Guid> ReadGuidCollectionLazy() => ReadEnumerable(ReadGuid);
 
         public IEnumerable<DateTime?> ReadDateTimeCollectionLazy() => ReadEnumerable(ReadDateTime);
@@ -415,6 +518,8 @@ namespace ZeroLevel.Services.Serialization
         public IEnumerable<byte> ReadByteCollectionLazy() => ReadEnumerable(ReadByte);
 
         public IEnumerable<byte[]> ReadByteArrayCollectionLazy() => ReadEnumerable(ReadBytes);
+
+        public IEnumerable<sbyte> ReadSByteCollectionLazy() => ReadEnumerable(ReadSByte);
 
         public IEnumerable<decimal> ReadDecimalCollectionLazy() => ReadEnumerable(ReadDecimal);
 
@@ -453,6 +558,12 @@ namespace ZeroLevel.Services.Serialization
 
         public IPEndPoint[] ReadIPEndPointArray() => ReadArray(ReadIPEndpoint);
 
+        public Uri[] ReadUriArray() => ReadArray(ReadUri);
+
+        public Version[] ReadVersionArray() => ReadArray(ReadVersion);
+
+        public BitArray[] ReadBitArrayArray() => ReadArray(ReadBitArray);
+
         public Guid[] ReadGuidArray() => ReadArray(ReadGuid);
 
         public DateTime?[] ReadDateTimeArray() => ReadArray(ReadDateTime);
@@ -483,10 +594,30 @@ namespace ZeroLevel.Services.Serialization
 
         public byte[][] ReadByteArrayArray() => ReadArray(ReadBytes);
 
+        public sbyte[] ReadSByteArray() => ReadArray(ReadSByte);
+
         public decimal[] ReadDecimalArray() => ReadArray(ReadDecimal);
 
         public TimeSpan[] ReadTimeSpanArray() => ReadArray(ReadTimeSpan);
         #endregion
+
+        public KeyValuePair<TKey, TValue> ReadKeyValuePair<TKey, TValue>()
+        {
+            var keyDeser = MessageSerializer.GetDeserializer<TKey>();
+            var valDeser = MessageSerializer.GetDeserializer<TValue>();
+            var key = keyDeser(this);
+            var val = valDeser(this);
+            return new KeyValuePair<TKey, TValue>(key, val);
+        }
+
+        public (T1, T2) ReadValueTuple<T1, T2>()
+        {
+            var d1 = MessageSerializer.GetDeserializer<T1>();
+            var d2 = MessageSerializer.GetDeserializer<T2>();
+            var i1 = d1(this);
+            var i2 = d2(this);
+            return (i1, i2);
+        }
 
         public Dictionary<TKey, TValue> ReadDictionary<TKey, TValue>()
         {
@@ -536,6 +667,19 @@ namespace ZeroLevel.Services.Serialization
             var item = (T)Activator.CreateInstance<T>();
             item.Deserialize(this);
             return item;
+        }
+
+        public HashSet<T> ReadHashSet<T>() where T : IBinarySerializable, new()
+        {
+            int count = ReadInt32();
+            var set = new HashSet<T>(count);
+            for (int i = 0; i < count; i++)
+            {
+                var item = new T();
+                item.Deserialize(this);
+                set.Add(item);
+            }
+            return set;
         }
 
         public bool TryReadByte(out byte b)
@@ -649,7 +793,7 @@ namespace ZeroLevel.Services.Serialization
         /// </summary>
         public async Task<bool> ReadBooleanAsync()
         {
-            return BitConverter.ToBoolean(new byte[1] { await ReadByteAsync() }, 0);
+            return await ReadByteAsync() != 0;
         }
 
         /// <summary>
@@ -659,6 +803,14 @@ namespace ZeroLevel.Services.Serialization
         {
             var buffer = await ReadBufferAsync(1);
             return buffer[0];
+        }
+
+        /// <summary>
+        /// Reading sbyte
+        /// </summary>
+        public async Task<sbyte> ReadSByteAsync()
+        {
+            return unchecked((sbyte)(await ReadByteAsync()));
         }
 
         public async Task<char> ReadCharAsync()
@@ -813,6 +965,71 @@ namespace ZeroLevel.Services.Serialization
             return null!;
         }
 
+        public async Task<Uri> ReadUriAsync()
+        {
+            var s = await ReadStringAsync();
+            if (s == null!) return null!;
+            return new Uri(s, UriKind.RelativeOrAbsolute);
+        }
+
+        public async Task<Version> ReadVersionAsync()
+        {
+            if (await ReadByteAsync() == 0) return null!;
+            int major = await ReadInt32Async();
+            int minor = await ReadInt32Async();
+            int build = await ReadInt32Async();
+            int revision = await ReadInt32Async();
+            if (build < 0) return new Version(major, minor);
+            if (revision < 0) return new Version(major, minor, build);
+            return new Version(major, minor, build, revision);
+        }
+
+        public async Task<BitArray> ReadBitArrayAsync()
+        {
+            int length = await ReadInt32Async();
+            if (length == -1) return null!;
+            if (length == 0) return new BitArray(0);
+            var bytes = await ReadBufferAsync((length + 7) >> 3);
+            var bits = new BitArray(bytes);
+            bits.Length = length;
+            return bits;
+        }
+
+        public async Task<T> ReadEnumAsync<T>() where T : struct, Enum
+        {
+            var underlyingType = Enum.GetUnderlyingType(typeof(T));
+            switch (Type.GetTypeCode(underlyingType))
+            {
+                case TypeCode.Byte: { var v = await ReadByteAsync(); return Unsafe.As<byte, T>(ref v); }
+                case TypeCode.SByte: { var v = await ReadSByteAsync(); return Unsafe.As<sbyte, T>(ref v); }
+                case TypeCode.Int16: { var v = await ReadShortAsync(); return Unsafe.As<short, T>(ref v); }
+                case TypeCode.UInt16: { var v = await ReadUShortAsync(); return Unsafe.As<ushort, T>(ref v); }
+                case TypeCode.Int32: { var v = await ReadInt32Async(); return Unsafe.As<int, T>(ref v); }
+                case TypeCode.UInt32: { var v = await ReadUInt32Async(); return Unsafe.As<uint, T>(ref v); }
+                case TypeCode.Int64: { var v = await ReadLongAsync(); return Unsafe.As<long, T>(ref v); }
+                case TypeCode.UInt64: { var v = await ReadULongAsync(); return Unsafe.As<ulong, T>(ref v); }
+                default: throw new NotSupportedException($"Enum {typeof(T).Name} has unsupported underlying type {underlyingType.Name}");
+            }
+        }
+
+        #region Nullable primitives (async)
+        public async Task<bool?> ReadBooleanNullableAsync() => await ReadByteAsync() == 0 ? (bool?)null : await ReadBooleanAsync();
+        public async Task<byte?> ReadByteNullableAsync() => await ReadByteAsync() == 0 ? (byte?)null : await ReadByteAsync();
+        public async Task<sbyte?> ReadSByteNullableAsync() => await ReadByteAsync() == 0 ? (sbyte?)null : await ReadSByteAsync();
+        public async Task<char?> ReadCharNullableAsync() => await ReadByteAsync() == 0 ? (char?)null : await ReadCharAsync();
+        public async Task<short?> ReadShortNullableAsync() => await ReadByteAsync() == 0 ? (short?)null : await ReadShortAsync();
+        public async Task<ushort?> ReadUShortNullableAsync() => await ReadByteAsync() == 0 ? (ushort?)null : await ReadUShortAsync();
+        public async Task<int?> ReadInt32NullableAsync() => await ReadByteAsync() == 0 ? (int?)null : await ReadInt32Async();
+        public async Task<uint?> ReadUInt32NullableAsync() => await ReadByteAsync() == 0 ? (uint?)null : await ReadUInt32Async();
+        public async Task<long?> ReadLongNullableAsync() => await ReadByteAsync() == 0 ? (long?)null : await ReadLongAsync();
+        public async Task<ulong?> ReadULongNullableAsync() => await ReadByteAsync() == 0 ? (ulong?)null : await ReadULongAsync();
+        public async Task<float?> ReadFloatNullableAsync() => await ReadByteAsync() == 0 ? (float?)null : await ReadFloatAsync();
+        public async Task<double?> ReadDoubleNullableAsync() => await ReadByteAsync() == 0 ? (double?)null : await ReadDoubleAsync();
+        public async Task<decimal?> ReadDecimalNullableAsync() => await ReadByteAsync() == 0 ? (decimal?)null : await ReadDecimalAsync();
+        public async Task<TimeSpan?> ReadTimeSpanNullableAsync() => await ReadByteAsync() == 0 ? (TimeSpan?)null : await ReadTimeSpanAsync();
+        public async Task<Guid?> ReadGuidNullableAsync() => await ReadByteAsync() == 0 ? (Guid?)null : await ReadGuidAsync();
+        #endregion
+
         #region Extensions
 
         #region Collections
@@ -863,6 +1080,12 @@ namespace ZeroLevel.Services.Serialization
 
         public async Task<List<IPEndPoint>> ReadIPEndPointCollectionAsync() => await ReadListAsync(ReadIPEndpointAsync, ReadIPEndpoint);
 
+        public async Task<List<Uri>> ReadUriCollectionAsync() => await ReadListAsync(ReadUriAsync, ReadUri);
+
+        public async Task<List<Version>> ReadVersionCollectionAsync() => await ReadListAsync(ReadVersionAsync, ReadVersion);
+
+        public async Task<List<BitArray>> ReadBitArrayCollectionAsync() => await ReadListAsync(ReadBitArrayAsync, ReadBitArray);
+
         public async Task<List<Guid>> ReadGuidCollectionAsync() => await ReadListAsync(ReadGuidAsync, ReadGuid);
 
         public async Task<List<DateTime?>> ReadDateTimeCollectionAsync() => await ReadListAsync(ReadDateTimeAsync, ReadDateTime);
@@ -892,6 +1115,8 @@ namespace ZeroLevel.Services.Serialization
         public async Task<List<byte>> ReadByteCollectionAsync() => await ReadListAsync(ReadByteAsync, ReadByte);
 
         public async Task<List<byte[]>> ReadByteArrayCollectionAsync() => await ReadListAsync(ReadBytesAsync, ReadBytes);
+
+        public async Task<List<sbyte>> ReadSByteCollectionAsync() => await ReadListAsync(ReadSByteAsync, ReadSByte);
 
         public async Task<List<decimal>> ReadDecimalCollectionAsync() => await ReadListAsync(ReadDecimalAsync, ReadDecimal);
 
@@ -946,6 +1171,12 @@ namespace ZeroLevel.Services.Serialization
 
         public async Task<IPEndPoint[]> ReadIPEndPointArrayAsync() => await ReadArrayAsync(ReadIPEndpointAsync, ReadIPEndpoint);
 
+        public async Task<Uri[]> ReadUriArrayAsync() => await ReadArrayAsync(ReadUriAsync, ReadUri);
+
+        public async Task<Version[]> ReadVersionArrayAsync() => await ReadArrayAsync(ReadVersionAsync, ReadVersion);
+
+        public async Task<BitArray[]> ReadBitArrayArrayAsync() => await ReadArrayAsync(ReadBitArrayAsync, ReadBitArray);
+
         public async Task<Guid[]> ReadGuidArrayAsync() => await ReadArrayAsync(ReadGuidAsync, ReadGuid);
 
         public async Task<DateTime?[]> ReadDateTimeArrayAsync() => await ReadArrayAsync(ReadDateTimeAsync, ReadDateTime);
@@ -983,11 +1214,31 @@ namespace ZeroLevel.Services.Serialization
 
         public async Task<byte[][]> ReadByteArrayArrayAsync() => await ReadArrayAsync(ReadBytesAsync, ReadBytes);
 
+        public async Task<sbyte[]> ReadSByteArrayAsync() => await ReadArrayAsync(ReadSByteAsync, ReadSByte);
+
         public async Task<decimal[]> ReadDecimalArrayAsync() => await ReadArrayAsync(ReadDecimalAsync, ReadDecimal);
 
         public async Task<TimeSpan[]> ReadTimeSpanArrayAsync() => await ReadArrayAsync(ReadTimeSpanAsync, ReadTimeSpan);
 
         #endregion
+
+        public Task<KeyValuePair<TKey, TValue>> ReadKeyValuePairAsync<TKey, TValue>()
+        {
+            var keyDeser = MessageSerializer.GetDeserializer<TKey>();
+            var valDeser = MessageSerializer.GetDeserializer<TValue>();
+            var key = keyDeser(this);
+            var val = valDeser(this);
+            return Task.FromResult(new KeyValuePair<TKey, TValue>(key, val));
+        }
+
+        public Task<(T1, T2)> ReadValueTupleAsync<T1, T2>()
+        {
+            var d1 = MessageSerializer.GetDeserializer<T1>();
+            var d2 = MessageSerializer.GetDeserializer<T2>();
+            var i1 = d1(this);
+            var i2 = d2(this);
+            return Task.FromResult((i1, i2));
+        }
 
         public async Task<Dictionary<TKey, TValue>> ReadDictionaryAsync<TKey, TValue>()
         {
@@ -1037,6 +1288,19 @@ namespace ZeroLevel.Services.Serialization
             var item = (T)Activator.CreateInstance<T>();
             await item.DeserializeAsync(this);
             return item;
+        }
+
+        public async Task<HashSet<T>> ReadHashSetAsync<T>() where T : IAsyncBinarySerializable, new()
+        {
+            int count = await ReadInt32Async();
+            var set = new HashSet<T>(count);
+            for (int i = 0; i < count; i++)
+            {
+                var item = new T();
+                await item.DeserializeAsync(this);
+                set.Add(item);
+            }
+            return set;
         }
 
         public async Task<T> ReadAsync<T>(object arg) where T : IAsyncBinarySerializable

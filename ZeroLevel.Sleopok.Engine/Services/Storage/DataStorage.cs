@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using ZeroLevel.Services.HashFunctions;
 using ZeroLevel.Services.PartitionStorage;
+using ZeroLevel.Sleopok.Engine.Services.Indexes;
 
 namespace ZeroLevel.Sleopok.Engine.Services.Storage
 {
@@ -81,9 +82,33 @@ namespace ZeroLevel.Sleopok.Engine.Services.Storage
                 async (w, n) => await w.WriteStringAsync(n),
                 async (w, n) => await w.WriteBytesAsync(n),
 
-                async (r) => { try { return new DeserializeResult<string>(true, await r.ReadStringAsync()); } catch { return new DeserializeResult<string>(false, string.Empty); } },
-                async (r) => { try { return new DeserializeResult<string>(true, await r.ReadStringAsync()); } catch { return new DeserializeResult<string>(false, string.Empty); } },
-                async (r) => { try { return new DeserializeResult<byte[]>(true, await r.ReadBytesAsync()); } catch { return new DeserializeResult<byte[]>(false, new byte[0]); } });
+                async (r) =>
+                {
+                    try { return new DeserializeResult<string>(true, await r.ReadStringAsync()); }
+                    catch (Exception ex) when (ex is IOException || ex is EndOfStreamException || ex is FormatException)
+                    {
+                        Log.Error(ex, "[Sleopok.DataStorage] Failed to deserialize key");
+                        return new DeserializeResult<string>(false, string.Empty);
+                    }
+                },
+                async (r) =>
+                {
+                    try { return new DeserializeResult<string>(true, await r.ReadStringAsync()); }
+                    catch (Exception ex) when (ex is IOException || ex is EndOfStreamException || ex is FormatException)
+                    {
+                        Log.Error(ex, "[Sleopok.DataStorage] Failed to deserialize input value");
+                        return new DeserializeResult<string>(false, string.Empty);
+                    }
+                },
+                async (r) =>
+                {
+                    try { return new DeserializeResult<byte[]>(true, await r.ReadBytesAsync()); }
+                    catch (Exception ex) when (ex is IOException || ex is EndOfStreamException || ex is FormatException)
+                    {
+                        Log.Error(ex, "[Sleopok.DataStorage] Failed to deserialize compressed value");
+                        return new DeserializeResult<byte[]>(false, new byte[0]);
+                    }
+                });
 
             var options = new StoreOptions<string, string, byte[], StoreMetadata>
             {
@@ -95,10 +120,10 @@ namespace ZeroLevel.Sleopok.Engine.Services.Storage
                     EnableIndexInMemoryCachee = false
                 },
                 RootFolder = rootFolder,
-                FilePartition = new StoreFilePartition<string, StoreMetadata>("Token hash", (token, _) => Math.Abs(StringHash.DotNetFullHash(token.ToLowerInvariant()) % 47).ToString()),
+                FilePartition = new StoreFilePartition<string, StoreMetadata>("Token hash", (token, _) => (StringHash.DotNetFullHash(token.ToLowerInvariant()) % 47).ToString()),
                 MergeFunction = list =>
                 {
-                    return Compressor.Compress(list.OrderBy(c => c).ToArray());
+                    return Compressor.Compress(list.Distinct().OrderBy(c => c).ToArray());
                 },
                 Partitions = new List<StoreCatalogPartition<StoreMetadata>>
                 {
@@ -153,9 +178,8 @@ namespace ZeroLevel.Sleopok.Engine.Services.Storage
             return documents.ToDictionary(d => d.Key, d => boost * d.Value.GetScore(tokens.Length, exactMatch));
         }
 
-        public async Task<Dictionary<string, List<string>>> GetAllDocuments(string field)
+        public async IAsyncEnumerable<TokenDocuments> IterateAllDocuments(string field)
         {
-            var documents = new Dictionary<string, List<string>>();
             var accessor = _store.CreateAccessor(new StoreMetadata(field));
             if (accessor != null)
             {
@@ -165,18 +189,10 @@ namespace ZeroLevel.Sleopok.Engine.Services.Storage
                     {
                         data.Deconstruct(out string key, out byte[] val);
                         var docs = Compressor.DecompressToDocuments(val);
-                        if (documents.TryGetValue(key, out var documentsIds))
-                        {
-                            documentsIds.AddRange(docs);
-                        }
-                        else
-                        {
-                            documents[key] = new List<string>(docs);
-                        }
+                        yield return new TokenDocuments(key, docs);
                     }
                 }
             }
-            return documents;
         }
 
         public async Task Dump(string key, Stream stream)

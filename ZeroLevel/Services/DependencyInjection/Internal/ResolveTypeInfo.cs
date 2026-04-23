@@ -47,5 +47,12 @@ namespace ZeroLevel.DependencyInjection
         /// Constructor parameters
         /// </summary>
         public object[] ConstructorParameters;
+
+        /// <summary>
+        /// Dedicated lock for serializing SharedInstance / GenericCachee / GenericInstanceCachee
+        /// initialization across concurrent Resolve callers. Private to avoid the lock-on-public-object
+        /// anti-pattern.
+        /// </summary>
+        internal readonly object _resolveLock = new object();
     }
 }

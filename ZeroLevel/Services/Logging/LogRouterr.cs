@@ -16,6 +16,7 @@ namespace ZeroLevel.Logging
         private readonly object LogsCacheeLocker = new object();
         private readonly Dictionary<int, List<ILogger>> LogWriters = new Dictionary<int, List<ILogger>>();
         private volatile ILogMessageBuffer _messageQueue;
+        private Thread _processingThread;
 
         #endregion Fields
 
@@ -26,8 +27,8 @@ namespace ZeroLevel.Logging
             _messageQueue = new NoLimitedLogMessageBuffer();
             AppDomain.CurrentDomain.ProcessExit += (sender, e) => { Dispose(); };
             _stopped = false;
-            var thread = new Thread(ProcessMessageQueueMethod) { IsBackground = true };
-            thread.Start();
+            _processingThread = new Thread(ProcessMessageQueueMethod) { IsBackground = true };
+            _processingThread.Start();
         }
 
         #endregion Ctor
@@ -61,11 +62,12 @@ namespace ZeroLevel.Logging
 
         private void ProcessMessageQueueMethod(object state)
         {
-            while (false == _stopped || _messageQueue.Count > 0)
+            try
             {
-                var message = _messageQueue.Take();
-                if (message != null!)
+                while (false == _stopped || _messageQueue.Count > 0)
                 {
+                    var message = _messageQueue.Take();
+                    if (message == null!) continue; // sentinel from Dispose, or queue closed
                     lock (LogsCacheeLocker)
                     {
                         foreach (var lv in LogWriters.Keys)
@@ -79,8 +81,12 @@ namespace ZeroLevel.Logging
                             }
                         }
                     }
-                    message = null!;
                 }
+            }
+            catch (Exception ex)
+            {
+                // Don't route via Log — that would feed back into us
+                try { Console.Error.WriteLine($"[LogRouter] Background loop fatal: {ex}"); } catch { }
             }
         }
 
@@ -121,28 +127,23 @@ namespace ZeroLevel.Logging
             if (false == _stopped)
             {
                 _stopped = true;
-                while (_messageQueue.Count > 0)
-                {
-                    Thread.Sleep(100);
-                }
-                _messageQueue.Dispose();
+                // Wake the background thread if it's blocked in Take() on an empty queue.
+                // ProcessMessageQueueMethod treats a null message as a no-op and re-checks the loop condition.
+                try { _messageQueue.Push(LogLevel.None, null!); } catch { }
+                // Wait for background to drain any remaining messages and exit.
+                try { _processingThread?.Join(TimeSpan.FromSeconds(5)); } catch { }
+                try { _messageQueue.Dispose(); } catch { }
                 lock (LogsCacheeLocker)
                 {
                     foreach (var logCollection in LogWriters.Values)
                     {
                         foreach (var logger in logCollection)
                         {
-                            try
-                            {
-                                logger.Dispose();
-                            }
-                            catch { }
+                            try { logger.Dispose(); } catch { }
                         }
                     }
                     LogWriters.Clear();
                 }
-                GC.Collect();
-                GC.WaitForPendingFinalizers();
             }
         }
 

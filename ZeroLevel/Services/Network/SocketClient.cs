@@ -69,7 +69,7 @@ namespace ZeroLevel.Network
                 _clientSocket.ReceiveBufferSize = 65536; // Увеличение буфера приема
                 //_clientSocket.Connect(ep);
                 OpenConnection(_clientSocket, ep);
-                _clientSocket.SetKeepAlive(true, 30000, 10000);
+                _clientSocket.SetKeepAlive(true, 10000, 5000);
                 OnConnect(this);
             }
             catch (Exception ex)

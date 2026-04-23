@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Net;
@@ -13,6 +14,8 @@ namespace ZeroLevel.Services.Serialization
         char ReadChar();
 
         byte ReadByte();
+
+        sbyte ReadSByte();
 
         byte[] ReadBytes();
 
@@ -48,6 +51,32 @@ namespace ZeroLevel.Services.Serialization
 
         IPEndPoint ReadIPEndpoint();
 
+        Uri ReadUri();
+
+        Version ReadVersion();
+
+        BitArray ReadBitArray();
+
+        T ReadEnum<T>() where T : struct, Enum;
+
+        #region Nullable primitives
+        bool? ReadBooleanNullable();
+        byte? ReadByteNullable();
+        sbyte? ReadSByteNullable();
+        char? ReadCharNullable();
+        short? ReadShortNullable();
+        ushort? ReadUShortNullable();
+        int? ReadInt32Nullable();
+        uint? ReadUInt32Nullable();
+        long? ReadLongNullable();
+        ulong? ReadULongNullable();
+        float? ReadFloatNullable();
+        double? ReadDoubleNullable();
+        decimal? ReadDecimalNullable();
+        TimeSpan? ReadTimeSpanNullable();
+        Guid? ReadGuidNullable();
+        #endregion
+
         #region Extensions
 
         #region Arrays
@@ -55,6 +84,9 @@ namespace ZeroLevel.Services.Serialization
         string[] ReadStringArray();
         IPAddress[] ReadIPArray();
         IPEndPoint[] ReadIPEndPointArray();
+        Uri[] ReadUriArray();
+        Version[] ReadVersionArray();
+        BitArray[] ReadBitArrayArray();
         Guid[] ReadGuidArray();
         DateTime?[] ReadDateTimeArray();
         DateTimeOffset?[] ReadDateTimeOffsetArray();
@@ -70,6 +102,7 @@ namespace ZeroLevel.Services.Serialization
         bool[] ReadBooleanArray();
         byte[] ReadByteArray();
         byte[][] ReadByteArrayArray();
+        sbyte[] ReadSByteArray();
         decimal[] ReadDecimalArray();
         TimeSpan[] ReadTimeSpanArray();
         #endregion
@@ -90,8 +123,12 @@ namespace ZeroLevel.Services.Serialization
         List<bool> ReadBooleanCollection();
         List<byte> ReadByteCollection();
         List<byte[]> ReadByteArrayCollection();
+        List<sbyte> ReadSByteCollection();
         List<IPAddress> ReadIPCollection();
         List<IPEndPoint> ReadIPEndPointCollection();
+        List<Uri> ReadUriCollection();
+        List<Version> ReadVersionCollection();
+        List<BitArray> ReadBitArrayCollection();
         List<UInt64> ReadUInt64Collection();
         List<UInt32> ReadUInt32Collection();
         List<short> ReadShortCollection();
@@ -104,6 +141,9 @@ namespace ZeroLevel.Services.Serialization
         IEnumerable<string> ReadStringCollectionLazy();
         IEnumerable<IPAddress> ReadIPCollectionLazy();
         IEnumerable<IPEndPoint> ReadIPEndPointCollectionLazy();
+        IEnumerable<Uri> ReadUriCollectionLazy();
+        IEnumerable<Version> ReadVersionCollectionLazy();
+        IEnumerable<BitArray> ReadBitArrayCollectionLazy();
         IEnumerable<Guid> ReadGuidCollectionLazy();
         IEnumerable<DateTime?> ReadDateTimeCollectionLazy();
         IEnumerable<DateTimeOffset?> ReadDateTimeOffsetCollectionLazy();
@@ -119,6 +159,7 @@ namespace ZeroLevel.Services.Serialization
         IEnumerable<bool> ReadBooleanCollectionLazy();
         IEnumerable<byte> ReadByteCollectionLazy();
         IEnumerable<byte[]> ReadByteArrayCollectionLazy();
+        IEnumerable<sbyte> ReadSByteCollectionLazy();
         IEnumerable<decimal> ReadDecimalCollectionLazy();
         IEnumerable<TimeSpan> ReadTimeSpanCollectionLazy();
         #endregion
@@ -126,11 +167,17 @@ namespace ZeroLevel.Services.Serialization
         T Read<T>() where T : IBinarySerializable;
         T Read<T>(object arg) where T : IBinarySerializable;
 
+        HashSet<T> ReadHashSet<T>() where T : IBinarySerializable, new();
+
         T ReadCompatible<T>();
 
         Dictionary<TKey, TValue> ReadDictionary<TKey, TValue>();
 
         ConcurrentDictionary<TKey, TValue> ReadDictionaryAsConcurrent<TKey, TValue>();
+
+        KeyValuePair<TKey, TValue> ReadKeyValuePair<TKey, TValue>();
+
+        (T1, T2) ReadValueTuple<T1, T2>();
 
         #endregion Extensions
 
@@ -143,6 +190,7 @@ namespace ZeroLevel.Services.Serialization
         Task<bool> ReadBooleanAsync();
         Task<char> ReadCharAsync();
         Task<byte> ReadByteAsync();
+        Task<sbyte> ReadSByteAsync();
         Task<byte[]> ReadBytesAsync();
         Task<Double> ReadDoubleAsync();
         Task<float> ReadFloatAsync();
@@ -161,6 +209,32 @@ namespace ZeroLevel.Services.Serialization
         Task<IPAddress> ReadIPAsync();
         Task<IPEndPoint> ReadIPEndpointAsync();
 
+        Task<Uri> ReadUriAsync();
+
+        Task<Version> ReadVersionAsync();
+
+        Task<BitArray> ReadBitArrayAsync();
+
+        Task<T> ReadEnumAsync<T>() where T : struct, Enum;
+
+        #region Nullable primitives
+        Task<bool?> ReadBooleanNullableAsync();
+        Task<byte?> ReadByteNullableAsync();
+        Task<sbyte?> ReadSByteNullableAsync();
+        Task<char?> ReadCharNullableAsync();
+        Task<short?> ReadShortNullableAsync();
+        Task<ushort?> ReadUShortNullableAsync();
+        Task<int?> ReadInt32NullableAsync();
+        Task<uint?> ReadUInt32NullableAsync();
+        Task<long?> ReadLongNullableAsync();
+        Task<ulong?> ReadULongNullableAsync();
+        Task<float?> ReadFloatNullableAsync();
+        Task<double?> ReadDoubleNullableAsync();
+        Task<decimal?> ReadDecimalNullableAsync();
+        Task<TimeSpan?> ReadTimeSpanNullableAsync();
+        Task<Guid?> ReadGuidNullableAsync();
+        #endregion
+
         #region Extensions
 
         #region Arrays
@@ -168,6 +242,9 @@ namespace ZeroLevel.Services.Serialization
         Task<string[]> ReadStringArrayAsync();
         Task<IPAddress[]> ReadIPArrayAsync();
         Task<IPEndPoint[]> ReadIPEndPointArrayAsync();
+        Task<Uri[]> ReadUriArrayAsync();
+        Task<Version[]> ReadVersionArrayAsync();
+        Task<BitArray[]> ReadBitArrayArrayAsync();
         Task<Guid[]> ReadGuidArrayAsync();
         Task<DateTime?[]> ReadDateTimeArrayAsync();
         Task<DateTimeOffset?[]> ReadDateTimeArrayOffsetAsync();
@@ -183,6 +260,7 @@ namespace ZeroLevel.Services.Serialization
         Task<bool[]> ReadBooleanArrayAsync();
         Task<byte[]> ReadByteArrayAsync();
         Task<byte[][]> ReadByteArrayArrayAsync();
+        Task<sbyte[]> ReadSByteArrayAsync();
         Task<decimal[]> ReadDecimalArrayAsync();
         Task<TimeSpan[]> ReadTimeSpanArrayAsync();
         #endregion
@@ -203,8 +281,12 @@ namespace ZeroLevel.Services.Serialization
         Task<List<bool>> ReadBooleanCollectionAsync();
         Task<List<byte>> ReadByteCollectionAsync();
         Task<List<byte[]>> ReadByteArrayCollectionAsync();
+        Task<List<sbyte>> ReadSByteCollectionAsync();
         Task<List<IPAddress>> ReadIPCollectionAsync();
         Task<List<IPEndPoint>> ReadIPEndPointCollectionAsync();
+        Task<List<Uri>> ReadUriCollectionAsync();
+        Task<List<Version>> ReadVersionCollectionAsync();
+        Task<List<BitArray>> ReadBitArrayCollectionAsync();
         Task<List<UInt64>> ReadUInt64CollectionAsync();
         Task<List<UInt32>> ReadUInt32CollectionAsync();
         Task<List<short>> ReadShortCollectionAsync();
@@ -213,9 +295,14 @@ namespace ZeroLevel.Services.Serialization
 
         Task<T> ReadAsync<T>() where T : IAsyncBinarySerializable;
         Task<T> ReadAsync<T>(object arg) where T : IAsyncBinarySerializable;
+        Task<HashSet<T>> ReadHashSetAsync<T>() where T : IAsyncBinarySerializable, new();
         Task<T> ReadCompatibleAsync<T>();
         Task<Dictionary<TKey, TValue>> ReadDictionaryAsync<TKey, TValue>();
         Task<ConcurrentDictionary<TKey, TValue>> ReadDictionaryAsConcurrentAsync<TKey, TValue>();
+
+        Task<KeyValuePair<TKey, TValue>> ReadKeyValuePairAsync<TKey, TValue>();
+
+        Task<(T1, T2)> ReadValueTupleAsync<T1, T2>();
 
         #endregion Extensions
     }

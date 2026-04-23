@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
@@ -15,6 +16,8 @@ namespace ZeroLevel.Services.Serialization
         void WriteChar(char val);
 
         void WriteByte(byte val);
+
+        void WriteSByte(sbyte val);
 
         void WriteBytes(byte[] val);
 
@@ -50,6 +53,32 @@ namespace ZeroLevel.Services.Serialization
 
         void WriteIPEndpoint(IPEndPoint endpoint);
 
+        void WriteUri(Uri uri);
+
+        void WriteVersion(Version version);
+
+        void WriteBitArray(BitArray bits);
+
+        void WriteEnum<T>(T value) where T : struct, Enum;
+
+        #region Nullable primitives
+        void WriteBooleanNullable(bool? val);
+        void WriteByteNullable(byte? val);
+        void WriteSByteNullable(sbyte? val);
+        void WriteCharNullable(char? val);
+        void WriteShortNullable(short? val);
+        void WriteUShortNullable(ushort? val);
+        void WriteInt32Nullable(int? val);
+        void WriteUInt32Nullable(uint? val);
+        void WriteLongNullable(long? val);
+        void WriteULongNullable(ulong? val);
+        void WriteFloatNullable(float? val);
+        void WriteDoubleNullable(double? val);
+        void WriteDecimalNullable(decimal? val);
+        void WriteTimeSpanNullable(TimeSpan? val);
+        void WriteGuidNullable(Guid? val);
+        #endregion
+
         #region Extensions
 
         #region Arrays
@@ -57,6 +86,9 @@ namespace ZeroLevel.Services.Serialization
         void WriteArray(string[] array);
         void WriteArray(IPAddress[] array);
         void WriteArray(IPEndPoint[] array);
+        void WriteArray(Uri[] array);
+        void WriteArray(Version[] array);
+        void WriteArray(BitArray[] array);
         void WriteArray(Guid[] array);
         void WriteArray(DateTime[] array);
         void WriteArray(DateTime?[] array);
@@ -74,6 +106,7 @@ namespace ZeroLevel.Services.Serialization
         void WriteArray(bool[] array);
         void WriteArray(byte[] array);
         void WriteArray(byte[][] array);
+        void WriteArray(sbyte[] array);
         void WriteArray(decimal[] array);
         void WriteArray(TimeSpan[] array);
         #endregion
@@ -101,12 +134,20 @@ namespace ZeroLevel.Services.Serialization
         void WriteCollection(IEnumerable<bool> collection);
         void WriteCollection(IEnumerable<byte> collection);
         void WriteCollection(IEnumerable<byte[]> collection);
+        void WriteCollection(IEnumerable<sbyte> collection);
         void WriteCollection(IEnumerable<IPEndPoint> collection);
         void WriteCollection(IEnumerable<IPAddress> collection);
+        void WriteCollection(IEnumerable<Uri> collection);
+        void WriteCollection(IEnumerable<Version> collection);
+        void WriteCollection(IEnumerable<BitArray> collection);
         #endregion
 
         void WriteDictionary<TKey, TValue>(IDictionary<TKey, TValue> collection);
         void WriteDictionary<TKey, TValue>(ConcurrentDictionary<TKey, TValue> collection);
+
+        void WriteKeyValuePair<TKey, TValue>(KeyValuePair<TKey, TValue> pair);
+
+        void WriteValueTuple<T1, T2>((T1, T2) value);
 
         void Write<T>(T item)
             where T : IBinarySerializable;
@@ -124,6 +165,8 @@ namespace ZeroLevel.Services.Serialization
         Task WriteCharAsync(char val);
 
         Task WriteBytesAsync(byte[] val);
+
+        Task WriteSByteAsync(sbyte val);
 
         Task WriteShortAsync(short number);
 
@@ -156,6 +199,32 @@ namespace ZeroLevel.Services.Serialization
 
         Task WriteIPEndpointAsync(IPEndPoint endpoint);
 
+        Task WriteUriAsync(Uri uri);
+
+        Task WriteVersionAsync(Version version);
+
+        Task WriteBitArrayAsync(BitArray bits);
+
+        Task WriteEnumAsync<T>(T value) where T : struct, Enum;
+
+        #region Nullable primitives
+        Task WriteBooleanNullableAsync(bool? val);
+        Task WriteByteNullableAsync(byte? val);
+        Task WriteSByteNullableAsync(sbyte? val);
+        Task WriteCharNullableAsync(char? val);
+        Task WriteShortNullableAsync(short? val);
+        Task WriteUShortNullableAsync(ushort? val);
+        Task WriteInt32NullableAsync(int? val);
+        Task WriteUInt32NullableAsync(uint? val);
+        Task WriteLongNullableAsync(long? val);
+        Task WriteULongNullableAsync(ulong? val);
+        Task WriteFloatNullableAsync(float? val);
+        Task WriteDoubleNullableAsync(double? val);
+        Task WriteDecimalNullableAsync(decimal? val);
+        Task WriteTimeSpanNullableAsync(TimeSpan? val);
+        Task WriteGuidNullableAsync(Guid? val);
+        #endregion
+
         #region Extensions
 
         #region Arrays
@@ -164,6 +233,9 @@ namespace ZeroLevel.Services.Serialization
         Task WriteArrayAsync(string[] array);
         Task WriteArrayAsync(IPAddress[] array);
         Task WriteArrayAsync(IPEndPoint[] array);
+        Task WriteArrayAsync(Uri[] array);
+        Task WriteArrayAsync(Version[] array);
+        Task WriteArrayAsync(BitArray[] array);
         Task WriteArrayAsync(Guid[] array);
         Task WriteArrayAsync(DateTime[] array);
         Task WriteArrayAsync(DateTime?[] array);
@@ -179,6 +251,7 @@ namespace ZeroLevel.Services.Serialization
         Task WriteArrayAsync(bool[] array);
         Task WriteArrayAsync(byte[] array);
         Task WriteArrayAsync(byte[][] array);
+        Task WriteArrayAsync(sbyte[] array);
         Task WriteArrayAsync(decimal[] array);
         Task WriteArrayAsync(TimeSpan[] array);
         #endregion
@@ -204,12 +277,20 @@ namespace ZeroLevel.Services.Serialization
         Task WriteCollectionAsync(IEnumerable<bool> collection);
         Task WriteCollectionAsync(IEnumerable<byte> collection);
         Task WriteCollectionAsync(IEnumerable<byte[]> collection);
+        Task WriteCollectionAsync(IEnumerable<sbyte> collection);
         Task WriteCollectionAsync(IEnumerable<IPEndPoint> collection);
         Task WriteCollectionAsync(IEnumerable<IPAddress> collection);
+        Task WriteCollectionAsync(IEnumerable<Uri> collection);
+        Task WriteCollectionAsync(IEnumerable<Version> collection);
+        Task WriteCollectionAsync(IEnumerable<BitArray> collection);
         #endregion
 
         Task WriteDictionaryAsync<TKey, TValue>(IDictionary<TKey, TValue> collection);
         Task WriteDictionaryAsync<TKey, TValue>(ConcurrentDictionary<TKey, TValue> collection);
+
+        Task WriteKeyValuePairAsync<TKey, TValue>(KeyValuePair<TKey, TValue> pair);
+
+        Task WriteValueTupleAsync<T1, T2>((T1, T2) value);
 
         Task WriteAsync<T>(T item)
             where T : IAsyncBinarySerializable;

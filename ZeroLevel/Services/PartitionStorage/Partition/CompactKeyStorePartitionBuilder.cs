@@ -55,7 +55,32 @@ namespace ZeroLevel.Services.PartitionStorage.Partition
             var files = Directory.GetFiles(_catalog);
             if (files != null && files.Length > 0)
             {
-                Parallel.ForEach(files, async (file, ct) => await CompressFile(file));
+                var maxDop = Math.Max(1, _options.MaxDegreeOfParallelism);
+                using (var semaphore = new SemaphoreSlim(maxDop))
+                {
+                    var tasks = new Task[files.Length];
+                    for (int i = 0; i < files.Length; i++)
+                    {
+                        var file = files[i];
+                        tasks[i] = Task.Run(async () =>
+                        {
+                            await semaphore.WaitAsync();
+                            try
+                            {
+                                await CompressFile(file);
+                            }
+                            catch (Exception ex)
+                            {
+                                Log.Error(ex, $"[CompactKeyStorePartitionBuilder.Compress] '{file}'");
+                            }
+                            finally
+                            {
+                                semaphore.Release();
+                            }
+                        });
+                    }
+                    Task.WaitAll(tasks);
+                }
             }
         }
         public async IAsyncEnumerable<SearchResult<TKey, TInput>> Iterate()
@@ -108,10 +133,13 @@ namespace ZeroLevel.Services.PartitionStorage.Partition
             });
         }
 
+        private static readonly TimeSpan _fileLockWaitTimeout = TimeSpan.FromSeconds(30);
+
         internal async Task CompressFile(string file)
         {
             var dict = new Dictionary<TKey, HashSet<TInput>>();
-            PhisicalFileAccessorCachee.LockFile(file);
+            PhisicalFileAccessorCachee.LockFileAndWait(file, _fileLockWaitTimeout);
+            string tempFile = null!;
             try
             {
                 using (var reader = new MemoryStreamReader(new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.None, 4096 * 1024)))
@@ -139,7 +167,9 @@ namespace ZeroLevel.Services.PartitionStorage.Partition
                         dict[kv.Value].Add(iv.Value);
                     }
                 }
-                var tempFile = FSUtils.GetAppLocalTemporaryFile();
+                // tempFile colocated with target → guaranteed same volume so File.Replace works cross-platform
+                tempFile = file + ".tmp";
+                if (File.Exists(tempFile)) File.Delete(tempFile);
                 using (var writer = new MemoryStreamWriter(new FileStream(tempFile, FileMode.Create, FileAccess.Write, FileShare.None, 4096 * 1024)))
                 {
                     // sort for search acceleration
@@ -150,11 +180,22 @@ namespace ZeroLevel.Services.PartitionStorage.Partition
                         writer.SerializeCompatible(v!);
                     }
                 }
-                File.Delete(file);
-                File.Move(tempFile, file);
+                if (File.Exists(file))
+                {
+                    File.Replace(tempFile, file, destinationBackupFileName: null);
+                }
+                else
+                {
+                    File.Move(tempFile, file);
+                }
+                tempFile = null!;
             }
             finally
             {
+                if (tempFile != null!)
+                {
+                    try { if (File.Exists(tempFile)) File.Delete(tempFile); } catch { }
+                }
                 PhisicalFileAccessorCachee.UnlockFile(file);
             }
         }

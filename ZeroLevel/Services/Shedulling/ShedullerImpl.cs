@@ -319,6 +319,10 @@ namespace ZeroLevel.Services.Shedulling
             if (disposing)
             {
                 _sheduller.Dispose();
+                // Release callback closures so user objects captured by them become GC-eligible.
+                // Without this, _repitableActions keeps every registered callback alive for as long
+                // as the ShedullerImpl instance itself is reachable.
+                _repitableActions.Clear();
             }
         }
         #endregion IDisposable

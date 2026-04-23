@@ -15,6 +15,7 @@ namespace ZeroLevel.Services.PartitionStorage
     internal sealed class StoreMergePartitionAccessor<TKey, TInput, TValue, TMeta>
         : IStorePartitionMergeBuilder<TKey, TInput, TValue>
     {
+        private static readonly TimeSpan _fileLockWaitTimeout = TimeSpan.FromSeconds(30);
         private readonly Func<TValue, IEnumerable<TInput>> _decompress;
         /// <summary>
         /// Exists compressed catalog
@@ -107,31 +108,36 @@ namespace ZeroLevel.Services.PartitionStorage
                 // replace old file by new
                 foreach (var file in newFiles)
                 {
-                    _phisicalFileAccessor.DropDataReader(file);
-
                     // 1. Remove index file
                     (_accessor as StorePartitionAccessor<TKey, TInput, TValue, TMeta>)!
                             .DropFileIndex(file);
 
-                    // 2. Replace source
+                    // 2. Replace source — atomic, waits for in-flight readers on the target
                     var name = Path.GetFileName(file);
                     var updateFilePath = Path.Combine(folder, name);
 
-                    _phisicalFileAccessor.LockFile(updateFilePath);
+                    _phisicalFileAccessor.LockFileAndWait(updateFilePath, _fileLockWaitTimeout);
                     try
                     {
+                        // file (source from temp folder) and updateFilePath (target in main folder)
+                        // are typically on the same volume since temp folder lives under the partition.
+                        // If not, File.Replace falls back gracefully — only the source-on-different-volume
+                        // edge case forces non-atomic Delete+Move.
                         if (File.Exists(updateFilePath))
                         {
-                            File.Delete(updateFilePath);
+                            File.Replace(file, updateFilePath, destinationBackupFileName: null);
                         }
-                        File.Move(file, updateFilePath);
+                        else
+                        {
+                            File.Move(file, updateFilePath);
+                        }
                     }
                     finally
                     {
                         _phisicalFileAccessor.UnlockFile(updateFilePath);
                     }
 
-                    // 3. Rebuil index
+                    // 3. Rebuild index
                     await (_accessor as BasePartition<TKey, TInput, TValue, TMeta>)!
                         .RebuildFileIndex(name);
                 }

@@ -13,6 +13,7 @@ namespace ZeroLevel.Services.Memory
         bool EOV { get; }
         long Position { get; }
         Task<byte[]> ReadBuffer(int count);
+        byte[] ReadBufferSync(int count);
         bool CheckOutOfRange(int offset);
         void Seek(long offset);
     }

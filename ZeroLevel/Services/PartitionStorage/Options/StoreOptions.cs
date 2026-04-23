@@ -83,13 +83,14 @@ namespace ZeroLevel.Services.PartitionStorage
 
         public StoreOptions<TKey, TInput, TValue, TMeta> Clone()
         {
-            var options = new StoreOptions<TKey, TInput, TValue, TMeta>
+            return new StoreOptions<TKey, TInput, TValue, TMeta>
             {
                 Index = new IndexOptions
                 {
                     Enabled = this.Index.Enabled,
-                    StepValue = 64,
-                    StepType = IndexStepType.AbsoluteCount
+                    StepValue = this.Index.StepValue,
+                    StepType = this.Index.StepType,
+                    EnableIndexInMemoryCachee = this.Index.EnableIndexInMemoryCachee
                 },
                 FilePartition = this.FilePartition,
                 KeyComparer = this.KeyComparer,
@@ -99,9 +100,9 @@ namespace ZeroLevel.Services.PartitionStorage
                     .Select(p => new StoreCatalogPartition<TMeta>(p.Name, p.PathExtractor))
                     .ToList(),
                 RootFolder = this.RootFolder,
-                ThreadSafeWriting = this.ThreadSafeWriting
+                ThreadSafeWriting = this.ThreadSafeWriting,
+                PhisicalFileAccessorExpirationPeriod = this.PhisicalFileAccessorExpirationPeriod
             };
-            return options;
         }
     }
 }

@@ -27,9 +27,29 @@ namespace ZeroLevel.Services.Memory
         {
             if (count == 0) return null!;
             var buffer = new byte[count];
-            var readedCount = await _stream.ReadAsync(buffer, 0, count);
-            if (count != readedCount)
-                throw new InvalidOperationException($"The stream returned less data ({count} bytes) than expected ({readedCount} bytes)");
+            int total = 0;
+            while (total < count)
+            {
+                var read = await _stream.ReadAsync(buffer, total, count - total);
+                if (read == 0)
+                    throw new InvalidOperationException($"The stream returned less data ({total} bytes) than expected ({count} bytes)");
+                total += read;
+            }
+            return buffer;
+        }
+
+        public byte[] ReadBufferSync(int count)
+        {
+            if (count == 0) return null!;
+            var buffer = new byte[count];
+            int total = 0;
+            while (total < count)
+            {
+                var read = _stream.Read(buffer, total, count - total);
+                if (read == 0)
+                    throw new InvalidOperationException($"The stream returned less data ({total} bytes) than expected ({count} bytes)");
+                total += read;
+            }
             return buffer;
         }
 

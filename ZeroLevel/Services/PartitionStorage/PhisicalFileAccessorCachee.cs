@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Threading;
 using ZeroLevel.Collections;
 using ZeroLevel.Services.Cache;
 using ZeroLevel.Services.FileSystem;
@@ -35,40 +36,50 @@ namespace ZeroLevel.Services.PartitionStorage
         }
         public IViewAccessor GetDataAccessor(string filePath, long offset)
         {
-            if (false == _lockedFiles.Contains(filePath))
+            if (_lockedFiles.Contains(filePath)) return null!;
+            var reader = GetDataReader(filePath);
+            IViewAccessor view;
+            try
             {
-                var reader = GetDataReader(filePath);
-                try
-                {
-                    return reader.GetAccessor(offset);
-                }
-                catch (ObjectDisposedException)
-                {
-                    _dataReadersCachee.Drop(filePath);
-                    reader = _dataReadersCachee.Get(filePath);
-                }
-                return reader.GetAccessor(offset);
+                view = reader.GetAccessor(offset);
             }
-            return null!;
+            catch (ObjectDisposedException)
+            {
+                _dataReadersCachee.Drop(filePath);
+                reader = _dataReadersCachee.Get(filePath);
+                view = reader.GetAccessor(offset);
+            }
+            // race re-check: if a LockFile slipped in between Contains and GetAccessor,
+            // release this view so the writer's WaitForRelease can proceed
+            if (_lockedFiles.Contains(filePath))
+            {
+                view?.Dispose();
+                return null!;
+            }
+            return view;
         }
 
         public IViewAccessor GetDataAccessor(string filePath, long offset, int length)
         {
-            if (false == _lockedFiles.Contains(filePath))
+            if (_lockedFiles.Contains(filePath)) return null!;
+            var reader = GetDataReader(filePath);
+            IViewAccessor view;
+            try
             {
-                var reader = GetDataReader(filePath);
-                try
-                {
-                    return reader.GetAccessor(offset, length);
-                }
-                catch (ObjectDisposedException)
-                {
-                    _dataReadersCachee.Drop(filePath);
-                    reader = _dataReadersCachee.Get(filePath);
-                }
-                return reader.GetAccessor(offset, length);
+                view = reader.GetAccessor(offset, length);
             }
-            return null!;
+            catch (ObjectDisposedException)
+            {
+                _dataReadersCachee.Drop(filePath);
+                reader = _dataReadersCachee.Get(filePath);
+                view = reader.GetAccessor(offset, length);
+            }
+            if (_lockedFiles.Contains(filePath))
+            {
+                view?.Dispose();
+                return null!;
+            }
+            return view;
         }
         public void DropAllDataReaders()
         {
@@ -90,40 +101,48 @@ namespace ZeroLevel.Services.PartitionStorage
         }
         public IViewAccessor GetIndexAccessor(string filePath, long offset)
         {
-            if (false == _lockedFiles.Contains(filePath))
+            if (_lockedFiles.Contains(filePath)) return null!;
+            var reader = GetIndexReader(filePath);
+            IViewAccessor view;
+            try
             {
-                var reader = GetIndexReader(filePath);
-                try
-                {
-                    return reader.GetAccessor(offset);
-                }
-                catch (ObjectDisposedException)
-                {
-                    _indexReadersCachee.Drop(filePath);
-                    reader = _indexReadersCachee.Get(filePath);
-                }
-                return reader.GetAccessor(offset);
+                view = reader.GetAccessor(offset);
             }
-            return null!;
+            catch (ObjectDisposedException)
+            {
+                _indexReadersCachee.Drop(filePath);
+                reader = _indexReadersCachee.Get(filePath);
+                view = reader.GetAccessor(offset);
+            }
+            if (_lockedFiles.Contains(filePath))
+            {
+                view?.Dispose();
+                return null!;
+            }
+            return view;
         }
 
         public IViewAccessor GetIndexAccessor(string filePath, long offset, int length)
         {
-            if (false == _lockedFiles.Contains(filePath))
+            if (_lockedFiles.Contains(filePath)) return null!;
+            var reader = GetIndexReader(filePath);
+            IViewAccessor view;
+            try
             {
-                var reader = GetIndexReader(filePath);
-                try
-                {
-                    return reader.GetAccessor(offset, length);
-                }
-                catch (ObjectDisposedException)
-                {
-                    _indexReadersCachee.Drop(filePath);
-                    reader = _indexReadersCachee.Get(filePath);
-                }
-                return reader.GetAccessor(offset, length);
+                view = reader.GetAccessor(offset, length);
             }
-            return null!;
+            catch (ObjectDisposedException)
+            {
+                _indexReadersCachee.Drop(filePath);
+                reader = _indexReadersCachee.Get(filePath);
+                view = reader.GetAccessor(offset, length);
+            }
+            if (_lockedFiles.Contains(filePath))
+            {
+                view?.Dispose();
+                return null!;
+            }
+            return view;
         }
         public void DropAllIndexReaders()
         {
@@ -131,14 +150,56 @@ namespace ZeroLevel.Services.PartitionStorage
         }
         #endregion
 
+        private static readonly TimeSpan _defaultLockTimeout = TimeSpan.FromSeconds(60);
+
         public void LockFile(string filePath)
         {
-            _lockedFiles.Add(filePath);
+            LockFile(filePath, _defaultLockTimeout);
+        }
+
+        public void LockFile(string filePath, TimeSpan timeout)
+        {
+            AcquireFileLock(filePath, timeout);
             DropDataReader(filePath);
             DropIndexReader(filePath);
         }
 
-        public void UnlockFile(string filePath) 
+        /// <summary>
+        /// Locks the file, evicts cached readers, and waits until any in-flight views
+        /// hand back their references before returning. Use before destructive file operations
+        /// (delete, rename, truncate) to avoid Windows sharing violations and Linux silent
+        /// stale-data reads.
+        /// </summary>
+        public void LockFileAndWait(string filePath, TimeSpan timeout)
+        {
+            var deadline = DateTime.UtcNow + timeout;
+            AcquireFileLock(filePath, timeout);
+            if (_dataReadersCachee.TryRemove(filePath, out var dataReader) && dataReader != null!)
+            {
+                dataReader.Dispose();
+                var remaining = deadline - DateTime.UtcNow;
+                if (remaining > TimeSpan.Zero) dataReader.WaitForRelease(remaining);
+            }
+            if (_indexReadersCachee.TryRemove(filePath, out var indexReader) && indexReader != null!)
+            {
+                indexReader.Dispose();
+                var remaining = deadline - DateTime.UtcNow;
+                if (remaining > TimeSpan.Zero) indexReader.WaitForRelease(remaining);
+            }
+        }
+
+        private void AcquireFileLock(string filePath, TimeSpan timeout)
+        {
+            var deadline = DateTime.UtcNow + timeout;
+            while (!_lockedFiles.Add(filePath))
+            {
+                if (DateTime.UtcNow >= deadline)
+                    throw new TimeoutException($"Failed to acquire file lock on '{filePath}' within {timeout}");
+                Thread.Sleep(10);
+            }
+        }
+
+        public void UnlockFile(string filePath)
         {
             _lockedFiles.TryRemove(filePath);
         }

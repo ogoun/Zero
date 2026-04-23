@@ -8,7 +8,7 @@
 		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
 		<Title>ZeroLevel</Title>
 		<FileVersion>$(AssemblyVersion)</FileVersion>
-		<AssemblyVersion>4.0.0.6</AssemblyVersion>
+		<AssemblyVersion>4.1.0.0</AssemblyVersion>
 		<Version>$(AssemblyVersion)</Version>
 		<AnalysisLevel>latest</AnalysisLevel>
 		<Authors>Ogoun</Authors>
@@ -35,12 +35,8 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <Content Include="v3.ico" />
-	</ItemGroup>
-
-	<ItemGroup>
 	  <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="6.1.2" />
-	  <PackageReference Include="System.Text.Json" Version="9.0.8" />
+	  <PackageReference Include="System.Text.Json" Version="10.0.2" />
 	  <PackageReference Include="YamlDotNet" Version="16.3.0" />
 	</ItemGroup>
 

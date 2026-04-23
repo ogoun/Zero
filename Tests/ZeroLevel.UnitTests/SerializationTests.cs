@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using Xunit;
 using ZeroLevel.DocumentObjectModel;
+using ZeroLevel.Models;
 using ZeroLevel.Network;
 using ZeroLevel.Services.Serialization;
 using ZeroLevel.UnitTests.Models;
@@ -123,6 +125,20 @@ namespace ZeroLevel.Serialization
             MakePrimitiveTest<DateTimeOffset>(DateTimeOffset.Now.AddYears(2000));
             MakePrimitiveTest<DateTimeOffset>(DateTimeOffset.MinValue);
             MakePrimitiveTest<DateTimeOffset>(DateTimeOffset.MaxValue);
+
+            var testData = new DataRequest
+            {
+                Data = null,
+                Symbol = "BTC",
+                Start = new DateTimeOffset(2025, 10, 10, 14, 00, 00, TimeSpan.Zero),
+                End = new DateTimeOffset(2025, 10, 10, 16, 00, 00, TimeSpan.Zero)
+            };
+            var bytes = MessageSerializer.Serialize(testData);
+            var restored = MessageSerializer.Deserialize<DataRequest>(bytes);
+
+            Assert.Equal(testData.Start, restored.Start);
+            Assert.Equal(testData.End, restored.End);
+            Assert.Equal(testData.Symbol, restored.Symbol);
         }
 
         [Fact]
@@ -324,6 +340,302 @@ namespace ZeroLevel.Serialization
             MakePrimitiveTest<Byte>(10);
             MakePrimitiveTest<Byte>(128);
             MakePrimitiveTest<Byte>(255);
+        }
+
+        [Fact]
+        public void SerializeSByte()
+        {
+            MakePrimitiveTest<sbyte>(0);
+            MakePrimitiveTest<sbyte>(1);
+            MakePrimitiveTest<sbyte>(-1);
+            MakePrimitiveTest<sbyte>(10);
+            MakePrimitiveTest<sbyte>(-10);
+            MakePrimitiveTest<sbyte>(sbyte.MinValue);
+            MakePrimitiveTest<sbyte>(sbyte.MaxValue);
+        }
+
+        [Fact]
+        public void SerializeCollectionSByte()
+        {
+            MakeCollectionTest<sbyte>(new sbyte[] { 0, 1, -1, 10, -10, sbyte.MinValue, sbyte.MaxValue });
+        }
+
+        public enum EnumByte : byte { Zero = 0, One = 1, Max = byte.MaxValue }
+        public enum EnumSByte : sbyte { Min = sbyte.MinValue, Zero = 0, Max = sbyte.MaxValue }
+        public enum EnumShort : short { Min = short.MinValue, Zero = 0, Max = short.MaxValue }
+        public enum EnumUShort : ushort { Zero = 0, Max = ushort.MaxValue }
+        public enum EnumInt32 { Min = int.MinValue, Zero = 0, A = 100, Max = int.MaxValue }
+        public enum EnumUInt32 : uint { Zero = 0, Max = uint.MaxValue }
+        public enum EnumInt64 : long { Min = long.MinValue, Zero = 0, Max = long.MaxValue }
+        public enum EnumUInt64 : ulong { Zero = 0, Max = ulong.MaxValue }
+        [Flags] public enum EnumFlags { None = 0, A = 1, B = 2, C = 4, AB = A | B, ABC = A | B | C }
+
+        [Fact]
+        public void SerializeEnums()
+        {
+            // Each underlying type
+            MakePrimitiveTest<EnumByte>(EnumByte.Zero);
+            MakePrimitiveTest<EnumByte>(EnumByte.Max);
+            MakePrimitiveTest<EnumSByte>(EnumSByte.Min);
+            MakePrimitiveTest<EnumSByte>(EnumSByte.Max);
+            MakePrimitiveTest<EnumShort>(EnumShort.Min);
+            MakePrimitiveTest<EnumShort>(EnumShort.Max);
+            MakePrimitiveTest<EnumUShort>(EnumUShort.Max);
+            MakePrimitiveTest<EnumInt32>(EnumInt32.Min);
+            MakePrimitiveTest<EnumInt32>(EnumInt32.A);
+            MakePrimitiveTest<EnumInt32>(EnumInt32.Max);
+            MakePrimitiveTest<EnumUInt32>(EnumUInt32.Max);
+            MakePrimitiveTest<EnumInt64>(EnumInt64.Min);
+            MakePrimitiveTest<EnumInt64>(EnumInt64.Max);
+            MakePrimitiveTest<EnumUInt64>(EnumUInt64.Max);
+            // Flags
+            MakePrimitiveTest<EnumFlags>(EnumFlags.None);
+            MakePrimitiveTest<EnumFlags>(EnumFlags.AB);
+            MakePrimitiveTest<EnumFlags>(EnumFlags.ABC);
+            MakePrimitiveTest<EnumFlags>((EnumFlags)5); // unnamed combination
+
+            // Direct WriteEnum/ReadEnum on the writer/reader
+            using (var w = new MemoryStreamWriter())
+            {
+                w.WriteEnum(EnumInt32.A);
+                w.WriteEnum(EnumByte.Max);
+                w.WriteEnum(EnumInt64.Min);
+                using (var r = new MemoryStreamReader(w.Complete()))
+                {
+                    Assert.Equal(EnumInt32.A, r.ReadEnum<EnumInt32>());
+                    Assert.Equal(EnumByte.Max, r.ReadEnum<EnumByte>());
+                    Assert.Equal(EnumInt64.Min, r.ReadEnum<EnumInt64>());
+                }
+            }
+        }
+
+        [Fact]
+        public void SerializeValueTuple()
+        {
+            using (var w = new MemoryStreamWriter())
+            {
+                w.WriteValueTuple<int, string>((42, "answer"));
+                w.WriteValueTuple<Guid, double>((Guid.NewGuid(), Math.PI));
+                w.WriteValueTuple<string, long>(("key", long.MaxValue));
+                using (var r = new MemoryStreamReader(w.Complete()))
+                {
+                    var t1 = r.ReadValueTuple<int, string>();
+                    Assert.Equal(42, t1.Item1);
+                    Assert.Equal("answer", t1.Item2);
+
+                    var t2 = r.ReadValueTuple<Guid, double>();
+                    Assert.NotEqual(Guid.Empty, t2.Item1);
+                    Assert.Equal(Math.PI, t2.Item2);
+
+                    var t3 = r.ReadValueTuple<string, long>();
+                    Assert.Equal("key", t3.Item1);
+                    Assert.Equal(long.MaxValue, t3.Item2);
+                }
+            }
+        }
+
+        [Fact]
+        public void SerializeKeyValuePair()
+        {
+            using (var w = new MemoryStreamWriter())
+            {
+                w.WriteKeyValuePair<int, string>(new KeyValuePair<int, string>(42, "hello"));
+                w.WriteKeyValuePair<Guid, long>(new KeyValuePair<Guid, long>(Guid.NewGuid(), long.MaxValue));
+                w.WriteKeyValuePair<string, int>(new KeyValuePair<string, int>("key", 100));
+                using (var r = new MemoryStreamReader(w.Complete()))
+                {
+                    var p1 = r.ReadKeyValuePair<int, string>();
+                    Assert.Equal(42, p1.Key);
+                    Assert.Equal("hello", p1.Value);
+
+                    var p2 = r.ReadKeyValuePair<Guid, long>();
+                    Assert.NotEqual(Guid.Empty, p2.Key);
+                    Assert.Equal(long.MaxValue, p2.Value);
+
+                    var p3 = r.ReadKeyValuePair<string, int>();
+                    Assert.Equal("key", p3.Key);
+                    Assert.Equal(100, p3.Value);
+                }
+            }
+
+            // null key/value rejected
+            using (var w = new MemoryStreamWriter())
+            {
+                Assert.Throws<ArgumentException>(() =>
+                    w.WriteKeyValuePair<string, int>(new KeyValuePair<string, int>(null!, 1)));
+                Assert.Throws<ArgumentException>(() =>
+                    w.WriteKeyValuePair<int, string>(new KeyValuePair<int, string>(1, null!)));
+            }
+        }
+
+        [Fact]
+        public void SerializeHashSet()
+        {
+            // primitive element types via SerializeCompatible
+            var setInt = new HashSet<int> { 1, 2, 3, 7, 11 };
+            var bytesInt = MessageSerializer.SerializeCompatible<HashSet<int>>(setInt);
+            var restoredInt = MessageSerializer.DeserializeCompatible<HashSet<int>>(bytesInt);
+            Assert.Equal(setInt.OrderBy(x => x).ToArray(), restoredInt.OrderBy(x => x).ToArray());
+
+            var setStr = new HashSet<string> { "a", "bb", "ccc", "" };
+            var bytesStr = MessageSerializer.SerializeCompatible<HashSet<string>>(setStr);
+            var restoredStr = MessageSerializer.DeserializeCompatible<HashSet<string>>(bytesStr);
+            // null and empty are indistinguishable per WriteString — empty set member round-trips to null
+            Assert.Equal(setStr.Count, restoredStr.Count);
+
+            var setGuid = new HashSet<Guid> { Guid.Empty, Guid.NewGuid(), Guid.NewGuid() };
+            var bytesGuid = MessageSerializer.SerializeCompatible<HashSet<Guid>>(setGuid);
+            var restoredGuid = MessageSerializer.DeserializeCompatible<HashSet<Guid>>(bytesGuid);
+            Assert.True(setGuid.SetEquals(restoredGuid));
+
+            // direct ReadHashSet<T> for IBinarySerializable element type
+            using (var w = new MemoryStreamWriter())
+            {
+                var docs = new HashSet<Document>();
+                docs.Add(CompositeInstanceFactory.MakeDocument());
+                w.WriteCollection<Document>(docs);
+                using (var r = new MemoryStreamReader(w.Complete()))
+                {
+                    var read = r.ReadHashSet<Document>();
+                    Assert.Equal(docs.Count, read.Count);
+                }
+            }
+        }
+
+        [Fact]
+        public void SerializeBitArray()
+        {
+            var comparator = new Func<BitArray, BitArray, bool>((l, r) =>
+            {
+                if (l == null && r == null) return true;
+                if (l == null || r == null) return false;
+                if (l.Length != r.Length) return false;
+                for (int i = 0; i < l.Length; i++)
+                    if (l[i] != r[i]) return false;
+                return true;
+            });
+
+            MakePrimitiveTest<BitArray>(null, comparator);
+            MakePrimitiveTest<BitArray>(new BitArray(0), comparator);
+            MakePrimitiveTest<BitArray>(new BitArray(1, true), comparator);
+            MakePrimitiveTest<BitArray>(new BitArray(8, false), comparator);
+            MakePrimitiveTest<BitArray>(new BitArray(new[] { true, false, true, true, false, false, true }), comparator);
+
+            // length not divisible by 8 — verify trailing bits do not leak
+            var b13 = new BitArray(13);
+            for (int i = 0; i < 13; i++) b13[i] = (i % 3 == 0);
+            MakePrimitiveTest<BitArray>(b13, comparator);
+
+            // larger set
+            var big = new BitArray(1024);
+            for (int i = 0; i < 1024; i++) big[i] = (i % 7 == 3);
+            MakePrimitiveTest<BitArray>(big, comparator);
+        }
+
+        [Fact]
+        public void SerializeVersion()
+        {
+            var comparator = new Func<Version, Version, bool>((l, r) =>
+                (l == null && r == null) || (l != null && r != null && l.Equals(r)));
+            MakePrimitiveTest<Version>(null, comparator);
+            MakePrimitiveTest<Version>(new Version(1, 0), comparator);              // build, revision = -1
+            MakePrimitiveTest<Version>(new Version(1, 2, 3), comparator);            // revision = -1
+            MakePrimitiveTest<Version>(new Version(1, 2, 3, 4), comparator);
+            MakePrimitiveTest<Version>(new Version(int.MaxValue, int.MaxValue, int.MaxValue, int.MaxValue), comparator);
+            MakePrimitiveTest<Version>(new Version(0, 0, 0, 0), comparator);
+        }
+
+        [Fact]
+        public void SerializeCollectionVersion()
+        {
+            var comparator = new Func<Version, Version, bool>((l, r) =>
+                (l == null && r == null) || (l != null && r != null && l.Equals(r)));
+            MakeCollectionTest<Version>(new Version[]
+            {
+                new Version(1, 0),
+                new Version(2, 5, 1),
+                new Version(3, 4, 5, 6)
+            }, comparator);
+        }
+
+        [Fact]
+        public void SerializeUri()
+        {
+            var comparator = new Func<Uri, Uri, bool>((left, right) =>
+                (left == null && right == null) ||
+                (left != null && right != null && string.Equals(left.OriginalString, right.OriginalString, StringComparison.Ordinal)));
+            MakePrimitiveTest<Uri>(null, comparator);
+            MakePrimitiveTest<Uri>(new Uri("https://example.com/path?query=1#frag"), comparator);
+            MakePrimitiveTest<Uri>(new Uri("http://пример.рф/путь"), comparator);
+            MakePrimitiveTest<Uri>(new Uri("file:///C:/temp/x.txt"), comparator);
+            MakePrimitiveTest<Uri>(new Uri("/relative/path", UriKind.Relative), comparator);
+        }
+
+        [Fact]
+        public void SerializeCollectionUri()
+        {
+            var comparator = new Func<Uri, Uri, bool>((left, right) =>
+                (left == null && right == null) ||
+                (left != null && right != null && string.Equals(left.OriginalString, right.OriginalString, StringComparison.Ordinal)));
+            MakeCollectionTest<Uri>(new Uri[]
+            {
+                new Uri("https://a.com"),
+                new Uri("https://b.com/path"),
+                new Uri("/rel", UriKind.Relative)
+            }, comparator);
+        }
+
+        [Fact]
+        public void SerializeNullablePrimitives()
+        {
+            // null round-trips to null
+            MakePrimitiveTest<bool?>(null);
+            MakePrimitiveTest<byte?>(null);
+            MakePrimitiveTest<sbyte?>(null);
+            MakePrimitiveTest<char?>(null);
+            MakePrimitiveTest<short?>(null);
+            MakePrimitiveTest<ushort?>(null);
+            MakePrimitiveTest<int?>(null);
+            MakePrimitiveTest<uint?>(null);
+            MakePrimitiveTest<long?>(null);
+            MakePrimitiveTest<ulong?>(null);
+            MakePrimitiveTest<float?>(null);
+            MakePrimitiveTest<double?>(null);
+            MakePrimitiveTest<decimal?>(null);
+            MakePrimitiveTest<TimeSpan?>(null);
+            MakePrimitiveTest<Guid?>(null);
+            MakePrimitiveTest<DateTime?>(null);
+            MakePrimitiveTest<DateTimeOffset?>(null);
+
+            // values
+            MakePrimitiveTest<bool?>(true);
+            MakePrimitiveTest<bool?>(false);
+            MakePrimitiveTest<byte?>(0);
+            MakePrimitiveTest<byte?>(255);
+            MakePrimitiveTest<sbyte?>(sbyte.MinValue);
+            MakePrimitiveTest<sbyte?>(sbyte.MaxValue);
+            MakePrimitiveTest<char?>('Я');
+            MakePrimitiveTest<short?>(short.MinValue);
+            MakePrimitiveTest<short?>(short.MaxValue);
+            MakePrimitiveTest<ushort?>(ushort.MaxValue);
+            MakePrimitiveTest<int?>(int.MinValue);
+            MakePrimitiveTest<int?>(int.MaxValue);
+            MakePrimitiveTest<uint?>(uint.MaxValue);
+            MakePrimitiveTest<long?>(long.MinValue);
+            MakePrimitiveTest<long?>(long.MaxValue);
+            MakePrimitiveTest<ulong?>(ulong.MaxValue);
+            MakePrimitiveTest<float?>(float.MinValue);
+            MakePrimitiveTest<float?>(float.MaxValue);
+            MakePrimitiveTest<double?>(double.MinValue);
+            MakePrimitiveTest<double?>(double.MaxValue);
+            MakePrimitiveTest<decimal?>(decimal.MinValue);
+            MakePrimitiveTest<decimal?>(decimal.MaxValue);
+            MakePrimitiveTest<TimeSpan?>(TimeSpan.Zero);
+            MakePrimitiveTest<TimeSpan?>(TimeSpan.MaxValue);
+            MakePrimitiveTest<Guid?>(Guid.Empty);
+            MakePrimitiveTest<Guid?>(Guid.NewGuid());
+            MakePrimitiveTest<DateTime?>(DateTime.Now);
+            MakePrimitiveTest<DateTimeOffset?>(DateTimeOffset.Now);
         }
 
         [Fact]

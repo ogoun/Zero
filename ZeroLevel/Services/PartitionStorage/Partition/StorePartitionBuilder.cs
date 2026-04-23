@@ -58,23 +58,32 @@ namespace ZeroLevel.Services.PartitionStorage
             var files = Directory.GetFiles(_catalog);
             if (files != null && files.Length > 0)
             {
-                var tasks = new Task[files.Length];
-                for (int i = 0; i < files.Length; i++)
+                var maxDop = Math.Max(1, _options.MaxDegreeOfParallelism);
+                using (var semaphore = new SemaphoreSlim(maxDop))
                 {
-                    tasks[i] = Task.Factory.StartNew(f =>
+                    var tasks = new Task[files.Length];
+                    for (int i = 0; i < files.Length; i++)
                     {
-                        var file = (string)f;
-                        try
+                        var file = files[i];
+                        tasks[i] = Task.Run(async () =>
                         {
-                            CompressFile(file).Wait();
-                        }
-                        catch (Exception ex)
-                        {
-                            Log.Error(ex, $"[StorePartitionBuilder.Compress] '{file}'");
-                        }
-                    }, files[i]);
+                            await semaphore.WaitAsync();
+                            try
+                            {
+                                await CompressFile(file);
+                            }
+                            catch (Exception ex)
+                            {
+                                Log.Error(ex, $"[StorePartitionBuilder.Compress] '{file}'");
+                            }
+                            finally
+                            {
+                                semaphore.Release();
+                            }
+                        });
+                    }
+                    Task.WaitAll(tasks);
                 }
-                Task.WaitAll(tasks);
             }
         }
         public async IAsyncEnumerable<SearchResult<TKey, TInput>> Iterate()
@@ -145,9 +154,12 @@ namespace ZeroLevel.Services.PartitionStorage
             }
         }
 
+        private static readonly TimeSpan _fileLockWaitTimeout = TimeSpan.FromSeconds(30);
+
         internal async Task CompressFile(string file)
         {
-            PhisicalFileAccessorCachee.LockFile(file);
+            PhisicalFileAccessorCachee.LockFileAndWait(file, _fileLockWaitTimeout);
+            string tempFile = null!;
             try
             {
                 var dict = new Dictionary<TKey, HashSet<TInput>>();
@@ -188,7 +200,9 @@ namespace ZeroLevel.Services.PartitionStorage
                     }
                 }
 
-                var tempFile = FSUtils.GetAppLocalTemporaryFile();
+                // tempFile colocated with target → guaranteed same volume so File.Replace works cross-platform
+                tempFile = file + ".tmp";
+                if (File.Exists(tempFile)) File.Delete(tempFile);
                 using (var writer = new MemoryStreamWriter(new FileStream(tempFile, FileMode.Create, FileAccess.Write, FileShare.None, 4096 * 1024)))
                 {
                     // sort for search acceleration
@@ -196,19 +210,28 @@ namespace ZeroLevel.Services.PartitionStorage
                     {
                         var v = _options.MergeFunction(pair.Value);
                         await Serializer.KeySerializer.Invoke(writer, pair.Key);
-                        Thread.MemoryBarrier();
                         await Serializer.ValueSerializer.Invoke(writer, v);
                     }
                 }
+                // Atomic replace: NTFS ReplaceFile / POSIX rename(2). Original is never lost
+                // in the (1)-then-(2) window like Delete+Move would.
                 if (File.Exists(file))
                 {
-                    File.Delete(file);
+                    File.Replace(tempFile, file, destinationBackupFileName: null);
                 }
-                File.Copy(tempFile, file, true);
-                File.Delete(tempFile);
+                else
+                {
+                    File.Move(tempFile, file);
+                }
+                tempFile = null!;
             }
             finally
             {
+                // best-effort cleanup of orphaned temp file (if Move succeeded, tempFile is null)
+                if (tempFile != null!)
+                {
+                    try { if (File.Exists(tempFile)) File.Delete(tempFile); } catch { }
+                }
                 PhisicalFileAccessorCachee.UnlockFile(file);
             }
         }

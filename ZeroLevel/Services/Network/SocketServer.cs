@@ -74,36 +74,49 @@ namespace ZeroLevel.Network
 
         private void BeginAcceptCallback(IAsyncResult ar)
         {
-            if (Status == SocketClientStatus.Working)
+            if (Status != SocketClientStatus.Working)
             {
+                Log.Warning($"[ZSocketServer.BeginAcceptCallback] Server socket change state to: {Status}");
+                return;
+            }
+            Socket client_socket = null!;
+            try
+            {
+                client_socket = _serverSocket.EndAccept(ar);
+                client_socket.NoDelay = true;
+                client_socket.SendBufferSize = 65536;
+                client_socket.ReceiveBufferSize = 65536;
+                client_socket.SetKeepAlive(true, 30000, 10000);
+
+                var ep = client_socket.RemoteEndPoint as IPEndPoint;
+                Log.SystemInfo($"[ZSocketServer.BeginAcceptCallback] Incoming connection {(ep?.Address?.ToString() ?? string.Empty)}:{(ep?.Port.ToString() ?? string.Empty)}");
+
+                var connection = new SocketClient(client_socket, _router);
+                client_socket = null!; // ownership transferred to SocketClient
+                connection.OnDisconnect += Connection_OnDisconnect;
+
+                _connection_set_lock.EnterWriteLock();
                 try
                 {
-                    var client_socket = _serverSocket.EndAccept(ar);
-                    // Настройка клиентского сокета
-                    client_socket.NoDelay = true;
-                    client_socket.SendBufferSize = 65536;
-                    client_socket.ReceiveBufferSize = 65536;
-
-                    // Настройка KeepAlive для клиентского соединения
-                    client_socket.SetKeepAlive(true, 30000, 10000);
-
-                    var ep = client_socket.RemoteEndPoint as IPEndPoint;
-                    Log.SystemInfo($"[ZSocketServer.BeginAcceptCallback] Incoming connection {(ep?.Address?.ToString() ?? string.Empty)}:{(ep?.Port.ToString() ?? string.Empty)}");
-                    _connection_set_lock.EnterWriteLock();
-                    var connection = new SocketClient(client_socket, _router);
-                    connection.OnDisconnect += Connection_OnDisconnect;
                     _connections[connection.Endpoint] = new ExClient(connection);
-                    ConnectEventRise(_connections[connection.Endpoint]);
-                }
-                catch (Exception ex)
-                {
-                    Broken();
-                    Log.SystemError(ex, "[ZSocketServer.BeginAcceptCallback] Error with connect accepting");
                 }
                 finally
                 {
                     _connection_set_lock.ExitWriteLock();
                 }
+                ConnectEventRise(_connections[connection.Endpoint]);
+            }
+            catch (Exception ex)
+            {
+                Log.SystemError(ex, "[ZSocketServer.BeginAcceptCallback] Error with connect accepting");
+                // dispose orphaned socket if SocketClient ctor threw
+                try { client_socket?.Close(); } catch { }
+                // single failed accept does not kill the listener
+            }
+
+            // Always re-arm accept so the server keeps listening even after an accept error
+            if (Status == SocketClientStatus.Working)
+            {
                 try
                 {
                     _serverSocket.BeginAccept(BeginAcceptCallback, null);
@@ -111,11 +124,8 @@ namespace ZeroLevel.Network
                 catch (Exception ex)
                 {
                     Log.SystemError(ex, "[ZSocketServer.BeginAcceptCallback] BeginAccept error");
+                    Broken();
                 }
-            }
-            else
-            {
-                Log.Warning($"[ZSocketServer.BeginAcceptCallback] Server socket change state to: {Status}");
             }
         }
 
@@ -140,18 +150,42 @@ namespace ZeroLevel.Network
 
         public override void Dispose()
         {
+            // Signal Status change so BeginAcceptCallback won't re-arm accept
+            Disposed();
+
+            // Close the listening socket FIRST to stop accepting new connections.
+            // Without this the port stays bound and the system handle leaks.
             try
             {
-                foreach (var c in _connections)
-                {
-                    c.Value.Dispose();
-                }
-                _connections.Clear();
+                _serverSocket?.Close();
+                _serverSocket?.Dispose();
             }
             catch (Exception ex)
             {
-                Log.SystemError(ex, "[SocketServer.Dispose]");
+                Log.SystemError(ex, "[SocketServer.Dispose] close listening socket");
             }
+
+            // Snapshot connections under lock, then dispose outside the lock to avoid
+            // deadlock with Connection_OnDisconnect (which takes the write lock itself).
+            List<ExClient> connectionsSnapshot;
+            _connection_set_lock.EnterWriteLock();
+            try
+            {
+                connectionsSnapshot = _connections.Values.ToList();
+                _connections.Clear();
+            }
+            finally
+            {
+                _connection_set_lock.ExitWriteLock();
+            }
+
+            foreach (var c in connectionsSnapshot)
+            {
+                try { c.Dispose(); }
+                catch (Exception ex) { Log.SystemError(ex, "[SocketServer.Dispose] connection"); }
+            }
+
+            try { _connection_set_lock.Dispose(); } catch { }
         }
 
         #region IRouter

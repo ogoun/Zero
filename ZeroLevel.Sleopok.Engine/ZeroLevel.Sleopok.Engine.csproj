@@ -1,16 +1,46 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<LangVersion>latest</LangVersion>
 		<TargetFramework>netstandard2.1</TargetFramework>
 		<Nullable>enable</Nullable>
 		<FileVersion>$(AssemblyVersion)</FileVersion>
-		<AssemblyVersion>4.0.0.0</AssemblyVersion>
+		<AssemblyVersion>4.1.0.0</AssemblyVersion>
 		<Version>$(AssemblyVersion)</Version>
+		<Title>ZeroLevel.Sleopok.Engine</Title>
+		<Authors>Ogoun</Authors>
+		<Description>Embeddable inverted-index search engine built on top of the ZeroLevel toolkit — a simplified, in-process alternative to Elasticsearch/Lucene.</Description>
+		<Copyright>© ogoun</Copyright>
+		<PackageProjectUrl>https://github.com/ogoun/Zero</PackageProjectUrl>
+		<PackageIcon>v3.png</PackageIcon>
+		<RepositoryUrl>https://github.com/ogoun/Zero</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<PackageReleaseNotes>Array/List field indexing, deduplicated merge, streaming GetAll, safer deserialization.</PackageReleaseNotes>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+		<NoWarn>1701;1702;8618</NoWarn>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+		<NoWarn>1701;1702;8618</NoWarn>
 	</PropertyGroup>
 
 	<ItemGroup>
 		<ProjectReference Include="..\ZeroLevel\ZeroLevel.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Update="README.md">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
+		<None Update="v3.png">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
 	</ItemGroup>
 
 </Project>

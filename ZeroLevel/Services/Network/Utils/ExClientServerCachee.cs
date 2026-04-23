@@ -12,6 +12,7 @@ namespace ZeroLevel.Network
         private static readonly ConcurrentDictionary<string, object> _clientLocks = new ConcurrentDictionary<string, object>();
 
         private readonly ConcurrentDictionary<string, SocketServer> _serverInstances = new ConcurrentDictionary<string, SocketServer>();
+        private static readonly ConcurrentDictionary<string, object> _serverLocks = new ConcurrentDictionary<string, object>();
 
         internal IEnumerable<SocketServer> ServerList => _serverInstances.Values;
 
@@ -69,13 +70,20 @@ namespace ZeroLevel.Network
         public SocketServer GetServer(IPEndPoint endpoint, IRouter router)
         {
             string key = $"{endpoint.Address}:{endpoint.Port}";
-            if (_serverInstances.ContainsKey(key))
+            // fast path
+            if (_serverInstances.TryGetValue(key, out var existing)) return existing;
+
+            // serialize ctor across concurrent callers for the same endpoint —
+            // otherwise both would call SocketServer ctor and the second would
+            // hit "Address already in use" (or, with SO_REUSEADDR on Linux, leak a duplicate)
+            var lockObj = _serverLocks.GetOrAdd(key, _ => new object());
+            lock (lockObj)
             {
-                return _serverInstances[key];
+                if (_serverInstances.TryGetValue(key, out existing)) return existing;
+                var instance = new SocketServer(endpoint, router);
+                _serverInstances[key] = instance;
+                return instance;
             }
-            var instance = new SocketServer(endpoint, router);
-            _serverInstances[key] = instance;
-            return instance;
         }
 
         public void Dispose()
